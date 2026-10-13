@@ -1,0 +1,36 @@
+### 1. Логин АДМИНА -> ждём 200 и поле "token" (это и есть живой login)
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{ "email": "admin@aria.shop", "password": "admin123" }
+
+> {% client.global.set("adminToken", response.body.token); %}
+
+### 2. Логин ПОКУПАТЕЛЯ -> ждём 200 + token
+POST http://localhost:8080/api/auth/login
+Content-Type: application/json
+
+{ "email": "user@aria.shop", "password": "user123" }
+
+> {% client.global.set("userToken", response.body.token); %}
+
+### 3. ARIA-анализ БЕЗ билета -> ждём 401 (закрыто, правильно)
+POST http://localhost:8080/api/aria/analyze
+
+### 4. ARIA-анализ с токеном АДМИНА -> ждём 200 и НЕНУЛЕВЫЕ счётчики кандидатов
+POST http://localhost:8080/api/aria/analyze
+Authorization: Bearer {{adminToken}}
+
+### 5. ARIA-анализ с токеном ПОКУПАТЕЛЯ -> ждём 403 (роль не та = доказательства ролей)
+POST http://localhost:8080/api/aria/analyze
+Authorization: Bearer {{userToken}}
+
+### 6. Витрина БЕЗ билета -> ждём 200 (публично)
+GET http://localhost:8080/api/products/store
+
+### 7. Корзина БЕЗ билета -> ждём 401 (приватно)
+GET http://localhost:8080/api/cart
+
+### 8. Корзина с токеном ПОКУПАТЕЛЯ -> СЕЙЧАС ждём 500 (это не провал, а цель следующего куска)
+GET http://localhost:8080/api/cart
+Authorization: Bearer {{userToken}}
