@@ -1,0 +1,225 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Shop — Карточка товара</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/i18n.js"></script>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="nav-glass">
+    <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
+    <div class="nav-links">
+        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
+        <a href="/cart.html" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" data-i18n="nav.profile">Профиль</a>
+        <span id="auth-nav"></span>
+        <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
+        <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
+    </div>
+</nav>
+
+<main class="container" style="max-width:1100px;margin:40px auto;padding:0 20px;">
+    <a href="/index.html" style="color:var(--text-secondary);text-decoration:none;margin-bottom:20px;display:inline-block;">← Назад в каталог</a>
+
+    <div id="product" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px;">
+        <p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px;">Загрузка товара...</p>
+    </div>
+
+    <div id="reviews" style="margin-top:60px;">
+        <h2 style="margin-bottom:20px;" data-i18n="product.reviews">Отзывы покупателей</h2>
+        <div id="reviews-list"></div>
+        <div style="margin-top:20px;padding:20px;" class="glass-card">
+            <h3 style="margin-bottom:15px;" data-i18n="product.leaveReview">Оставить отзыв</h3>
+            <input type="text" id="review-author" data-i18n-placeholder="product.reviewAuthor" placeholder="Ваше имя" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <textarea id="review-comment" data-i18n-placeholder="product.reviewComment" placeholder="Комментарий" rows="3" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);resize:vertical;"></textarea>
+            <select id="review-rating" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+                <option value="5">★★★★★ (5)</option>
+                <option value="4">★★★★ (4)</option>
+                <option value="3">★★★ (3)</option>
+                <option value="2">★★ (2)</option>
+                <option value="1">★ (1)</option>
+            </select>
+            <button class="btn-glow" onclick="submitReview()" data-i18n="product.reviewSubmit">Отправить отзыв</button>
+        </div>
+    </div>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/js/auth.js"></script>
+<script>
+    let productId = null;
+
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
+        toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + msg + '</span>';
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+
+    function updateAuthNav() {
+        const authNav = document.getElementById('auth-nav');
+        if (ariaAuth.isLoggedIn()) {
+            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
+                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
+        } else {
+            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
+        }
+    }
+
+    async function loadCartCount() {
+        try {
+            const res = await ariaAuth.authFetch('/api/cart/total');
+            const data = await res.json();
+            document.getElementById('cart-count').textContent = data.itemCount || 0;
+        } catch(e) {}
+    }
+
+    async function addToCart(id) {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            await ariaAuth.authFetch('/api/cart/add?productId=' + id + '&qty=1', { method: 'POST' });
+            await loadCartCount();
+            showToast('Товар добавлен в корзину');
+        } catch(e) { showToast('Ошибка добавления', 'error'); }
+    }
+
+    async function toggleFavorite(id, btn) {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            const res = await ariaAuth.authFetch('/api/favorites/' + id, { method: 'POST' });
+            const data = await res.json();
+            if (data.success) {
+                btn.textContent = '❤️ В избранном';
+                showToast('Добавлено в избранное');
+            } else {
+                btn.textContent = '🤍 В избранное';
+                showToast('Удалено из избранного');
+            }
+        } catch(e) { showToast('Ошибка', 'error'); }
+    }
+
+    async function loadReviews() {
+        try {
+            const res = await fetch('/api/reviews/product/' + productId);
+            const reviews = await res.json();
+            const list = document.getElementById('reviews-list');
+            if (reviews.length === 0) {
+                list.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center;" data-i18n="product.noReviews">Пока нет отзывов. Будьте первым!</p>';
+                return;
+            }
+            list.innerHTML = reviews.map(r =>
+                '<div class="glass-card" style="padding:16px;margin-bottom:10px;">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:8px;">' +
+                '<strong>' + r.authorName + '</strong>' +
+                '<span style="color:var(--accent-orange);">' + '★'.repeat(r.rating) + '☆'.repeat(5 - r.rating) + '</span>' +
+                '</div>' +
+                '<p style="margin:0;color:var(--text-secondary);line-height:1.6;">' + r.comment + '</p>' +
+                '<div style="font-size:12px;color:var(--text-muted);margin-top:8px;">' + new Date(r.createdAt).toLocaleString('ru-RU') + '</div>' +
+                '</div>'
+            ).join('');
+        } catch(e) {
+            document.getElementById('reviews-list').innerHTML = '<p style="color:var(--text-muted);">Не удалось загрузить отзывы</p>';
+        }
+    }
+
+    async function submitReview() {
+        const author = document.getElementById('review-author').value || 'Аноним';
+        const comment = document.getElementById('review-comment').value;
+        const rating = parseInt(document.getElementById('review-rating').value);
+        if (!comment) { showToast(ariaI18n.t('product.reviewError'), 'error'); return; }
+        try {
+            await fetch('/api/reviews', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ productId, author, comment, rating })
+            });
+            showToast(ariaI18n.t('toast.reviewAdded'));
+            document.getElementById('review-comment').value = '';
+            loadReviews();
+        } catch(e) { showToast(ariaI18n.t('toast.error'), 'error'); }
+    }
+
+    async function loadProduct() {
+        const params = new URLSearchParams(location.search);
+        productId = params.get('id');
+        if (!productId) { location.href = '/index.html'; return; }
+
+        try {
+            const res = await fetch('/api/products/' + productId);
+            const data = await res.json();
+            const p = data.product;
+            const d = data.details;
+
+            const favRes = await fetch('/api/favorites/check/' + productId);
+            const favData = await favRes.json();
+            const isFav = favData.isFavorite;
+
+            // Картинка с названием товара
+            const imageUrl = 'https://placehold.co/600x500/1e293b/3b82f6?text=' + encodeURIComponent(p.name);
+
+            // Статус на русском
+            const statusLabels = { 'ACTIVE': 'В продаже', 'CANDIDATE': 'Кандидат на передачу', 'RESERVED': 'Зарезервирован', 'TRANSFERRED': 'Передан' };
+            const statusText = statusLabels[p.status] || p.status;
+
+            document.getElementById('product').innerHTML =
+                '<div class="glass-card" style="padding:0;overflow:hidden;">' +
+                '<img src="' + imageUrl + '" alt="' + p.name + '" style="width:100%;height:400px;object-fit:cover;">' +
+                '</div>' +
+                '<div>' +
+                '<h1 style="margin-bottom:10px;">' + p.name + '</h1>' +
+                '<div style="color:var(--text-muted);margin-bottom:20px;">SKU: ' + p.sku + ' · ' + (p.category || '') + '</div>' +
+                '<div style="font-size:32px;font-weight:700;color:var(--accent-blue);margin-bottom:20px;">' + p.unitPrice + ' ₽</div>' +
+
+                // Характеристики
+                (d ? '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
+                    '<h3 style="margin-bottom:12px;font-size:16px;">Характеристики</h3>' +
+                    (d.brand ? '<div style="margin-bottom:8px;"><b>Бренд:</b> ' + d.brand + '</div>' : '') +
+                    (d.color ? '<div style="margin-bottom:8px;"><b>Цвет:</b> ' + d.color + '</div>' : '') +
+                    (d.size ? '<div style="margin-bottom:8px;"><b>Размер:</b> ' + d.size + '</div>' : '') +
+                    (d.weightKg ? '<div style="margin-bottom:8px;"><b>Вес:</b> ' + d.weightKg + ' кг</div>' : '') +
+                    '</div>' : '') +
+
+                // Информация о товаре
+                '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
+                '<h3 style="margin-bottom:12px;font-size:16px;">Информация</h3>' +
+                '<div style="margin-bottom:8px;"><b>В наличии:</b> ' + p.quantityOnHand + ' шт.</div>' +
+                '<div style="margin-bottom:8px;"><b>Поступил:</b> ' + new Date(p.receivedAt).toLocaleDateString('ru-RU') + '</div>' +
+                '<div style="margin-bottom:8px;"><b>Продаж за месяц:</b> ' + p.salesLast30Days + ' шт.</div>' +
+                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>Срок годности:</b> ' + new Date(p.expiryDate).toLocaleDateString('ru-RU') + '</div>' : '') +
+                '<div><b>Статус:</b> ' + statusText + '</div>' +
+                '</div>' +
+
+                // Описание
+                (d && d.descriptionLong ? '<p style="line-height:1.6;color:var(--text-secondary);margin-bottom:20px;">' + d.descriptionLong + '</p>' : '') +
+
+                // Кнопки
+                '<div style="display:flex;gap:10px;">' +
+                '<button class="btn-glow" onclick="addToCart(' + p.id + ')" style="flex:1;">Добавить в корзину</button>' +
+                '<button class="btn-outline" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? '❤️ В избранном' : '🤍 В избранное') + '</button>' +
+                '</div>' +
+                '</div>';
+
+            loadReviews();
+        } catch(e) {
+            document.getElementById('product').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--accent-red);padding:60px;">Товар не найден</p>';
+        }
+    }
+
+    updateAuthNav();
+    ariaTheme.initTheme();
+    ariaI18n.initI18n();
+    loadCartCount();
+    loadProduct();
+</script>
+</body>
+</html>

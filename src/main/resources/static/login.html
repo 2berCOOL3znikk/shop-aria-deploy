@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Shop — Вход</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .auth-container {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            padding: 20px;
+        }
+        .auth-card {
+            width: 100%;
+            max-width: 400px;
+            padding: 40px;
+        }
+        .tab-buttons {
+            display: flex;
+            margin-bottom: 24px;
+            border-bottom: 1px solid var(--border-color);
+        }
+        .tab-btn {
+            flex: 1;
+            padding: 12px;
+            background: transparent;
+            border: none;
+            color: var(--text-muted);
+            cursor: pointer;
+            font-size: 16px;
+            transition: 0.3s;
+        }
+        .tab-btn.active {
+            color: var(--accent-blue);
+            border-bottom: 2px solid var(--accent-blue);
+        }
+        .auth-form {
+            display: none;
+        }
+        .auth-form.active {
+            display: block;
+        }
+        .auth-form input {
+            width: 100%;
+            padding: 14px 16px;
+            margin-bottom: 16px;
+            background: var(--bg-surface);
+            border: 1px solid var(--border-color);
+            border-radius: 10px;
+            color: var(--text-primary);
+            font-size: 15px;
+            box-sizing: border-box;
+        }
+        .auth-form input:focus {
+            outline: none;
+            border-color: var(--accent-blue);
+        }
+        .error-message {
+            color: var(--accent-red);
+            font-size: 14px;
+            margin-bottom: 16px;
+            padding: 12px;
+            background: rgba(239, 68, 68, 0.1);
+            border-radius: 8px;
+            display: none;
+        }
+        .error-message.show {
+            display: block;
+        }
+        .guest-link {
+            text-align: center;
+            margin-top: 24px;
+            color: var(--text-muted);
+            font-size: 14px;
+        }
+        .guest-link a {
+            color: var(--accent-blue);
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<div class="auth-container">
+    <div class="glass-card auth-card">
+        <h1 style="text-align: center; margin-bottom: 30px;">◆ <span class="gradient-text">ARIA</span>Shop</h1>
+
+        <div class="tab-buttons">
+            <button class="tab-btn active" onclick="switchTab('login')">Вход</button>
+            <button class="tab-btn" onclick="switchTab('register')">Регистрация</button>
+        </div>
+
+        <!-- Форма входа -->
+        <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
+            <div id="login-error" class="error-message"></div>
+            <input type="email" id="login-email" placeholder="Email" required>
+            <input type="password" id="login-password" placeholder="Пароль" required>
+            <button type="submit" class="btn-glow" style="width: 100%;">Войти</button>
+        </form>
+
+        <!-- Форма регистрации -->
+        <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
+            <div id="register-error" class="error-message"></div>
+            <input type="text" id="register-fullName" placeholder="ФИО" required>
+            <input type="email" id="register-email" placeholder="Email" required>
+            <input type="password" id="register-password" placeholder="Пароль" required>
+            <button type="submit" class="btn-glow" style="width: 100%;">Зарегистрироваться</button>
+        </form>
+
+        <div class="guest-link">
+            <a href="/index.html">Продолжить без входа — витрина открыта</a>
+        </div>
+    </div>
+</div>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script>
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        const icon = type === 'error' ? '❌' : '✅';
+        toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + msg + '</span>';
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+
+    function switchTab(tab) {
+        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
+        
+        if (tab === 'login') {
+            document.querySelector('.tab-btn:first-child').classList.add('active');
+            document.getElementById('login-form').classList.add('active');
+        } else {
+            document.querySelector('.tab-btn:last-child').classList.add('active');
+            document.getElementById('register-form').classList.add('active');
+        }
+    }
+
+    async function handleLogin(event) {
+        event.preventDefault();
+        const email = document.getElementById('login-email').value;
+        const password = document.getElementById('login-password').value;
+        const errorDiv = document.getElementById('login-error');
+
+        try {
+            const res = await fetch('/api/auth/login', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('aria_token', data.token);
+                localStorage.setItem('aria_role', data.role);
+                localStorage.setItem('aria_email', data.email);
+                
+                const next = localStorage.getItem('aria_next');
+                localStorage.removeItem('aria_next');
+                location.href = next || '/index.html';
+            } else if (res.status === 401) {
+                errorDiv.textContent = 'Неверный email или пароль';
+                errorDiv.classList.add('show');
+            } else {
+                const err = await res.json();
+                errorDiv.textContent = err.error || 'Ошибка входа';
+                errorDiv.classList.add('show');
+            }
+        } catch (e) {
+            errorDiv.textContent = 'Ошибка соединения с сервером';
+            errorDiv.classList.add('show');
+        }
+    }
+
+    async function handleRegister(event) {
+        event.preventDefault();
+        const fullName = document.getElementById('register-fullName').value;
+        const email = document.getElementById('register-email').value;
+        const password = document.getElementById('register-password').value;
+        const errorDiv = document.getElementById('register-error');
+
+        try {
+            const res = await fetch('/api/auth/register', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email, password, fullName })
+            });
+
+            if (res.ok) {
+                const data = await res.json();
+                localStorage.setItem('aria_token', data.token);
+                localStorage.setItem('aria_role', data.role);
+                localStorage.setItem('aria_email', data.email);
+                
+                const next = localStorage.getItem('aria_next');
+                localStorage.removeItem('aria_next');
+                location.href = next || '/index.html';
+            } else {
+                const err = await res.json();
+                errorDiv.textContent = err.error || 'Ошибка регистрации';
+                errorDiv.classList.add('show');
+            }
+        } catch (e) {
+            errorDiv.textContent = 'Ошибка соединения с сервером';
+            errorDiv.classList.add('show');
+        }
+    }
+
+    // Сохраняем next-параметр при загрузке
+    const params = new URLSearchParams(location.search);
+    if (params.get('next')) {
+        localStorage.setItem('aria_next', params.get('next'));
+    }
+</script>
+</body>
+</html>

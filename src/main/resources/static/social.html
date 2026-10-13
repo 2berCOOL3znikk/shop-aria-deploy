@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARIA Shop — Социальная помощь</title>
+  <link rel="stylesheet" href="/styles.css">
+  <script src="/js/theme.js"></script>
+  <script src="/js/i18n.js"></script>
+  <style>
+    .social-hero {
+      background: linear-gradient(135deg, rgba(245, 158, 11, 0.1), rgba(239, 68, 68, 0.05));
+      border: 1px solid rgba(245, 158, 11, 0.2);
+      border-radius: 20px;
+      padding: 32px;
+      margin-bottom: 40px;
+      display: flex;
+      gap: 24px;
+      align-items: start;
+    }
+    .hero-icon { font-size: 48px; }
+    .hero-text h2 { color: #fbbf24; margin-bottom: 8px; }
+    .hero-text p { color: var(--text-secondary); line-height: 1.6; }
+
+    .social-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+      gap: 24px;
+    }
+
+    .social-card {
+      background: var(--bg-surface);
+      border: 1px solid var(--border-color);
+      border-radius: 16px;
+      overflow: hidden;
+      position: relative;
+      transition: 0.3s;
+    }
+    .social-card:hover { transform: translateY(-4px); border-color: rgba(245, 158, 11, 0.3); }
+
+    .sc-header {
+      padding: 16px;
+      background: rgba(0,0,0,0.2);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .sc-status {
+      font-size: 0.75rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      padding: 4px 8px;
+      border-radius: 4px;
+    }
+    .st-candidate { background: rgba(245, 158, 11, 0.2); color: #fbbf24; }
+    .st-reserved { background: rgba(59, 130, 246, 0.2); color: #60a5fa; }
+
+    .sc-body { padding: 20px; }
+    .sc-title { font-weight: 600; margin-bottom: 8px; font-size: 1.1rem; }
+    .sc-reason {
+      background: rgba(239, 68, 68, 0.1);
+      border-left: 3px solid var(--accent-red);
+      padding: 12px;
+      border-radius: 0 8px 8px 0;
+      font-size: 0.85rem;
+      color: #fca5a5;
+      margin-bottom: 16px;
+    }
+    .sc-stats {
+      display: flex;
+      justify-content: space-between;
+      font-size: 0.85rem;
+      color: var(--text-muted);
+      margin-bottom: 16px;
+    }
+    .progress-bar {
+      height: 6px;
+      background: rgba(255,255,255,0.1);
+      border-radius: 3px;
+      overflow: hidden;
+      margin-bottom: 8px;
+    }
+    .progress-fill {
+      height: 100%;
+      background: linear-gradient(90deg, var(--accent-orange), var(--accent-red));
+      width: 0%;
+      transition: width 1s ease-out;
+    }
+    .timer-label { font-size: 0.8rem; color: var(--text-muted); text-align: right; }
+  </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<nav class="nav-glass">
+  <a href="/home.html" class="logo-new"><span style="color:var(--accent-blue)">◆</span> ARIA<span style="font-weight:300;color:var(--text-muted)">Help</span></a>
+  <div class="nav-links">
+    <a href="/index.html" data-i18n="nav.catalog">Магазин</a>
+    <a href="/social.html" class="active" data-i18n="nav.social">Соц. полка</a>
+    <a href="/admin.html" data-i18n="nav.admin">Админ</a>
+    <span id="auth-nav"></span>
+    <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
+    <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
+  </div>
+</nav>
+
+<div class="container" style="max-width:1200px; margin:0 auto; padding:40px 20px;">
+
+  <div class="social-hero">
+    <div class="hero-icon">💡</div>
+    <div class="hero-text">
+      <h2>Как работает модуль ARIA?</h2>
+      <p>Алгоритм автоматически выявляет товары с низкой оборачиваемостью (>180 дней), истекающим сроком годности или отрицательной маржинальностью. Эти позиции выводятся из коммерческой продажи и формируют лоты для передачи благотворительным фондам. Это снижает налоговую нагрузку магазина и помогает нуждающимся.</p>
+    </div>
+  </div>
+
+  <h2 style="margin-bottom:24px;">Товары для передачи фондам</h2>
+  <div id="grid" class="social-grid"></div>
+
+</div>
+
+<script src="/js/auth.js"></script>
+<script>
+  function showToast(msg, type = 'success') {
+    const container = document.createElement('div');
+    container.style.cssText = 'position:fixed;top:20px;right:20px;z-index:10000;';
+    document.body.appendChild(container);
+    const toast = document.createElement('div');
+    toast.className = 'toast ' + type;
+    toast.style.cssText = 'background:' + (type === 'error' ? '#ef4444' : '#10b981') + ';color:white;padding:12px 20px;border-radius:8px;margin-bottom:10px;';
+    toast.textContent = msg;
+    container.appendChild(toast);
+    setTimeout(() => toast.remove(), 3500);
+  }
+
+  function updateAuthNav() {
+    const authNav = document.getElementById('auth-nav');
+    if (ariaAuth.isLoggedIn()) {
+      authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
+        '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
+    } else {
+      authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
+    }
+  }
+
+  async function loadSocial() {
+    const res = await fetch('/api/products/social');
+    const data = await res.json();
+    const g = document.getElementById('grid');
+
+    if(!data.length){
+      g.innerHTML='<div style="grid-column:1/-1;text-align:center;padding:40px;color:var(--text-muted)">Нет активных заявок на передачу.</div>';
+      return;
+    }
+
+    g.innerHTML=data.map(p=>{
+      const daysInStock = Math.floor((Date.now() - new Date(p.receivedAt).getTime()) / 86400000);
+      const isReserved = p.status === 'RESERVED';
+      const statusClass = isReserved ? 'st-reserved' : 'st-candidate';
+      const statusText = isReserved ? 'Резерв Фонда' : 'На рассмотрении';
+
+      // Прогресс: чем дольше лежит, тем ближе к передаче
+      const progress = Math.min((daysInStock / 300) * 100, 100);
+
+      return `
+        <div class="social-card">
+            <div class="sc-header">
+                <span class="sc-status ${statusClass}">${statusText}</span>
+                <span style="font-size:0.8rem; color:var(--text-muted);">#${p.sku}</span>
+            </div>
+            <div class="sc-body">
+                <div class="sc-title">${p.name}</div>
+                <div class="sc-reason">
+                    <strong>Причина:</strong> ${p.ariaReason || 'Не указана'}
+                </div>
+                <div class="sc-stats">
+                    <span>Себест.: ${new Intl.NumberFormat('ru-RU').format(p.unitCost)} ₽</span>
+                    <span>Остаток: ${p.quantityOnHand} шт</span>
+                </div>
+                <div class="progress-bar">
+                    <div class="progress-fill" style="width:${progress}%"></div>
+                </div>
+                <div class="timer-label">Готов к передаче: ${Math.round(progress)}%</div>
+            </div>
+        </div>`;
+    }).join('');
+  }
+
+  updateAuthNav();
+  loadSocial();
+</script>
+</body>
+</html>

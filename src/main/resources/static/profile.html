@@ -1,0 +1,170 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Shop — Личный кабинет</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/i18n.js"></script>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="nav-glass">
+    <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
+    <div class="nav-links">
+        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
+        <a href="/cart.html" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" class="active" data-i18n="nav.profile">Профиль</a>
+        <span id="auth-nav"></span>
+        <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
+        <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
+    </div>
+</nav>
+
+<main class="container" style="max-width:1000px;margin:40px auto;padding:0 20px;">
+    <h1 style="margin-bottom:30px;" data-i18n="profile.title">Мой Кабинет</h1>
+
+    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
+        <div class="glass-card" style="padding:24px;">
+            <h2 style="margin-bottom:20px;" data-i18n="profile.personal">Личная информация</h2>
+            <input type="email" id="email" data-i18n-placeholder="profile.email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <input type="text" id="fullName" data-i18n-placeholder="profile.fullName" placeholder="ФИО" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <input type="tel" id="phone" data-i18n-placeholder="profile.phone" placeholder="Телефон" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <input type="text" id="address" data-i18n-placeholder="profile.address" placeholder="Адрес" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <button class="btn-glow" onclick="saveProfile()" style="width:100%;" data-i18n="profile.save">Сохранить</button>
+        </div>
+
+        <div class="glass-card" style="padding:24px;">
+            <h2 style="margin-bottom:20px;" data-i18n="profile.favorites">Избранное ❤️</h2>
+            <div id="favorites"></div>
+        </div>
+    </div>
+
+    <div class="glass-card" style="padding:24px;margin-top:30px;">
+        <h2 style="margin-bottom:20px;" data-i18n="profile.orders">Мои заказы </h2>
+        <div id="orders"></div>
+    </div>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/js/auth.js"></script>
+<script>
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML = '<span class="toast-icon">' + (type === 'error' ? '❌' : '✅') + '</span><span class="toast-message">' + msg + '</span>';
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+
+    function updateAuthNav() {
+        const authNav = document.getElementById('auth-nav');
+        if (ariaAuth.isLoggedIn()) {
+            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
+                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
+        } else {
+            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
+        }
+    }
+
+    async function loadCartCount() {
+        try {
+            const res = await ariaAuth.authFetch('/api/cart/total');
+            const data = await res.json();
+            document.getElementById('cart-count').textContent = data.itemCount || 0;
+        } catch(e) {}
+    }
+
+    async function loadProfile() {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            const email = ariaAuth.getUserEmail();
+            const res = await ariaAuth.authFetch('/api/profile/' + email);
+            const data = await res.json();
+            if (data.found) {
+                document.getElementById('email').value = data.data.email || '';
+                document.getElementById('fullName').value = data.data.fullName || '';
+                document.getElementById('phone').value = data.data.phone || '';
+                document.getElementById('address').value = data.data.address || '';
+            }
+        } catch(e) {}
+    }
+
+    async function saveProfile() {
+        try {
+            await ariaAuth.authFetch('/api/profile', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    email: document.getElementById('email').value,
+                    fullName: document.getElementById('fullName').value,
+                    phone: document.getElementById('phone').value,
+                    address: document.getElementById('address').value
+                })
+            });
+            showToast('Профиль сохранён');
+        } catch(e) { showToast('Ошибка', 'error'); }
+    }
+
+    async function loadFavorites() {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            const res = await ariaAuth.authFetch('/api/favorites');
+            const items = await res.json();
+            const box = document.getElementById('favorites');
+            if (items.length === 0) {
+                box.innerHTML = '<p style="color:var(--text-muted);" data-i18n="profile.noFavorites">Нет избранных товаров</p>';
+                return;
+            }
+            box.innerHTML = items.map(p =>
+                '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border-color);">' +
+                '<img src="https://picsum.photos/seed/' + p.sku + '/80/80" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">' +
+                '<div style="flex:1;">' +
+                '<div style="font-weight:600;">' + p.name + '</div>' +
+                '<div style="color:var(--accent-blue);">' + p.unitPrice + ' ₽</div>' +
+                '</div>' +
+                '<a href="/product.html?id=' + p.id + '" class="btn-outline" style="text-decoration:none;padding:8px 12px;font-size:13px;" data-i18n="catalog.details">Открыть</a>' +
+                '</div>'
+            ).join('');
+        } catch(e) {}
+    }
+
+    async function loadOrders() {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            const res = await ariaAuth.authFetch('/api/orders');
+            const orders = await res.json();
+            const box = document.getElementById('orders');
+            if (orders.length === 0) {
+                box.innerHTML = '<p style="color:var(--text-muted);" data-i18n="profile.noOrders">Заказов пока нет</p>';
+                return;
+            }
+            box.innerHTML = orders.map(o =>
+                '<div class="glass-card" style="padding:16px;margin-bottom:15px;">' +
+                '<div style="display:flex;justify-content:space-between;margin-bottom:10px;">' +
+                '<strong><span data-i18n="profile.orderNum">Заказ #</span>' + o.id + '</strong>' +
+                '<span style="color:var(--accent-green);">' + o.status + '</span>' +
+                '</div>' +
+                '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString('ru-RU') + '</div>' +
+                '<div style="margin-bottom:10px;">' + o.items.map(i => i.productName + ' × ' + i.quantity).join(', ') + '</div>' +
+                '<div style="font-weight:700;color:var(--accent-blue);"><span data-i18n="cart.total">Итого:</span> ' + o.totalAmount + ' ₽</div>' +
+                '</div>'
+            ).join('');
+        } catch(e) {}
+    }
+
+    updateAuthNav();
+    ariaTheme.initTheme();
+    ariaI18n.initI18n();
+    loadCartCount();
+    loadProfile();
+    loadFavorites();
+    loadOrders();
+</script>
+</body>
+</html>

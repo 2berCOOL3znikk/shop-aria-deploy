@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>ARIA Shop — Intelligence for Retail</title>
+    <link rel="stylesheet" href="/styles.css">
+    <style>
+        .hero-section {
+            min-height: 90vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding: 2rem;
+            position: relative;
+        }
+
+        .badge-pro {
+            background: rgba(59, 130, 246, 0.1);
+            border: 1px solid rgba(59, 130, 246, 0.3);
+            color: var(--accent-blue);
+            padding: 6px 16px;
+            border-radius: 99px;
+            font-size: 0.85rem;
+            font-weight: 600;
+            margin-bottom: 24px;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            backdrop-filter: blur(4px);
+        }
+
+        h1.main-title {
+            font-size: clamp(3rem, 6vw, 5rem);
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: 24px;
+            max-width: 900px;
+        }
+
+        p.sub-title {
+            font-size: 1.25rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin-bottom: 40px;
+            line-height: 1.6;
+        }
+
+        .cta-group {
+            display: flex;
+            gap: 16px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin-bottom: 80px;
+        }
+
+        .features-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 24px;
+            width: 100%;
+            max-width: 1200px;
+            padding: 0 2rem;
+        }
+
+        .feature-item {
+            padding: 32px;
+            text-align: left;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .feature-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--bg-elevated);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-bottom: 20px;
+            border: 1px solid var(--border-color);
+        }
+
+        .feature-item h3 {
+            font-size: 1.25rem;
+            margin-bottom: 12px;
+            color: var(--text-primary);
+        }
+
+        .feature-item p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            line-height: 1.5;
+        }
+
+        .stats-strip {
+            margin-top: 80px;
+            padding: 40px 2rem;
+            border-top: 1px solid var(--border-color);
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 20px;
+            width: 100%;
+            max-width: 1000px;
+        }
+
+        .stat-item { text-align: center; }
+        .stat-val { font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
+        .stat-lbl { font-size: 0.9rem; color: var(--text-muted); }
+    </style>
+</head>
+<body>
+
+<div class="bg-mesh"></div>
+
+<nav class="nav-glass">
+    <div class="logo-new">
+        <span style="color:var(--accent-blue)">◆</span> ARIA<span style="font-weight:300;color:var(--text-muted)">Shop</span>
+    </div>
+    <div class="nav-links">
+        <a href="/" class="active">Продукт</a>
+        <a href="/index.html">Магазин</a>
+        <a href="/admin.html">Dashboard</a>
+        <span id="auth-nav"></span>
+    </div>
+</nav>
+
+<section class="hero-section animate-in">
+    <div class="badge-pro delay-1">
+        <span>🚀 AI-Powered Inventory Management</span>
+    </div>
+
+    <h1 class="main-title delay-2">
+        Превращаем <span class="gradient-text">мертвый сток</span><br>в социальную ценность
+    </h1>
+
+    <p class="sub-title delay-3">
+        Интеллектуальный модуль ARIA анализирует ассортимент в реальном времени, выявляет убыточные позиции и автоматически формирует акты передачи благотворительным фондам. Экономия налогов + помощь людям.
+    </p>
+
+    <div class="cta-group delay-4">
+        <a href="/index.html" class="btn-glow">Открыть Демо Магазин</a>
+        <a href="/admin.html" class="btn-outline">Войти в Панель Управления</a>
+    </div>
+</section>
+
+<section class="features-grid animate-in delay-5">
+    <div class="glass-card feature-item">
+        <div class="feature-icon">📊</div>
+        <h3>Real-time Analytics</h3>
+        <p>Мониторинг оборачиваемости, маржинальности и сроков годности по каждому SKU. Алгоритмы предсказывают риск списания за 30 дней.</p>
+    </div>
+    <div class="glass-card feature-item">
+        <div class="feature-icon">♻️</div>
+        <h3>Social Impact Engine</h3>
+        <p>Автоматическая генерация лотов для фондов. Каждый товар сопровождается машинно-обоснованной причиной передачи для аудита.</p>
+    </div>
+    <div class="glass-card feature-item">
+        <div class="feature-icon">💰</div>
+        <h3>Tax Optimization</h3>
+        <p>Формирование юридических документов для налогового вычета. Прозрачность процессов защищает от обвинений в гринвошинге.</p>
+    </div>
+</section>
+
+<div class="stats-strip animate-in delay-6">
+    <div class="stat-item">
+        <div class="stat-val mono">13%</div>
+        <div class="stat-lbl">Товаров теряется в рознице (UNEP)</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-val mono">60%</div>
+        <div class="stat-lbl">Потребителей готовы платить за экологичность</div>
+    </div>
+    <div class="stat-item">
+        <div class="stat-val mono">20%</div>
+        <div class="stat-lbl">Средняя экономия на логистике списаний</div>
+    </div>
+</div>
+
+<footer style="text-align:center; padding:40px; color:var(--text-muted); font-size:0.9rem;">
+    © 2026 ARIA Project. Educational Demo. Built with Spring Boot & Vanilla JS.
+</footer>
+
+<script src="/js/auth.js"></script>
+<script>
+    function updateAuthNav() {
+        const authNav = document.getElementById('auth-nav');
+        if (ariaAuth.isLoggedIn()) {
+            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
+                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
+        } else {
+            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
+        }
+    }
+    updateAuthNav();
+</script>
+
+</body>
+</html>

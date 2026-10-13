@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ARIA Shop — Корзина</title>
+    <link rel="stylesheet" href="/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/i18n.js"></script>
+</head>
+<body>
+<div class="bg-mesh"></div>
+
+<nav class="nav-glass">
+    <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
+    <div class="nav-links">
+        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
+        <a href="/cart.html" class="active" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" data-i18n="nav.profile">Профиль</a>
+        <span id="auth-nav"></span>
+        <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
+        <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
+    </div>
+</nav>
+
+<main class="container" style="max-width:900px;margin:40px auto;padding:0 20px;">
+    <h1 style="margin-bottom:30px;" data-i18n="cart.title">Ваша корзина</h1>
+    <div id="cart-items"></div>
+    <div id="cart-total" style="margin-top:30px;padding:20px;" class="glass-card"></div>
+</main>
+
+<div class="toast-container" id="toast-container"></div>
+
+<script src="/js/auth.js"></script>
+<script>
+    let items = [];
+
+    function showToast(msg, type = 'success') {
+        const container = document.getElementById('toast-container');
+        const toast = document.createElement('div');
+        toast.className = 'toast ' + type;
+        toast.innerHTML = '<span class="toast-icon">' + (type === 'error' ? '❌' : '✅') + '</span><span class="toast-message">' + msg + '</span>';
+        container.appendChild(toast);
+        setTimeout(() => toast.remove(), 3500);
+    }
+
+    function updateAuthNav() {
+        const authNav = document.getElementById('auth-nav');
+        if (ariaAuth.isLoggedIn()) {
+            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
+                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
+        } else {
+            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
+        }
+    }
+
+    async function loadCartCount() {
+        try {
+            const res = await ariaAuth.authFetch('/api/cart/total');
+            const data = await res.json();
+            document.getElementById('cart-count').textContent = data.itemCount || 0;
+        } catch(e) {}
+    }
+
+    async function loadCart() {
+        if (!ariaAuth.requireLogin()) return;
+        try {
+            const res = await ariaAuth.authFetch('/api/cart');
+            items = await res.json();
+            render();
+            await loadCartCount();
+        } catch(e) {
+            showToast('Ошибка загрузки корзины', 'error');
+        }
+    }
+
+    function render() {
+        const box = document.getElementById('cart-items');
+        if (items.length === 0) {
+            box.innerHTML = '<p style="text-align:center;color:var(--text-muted);padding:40px;"><span data-i18n="cart.empty">Корзина пуста. </span><a href="/index.html" style="color:var(--accent-blue);" data-i18n="cart.emptyLink">Перейти в каталог</a></p>';
+            document.getElementById('cart-total').innerHTML = '';
+            return;
+        }
+        box.innerHTML = items.map(it =>
+            '<div class="glass-card" style="display:flex;align-items:center;gap:20px;padding:16px;margin-bottom:15px;">' +
+            '<img src="' + it.imageUrl + '" alt="' + it.productName + '" style="width:80px;height:80px;object-fit:cover;border-radius:8px;">' +
+            '<div style="flex:1;">' +
+            '<h3 style="margin:0 0 5px 0;">' + it.productName + '</h3>' +
+            '<div style="color:var(--text-muted);font-size:12px;">SKU: ' + it.productSku + '</div>' +
+            '<div style="color:var(--accent-blue);font-weight:700;margin-top:5px;">' + it.priceAtAddTime + ' ₽</div>' +
+            '</div>' +
+            '<div style="display:flex;align-items:center;gap:10px;">' +
+            '<button class="btn-icon" onclick="changeQty(' + it.id + ',' + (it.quantity - 1) + ')" style="background:var(--bg-surface);border:1px solid var(--border-color);color:var(--text-primary);">−</button>' +
+            '<span style="min-width:30px;text-align:center;">' + it.quantity + '</span>' +
+            '<button class="btn-icon" onclick="changeQty(' + it.id + ',' + (it.quantity + 1) + ')" style="background:var(--bg-surface);border:1px solid var(--border-color);color:var(--text-primary);">+</button>' +
+            '</div>' +
+            '<div style="font-weight:700;min-width:100px;text-align:right;">' + (it.priceAtAddTime * it.quantity).toFixed(2) + ' ₽</div>' +
+            '<button class="btn-icon" onclick="removeItem(' + it.id + ')" style="background:transparent;border:none;color:var(--accent-red);cursor:pointer;font-size:20px;">✕</button>' +
+            '</div>'
+        ).join('');
+
+        const total = items.reduce((sum, it) => sum + it.priceAtAddTime * it.quantity, 0);
+        document.getElementById('cart-total').innerHTML =
+            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<div><b style="font-size:20px;"><span data-i18n="cart.total">Итого:</span> ' + total.toFixed(2) + ' ₽</b></div>' +
+            '<button class="btn-glow" onclick="checkout()" data-i18n="cart.checkout">Оформить заказ</button>' +
+            '</div>';
+    }
+
+    async function changeQty(id, newQty) {
+        if (newQty < 1) return removeItem(id);
+        // Оптимистичное обновление
+        const item = items.find(i => i.id === id);
+        item.quantity = newQty;
+        render();
+        // В реальном приложении здесь был бы PUT запрос
+    }
+
+    async function removeItem(id) {
+        items = items.filter(i => i.id !== id);
+        render();
+        try {
+            await ariaAuth.authFetch('/api/cart/' + id, { method: 'DELETE' });
+            await loadCartCount();
+            showToast('Товар удалён');
+        } catch(e) { showToast('Ошибка', 'error'); }
+    }
+
+    async function checkout() {
+        try {
+            await ariaAuth.authFetch('/api/orders/checkout', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ address: 'г. Москва, ул. Ленина, д. 1' })
+            });
+            showToast('Заказ оформлен!');
+            items = [];
+            render();
+            await loadCartCount();
+        } catch(e) { showToast('Ошибка оформления', 'error'); }
+    }
+
+    updateAuthNav();
+    ariaTheme.initTheme();
+    ariaI18n.initI18n();
+    loadCart();
+</script>
+</body>
+</html>
