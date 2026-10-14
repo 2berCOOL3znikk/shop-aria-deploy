@@ -1,0 +1,41 @@
+services:
+  - type: web
+    name: aria-shop
+    runtime: docker
+    plan: free
+    region: frankfurt
+    dockerfilePath: ./Dockerfile
+    dockerContext: .
+    healthCheckPath: /actuator/health
+    envVars:
+      - key: SPRING_PROFILES_ACTIVE
+        value: postgres
+      - key: ARIA_DATABASE_URL
+        fromDatabase:
+          name: aria-db
+          property: connectionString
+      - key: SPRING_DATASOURCE_USERNAME
+        fromDatabase:
+          name: aria-db
+          property: user
+      - key: SPRING_DATASOURCE_PASSWORD
+        fromDatabase:
+          name: aria-db
+          property: password
+      - key: ARIA_RESET_DATA_ON_START
+        value: "false"
+      - key: ARIA_SEED_DEMO_USERS
+        value: "false"
+      - key: ARIA_ADMIN_EMAIL
+        sync: false
+      - key: ARIA_ADMIN_PASSWORD
+        sync: false
+      - key: ARIA_JWT_SECRET
+        sync: false
+
+databases:
+  - name: aria-db
+    databaseName: aria
+    user: aria
+    plan: 0.1c-256mb
+    region: frankfurt

@@ -15,6 +15,7 @@ import org.springframework.context.annotation.Bean;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.Random;
+import java.math.RoundingMode;
 
 @SpringBootApplication
 public class AriaBackendApplication {
@@ -37,7 +38,7 @@ public class AriaBackendApplication {
 
 			// 1. Пользователь (всегда один)
 			if (profiles.count() == 0) {
-				profiles.save(new UserProfile("demo@aria.shop", "Иван Петров", "+7 999 123-45-67", "г. Москва, ул. Ленина, д. 1"));
+				profiles.save(new UserProfile("demo@aria.shop", "Иван Петров", "+7 700 000-00-00", "г. Кызылорда, Казахстан"));
 				System.out.println("✅ Пользователь создан");
 			}
 
@@ -144,7 +145,15 @@ public class AriaBackendApplication {
 				details.save(new ProductDetail(giftSet, "ARIA", "Разноцветный", "Подарочный", new BigDecimal("1.0"), "Подарочный набор из 5 позиций. Идеально для корпоративных подарков."));
 				details.save(new ProductDetail(sampler, "ARIA", "Разноцветный", "Дегустационный", new BigDecimal("0.8"), "Дегустационный сет из 8 мини-порций. Знакомство с ассортиментом."));
 
-				System.out.println("✅ Создано " + products.count() + " товаров с характеристиками");
+				// Демо-цены исходного набора были в RUB. Храним и показываем их в KZT.
+				BigDecimal rubToKzt = new BigDecimal("5.36"); // официальный курс НБК на 14.10.2026
+				products.findAll().forEach(product -> {
+					if (product.getUnitCost() != null) product.setUnitCost(product.getUnitCost().multiply(rubToKzt).setScale(2, RoundingMode.HALF_UP));
+					if (product.getUnitPrice() != null) product.setUnitPrice(product.getUnitPrice().multiply(rubToKzt).setScale(2, RoundingMode.HALF_UP));
+				});
+				products.flush();
+
+				System.out.println("✅ Создано " + products.count() + " товаров в тенге; исходный курс RUB/KZT: 5.36 на 14.10.2026");
 			} else {
 				System.out.println("ℹ️ Товары уже есть в базе (используйте aria.reset-data-on-start=true для пересоздания)");
 

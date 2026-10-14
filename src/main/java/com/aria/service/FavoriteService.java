@@ -12,6 +12,7 @@ import java.util.stream.Collectors;
 
 @Service
 public class FavoriteService {
+    private static final String LEGACY_OWNER = "demo@aria.shop";
 
     private final WishlistRepository wishlistRepo;
     private final ProductRepository productRepo;
@@ -30,6 +31,11 @@ public class FavoriteService {
                 .collect(Collectors.toList());
     }
 
+    public List<Product> getAllFavorites(String ownerEmail) {
+        return wishlistRepo.findByOwnerEmailOrderByAddedAtDesc(ownerEmail).stream()
+                .map(WishlistItem::getProduct).collect(Collectors.toList());
+    }
+
     /**
      * Добавить товар в избранное.
      */
@@ -46,6 +52,14 @@ public class FavoriteService {
         wishlistRepo.save(item);
     }
 
+    @Transactional
+    public void addFavorite(Long productId, String ownerEmail) {
+        if (wishlistRepo.findByOwnerEmailAndProductId(ownerEmail, productId).isPresent()) return;
+        Product product = productRepo.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        wishlistRepo.save(new WishlistItem(product, ownerEmail));
+    }
+
     /**
      * Удалить товар из избранного.
      */
@@ -54,10 +68,19 @@ public class FavoriteService {
         wishlistRepo.findByProductId(productId).ifPresent(wishlistRepo::delete);
     }
 
+    @Transactional
+    public void removeFavorite(Long productId, String ownerEmail) {
+        wishlistRepo.findByOwnerEmailAndProductId(ownerEmail, productId).ifPresent(wishlistRepo::delete);
+    }
+
     /**
      * Проверить, является ли товар избранным.
      */
     public boolean isFavorite(Long productId) {
         return wishlistRepo.existsByProductId(productId);
+    }
+
+    public boolean isFavorite(Long productId, String ownerEmail) {
+        return wishlistRepo.existsByOwnerEmailAndProductId(ownerEmail, productId);
     }
 }

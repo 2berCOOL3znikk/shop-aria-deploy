@@ -24,6 +24,9 @@ public class CartItem {
     @Column(nullable = false)
     private LocalDateTime addedAt;
 
+    @Column(length = 255)
+    private String ownerEmail;
+
     public CartItem() {
         this.addedAt = LocalDateTime.now();
     }
@@ -35,6 +38,11 @@ public class CartItem {
         this.addedAt = LocalDateTime.now();
     }
 
+    public CartItem(Product product, int qty, BigDecimal price, String ownerEmail) {
+        this(product, qty, price);
+        this.ownerEmail = ownerEmail;
+    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
     public Product getProduct() { return product; }
@@ -44,4 +52,6 @@ public class CartItem {
     public BigDecimal getPriceAtAddTime() { return priceAtAddTime; }
     public void setPriceAtAddTime(BigDecimal p) { this.priceAtAddTime = p; }
     public LocalDateTime getAddedAt() { return addedAt; }
+    public String getOwnerEmail() { return ownerEmail; }
+    public void setOwnerEmail(String ownerEmail) { this.ownerEmail = ownerEmail; }
 }

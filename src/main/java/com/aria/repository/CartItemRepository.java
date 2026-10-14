@@ -8,4 +8,10 @@ import java.util.List;
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
     List<CartItem> findAllByOrderByAddedAtDesc();
+    List<CartItem> findAllByOwnerEmailOrderByAddedAtDesc(String ownerEmail);
+    java.util.Optional<CartItem> findByOwnerEmailAndProductId(String ownerEmail, Long productId);
+    java.util.Optional<CartItem> findByIdAndOwnerEmail(Long id, String ownerEmail);
+    long countByOwnerEmail(String ownerEmail);
+    void deleteAllByOwnerEmail(String ownerEmail);
+    void deleteByIdAndOwnerEmail(Long id, String ownerEmail);
 }

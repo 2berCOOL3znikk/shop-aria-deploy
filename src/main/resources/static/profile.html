@@ -16,6 +16,7 @@
     <div class="nav-links">
         <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
         <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
+        <a href="#favorites-list" aria-label="Избранное">♡ Избранное</a>
         <a href="/cart.html" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
         <a href="/profile.html" class="active" data-i18n="nav.profile">Профиль</a>
         <span id="auth-nav"></span>
@@ -38,8 +39,8 @@
         </div>
 
         <div class="glass-card" style="padding:24px;">
-            <h2 style="margin-bottom:20px;" data-i18n="profile.favorites">Избранное ❤️</h2>
-            <div id="favorites"></div>
+            <h2 id="favorites-heading" style="margin-bottom:20px;" data-i18n="profile.favorites">Избранное ❤️</h2>
+            <div id="favorites-list"></div>
         </div>
     </div>
 
@@ -52,6 +53,7 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script src="/js/auth.js"></script>
+<script src="/js/money.js"></script>
 <script>
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -84,7 +86,7 @@
         if (!ariaAuth.requireLogin()) return;
         try {
             const email = ariaAuth.getUserEmail();
-            const res = await ariaAuth.authFetch('/api/profile/' + email);
+            const res = await ariaAuth.authFetch('/api/profile/me');
             const data = await res.json();
             if (data.found) {
                 document.getElementById('email').value = data.data.email || '';
@@ -116,17 +118,17 @@
         try {
             const res = await ariaAuth.authFetch('/api/favorites');
             const items = await res.json();
-            const box = document.getElementById('favorites');
+            const box = document.getElementById('favorites-list');
             if (items.length === 0) {
                 box.innerHTML = '<p style="color:var(--text-muted);" data-i18n="profile.noFavorites">Нет избранных товаров</p>';
                 return;
             }
             box.innerHTML = items.map(p =>
                 '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border-color);">' +
-                '<img src="https://picsum.photos/seed/' + p.sku + '/80/80" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">' +
+                '<img src="' + (p.imageUrl || '/images/product-generic.svg') + '" onerror="this.src=\'/images/product-generic.svg\'" alt="" style="width:60px;height:60px;object-fit:cover;border-radius:8px;">' +
                 '<div style="flex:1;">' +
                 '<div style="font-weight:600;">' + p.name + '</div>' +
-                '<div style="color:var(--accent-blue);">' + p.unitPrice + ' ₽</div>' +
+                '<div style="color:var(--accent-blue);">' + ariaMoney.format(p.unitPrice) + '</div>' +
                 '</div>' +
                 '<a href="/product.html?id=' + p.id + '" class="btn-outline" style="text-decoration:none;padding:8px 12px;font-size:13px;" data-i18n="catalog.details">Открыть</a>' +
                 '</div>'
@@ -152,7 +154,7 @@
                 '</div>' +
                 '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString('ru-RU') + '</div>' +
                 '<div style="margin-bottom:10px;">' + o.items.map(i => i.productName + ' × ' + i.quantity).join(', ') + '</div>' +
-                '<div style="font-weight:700;color:var(--accent-blue);"><span data-i18n="cart.total">Итого:</span> ' + o.totalAmount + ' ₽</div>' +
+                '<div style="font-weight:700;color:var(--accent-blue);"><span data-i18n="cart.total">Итого:</span> ' + ariaMoney.format(o.totalAmount) + '</div>' +
                 '</div>'
             ).join('');
         } catch(e) {}

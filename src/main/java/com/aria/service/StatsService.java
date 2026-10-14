@@ -48,7 +48,22 @@ public class StatsService {
                 "taxBenefitEstimate", taxBenefitEstimate,
                 "categoryBreakdown", categoryBreakdown,
                 "totalProducts", all.size(),
-                "activeProducts", all.stream().filter(p -> p.getStatus() == ProductStatus.ACTIVE).count()
+                "activeProducts", all.stream().filter(p -> p.getStatus() == ProductStatus.ACTIVE).count(),
+                "statusCounts", getStatusCounts(all)
+        );
+    }
+
+    /**
+     * Возвращает счётчики товаров по всем статусам.
+     */
+    public Map<String, Long> getStatusCounts(List<Product> all) {
+        return Map.of(
+                "ACTIVE", all.stream().filter(p -> p.getStatus() == ProductStatus.ACTIVE).count(),
+                "DISCOUNTED", all.stream().filter(p -> p.getStatus() == ProductStatus.DISCOUNTED).count(),
+                "SOCIAL", all.stream().filter(p -> p.getStatus() == ProductStatus.SOCIAL).count(),
+                "CANDIDATE", all.stream().filter(p -> p.getStatus() == ProductStatus.CANDIDATE).count(),
+                "TRANSFERRED", all.stream().filter(p -> p.getStatus() == ProductStatus.TRANSFERRED).count(),
+                "WRITTEN_OFF", all.stream().filter(p -> p.getStatus() == ProductStatus.WRITTEN_OFF).count()
         );
     }
 }

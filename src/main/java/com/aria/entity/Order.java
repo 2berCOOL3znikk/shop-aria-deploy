@@ -26,6 +26,9 @@ public class Order {
     @Column(length = 500)
     private String deliveryAddress;
 
+    @Column(length = 255)
+    private String ownerEmail;
+
     @OneToMany(cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.EAGER)
     @JoinColumn(name = "order_id")
     private List<OrderItem> items = new ArrayList<>();
@@ -42,5 +45,7 @@ public class Order {
     public void setStatus(String s) { this.status = s; }
     public String getDeliveryAddress() { return deliveryAddress; }
     public void setDeliveryAddress(String a) { this.deliveryAddress = a; }
+    public String getOwnerEmail() { return ownerEmail; }
+    public void setOwnerEmail(String ownerEmail) { this.ownerEmail = ownerEmail; }
     public List<OrderItem> getItems() { return items; }
 }

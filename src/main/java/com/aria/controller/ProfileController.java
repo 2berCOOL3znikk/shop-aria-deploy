@@ -3,6 +3,7 @@ package com.aria.controller;
 import com.aria.entity.UserProfile;
 import com.aria.service.ProfileService;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.security.core.Authentication;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -17,8 +18,9 @@ public class ProfileController {
         this.service = service;
     }
 
-    @GetMapping("/{email}")
-    public Map<String, Object> getProfile(@PathVariable String email) {
+    @GetMapping("/me")
+    public Map<String, Object> getProfile(Authentication authentication) {
+        String email = authentication.getName();
         return service.getByEmail(email)
                 .map(p -> {
                     Map<String, Object> map = new HashMap<>();
@@ -36,9 +38,9 @@ public class ProfileController {
     }
 
     @PostMapping
-    public UserProfile saveProfile(@RequestBody Map<String, String> data) {
+    public UserProfile saveProfile(@RequestBody Map<String, String> data, Authentication authentication) {
         return service.createOrUpdate(
-                data.getOrDefault("email", ""),
+                authentication.getName(),
                 data.getOrDefault("fullName", ""),
                 data.getOrDefault("phone", ""),
                 data.getOrDefault("address", "")

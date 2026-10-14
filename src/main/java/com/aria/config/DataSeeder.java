@@ -3,6 +3,7 @@ package com.aria.config;
 import com.aria.entity.AppUser;
 import com.aria.enums.Role;
 import com.aria.repository.AppUserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
@@ -13,6 +14,15 @@ public class DataSeeder implements CommandLineRunner {
     private final AppUserRepository appUserRepository;
     private final PasswordEncoder passwordEncoder;
 
+    @Value("${aria.admin.email:admin@aria.shop}")
+    private String adminEmail;
+    @Value("${aria.admin.password:admin123}")
+    private String adminPassword;
+    @Value("${aria.seed-demo-users:true}")
+    private boolean seedDemoUsers;
+    @Value("${jwt.secret:}")
+    private String jwtSecret;
+
     public DataSeeder(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
         this.appUserRepository = appUserRepository;
         this.passwordEncoder = passwordEncoder;
@@ -20,26 +30,35 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
-        // Создаем администратора, если его нет
-        if (!appUserRepository.existsByEmail("admin@aria.shop")) {
+        if (adminPassword == null || adminPassword.isBlank()) {
+            throw new IllegalStateException("Задайте непустой пароль администратора в ARIA_ADMIN_PASSWORD");
+        }
+        if (jwtSecret == null || jwtSecret.length() < 32) {
+            throw new IllegalStateException("Задайте ARIA_JWT_SECRET длиной не менее 32 символов");
+        }
+        if (!appUserRepository.existsByEmail(adminEmail)) {
             AppUser admin = new AppUser();
-            admin.setEmail("admin@aria.shop");
-            admin.setPassword(passwordEncoder.encode("admin123"));
-            admin.setFullName("Администратор");
+            admin.setEmail(adminEmail);
+            admin.setPassword(passwordEncoder.encode(adminPassword));
+            admin.setFullName("Администратор ARIA");
             admin.setRole(Role.ADMIN);
             appUserRepository.save(admin);
-            System.out.println("Создан администратор: admin@aria.shop / admin123");
+            System.out.println("Создан администратор: " + adminEmail);
         }
 
-        // Создаем обычного пользователя, если его нет
-        if (!appUserRepository.existsByEmail("user@aria.shop")) {
-            AppUser user = new AppUser();
-            user.setEmail("user@aria.shop");
-            user.setPassword(passwordEncoder.encode("user123"));
-            user.setFullName("Тестовый пользователь");
-            user.setRole(Role.USER);
-            appUserRepository.save(user);
-            System.out.println("Создан пользователь: user@aria.shop / user123");
-        }
+        if (!seedDemoUsers) return;
+
+        seedUser("user@aria.shop", "user123", "Демо-покупатель", Role.USER);
+        seedUser("fund@aria.shop", "fund123", "Фонд «Тёплый дом»", Role.ORG);
+    }
+
+    private void seedUser(String email, String password, String name, Role role) {
+        if (appUserRepository.existsByEmail(email)) return;
+        AppUser user = new AppUser();
+        user.setEmail(email);
+        user.setPassword(passwordEncoder.encode(password));
+        user.setFullName(name);
+        user.setRole(role);
+        appUserRepository.save(user);
     }
 }

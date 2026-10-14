@@ -20,6 +20,9 @@ public class Product {
     @Column(length = 500, nullable = false)
     private String name;
 
+    @Column(length = 500)
+    private String imageUrl;
+
     @Column(length = 120)
     private String category;
 
@@ -53,12 +56,17 @@ public class Product {
     @Column(precision = 12, scale = 2)
     private BigDecimal marketAvgPrice;
 
+    // Процент скидки для динамического ценообразования (0 = без скидки)
+    @Column(nullable = false)
+    private Integer discountPercent = 0;
+
     public Product() {}
 
     public Product(String sku, String name, String category, int qty, LocalDate receivedAt,
                    int sales30, BigDecimal cost, BigDecimal price, LocalDate expiry) {
         this.sku = sku;
         this.name = name;
+        this.imageUrl = defaultImageFor(category);
         this.category = category;
         this.quantityOnHand = qty;
         this.receivedAt = receivedAt;
@@ -78,6 +86,9 @@ public class Product {
 
     public String getName() { return name; }
     public void setName(String v) { name = v; }
+
+    public String getImageUrl() { return imageUrl; }
+    public void setImageUrl(String v) { imageUrl = v; }
 
     public String getCategory() { return category; }
     public void setCategory(String v) { category = v; }
@@ -111,4 +122,17 @@ public class Product {
 
     public BigDecimal getMarketAvgPrice() { return marketAvgPrice; }
     public void setMarketAvgPrice(BigDecimal v) { marketAvgPrice = v; }
+
+    public Integer getDiscountPercent() { return discountPercent; }
+    public void setDiscountPercent(Integer v) { discountPercent = v; }
+
+    private static String defaultImageFor(String category) {
+        if (category == null) return "/images/product-generic.svg";
+        String value = category.toLowerCase(java.util.Locale.ROOT);
+        if (value.contains("электрон") || value.contains("техник")) return "/images/product-electronics.svg";
+        if (value.contains("дом") || value.contains("текстил")) return "/images/product-home.svg";
+        if (value.contains("промо") || value.contains("подар")) return "/images/product-gifts.svg";
+        if (value.contains("продукт") || value.contains("еда")) return "/images/product-food.svg";
+        return "/images/product-generic.svg";
+    }
 }

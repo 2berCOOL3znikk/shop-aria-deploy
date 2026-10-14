@@ -1,7 +1,7 @@
 // Модуль управления темой (светлая/тёмная) для ARIA Shop
 window.ariaTheme = {
     getTheme: function() {
-        return localStorage.getItem('aria_theme') || 'dark';
+        return localStorage.getItem('aria_theme') || 'light';
     },
 
     applyTheme: function(theme) {
@@ -20,7 +20,8 @@ window.ariaTheme = {
         const btn = document.getElementById('theme-toggle-btn');
         if (btn) {
             const theme = this.getTheme();
-            btn.textContent = theme === 'dark' ? '☀' : '🌙';
+            btn.textContent = theme === 'dark' ? '☀' : '◐';
+            btn.title = theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему';
         }
     },
 

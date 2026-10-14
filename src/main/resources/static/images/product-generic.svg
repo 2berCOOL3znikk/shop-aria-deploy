@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Товар ARIA">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#edf1f2"/><stop offset="1" stop-color="#dce5e6"/></linearGradient></defs>
+  <rect width="600" height="400" rx="28" fill="url(#bg)"/><ellipse cx="300" cy="319" rx="148" ry="20" fill="#97a8a9" opacity=".28"/>
+  <path d="M209 160h182l-18 154H227z" fill="#f8faf9" stroke="#bbcbcb" stroke-width="6"/><path d="M237 159c6-57 118-57 124 0" fill="none" stroke="#72908d" stroke-width="12" stroke-linecap="round"/><rect x="252" y="203" width="96" height="62" rx="12" fill="#dceae5"/><path d="M274 235h52" stroke="#477c76" stroke-width="8" stroke-linecap="round"/><circle cx="300" cy="235" r="4" fill="#477c76"/>
+</svg>

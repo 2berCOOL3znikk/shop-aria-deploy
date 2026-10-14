@@ -1,0 +1,10 @@
+.git
+.idea
+.mvn/wrapper/maven-wrapper.jar
+target
+data
+out
+*.log
+.env
+login.json
+README.md

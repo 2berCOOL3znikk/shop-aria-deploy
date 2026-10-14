@@ -1,10 +1,12 @@
 package com.aria.service;
 
 import com.aria.entity.AriaLog;
+import com.aria.entity.DiscountSuggestion;
 import com.aria.entity.Product;
 import com.aria.entity.TransferLot;
 import com.aria.enums.ProductStatus;
 import com.aria.repository.AriaLogRepository;
+import com.aria.repository.DiscountSuggestionRepository;
 import com.aria.repository.ProductRepository;
 import com.aria.repository.TransferLotRepository;
 import org.springframework.stereotype.Service;
@@ -28,15 +30,18 @@ public class AriaService {
     private final TransferLotRepository lots;
     private final CompetitorAnalyzerService competitorService;
     private final AriaLogRepository logRepo;
+    private final DiscountSuggestionRepository discountRepo;
 
     public AriaService(ProductRepository products,
                        TransferLotRepository lots,
                        CompetitorAnalyzerService competitorService,
-                       AriaLogRepository logRepo) {
+                       AriaLogRepository logRepo,
+                       DiscountSuggestionRepository discountRepo) {
         this.products = products;
         this.lots = lots;
         this.competitorService = competitorService;
         this.logRepo = logRepo;
+        this.discountRepo = discountRepo;
     }
 
     @Transactional
@@ -51,7 +56,9 @@ public class AriaService {
         int priceOutliers = 0;
 
         for (Product p : all) {
-            if (p.getStatus() == ProductStatus.TRANSFERRED) continue;
+            if (p.getStatus() == ProductStatus.TRANSFERRED || p.getStatus() == ProductStatus.WRITTEN_OFF
+                    || p.getStatus() == ProductStatus.RESERVED || p.getStatus() == ProductStatus.SOCIAL
+                    || p.getStatus() == ProductStatus.DISCOUNTED) continue;
 
             // Заполняем рыночную цену, если её ещё нет
             if (p.getMarketAvgPrice() == null) {
@@ -59,7 +66,7 @@ public class AriaService {
                         p.getName(), p.getCategory() != null ? p.getCategory() : ""
                 );
                 p.setMarketAvgPrice(marketPrice);
-                System.out.println("[ARIA] " + p.getName() + " -> рыночная цена: " + marketPrice + " руб.");
+                    System.out.println("[ARIA] " + p.getName() + " -> ориентир рыночной цены: " + marketPrice + " ₸");
             }
 
             List<String> reasons = new ArrayList<>();
@@ -75,9 +82,12 @@ public class AriaService {
             // Правило 2: Скоропорт (<30 дней до истечения)
             if (p.getExpiryDate() != null) {
                 long daysToExpiry = ChronoUnit.DAYS.between(today, p.getExpiryDate());
-                if (daysToExpiry < EXPIRY_ALERT_DAYS) {
+                if (daysToExpiry < 0) {
+                    reasons.add("срок годности истёк " + Math.abs(daysToExpiry) + " дн. назад — передача запрещена");
+                    System.out.println("[ARIA] " + p.getName() + " - срок годности истёк");
+                } else if (daysToExpiry < EXPIRY_ALERT_DAYS) {
                     reasons.add("срок годности через " + daysToExpiry + " дн.");
-                    isUrgent = true;
+                    isUrgent = daysToExpiry <= 7;
                     System.out.println("[ARIA] " + p.getName() + " - скоропорт " + daysToExpiry + " дн.");
                 }
             }
@@ -162,19 +172,40 @@ public class AriaService {
     }
 
     @Transactional
+    public Product writeOff(Long productId) {
+        Product product = products.findById(productId)
+                .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        if (product.getStatus() == ProductStatus.RESERVED || product.getStatus() == ProductStatus.TRANSFERRED) {
+            throw new IllegalStateException("Зарезервированный или переданный товар нельзя списать повторно");
+        }
+        product.setStatus(ProductStatus.WRITTEN_OFF);
+        product.setQuantityOnHand(0);
+        product.setAriaReason("Списан оператором " + LocalDate.now());
+        return products.save(product);
+    }
+
+    @Transactional
     public TransferLot createTransfer(String partner, String note) {
+        return createTransfer(partner, note, null);
+    }
+
+    @Transactional
+    public TransferLot createTransfer(String partner, String note, List<Long> selectedProductIds) {
         System.out.println("[ARIA] Создание лота передачи для: " + partner);
 
-        // НЕ вызываем analyze() — кандидаты уже есть после анализа
-        List<Product> candidates = products.findByStatus(ProductStatus.CANDIDATE);
+        // Передавать можно только выбранных кандидатов с действующим сроком годности.
+        List<Product> candidates = products.findByStatus(ProductStatus.CANDIDATE).stream()
+                .filter(p -> p.getExpiryDate() == null || !p.getExpiryDate().isBefore(LocalDate.now()))
+                .filter(p -> selectedProductIds == null || selectedProductIds.contains(p.getId()))
+                .toList();
         if (candidates.isEmpty()) {
-            throw new IllegalStateException("Нет товаров-кандидатов. Сначала запустите анализ ARIA.");
+            throw new IllegalStateException("Не выбраны подходящие товары: проверьте, что они кандидаты и срок годности не истёк.");
         }
 
         TransferLot lot = new TransferLot();
-        lot.setPartner(partner);
+        lot.setPartner(partner == null || partner.isBlank() ? "Благотворительная организация" : partner.trim());
         lot.setNote(note);
-        lot.setState("NOTIFIED");
+        lot.setState("DRAFT");
 
         for (Product p : candidates) {
             p.setStatus(ProductStatus.RESERVED);
@@ -191,17 +222,16 @@ public class AriaService {
         TransferLot lot = lots.findById(lotId).orElseThrow(() -> new IllegalArgumentException("Лот не найден"));
 
         String rows = lot.getItems().stream().map(p -> {
-            String cost = p.getUnitCost() == null ? "—" : p.getUnitCost().toPlainString();
-            String market = p.getMarketAvgPrice() == null ? "—" : p.getMarketAvgPrice().toPlainString();
+            BigDecimal cost = p.getUnitCost() == null ? BigDecimal.ZERO : p.getUnitCost();
+            int quantity = p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand();
             String exp = p.getExpiryDate() == null ? "—" : p.getExpiryDate().toString();
 
-            return "<tr><td>" + esc(p.getSku()) + "</td><td>" + esc(p.getName()) + "</td><td>" +
-                    esc(p.getCategory()) + "</td><td>" + p.getQuantityOnHand() + "</td><td>" +
-                    cost + "</td><td>" + market + "</td><td>" + exp + "</td><td>" +
+            return "<tr><td>" + esc(p.getSku()) + "</td><td>" + esc(p.getName()) + "<br><small>" + esc(p.getCategory()) + "</small></td><td>" +
+                    quantity + "</td><td>" + cost.toPlainString() + "</td><td>" + cost.multiply(BigDecimal.valueOf(quantity)).toPlainString() + "</td><td>" + exp + "</td><td>" +
                     esc(p.getAriaReason()) + "</td></tr>";
         }).collect(java.util.stream.Collectors.joining("\n"));
 
-        int totalQty = lot.getItems().stream().mapToInt(Product::getQuantityOnHand).sum();
+        int totalQty = lot.getItems().stream().mapToInt(p -> p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand()).sum();
 
         return """
             <!DOCTYPE html>
@@ -211,25 +241,148 @@ public class AriaService {
             </head>
             <body>
             <h1>Акт приёма-передачи № ARIA-%d</h1>
-            <p><b>Передаёт:</b> ООО «ARIA Shop»</p>
-            <p><b>Принимает:</b> %s</p>
-            <p><b>Примечание:</b> %s</p>
+            <p><b>Дата формирования:</b> %s</p>
+            <p><b>Передающая сторона:</b> ARIA Shop</p>
+            <p><b>Принимающая организация:</b> %s</p>
+            <p><b>Основание / примечание:</b> %s</p>
             <table>
-            <tr><th>SKU</th><th>Название</th><th>Категория</th><th>Кол-во</th><th>Себест.</th><th>Рынок</th><th>Срок годн.</th><th>Причина (ARIA)</th></tr>
+            <tr><th>SKU</th><th>Товар и категория</th><th>Кол-во</th><th>Себестоимость за ед., ₸</th><th>Стоимость партии, ₸</th><th>Срок годности</th><th>Основание ARIA</th></tr>
             %s
             </table>
-            <p style="margin-top:20px;"><b>Позиций:</b> %d | <b>Единиц:</b> %d</p>
-            <p>Причины зафиксированы автоматически модулем ARIA.</p>
+            <p style="margin-top:20px;"><b>Позиций:</b> %d | <b>Единиц:</b> %d | <b>Балансовая стоимость партии:</b> %s ₸</p>
+            <p>Черновик документа: проверьте номенклатуру, количество и реквизиты сторон перед подписанием.</p>
             <br><br>
-            <p>Передал: ____________ / ____________ /</p>
-            <p>Принял: ____________ / ____________ /</p>
+            <p>Передал: ____________________ &nbsp; М.П.</p>
+            <p>Принял: ____________________ &nbsp; М.П.</p>
+            <p>Документ сформирован ARIA Shop. Налоговый и бухгалтерский учёт оформляется ответственными сторонами по применимым правилам.</p>
             </body>
             </html>
-            """.formatted(lotId, lotId, esc(lot.getPartner()), esc(lot.getNote()), rows, lot.getItems().size(), totalQty);
+            """.formatted(lotId, lotId, lot.getCreatedAt().toLocalDate(), esc(lot.getPartner()), esc(lot.getNote()), rows, lot.getItems().size(), totalQty,
+                lot.getItems().stream().map(p -> (p.getUnitCost() == null ? BigDecimal.ZERO : p.getUnitCost())
+                        .multiply(BigDecimal.valueOf(p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand())))
+                        .reduce(BigDecimal.ZERO, BigDecimal::add).setScale(2, RoundingMode.HALF_UP).toPlainString());
     }
 
     private String esc(String s) {
         return s == null ? "" : s.replace("&", "&amp;").replace("<", "&lt;").replace(">", "&gt;");
+    }
+
+    @Transactional(readOnly = true)
+    public List<TransferLot> listTransfers() {
+        return lots.findAll(org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt"));
+    }
+
+    /**
+     * Предлагает скидки для товаров-кандидатов со сроком годности.
+     * Тиры скидок по оставшимся дням:
+     * - <=1 день: 50% (priority clearance)
+     * - <=7 дней: 30%
+     * - <=30 дней: 15%
+     * - >30 дней: без предложения
+     * Пропускает товары, для которых уже есть PENDING предложение.
+     */
+    @Transactional
+    public int proposeDiscounts() {
+        System.out.println("[ARIA] === НАЧАЛО ПРЕДЛОЖЕНИЙ СКИДОК === " + LocalDateTime.now());
+        LocalDate today = LocalDate.now();
+        List<Product> candidates = products.findByStatus(ProductStatus.CANDIDATE);
+        int suggestionsCreated = 0;
+
+        for (Product p : candidates) {
+            // Пропускаем, если нет срока годности
+            if (p.getExpiryDate() == null) continue;
+
+            // Пропускаем, если уже есть PENDING предложение для этого товара
+            if (discountRepo.existsByProductIdAndStatus(p.getId(), "PENDING")) {
+                System.out.println("[ARIA] " + p.getName() + " - уже есть PENDING предложение, пропускаем");
+                continue;
+            }
+
+            // Вычисляем оставшиеся дни
+            long daysToExpiry = ChronoUnit.DAYS.between(today, p.getExpiryDate());
+
+            // Определяем процент скидки по тиру
+            int discountPercent = 0;
+            String reason = "";
+
+            if (daysToExpiry <= 1) {
+                discountPercent = 50;
+                reason = "Экстренная распродажа: остался " + daysToExpiry + " день до истечения срока";
+            } else if (daysToExpiry <= 7) {
+                discountPercent = 30;
+                reason = "Срочная распродажа: осталось " + daysToExpiry + " дней до истечения срока";
+            } else if (daysToExpiry <= 30) {
+                discountPercent = 15;
+                reason = "Предупреждающая скидка: осталось " + daysToExpiry + " дней до истечения срока";
+            } else {
+                // Не предлагаем скидку для товаров с долгим сроком
+                continue;
+            }
+
+            // Создаём предложение (каждое в try/catch для изоляции ошибок)
+            try {
+                DiscountSuggestion suggestion = new DiscountSuggestion(p, reason, discountPercent);
+                discountRepo.save(suggestion);
+                suggestionsCreated++;
+                System.out.println("[ARIA] " + p.getName() + " - предложена скидка " + discountPercent + "% (" + reason + ")");
+            } catch (Exception e) {
+                System.err.println("[ARIA] Ошибка при создании предложения для " + p.getName() + ": " + e.getMessage());
+            }
+        }
+
+        System.out.println("[ARIA] Предложений создано: " + suggestionsCreated);
+        System.out.println("[ARIA] === КОНЕЦ ПРЕДЛОЖЕНИЙ СКИДОК ===\n");
+        return suggestionsCreated;
+    }
+
+    /**
+     * Одобряет предложение о скидке: применяет скидку к товару.
+     * Устанавливает product.status = DISCOUNTED и product.discountPercent = percent.
+     * НЕ изменяет unitPrice, чтобы сохранить обратимость.
+     */
+    @Transactional
+    public void approveDiscount(Long suggestionId, String userEmail) {
+        DiscountSuggestion suggestion = discountRepo.findById(suggestionId)
+                .orElseThrow(() -> new IllegalArgumentException("Предложение не найдено"));
+
+        if (!"PENDING".equals(suggestion.getStatus())) {
+            throw new IllegalStateException("Предложение уже обработано: " + suggestion.getStatus());
+        }
+
+        Product product = suggestion.getProduct();
+        product.setStatus(ProductStatus.DISCOUNTED);
+        product.setDiscountPercent(suggestion.getSuggestedPercent());
+
+        suggestion.setStatus("APPROVED");
+        suggestion.setDecidedBy(userEmail);
+        suggestion.setDecidedAt(LocalDateTime.now());
+
+        discountRepo.save(suggestion);
+        products.save(product);
+
+        System.out.println("[ARIA] Предложение #" + suggestionId + " одобрено пользователем " + userEmail +
+                ". Товар " + product.getName() + " теперь со скидкой " + suggestion.getSuggestedPercent() + "%");
+    }
+
+    /**
+     * Отклоняет предложение о скидке.
+     */
+    @Transactional
+    public void rejectDiscount(Long suggestionId, String userEmail) {
+        DiscountSuggestion suggestion = discountRepo.findById(suggestionId)
+                .orElseThrow(() -> new IllegalArgumentException("Предложение не найдено"));
+
+        if (!"PENDING".equals(suggestion.getStatus())) {
+            throw new IllegalStateException("Предложение уже обработано: " + suggestion.getStatus());
+        }
+
+        suggestion.setStatus("REJECTED");
+        suggestion.setDecidedBy(userEmail);
+        suggestion.setDecidedAt(LocalDateTime.now());
+
+        discountRepo.save(suggestion);
+
+        System.out.println("[ARIA] Предложение #" + suggestionId + " отклонено пользователем " + userEmail);
     }
 
     public record AnalysisReport(int markedCandidate, int returnedToActive, int urgent, int priceOutliers, int totalScanned) {}

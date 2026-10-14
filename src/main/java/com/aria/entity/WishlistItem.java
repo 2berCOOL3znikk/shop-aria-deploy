@@ -18,6 +18,9 @@ public class WishlistItem {
     @Column(nullable = false)
     private LocalDateTime addedAt;
 
+    @Column(length = 255)
+    private String ownerEmail;
+
     public WishlistItem() {
         this.addedAt = LocalDateTime.now();
     }
@@ -27,8 +30,15 @@ public class WishlistItem {
         this.addedAt = LocalDateTime.now();
     }
 
+    public WishlistItem(Product product, String ownerEmail) {
+        this(product);
+        this.ownerEmail = ownerEmail;
+    }
+
     public Long getId() { return id; }
     public Product getProduct() { return product; }
     public void setProduct(Product p) { this.product = p; }
     public LocalDateTime getAddedAt() { return addedAt; }
+    public String getOwnerEmail() { return ownerEmail; }
+    public void setOwnerEmail(String ownerEmail) { this.ownerEmail = ownerEmail; }
 }

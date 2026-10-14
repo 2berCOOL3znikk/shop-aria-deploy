@@ -37,16 +37,31 @@ public class ReviewController {
     }
 
     @PostMapping
-    public Review addReview(@RequestBody Map<String, Object> data) {
+    public Map<String, Object> addReview(@RequestBody Map<String, Object> data) {
         Long prodId = Long.valueOf(data.get("productId").toString());
         String author = (String) data.getOrDefault("author", "Аноним");
         String comment = (String) data.getOrDefault("comment", "");
         Integer rating = Integer.valueOf(data.getOrDefault("rating", 5).toString());
 
+        if (author == null || author.isBlank()) author = "Аноним";
+        if (author.length() > 100 || comment.isBlank() || comment.length() > 2000 || rating < 1 || rating > 5) {
+            throw new IllegalArgumentException("Проверьте имя, отзыв и оценку (1–5 звёзд, до 2000 символов)");
+        }
+
         Product product = productRepo.findById(prodId)
                 .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        if (product.getStatus() != com.aria.enums.ProductStatus.ACTIVE && product.getStatus() != com.aria.enums.ProductStatus.DISCOUNTED) {
+            throw new IllegalArgumentException("Отзыв можно оставить только на товар из каталога");
+        }
 
         Review review = new Review(product, author, comment, rating);
-        return reviewRepo.save(review);
+        Review saved = reviewRepo.save(review);
+        Map<String, Object> result = new HashMap<>();
+        result.put("id", saved.getId());
+        result.put("authorName", saved.getAuthorName());
+        result.put("comment", saved.getComment());
+        result.put("rating", saved.getRating());
+        result.put("createdAt", saved.getCreatedAt());
+        return result;
     }
 }

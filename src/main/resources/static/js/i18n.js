@@ -12,7 +12,7 @@ window.ariaI18n = {
             'nav.logout': 'Выйти',
             'nav.theme': 'Тема',
             'nav.lang': 'Язык',
-            
+
             // Каталог
             'catalog.title': 'Каталог',
             'catalog.search': 'Поиск товаров...',
@@ -26,7 +26,7 @@ window.ariaI18n = {
             'catalog.favActive': 'В избранном',
             'catalog.details': 'Подробнее',
             'catalog.noProducts': 'Товары не найдены',
-            
+
             // Карточка товара
             'product.addToCart': 'Добавить в корзину',
             'product.fav': '🤍 В избранное',
@@ -49,7 +49,7 @@ window.ariaI18n = {
             'product.reviewComment': 'Комментарий',
             'product.reviewSubmit': 'Отправить отзыв',
             'product.reviewError': 'Введите комментарий',
-            
+
             // Корзина
             'cart.title': 'Ваша корзина',
             'cart.empty': 'Корзина пуста. ',
@@ -57,7 +57,7 @@ window.ariaI18n = {
             'cart.total': 'Итого',
             'cart.checkout': 'Оформить заказ',
             'cart.qty': 'Количество',
-            
+
             // Профиль
             'profile.title': 'Мой Кабинет',
             'profile.personal': 'Личная информация',
@@ -71,7 +71,7 @@ window.ariaI18n = {
             'profile.orders': 'Мои заказы',
             'profile.noOrders': 'Заказов пока нет',
             'profile.orderNum': 'Заказ #',
-            
+
             // Админ
             'admin.title': 'Панель управления',
             'admin.subtitle': 'Интеллектуальное управление складом и социальная помощь',
@@ -107,7 +107,27 @@ window.ariaI18n = {
             'admin.price': 'Выше рыночной цены',
             'admin.analysisRunning': 'Анализ ARIA запущен',
             'admin.analysisDone': '✅ Анализ завершён',
-            
+            'admin.filter': 'Фильтровать',
+            'admin.filterSearch': 'Код/Описание...',
+            'admin.filterDateFrom': 'С даты',
+            'admin.filterDateTo': 'По дату',
+            'admin.filterStatus': 'Все статусы',
+            'admin.statusAll': 'Все статусы',
+            'admin.statusActive': 'АКТИВЕН',
+            'admin.statusCandidate': 'КАНДИДАТ',
+            'admin.statusReserved': 'ЗАРЕЗЕРВИРОВАН',
+            'admin.statusTransferred': 'ПЕРЕДАН',
+            'admin.remove': 'Списать',
+            'admin.noResults': 'Нет товаров, соответствующих фильтрам',
+            'admin.sku': 'SKU / Код',
+            'admin.description': 'Описание',
+            'admin.expiry': 'Срок годности',
+            'admin.daysLeft': 'Дней осталось',
+            'admin.qty': 'Кол-во',
+            'admin.location': 'Локация',
+            'admin.level': 'Уровень',
+            'admin.action': 'Действие',
+
             // Тосты
             'toast.added': 'Товар добавлен в корзину',
             'toast.removed': 'Товар удалён',
@@ -123,7 +143,7 @@ window.ariaI18n = {
             'toast.analysisError': 'Ошибка анализа',
             'toast.resetError': 'Ошибка сброса',
             'toast.forbidden': 'Доступ запрещён',
-            
+
             // Вход/Регистрация
             'login.title': '◆ ARIAShop',
             'login.tabLogin': 'Вход',
@@ -137,18 +157,38 @@ window.ariaI18n = {
             'login.error': 'Неверный email или пароль',
             'login.registerError': 'Ошибка регистрации',
             'login.connectionError': 'Ошибка соединения с сервером',
-            
+
             // Тема
             'theme.dark': 'Тёмная тема',
             'theme.light': 'Светлая тема',
-            
+
             // Язык
             'lang.label': 'Язык',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ'
+            'lang.kk': 'KZ',
+
+            // Empty states
+            'empty.cart': 'Корзина пуста',
+            'empty.fav': 'Нет избранных товаров',
+            'empty.orders': 'Заказов пока нет',
+            'empty.reviews': 'Пока нет отзывов. Будьте первым!',
+            'empty.search': 'Товары не найдены',
+            'empty.candidates': 'Нет товаров для передачи. Отличная работа!',
+
+            // Expiry levels
+            'expiry.expired': 'Просрочен',
+            'expiry.critical': 'Критично',
+            'expiry.warning': 'Внимание',
+            'expiry.good': 'Активен',
+            'expiry.none': 'Н/Д',
+
+            // Impact stats
+            'impact.saved': 'Спасено от списания',
+            'impact.social': 'Товаров в соц-разделе',
+            'impact.active': 'Активных предложений'
         },
-        
+
         en: {
             // Navigation
             'nav.catalog': 'Catalog',
@@ -160,7 +200,7 @@ window.ariaI18n = {
             'nav.logout': 'Logout',
             'nav.theme': 'Theme',
             'nav.lang': 'Language',
-            
+
             // Catalog
             'catalog.title': 'Catalog',
             'catalog.search': 'Search products...',
@@ -174,7 +214,7 @@ window.ariaI18n = {
             'catalog.favActive': 'In favorites',
             'catalog.details': 'Details',
             'catalog.noProducts': 'No products found',
-            
+
             // Product
             'product.addToCart': 'Add to cart',
             'product.fav': '🤍 Add to favorites',
@@ -197,7 +237,7 @@ window.ariaI18n = {
             'product.reviewComment': 'Comment',
             'product.reviewSubmit': 'Submit review',
             'product.reviewError': 'Enter a comment',
-            
+
             // Cart
             'cart.title': 'Your cart',
             'cart.empty': 'Cart is empty. ',
@@ -205,7 +245,7 @@ window.ariaI18n = {
             'cart.total': 'Total',
             'cart.checkout': 'Checkout',
             'cart.qty': 'Quantity',
-            
+
             // Profile
             'profile.title': 'My Profile',
             'profile.personal': 'Personal information',
@@ -219,7 +259,7 @@ window.ariaI18n = {
             'profile.orders': 'My orders',
             'profile.noOrders': 'No orders yet',
             'profile.orderNum': 'Order #',
-            
+
             // Admin
             'admin.title': 'Control Panel',
             'admin.subtitle': 'Intelligent warehouse management and social assistance',
@@ -255,7 +295,27 @@ window.ariaI18n = {
             'admin.price': 'Above market price',
             'admin.analysisRunning': 'ARIA analysis running',
             'admin.analysisDone': '✅ Analysis complete',
-            
+            'admin.filter': 'Filter',
+            'admin.filterSearch': 'Code/Description...',
+            'admin.filterDateFrom': 'From date',
+            'admin.filterDateTo': 'To date',
+            'admin.filterStatus': 'All statuses',
+            'admin.statusAll': 'All statuses',
+            'admin.statusActive': 'ACTIVE',
+            'admin.statusCandidate': 'CANDIDATE',
+            'admin.statusReserved': 'RESERVED',
+            'admin.statusTransferred': 'TRANSFERRED',
+            'admin.remove': 'Dispose',
+            'admin.noResults': 'No products match filters',
+            'admin.sku': 'SKU / Code',
+            'admin.description': 'Description',
+            'admin.expiry': 'Expiry date',
+            'admin.daysLeft': 'Days left',
+            'admin.qty': 'Quantity',
+            'admin.location': 'Location',
+            'admin.level': 'Level',
+            'admin.action': 'Action',
+
             // Toasts
             'toast.added': 'Product added to cart',
             'toast.removed': 'Product removed',
@@ -271,7 +331,7 @@ window.ariaI18n = {
             'toast.analysisError': 'Analysis error',
             'toast.resetError': 'Reset error',
             'toast.forbidden': 'Access denied',
-            
+
             // Login/Register
             'login.title': '◆ ARIAShop',
             'login.tabLogin': 'Login',
@@ -285,18 +345,38 @@ window.ariaI18n = {
             'login.error': 'Invalid email or password',
             'login.registerError': 'Registration error',
             'login.connectionError': 'Server connection error',
-            
+
             // Theme
             'theme.dark': 'Dark theme',
             'theme.light': 'Light theme',
-            
+
             // Language
             'lang.label': 'Language',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ'
+            'lang.kk': 'KZ',
+
+            // Empty states
+            'empty.cart': 'Cart is empty',
+            'empty.fav': 'No favorite items',
+            'empty.orders': 'No orders yet',
+            'empty.reviews': 'No reviews yet. Be the first!',
+            'empty.search': 'No products found',
+            'empty.candidates': 'No products for transfer. Great job!',
+
+            // Expiry levels
+            'expiry.expired': 'Expired',
+            'expiry.critical': 'Critical',
+            'expiry.warning': 'Warning',
+            'expiry.good': 'Active',
+            'expiry.none': 'N/A',
+
+            // Impact stats
+            'impact.saved': 'Saved from disposal',
+            'impact.social': 'Social section items',
+            'impact.active': 'Active offers'
         },
-        
+
         kk: {
             // Навигация
             'nav.catalog': 'Каталог',
@@ -308,7 +388,7 @@ window.ariaI18n = {
             'nav.logout': 'Шығу',
             'nav.theme': 'Тақырып',
             'nav.lang': 'Тіл',
-            
+
             // Каталог
             'catalog.title': 'Каталог',
             'catalog.search': 'Тауарларды іздеу...',
@@ -322,7 +402,7 @@ window.ariaI18n = {
             'catalog.favActive': 'Таңдаулыларда',
             'catalog.details': 'Толығырақ',
             'catalog.noProducts': 'Тауарлар табылмады',
-            
+
             // Тауар картасы
             'product.addToCart': 'Себетке қосу',
             'product.fav': '🤍 Таңдаулыларға',
@@ -345,40 +425,40 @@ window.ariaI18n = {
             'product.reviewComment': 'Комментарий',
             'product.reviewSubmit': 'Пікірді жіберу',
             'product.reviewError': 'Комментарий енгізіңіз',
-            
+
             // Себет
             'cart.title': 'Сіздің себетіңіз',
             'cart.empty': 'Себет бос. ',
             'cart.emptyLink': 'Каталогқа өту',
             'cart.total': 'Барлығы',
-            'cart.checkout': 'Сатып алу',
+            'cart.checkout': 'Тапсырыс жасау',
             'cart.qty': 'Саны',
-            
+
             // Профиль
             'profile.title': 'Менің кабинетім',
             'profile.personal': 'Жеке ақпарат',
             'profile.email': 'Email',
-            'profile.fullName': 'Аты-жөніңіз',
+            'profile.fullName': 'Аты-жөні',
             'profile.phone': 'Телефон',
             'profile.address': 'Мекен-жай',
             'profile.save': 'Сақтау',
             'profile.favorites': 'Таңдаулылар',
             'profile.noFavorites': 'Таңдаулылар жоқ',
-            'profile.orders': 'Менің тапсырыстарым',
+            'profile.orders': 'Тапсырыстарым',
             'profile.noOrders': 'Тапсырыстар жоқ',
             'profile.orderNum': 'Тапсырыс #',
-            
+
             // Админ
             'admin.title': 'Басқару панелі',
-            'admin.subtitle': 'Қойма бойынша ақылды басқару және әлеуметтік көмек',
+            'admin.subtitle': 'Интеллектуалды қойма басқаруы және әлеуметтік көмек',
             'admin.runAnalysis': '🔍 ARIA талдауын іске қосу',
             'admin.reset': '🔄 Статустарды қалпына келтіру',
             'admin.createLot': ' Лот құру',
             'admin.logs': '📊 ARIA талдау тарихы',
             'admin.noLogs': 'Журналдар жоқ. Бірінші талдауды іске қосыңыз.',
             'admin.history': 'Талдау тарихы',
-            'admin.products': 'Қайырымдылыққа беруге арналған тауарлар',
-            'admin.loading': 'ARIA деректері жүктелуде...',
+            'admin.products': 'Қайырымдылыққа берілетін тауарлар',
+            'admin.loading': 'ARIA деректерін жүктеу...',
             'admin.noProducts': '🎉 Беру үшін тауарлар жоқ. Жақсы жұмыс!',
             'admin.error': 'Деректерді жүктеу қатесі',
             'admin.deadStock': 'Өлі қор құны',
@@ -403,7 +483,27 @@ window.ariaI18n = {
             'admin.price': 'Нарық бағасынан жоғары',
             'admin.analysisRunning': 'ARIA талдауы іске қосылды',
             'admin.analysisDone': '✅ Талдау аяқталды',
-            
+            'admin.filter': 'Фильтр',
+            'admin.filterSearch': 'Код/Сипаттама...',
+            'admin.filterDateFrom': 'Күннен',
+            'admin.filterDateTo': 'Күнге дейін',
+            'admin.filterStatus': 'Барлық статустар',
+            'admin.statusAll': 'Барлық статустар',
+            'admin.statusActive': 'БЕЛСЕНДІ',
+            'admin.statusCandidate': 'КАНДИДАТ',
+            'admin.statusReserved': 'РЕЗЕРВТЕЛГЕН',
+            'admin.statusTransferred': 'БЕРІЛДІ',
+            'admin.remove': 'Жою',
+            'admin.noResults': 'Фильтрлерге сәйкес тауарлар жоқ',
+            'admin.sku': 'SKU / Код',
+            'admin.description': 'Сипаттама',
+            'admin.expiry': 'Жарамдылық мерзімі',
+            'admin.daysLeft': 'Қалған күн',
+            'admin.qty': 'Саны',
+            'admin.location': 'Локация',
+            'admin.level': 'Деңгей',
+            'admin.action': 'Әрекет',
+
             // Тосттар
             'toast.added': 'Тауар себетке қосылды',
             'toast.removed': 'Тауар алынды',
@@ -419,7 +519,7 @@ window.ariaI18n = {
             'toast.analysisError': 'Талдау қатесі',
             'toast.resetError': 'Қалпына келтіру қатесі',
             'toast.forbidden': 'Қатынауға тыйым салынды',
-            
+
             // Кіру/Тіркелу
             'login.title': '◆ ARIAShop',
             'login.tabLogin': 'Кіру',
@@ -433,16 +533,36 @@ window.ariaI18n = {
             'login.error': 'Email немесе құпия сөз дұрыс емес',
             'login.registerError': 'Тіркелу қатесі',
             'login.connectionError': 'Сервермен байланыс қатесі',
-            
+
             // Тақырып
             'theme.dark': 'Қараңғы тақырып',
             'theme.light': 'Ақ тақырып',
-            
+
             // Тіл
             'lang.label': 'Тіл',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ'
+            'lang.kk': 'KZ',
+
+            // Бос күйлер
+            'empty.cart': 'Себет бос',
+            'empty.fav': 'Таңдаулылар жоқ',
+            'empty.orders': 'Тапсырыстар жоқ',
+            'empty.reviews': 'Пікірлер жоқ. Бірінші болыңыз!',
+            'empty.search': 'Тауарлар табылмады',
+            'empty.candidates': 'Беру үшін тауарлар жоқ. Жақсы жұмыс!',
+
+            // Жарамдылық деңгейлері
+            'expiry.expired': 'Мерзімі өтті',
+            'expiry.critical': 'Критикалық',
+            'expiry.warning': 'Ескерту',
+            'expiry.good': 'Белсенді',
+            'expiry.none': 'Н/Д',
+
+            // Әсер статистикасы
+            'impact.saved': 'Жоюдан құтқарылды',
+            'impact.social': 'Әлеуметтік бөлім тауарлары',
+            'impact.active': 'Белсенді ұсыныстар'
         }
     },
 
@@ -497,12 +617,3 @@ window.ariaI18n = {
         this.updateLangButton();
     }
 };
-
-// Apply i18n on load
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        window.ariaI18n.initI18n();
-    });
-} else {
-    window.ariaI18n.initI18n();
-}

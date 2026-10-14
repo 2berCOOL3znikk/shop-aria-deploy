@@ -50,7 +50,10 @@ window.ariaAuth = {
         }
         const response = await fetch(url, mergedOptions);
         if (response.status === 401) {
-            this.logout();
+            localStorage.removeItem('aria_token');
+            localStorage.removeItem('aria_role');
+            localStorage.removeItem('aria_email');
+            location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
         }
         return response;
     },
@@ -67,6 +70,10 @@ window.ariaAuth = {
 
     requireAdmin: function(redirect = true) {
         if (this.getRole() !== 'ADMIN') {
+            if (redirect && !this.isLoggedIn()) {
+                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search);
+                return false;
+            }
             if (typeof showToast === 'function') {
                 showToast('Нужна роль администратора', 'error');
             } else {

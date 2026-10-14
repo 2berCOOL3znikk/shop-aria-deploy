@@ -11,4 +11,7 @@ public interface WishlistRepository extends JpaRepository<WishlistItem, Long> {
     List<WishlistItem> findAllByOrderByAddedAtDesc();
     Optional<WishlistItem> findByProductId(Long productId);
     boolean existsByProductId(Long productId);
+    List<WishlistItem> findByOwnerEmailOrderByAddedAtDesc(String ownerEmail);
+    Optional<WishlistItem> findByOwnerEmailAndProductId(String ownerEmail, Long productId);
+    boolean existsByOwnerEmailAndProductId(String ownerEmail, Long productId);
 }

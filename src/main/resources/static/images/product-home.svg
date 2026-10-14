@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Товары для дома и текстиль">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f1eee8"/><stop offset="1" stop-color="#e1ddd3"/></linearGradient></defs>
+  <rect width="600" height="400" rx="28" fill="url(#bg)"/><ellipse cx="305" cy="330" rx="174" ry="24" fill="#a99e8e" opacity=".3"/>
+  <rect x="158" y="215" width="284" height="100" rx="20" fill="#8caa9d"/><path d="M158 256h284v40a20 20 0 0 1-20 20H178a20 20 0 0 1-20-20z" fill="#658b7c"/><path d="M188 227h224" stroke="#c6d6ce" stroke-width="8" stroke-linecap="round"/>
+  <rect x="193" y="161" width="112" height="104" rx="24" fill="#f6f1e8" transform="rotate(-8 193 161)"/><path d="M209 187h77" stroke="#d7cbb9" stroke-width="8" stroke-linecap="round" transform="rotate(-8 209 187)"/><rect x="299" y="151" width="111" height="106" rx="24" fill="#d8b59a" transform="rotate(8 299 151)"/><path d="M320 181h71" stroke="#f2dfce" stroke-width="8" stroke-linecap="round" transform="rotate(8 320 181)"/>
+  <path d="M229 149c0-30 20-52 47-52s48 22 48 52" fill="none" stroke="#788c81" stroke-width="9" stroke-linecap="round"/><path d="M228 151h100" stroke="#788c81" stroke-width="9" stroke-linecap="round"/>
+  <circle cx="422" cy="120" r="19" fill="#c8a16d" opacity=".7"/><path d="M413 120h18M422 111v18" stroke="#fff9f0" stroke-width="4" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Товары категории продукты">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#edf4ef"/><stop offset="1" stop-color="#d7e7dc"/></linearGradient><linearGradient id="jar" x2="0" y2="1"><stop stop-color="#d79c44"/><stop offset="1" stop-color="#a75b34"/></linearGradient></defs>
+  <rect width="600" height="400" rx="28" fill="url(#bg)"/><ellipse cx="302" cy="338" rx="178" ry="22" fill="#9ab4a3" opacity=".35"/>
+  <path d="M172 158h252l-25 167H197z" fill="#b98250"/><path d="M184 176h228l-21 130H205z" fill="#e4c092"/><path d="M214 170c8-78 141-78 152 0" fill="none" stroke="#8f603e" stroke-width="15" stroke-linecap="round"/>
+  <path d="M233 158c-9-44 11-68 34-55 24 14 15 48-4 62" fill="#548d5a"/><path d="M276 146c2-52 32-68 50-46 18 23-2 53-26 61" fill="#82a65f"/><path d="M342 155c-5-36 16-60 37-49 23 13 9 42-13 58" fill="#6d9a61"/>
+  <rect x="282" y="204" width="64" height="96" rx="16" fill="url(#jar)"/><rect x="294" y="190" width="40" height="19" rx="6" fill="#58745c"/><path d="M293 243h43" stroke="#f2d79a" stroke-width="8" stroke-linecap="round"/>
+  <circle cx="235" cy="248" r="31" fill="#d77e4c"/><path d="M235 216c1-14 13-21 24-17" fill="none" stroke="#597f4e" stroke-width="7" stroke-linecap="round"/><circle cx="388" cy="243" r="28" fill="#e7b548"/><path d="M387 216c-1-12 9-18 18-18" fill="none" stroke="#597f4e" stroke-width="6" stroke-linecap="round"/>
+</svg>

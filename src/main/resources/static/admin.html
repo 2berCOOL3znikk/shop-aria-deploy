@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>ARIA — Панель управления</title>
     <link rel="stylesheet" href="/styles.css">
+    <script src="/js/theme.js"></script>
+    <script src="/js/i18n.js"></script>
     <style>
         .stat-card { padding: 24px; text-align: center; }
         .stat-value { font-size: 32px; font-weight: 700; margin: 10px 0; }
@@ -12,10 +14,7 @@
         .badge-active { background: rgba(16, 185, 129, 0.2); color: #10b981; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge-candidate { background: rgba(245, 158, 11, 0.2); color: #f59e0b; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .badge-reserved { background: rgba(139, 92, 246, 0.2); color: #8b5cf6; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
-        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
-        th { text-align: left; padding: 12px; color: var(--text-secondary); font-size: 13px; border-bottom: 1px solid var(--border-color); }
-        td { padding: 16px 12px; border-bottom: 1px solid var(--border-color); font-size: 14px; }
-        .aria-reason { color: var(--accent-orange); font-size: 13px; }
+        .badge-transferred { background: rgba(239, 68, 68, 0.2); color: #ef4444; padding: 4px 8px; border-radius: 6px; font-size: 12px; font-weight: 600; }
         .log-entry { padding: 12px; background: var(--bg-surface); border-radius: 8px; margin-bottom: 10px; border-left: 3px solid var(--accent-blue); }
         .log-time { color: var(--text-muted); font-size: 12px; }
         .log-stats { display: flex; gap: 15px; margin-top: 8px; font-size: 13px; flex-wrap: wrap; }
@@ -56,7 +55,7 @@
             background: linear-gradient(90deg, var(--accent-blue), var(--accent-purple));
             border-radius: 4px;
             width: 0%;
-            animation: progressAnim 2.5s ease-in-out forwards;
+            transition: width .3s ease;
         }
         @keyframes progressAnim {
             0% { width: 0%; }
@@ -94,22 +93,32 @@
         }
         .result-row .label { color: var(--text-secondary); }
         .result-row .value { font-weight: 600; }
+        .admin-chart-grid { display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:20px;margin:0 0 30px; }
+        .chart-row { display:grid;grid-template-columns:minmax(100px,1fr) 2fr 36px;align-items:center;gap:10px;margin:12px 0;font-size:13px; }
+        .chart-track { height:9px;background:var(--bg-elevated);border-radius:99px;overflow:hidden; }
+        .chart-fill { height:100%;background:var(--accent-blue);border-radius:99px; }
+        .lot-entry { display:flex;justify-content:space-between;align-items:center;gap:16px;padding:14px 0;border-bottom:1px solid var(--border-color); }
+        .admin-note { color:var(--text-secondary);font-size:14px;line-height:1.55; }
+        .table-actions { display:flex;flex-wrap:wrap;gap:6px; }
+        .table-actions button { white-space:nowrap; }
     </style>
 </head>
 <body>
 <div class="bg-mesh"></div>
 
 <nav class="nav-glass">
-    <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span> Админ</a>
+    <a href="/admin.html" class="logo-new">ARIA · Управление</a>
     <div class="nav-links">
         <a href="/index.html">Магазин</a>
         <a href="/social.html">Соц. полка</a>
         <a href="/admin.html" class="active">Панель</a>
         <span id="auth-nav"></span>
+        <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
+        <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
     </div>
 </nav>
 
-<main class="container" style="max-width: 1200px; margin: 40px auto; padding: 0 20px;">
+<main class="container" style="max-width: 1400px; margin: 40px auto; padding: 0 20px;">
     <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; flex-wrap: wrap; gap: 15px;">
         <div>
             <h1 style="margin-bottom: 8px;">Панель управления</h1>
@@ -117,24 +126,23 @@
         </div>
         <div style="display: flex; gap: 10px; flex-wrap: wrap;">
             <button class="btn-glow" id="btn-analyze" onclick="runAnalysis()">🔍 Запустить анализ ARIA</button>
-            <button class="btn-outline" id="btn-reset" onclick="resetStatuses()">🔄 Сбросить статусы</button>
-            <button class="btn-outline" id="btn-transfer" onclick="createTransferLot()"> Сформировать лот</button>
+            <button class="btn-outline" id="btn-transfer" onclick="createTransferLot()">Сформировать акт из отмеченных</button>
         </div>
     </div>
 
     <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 20px; margin-bottom: 40px;">
         <div class="glass-card stat-card">
             <div class="stat-label">Стоимость мёртвого стока</div>
-            <div class="stat-value gradient-text" id="stat-dead-stock">— ₽</div>
-            <div class="stat-label">Товары со статусом КАНДИДАТ</div>
+            <div class="stat-value gradient-text" id="stat-dead-stock">— ₸</div>
+            <div class="stat-label">Остатки по себестоимости</div>
         </div>
         <div class="glass-card stat-card">
-            <div class="stat-label">Налоговая выгода</div>
-            <div class="stat-value" style="color: var(--accent-green);" id="stat-tax-benefit">— ₽</div>
-            <div class="stat-label">~20% потенциальный вычет</div>
+            <div class="stat-label">Условная оценка 20%</div>
+            <div class="stat-value" style="color: var(--accent-green);" id="stat-tax-benefit">— ₸</div>
+            <div class="stat-label">Демонстрационный расчёт по остаткам</div>
         </div>
         <div class="glass-card stat-card">
-            <div class="stat-label">Спасённых товаров</div>
+            <div class="stat-label">Позиций в лотах</div>
             <div class="stat-value" style="color: var(--accent-purple);" id="stat-saved">0</div>
             <div class="stat-label">Зарезервировано / Передано</div>
         </div>
@@ -145,6 +153,11 @@
         </div>
     </div>
 
+    <div class="admin-chart-grid">
+        <section class="glass-card" style="padding:22px;"><h2>Состояние ассортимента</h2><p class="admin-note">Распределение товаров по текущим статусам.</p><div id="status-chart"></div></section>
+        <section class="glass-card" style="padding:22px;"><h2>Товары по категориям</h2><p class="admin-note">Остатки сгруппированы по каталогу.</p><div id="category-chart"></div></section>
+    </div>
+
     <div class="glass-card" style="padding: 24px; margin-bottom: 30px;">
         <h2 style="margin-bottom: 20px;">📊 История анализов ARIA</h2>
         <div id="logs-container">
@@ -153,25 +166,61 @@
     </div>
 
     <div class="glass-card" style="padding: 24px; overflow-x: auto;">
-        <h2 style="margin-bottom: 20px;">Товары для передачи фондам</h2>
-        <table>
+        <h2 style="margin-bottom: 8px;">Контроль запасов и социальных лотов</h2>
+        <p class="admin-note">Срочные товары (до 7 дней) отмечены автоматически — их можно публиковать сразу, не дожидаясь общей партии. Обычные кандидаты можно объединить в один акт, чтобы согласовать одну выдачу. ARIA ничего не передаёт сама: сотрудник подтверждает лот, фонд резервирует его и отдельно согласует самовывоз. Просроченное не допускается.</p>
+
+        <!-- Filter Row -->
+        <div class="admin-filter-row">
+            <input type="text" id="filter-search" placeholder="Код/Описание..." style="flex:1;min-width:150px;">
+            <input type="date" id="filter-date-from" placeholder="С даты">
+            <input type="date" id="filter-date-to" placeholder="По дату">
+            <select id="filter-status">
+                <option value="">Все статусы</option>
+                <option value="ACTIVE">АКТИВЕН</option>
+                <option value="CANDIDATE">КАНДИДАТ</option>
+                <option value="RESERVED">ЗАРЕЗЕРВИРОВАН</option>
+                <option value="TRANSFERRED">ПЕРЕДАН</option>
+                <option value="SOCIAL">НА СОЦПОЛКЕ</option>
+                <option value="DISCOUNTED">СКИДКА</option>
+                <option value="WRITTEN_OFF">СПИСАН</option>
+            </select>
+            <button class="btn-filter" onclick="applyFilters()">Фильтровать</button>
+        </div>
+
+        <table class="admin-table">
             <thead>
             <tr>
-                <th>Товар / SKU</th>
+                <th>В лот</th>
+                <th>SKU / Код</th>
+                <th>Товар</th>
+                <th>Срок годности</th>
+                <th>Дней осталось</th>
+                <th>Кол-во</th>
+                <th>Продаж / 30 дн.</th>
+                <th>Маржа</th>
                 <th>Статус</th>
-                <th>Дней на складе</th>
-                <th>Продаж/мес</th>
-                <th>Наша цена</th>
-                <th>Рыночная</th>
-                <th>Причина (AI)</th>
+                <th>Риск</th>
+                <th>Действие</th>
             </tr>
             </thead>
             <tbody id="aria-table-body">
-            <tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--text-muted);">Загрузка данных ARIA...</td></tr>
+            <tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">Загрузка данных ARIA...</td></tr>
             </tbody>
         </table>
     </div>
 </main>
+
+<section class="container" style="max-width:1400px;margin:0 auto 30px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;">
+    <div class="glass-card" style="padding:22px;"><h2>Акты и партии</h2><p class="admin-note">Документ можно скачать и распечатать для подписания обеими сторонами.</p><div id="lots-container">Загрузка...</div></div>
+    <div class="glass-card" style="padding:22px;"><h2>Подключить фонд или приют</h2><p class="admin-note">Создайте учётную запись партнёра. После входа организация сможет забрать опубликованный лот на соцполке.</p>
+        <form id="org-form" style="display:grid;gap:10px;margin-top:14px;">
+            <input id="org-name" required maxlength="120" placeholder="Название фонда / приюта">
+            <input id="org-email" required type="email" placeholder="Рабочий email">
+            <input id="org-password" required type="password" minlength="8" placeholder="Временный пароль, от 8 символов">
+            <button class="btn-outline" type="submit">Создать доступ организации</button>
+        </form><div id="org-result" class="admin-note" style="margin-top:10px;"></div>
+    </div>
+</section>
 
 <div class="analysis-overlay" id="analysis-overlay">
     <div class="analysis-box">
@@ -192,6 +241,7 @@
             <div class="result-row"><span class="label">Вернулось в актив:</span><span class="value" style="color: var(--accent-green);" id="res-active">0</span></div>
             <div class="result-row"><span class="label">Срочных (скоропорт):</span><span class="value" style="color: var(--accent-red);" id="res-urgent">0</span></div>
             <div class="result-row"><span class="label">Выше рыночной цены:</span><span class="value" style="color: var(--accent-purple);" id="res-price">0</span></div>
+            <button type="button" class="btn-outline" onclick="document.getElementById('analysis-overlay').classList.remove('active')" style="margin-top:12px;">Готово</button>
         </div>
     </div>
 </div>
@@ -199,8 +249,12 @@
 <div class="toast-container" id="toast-container"></div>
 
 <script src="/js/auth.js"></script>
+<script src="/js/money.js"></script>
 <script>
     let isAnalyzing = false;
+    let allProducts = [];
+    let selectedProductIds = new Set();
+    let selectCriticalCandidatesOnNextLoad = true;
 
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
@@ -222,6 +276,103 @@
         }
     }
 
+    // Expiry level calculation
+    function getExpiryLevel(expiryDate) {
+        if (!expiryDate) return { class: 'expiry-good', text: 'Н/Д' };
+        const today = new Date();
+        const expiry = new Date(expiryDate);
+        const daysLeft = Math.ceil((expiry - today) / (1000 * 60 * 60 * 24));
+
+        if (daysLeft < 0) return { class: 'expiry-expired', text: 'Просрочен' };
+        if (daysLeft <= 7) return { class: 'expiry-critical', text: 'Критично' };
+        if (daysLeft <= 30) return { class: 'expiry-warning', text: 'Внимание' };
+        return { class: 'expiry-good', text: 'Активен' };
+    }
+
+    function renderProductRow(p) {
+        const expiryLevel = getExpiryLevel(p.expiryDate);
+        const statusLabels = { 'ACTIVE': 'Активен', 'CANDIDATE': 'Кандидат', 'RESERVED': 'Зарезервирован', 'TRANSFERRED': 'Передан', 'SOCIAL':'На соцполке', 'DISCOUNTED':'Скидка', 'WRITTEN_OFF':'Списан' };
+        const badgeClass = 'badge-' + p.status.toLowerCase();
+        const statusText = statusLabels[p.status] || p.status;
+        const daysLeft = p.expiryDate ? Math.ceil((new Date(p.expiryDate) - new Date()) / (1000 * 60 * 60 * 24)) : null;
+        const expired = daysLeft !== null && daysLeft < 0;
+        const stockDays = Math.max(0, Math.floor((Date.now() - new Date(p.receivedAt).getTime()) / 86400000));
+        const qty = Number(p.quantityOnHand || 0);
+        const unitPrice = Number(p.unitPrice || 0);
+        const unitCost = Number(p.unitCost || 0);
+        const marginPercent = unitCost > 0 ? Math.round((unitPrice - unitCost) / unitCost * 100) : null;
+        const isCritical = !expired && daysLeft !== null && daysLeft <= 7;
+        const canTransfer = p.status === 'CANDIDATE' && !expired && qty > 0;
+        const aboveMarket = Number(p.marketAvgPrice || 0) > 0 && unitPrice > Number(p.marketAvgPrice) * 1.2;
+        const riskText = expired ? 'Срок истёк' : isCritical ? 'Срочно · передать сейчас' : daysLeft !== null && daysLeft <= 30 ? 'Скоро истекает' : marginPercent !== null && marginPercent < 0 ? 'Минусовая маржа' : aboveMarket ? 'Выше рынка' : stockDays >= 180 && Number(p.salesLast30Days || 0) === 0 ? 'Долго лежит' : 'Наблюдение';
+
+        return `<tr>
+            <td>${canTransfer ? `<input aria-label="Добавить ${p.sku} в лот" type="checkbox" ${selectedProductIds.has(Number(p.id)) ? 'checked' : ''} onchange="toggleProductSelection(${p.id},this.checked)">` : '—'}</td>
+            <td class="mono" style="font-weight:600;">${p.sku}</td>
+            <td>
+                <div style="font-weight: 600;">${p.name}</div><small>${p.category || 'Без категории'} · ${stockDays} дн. на складе</small>
+            </td>
+            <td>${p.expiryDate ? new Date(p.expiryDate).toLocaleDateString('ru-RU') : '—'}</td>
+            <td class="${daysLeft < 0 ? 'days-negative' : ''}">${daysLeft !== null ? daysLeft + ' дн.' : '—'}</td>
+            <td>${qty}</td>
+            <td>${p.salesLast30Days || 0}</td>
+            <td style="color:${marginPercent !== null && marginPercent < 0 ? 'var(--accent-red)' : 'var(--text-primary)'}">${marginPercent === null ? '—' : (marginPercent > 0 ? '+' : '') + marginPercent + '%'}</td>
+            <td><span class="${badgeClass}">${statusText}</span></td>
+            <td>
+                <span class="expiry-pill ${expired || isCritical ? 'expiry-critical' : expiryLevel.class}">${riskText}</span>
+            </td>
+            <td class="table-actions">${canTransfer ? `<button class="btn-outline" onclick="publishSocialOffer(${p.id},${qty},'${p.expiryDate || ''}')">На соцполку</button>` : ''}${p.status !== 'WRITTEN_OFF' && p.status !== 'TRANSFERRED' && p.status !== 'RESERVED' ? `<button class="admin-action-btn" onclick="writeOffProduct(${p.id})">Списать</button>` : ''}<label class="btn-outline" style="padding:6px 9px;cursor:pointer;">Фото<input type="file" accept="image/jpeg,image/png" aria-label="Загрузить фото товара" style="display:none" onchange="uploadProductPhoto(${p.id},this)"></label></td>
+        </tr>`;
+    }
+
+    function applyFilters() {
+        const search = document.getElementById('filter-search').value.toLowerCase();
+        const dateFrom = document.getElementById('filter-date-from').value;
+        const dateTo = document.getElementById('filter-date-to').value;
+        const status = document.getElementById('filter-status').value;
+
+        const filtered = allProducts.filter(p => {
+            const matchSearch = !search || p.name.toLowerCase().includes(search) || p.sku.toLowerCase().includes(search);
+            const matchStatus = !status || p.status === status;
+            let matchDate = true;
+            if (dateFrom || dateTo) {
+                const received = new Date(p.receivedAt);
+                if (dateFrom) matchDate = matchDate && received >= new Date(dateFrom);
+                if (dateTo) matchDate = matchDate && received <= new Date(dateTo);
+            }
+            return matchSearch && matchStatus && matchDate;
+        });
+
+        const tbody = document.getElementById('aria-table-body');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--text-muted);">Нет товаров, соответствующих фильтрам</td></tr>';
+        } else {
+            tbody.innerHTML = filtered.map(renderProductRow).join('');
+        }
+    }
+
+    function toggleProductSelection(productId, checked) {
+        const id = Number(productId);
+        if (checked) selectedProductIds.add(id);
+        else selectedProductIds.delete(id);
+        document.getElementById('btn-transfer').textContent = `Сформировать акт · ${selectedProductIds.size}`;
+    }
+
+    async function writeOffProduct(productId) {
+        if (!ariaAuth.requireAdmin()) return;
+        const product = allProducts.find(item => item.id === productId);
+        if (!confirm(`Списать «${product ? product.name : 'товар'}»? Остаток будет установлен в 0.`)) return;
+
+        try {
+            const res = await ariaAuth.authFetch('/api/aria/products/' + productId + '/write-off', { method: 'POST' });
+            if (!res.ok) throw new Error((await res.json()).message || 'Не удалось списать товар');
+            showToast('Товар списан');
+            await loadProducts();
+        } catch(e) {
+            showToast('Ошибка: ' + e.message, 'error');
+        }
+    }
+
     async function runAnalysis() {
         if (!ariaAuth.requireLogin()) return;
         if (!ariaAuth.requireAdmin()) return;
@@ -236,41 +387,40 @@
         result.classList.remove('show');
         progressFill.style.animation = 'none';
         void progressFill.offsetWidth;
-        progressFill.style.animation = 'progressAnim 2.5s ease-in-out forwards';
+        progressFill.style.width = '0%';
 
         for (let i = 1; i <= 6; i++) {
             const step = document.getElementById('step-' + i);
-            step.className = 'step active';
-            step.querySelector('.step-icon').textContent = '⏳';
+            step.className = 'step';
+            step.querySelector('.step-icon').textContent = '';
         }
 
         overlay.classList.add('active');
         btn.textContent = ' Анализ...';
         btn.disabled = true;
 
-        const steps = [
-            { id: 1, delay: 400 },
-            { id: 2, delay: 800 },
-            { id: 3, delay: 1200 },
-            { id: 4, delay: 1600 },
-            { id: 5, delay: 2000 },
-            { id: 6, delay: 2400 }
-        ];
-
-        steps.forEach(s => {
-            setTimeout(() => {
-                const step = document.getElementById('step-' + s.id);
-                if (step) {
-                    step.className = 'step done';
-                    step.querySelector('.step-icon').textContent = '✅';
-                }
-            }, s.delay);
-        });
-
         try {
-            const res = await ariaAuth.authFetch('/api/aria/analyze', { method: 'POST' });
+            const request = ariaAuth.authFetch('/api/aria/analyze', { method: 'POST' });
+            const pause = ms => new Promise(resolve => setTimeout(resolve, ms));
+            for (let i = 1; i <= 5; i++) {
+                const step = document.getElementById('step-' + i);
+                step.className = 'step active';
+                step.querySelector('.step-icon').textContent = '…';
+                progressFill.style.width = Math.min(i * 15, 85) + '%';
+                await pause(320);
+                step.className = 'step done';
+                step.querySelector('.step-icon').textContent = '✓';
+            }
+            const saving = document.getElementById('step-6');
+            saving.className = 'step active';
+            saving.querySelector('.step-icon').textContent = '…';
+            const res = await request;
             if (!res.ok) throw new Error('Сервер вернул ошибку ' + res.status);
             const data = await res.json();
+            await pause(250);
+            saving.className = 'step done';
+            saving.querySelector('.step-icon').textContent = '✓';
+            progressFill.style.width = '100%';
 
             document.getElementById('res-total').textContent = data.totalScanned || 0;
             document.getElementById('res-candidate').textContent = data.markedCandidate || 0;
@@ -279,11 +429,9 @@
             document.getElementById('res-price').textContent = data.priceOutliers || 0;
 
             result.classList.add('show');
+            selectCriticalCandidatesOnNextLoad = true;
             await loadAll();
 
-            setTimeout(() => {
-                overlay.classList.remove('active');
-            }, 4000);
         } catch(e) {
             showToast('Ошибка анализа: ' + e.message, 'error');
             overlay.classList.remove('active');
@@ -294,41 +442,25 @@
         }
     }
 
-    async function resetStatuses() {
-        if (!ariaAuth.requireAdmin()) return;
-        const btn = document.getElementById('btn-reset');
-        btn.textContent = '⏳ Сброс...';
-        btn.disabled = true;
-
-        try {
-            const res = await ariaAuth.authFetch('/api/aria/reset-statuses', { method: 'POST' });
-            const data = await res.json();
-            showToast(data.message || 'Статусы сброшены');
-            await loadAll();
-        } catch(e) {
-            if (e.message && e.message.includes('403')) {
-                showToast('Доступ запрещён: нужна роль ADMIN', 'error');
-            } else {
-                showToast('Ошибка сброса: ' + e.message, 'error');
-            }
-        } finally {
-            btn.textContent = '🔄 Сбросить статусы';
-            btn.disabled = false;
-        }
-    }
-
     async function createTransferLot() {
         if (!ariaAuth.requireAdmin()) return;
         const btn = document.getElementById('btn-transfer');
+        const productIds = Array.from(selectedProductIds);
+        if (productIds.length === 0) {
+            showToast('Отметьте товары для партии. Критические позиции уже выбраны автоматически.', 'warning');
+            return;
+        }
+        const partnerName = prompt('Кому передаём лот?', 'Фонд «Тёплый дом»');
+        if (!partnerName || !partnerName.trim()) return;
+        const noteText = prompt('Основание или примечание к акту', 'Отбор ARIA по сроку годности и оборачиваемости');
+        if (noteText === null) return;
         btn.textContent = '⏳ Обработка...';
         btn.disabled = true;
 
         try {
-            const partner = encodeURIComponent('Фонд Тёплый дом');
-            const note = encodeURIComponent('Автоматическая передача по правилам ARIA');
-            const res = await ariaAuth.authFetch('/api/aria/transfer?partner=' + partner + '&note=' + note, {
-                method: 'POST'
-            });
+            const params = new URLSearchParams({partner: partnerName.trim(), note: noteText});
+            productIds.forEach(id => params.append('productIds', id));
+            const res = await ariaAuth.authFetch('/api/aria/transfer?' + params.toString(), {method: 'POST'});
 
             if (!res.ok) {
                 const err = await res.json();
@@ -336,11 +468,9 @@
             }
 
             const lot = await res.json();
-            showToast('Лот #' + lot.id + ' создан! Открываем акт...');
-
-            setTimeout(() => {
-                window.open('/api/aria/act/' + lot.id, '_blank');
-            }, 500);
+            selectedProductIds.clear();
+            showToast('Лот #' + lot.id + ' создан. Скачиваю акт для проверки и печати.');
+            await downloadAct(lot.id);
 
             await loadAll();
         } catch(e) {
@@ -350,19 +480,102 @@
                 showToast('Ошибка: ' + e.message, 'error');
             }
         } finally {
-            btn.textContent = '📦 Сформировать лот';
+            btn.textContent = `Сформировать акт · ${selectedProductIds.size}`;
             btn.disabled = false;
         }
     }
 
+    async function downloadAct(lotId) {
+        const res = await ariaAuth.authFetch('/api/aria/act/' + lotId);
+        if (!res.ok) throw new Error('Акт недоступен: проверьте, что партия существует и у вас есть доступ администратора.');
+        const fileUrl = URL.createObjectURL(await res.blob());
+        const link = document.createElement('a');
+        link.href = fileUrl;
+        link.download = `aria-act-${lotId}.html`;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        setTimeout(() => URL.revokeObjectURL(fileUrl), 30000);
+    }
+
+    async function publishSocialOffer(productId, quantity, expiryDate) {
+        if (!ariaAuth.requireAdmin()) return;
+        const validUntil = expiryDate && expiryDate < new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10)
+            ? expiryDate : new Date(Date.now() + 7 * 86400000).toISOString().slice(0, 10);
+        try {
+            const res = await ariaAuth.authFetch('/api/social/offers', {
+                method: 'POST', headers: {'Content-Type':'application/json'},
+                body: JSON.stringify({productId, quantity, validUntil})
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Не удалось опубликовать лот');
+            showToast('Лот опубликован на соцполке. Фонды увидят доступное количество.');
+            await loadAll();
+        } catch(e) { showToast(e.message, 'error'); }
+    }
+
+    async function uploadProductPhoto(productId, input) {
+        const file = input.files && input.files[0];
+        if (!file) return;
+        const form = new FormData();
+        form.append('photo', file);
+        try {
+            const res = await ariaAuth.authFetch('/api/admin/products/' + productId + '/photo', {method:'POST', body:form});
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Не удалось загрузить фотографию');
+            showToast('Фото товара сохранено. Оно будет видно в каталоге и соцполке.');
+            await loadProducts();
+        } catch(e) { showToast(e.message, 'error'); }
+        finally { input.value = ''; }
+    }
+
+    async function loadLots() {
+        try {
+            const res = await ariaAuth.authFetch('/api/aria/lots');
+            if (!res.ok) throw new Error('Не удалось загрузить акты');
+            const lots = await res.json();
+            const box = document.getElementById('lots-container');
+            if (!lots.length) { box.innerHTML = '<p class="admin-note">Пока нет сформированных партий.</p>'; return; }
+            box.innerHTML = lots.map(lot => `<div class="lot-entry"><div><strong>Акт ARIA-${lot.id} · ${lot.partner}</strong><div class="admin-note">${new Date(lot.createdAt).toLocaleString('ru-KZ')} · ${lot.itemCount} поз. · ${lot.quantity} шт. · ${lot.state}</div></div><button class="btn-outline" onclick="downloadAct(${lot.id})">Скачать акт</button></div>`).join('');
+        } catch(e) { document.getElementById('lots-container').textContent = e.message; }
+    }
+
+    async function createOrganization(event) {
+        event.preventDefault();
+        const result = document.getElementById('org-result');
+        const request = {
+            name: document.getElementById('org-name').value,
+            email: document.getElementById('org-email').value,
+            password: document.getElementById('org-password').value
+        };
+        try {
+            const res = await ariaAuth.authFetch('/api/admin/organizations', {
+                method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(request)
+            });
+            const data = await res.json();
+            if (!res.ok) throw new Error(data.error || 'Не удалось создать доступ');
+            result.textContent = `Доступ создан для ${data.name} (${data.email}). Передайте организации пароль отдельно.`;
+            document.getElementById('org-form').reset();
+        } catch(e) { result.textContent = e.message; }
+    }
+
     async function loadStats() {
         try {
-            const stats = await (await fetch('/api/aria/stats')).json();
-            document.getElementById('stat-dead-stock').textContent = Number(stats.deadStockValue).toLocaleString('ru-RU') + ' ₽';
-            document.getElementById('stat-tax-benefit').textContent = Number(stats.taxBenefitEstimate).toLocaleString('ru-RU') + ' ₽';
+            const res = await ariaAuth.authFetch('/api/aria/stats');
+            if (!res.ok) throw new Error('Нет доступа к статистике');
+            const stats = await res.json();
+            document.getElementById('stat-dead-stock').textContent = ariaMoney.format(stats.deadStockValue);
+            document.getElementById('stat-tax-benefit').textContent = ariaMoney.format(stats.taxBenefitEstimate);
             document.getElementById('stat-saved').textContent = stats.savedItemsCount;
             document.getElementById('stat-total').textContent = stats.totalProducts;
             document.getElementById('stat-active').textContent = stats.activeProducts;
+            const statusLabels = {ACTIVE:'Активные', CANDIDATE:'Кандидаты', RESERVED:'В резерве', SOCIAL:'На соцполке', DISCOUNTED:'Со скидкой', TRANSFERRED:'Переданы', WRITTEN_OFF:'Списаны'};
+            const statusValues = stats.statusCounts || {};
+            const statusMax = Math.max(1, ...Object.values(statusValues));
+            document.getElementById('status-chart').innerHTML = Object.entries(statusValues).map(([key,value]) => `<div class="chart-row"><span>${statusLabels[key] || key}</span><div class="chart-track"><div class="chart-fill" style="width:${Math.round(value/statusMax*100)}%"></div></div><strong>${value}</strong></div>`).join('');
+            const categories = stats.categoryBreakdown || {};
+            const categoryMax = Math.max(1, ...Object.values(categories));
+            document.getElementById('category-chart').innerHTML = Object.entries(categories).sort((a,b) => b[1]-a[1]).map(([name,value]) => `<div class="chart-row"><span>${name}</span><div class="chart-track"><div class="chart-fill" style="width:${Math.round(value/categoryMax*100)}%"></div></div><strong>${value}</strong></div>`).join('') || '<p class="admin-note">Нет категорий.</p>';
         } catch(e) {
             console.error('Ошибка загрузки статистики:', e);
         }
@@ -370,7 +583,9 @@
 
     async function loadLogs() {
         try {
-            const logs = await (await fetch('/api/aria/logs')).json();
+            const res = await ariaAuth.authFetch('/api/aria/logs');
+            if (!res.ok) throw new Error('Нет доступа к истории');
+            const logs = await res.json();
             const container = document.getElementById('logs-container');
 
             if (logs.length === 0) {
@@ -397,47 +612,42 @@
 
     async function loadProducts() {
         try {
-            const products = await (await fetch('/api/products/social')).json();
-            const tbody = document.getElementById('aria-table-body');
-
-            if (products.length === 0) {
-                tbody.innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--accent-green);">🎉 Нет товаров для передачи. Отличная работа!</td></tr>';
-                return;
+            const res = await ariaAuth.authFetch('/api/products');
+            if (!res.ok) throw new Error('Нет доступа к товарам');
+            const products = await res.json();
+            allProducts = products;
+            const today = new Date().toISOString().slice(0, 10);
+            const selectableIds = new Set(allProducts
+                .filter(p => p.status === 'CANDIDATE' && Number(p.quantityOnHand || 0) > 0 && (!p.expiryDate || p.expiryDate >= today))
+                .map(p => Number(p.id)));
+            selectedProductIds = new Set(Array.from(selectedProductIds).filter(id => selectableIds.has(id)));
+            if (selectCriticalCandidatesOnNextLoad) {
+                allProducts.filter(p => p.status === 'CANDIDATE' && p.expiryDate && p.expiryDate >= today && Math.ceil((new Date(p.expiryDate) - new Date()) / 86400000) <= 7)
+                    .forEach(p => selectedProductIds.add(Number(p.id)));
+                selectCriticalCandidatesOnNextLoad = false;
             }
-
-            const today = new Date();
-            tbody.innerHTML = products.map(p => {
-                const received = new Date(p.receivedAt);
-                const daysInStock = Math.max(0, Math.floor((today - received) / (1000 * 60 * 60 * 24)));
-                const statusLabels = { 'ACTIVE': 'АКТИВЕН', 'CANDIDATE': 'КАНДИДАТ', 'RESERVED': 'ЗАРЕЗЕРВИРОВАН', 'TRANSFERRED': 'ПЕРЕДАН' };
-                const badgeClass = 'badge-' + p.status.toLowerCase();
-                const statusText = statusLabels[p.status] || p.status;
-
-                return `<tr>
-                <td>
-                    <div style="font-weight: 600;">${p.name}</div>
-                    <div class="mono" style="color: var(--text-muted); font-size: 12px; margin-top: 4px;">${p.sku}</div>
-                </td>
-                <td><span class="${badgeClass}">${statusText}</span></td>
-                <td>${daysInStock} дн.</td>
-                <td>${p.salesLast30Days}</td>
-                <td>${p.unitPrice} ₽</td>
-                <td>${p.marketAvgPrice ? p.marketAvgPrice + ' ₽' : '—'}</td>
-                <td class="aria-reason">${p.ariaReason || '—'}</td>
-            </tr>`;
-            }).join('');
+            document.getElementById('btn-transfer').textContent = `Сформировать акт · ${selectedProductIds.size}`;
+            applyFilters();
         } catch(e) {
             console.error('Ошибка загрузки товаров:', e);
-            document.getElementById('aria-table-body').innerHTML = '<tr><td colspan="7" style="text-align: center; padding: 40px; color: var(--accent-red);">Ошибка загрузки данных</td></tr>';
+            document.getElementById('aria-table-body').innerHTML = '<tr><td colspan="11" style="text-align: center; padding: 40px; color: var(--accent-red);">Ошибка загрузки данных</td></tr>';
         }
     }
 
     async function loadAll() {
-        await Promise.all([loadStats(), loadLogs(), loadProducts()]);
+        await Promise.all([loadStats(), loadLogs(), loadProducts(), loadLots()]);
     }
 
     updateAuthNav();
-    loadAll();
+    ariaTheme.initTheme();
+    ariaI18n.initI18n();
+    if (ariaAuth.getRole() !== 'ADMIN') {
+        if (!ariaAuth.isLoggedIn()) location.replace('/login.html?next=%2Fadmin.html');
+        else location.replace('/index.html');
+    } else {
+        document.getElementById('org-form').addEventListener('submit', createOrganization);
+        loadAll();
+    }
 </script>
 </body>
 </html>

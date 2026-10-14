@@ -1,0 +1,39 @@
+services:
+  database:
+    image: postgres:17-alpine
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: aria
+      POSTGRES_USER: ${ARIA_DB_USER:-aria}
+      POSTGRES_PASSWORD: ${ARIA_DB_PASSWORD:-aria-local-only}
+    volumes:
+      - aria_database:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${ARIA_DB_USER:-aria} -d aria"]
+      interval: 5s
+      timeout: 5s
+      retries: 20
+
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    depends_on:
+      database:
+        condition: service_healthy
+    environment:
+      SPRING_PROFILES_ACTIVE: postgres
+      SPRING_DATASOURCE_URL: jdbc:postgresql://database:5432/aria
+      SPRING_DATASOURCE_USERNAME: ${ARIA_DB_USER:-aria}
+      SPRING_DATASOURCE_PASSWORD: ${ARIA_DB_PASSWORD:-aria-local-only}
+      ARIA_ADMIN_EMAIL: ${ARIA_ADMIN_EMAIL:-admin@aria.shop}
+      ARIA_ADMIN_PASSWORD: ${ARIA_ADMIN_PASSWORD:-admin123}
+      ARIA_JWT_SECRET: ${ARIA_JWT_SECRET:-local-only-aria-jwt-secret-change-before-any-public-host-2026}
+      ARIA_SEED_DEMO_USERS: ${ARIA_SEED_DEMO_USERS:-true}
+      ARIA_RESET_DATA_ON_START: "false"
+    ports:
+      - "8080:8080"
+
+volumes:
+  aria_database:

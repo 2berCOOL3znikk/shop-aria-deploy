@@ -15,7 +15,7 @@ import java.util.Map;
 @Service
 public class JwtService {
 
-    @Value("${jwt.secret:mySuperSecretKeyForJWTTokenGenerationThatIsLongEnoughForHS256Algorithm}")
+    @Value("${jwt.secret:}")
     private String secret;
 
     private SecretKey getSigningKey() {

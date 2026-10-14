@@ -3,6 +3,7 @@ package com.aria.config;
 import com.aria.security.JwtAuthFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -43,12 +44,22 @@ public class SecurityConfig {
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/hello",
-                                "/api/products/**",
-                                "/", "/*.html", "/css/**", "/js/**", "/styles.css", "/favicon.ico",
+                                "/actuator/health",
+                                "/", "/*.html", "/css/**", "/js/**", "/images/**", "/styles.css", "/favicon.ico",
                                 "/h2-console/**"
                         ).permitAll()
-                        .requestMatchers("/api/aria/**", "/api/admin/**", "/api/articles/**", "/api/debug/**")
+                        .requestMatchers(HttpMethod.GET, "/api/products").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/products/social").hasAnyRole("ADMIN", "ORG")
+                        .requestMatchers(HttpMethod.GET, "/api/products/**").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/social/offers").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/social/impact").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/social/offers").hasRole("ADMIN")
+                        .requestMatchers("/api/social/offers/*/claim", "/api/social/my-claims", "/api/social/my-claims/**").hasRole("ORG")
+                        .requestMatchers("/api/aria/**", "/api/aria/suggestions/**", "/api/admin/**", "/api/articles/**", "/api/debug/**", "/api/feedback/**")
                         .hasRole("ADMIN")
+                        .requestMatchers("/api/stats/**").hasRole("ADMIN")
+                        .requestMatchers(HttpMethod.GET, "/api/reviews/product/**").permitAll()
                         .requestMatchers("/api/cart/**", "/api/favorites/**", "/api/orders/**",
                                 "/api/profile/**", "/api/reviews/**")
                         .authenticated()
@@ -65,7 +76,7 @@ public class SecurityConfig {
                         .accessDeniedHandler((req, res, e) -> {
                             res.setStatus(403);
                             res.setContentType("application/json;charset=UTF-8");
-                            res.getWriter().write("{\"status\":\"error\",\"message\":\"Доступ запрещён: нужна роль ADMIN\"}");
+                            res.getWriter().write("{\"status\":\"error\",\"message\":\"Недостаточно прав для этого действия\"}");
                         })
                 )
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

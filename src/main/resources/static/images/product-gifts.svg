@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 400" role="img" aria-label="Подарочные наборы">
+  <defs><linearGradient id="bg" x2="1" y2="1"><stop stop-color="#f5efe9"/><stop offset="1" stop-color="#e8ddd4"/></linearGradient></defs>
+  <rect width="600" height="400" rx="28" fill="url(#bg)"/><ellipse cx="305" cy="326" rx="175" ry="23" fill="#b6a092" opacity=".28"/>
+  <rect x="157" y="202" width="150" height="112" rx="13" fill="#bd765b"/><rect x="157" y="229" width="150" height="22" fill="#e9c68a"/><path d="M219 202v112" stroke="#e9c68a" stroke-width="18"/><path d="M232 201c-44-4-43-40-17-39 23 1 27 39 27 39m0 0c1-39 29-50 40-31 13 22-14 32-40 31" fill="none" stroke="#e9c68a" stroke-width="11" stroke-linecap="round"/>
+  <rect x="302" y="175" width="140" height="139" rx="13" fill="#819b8c"/><rect x="302" y="209" width="140" height="22" fill="#f1dfbe"/><path d="M361 175v139" stroke="#f1dfbe" stroke-width="18"/><path d="M374 174c-43-5-41-39-16-39 22 0 26 38 26 39m0 0c2-38 29-48 40-29 12 20-14 31-40 29" fill="none" stroke="#f1dfbe" stroke-width="10" stroke-linecap="round"/>
+  <path d="M126 124h20m-10-10v20M471 103h17m-8-9v18" stroke="#c39b69" stroke-width="5" stroke-linecap="round"/>
+</svg>

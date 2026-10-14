@@ -16,6 +16,7 @@ import java.util.List;
 
 @Service
 public class OrderService {
+    private static final String LEGACY_OWNER = "demo@aria.shop";
 
     private final OrderRepository orderRepo;
     private final CartItemRepository cartRepo;
@@ -32,9 +33,19 @@ public class OrderService {
         return orderRepo.findAllByOrderByCreatedAtDesc();
     }
 
+    @Transactional(readOnly = true)
+    public List<Order> getOrders(String ownerEmail) {
+        return orderRepo.findByOwnerEmailOrderByCreatedAtDesc(ownerEmail);
+    }
+
     @Transactional
     public Order createOrderFromCart(String address) {
-        List<CartItem> cartItems = cartRepo.findAllByOrderByAddedAtDesc();
+        return createOrderFromCart(LEGACY_OWNER, address);
+    }
+
+    @Transactional
+    public Order createOrderFromCart(String ownerEmail, String address) {
+        List<CartItem> cartItems = cartRepo.findAllByOwnerEmailOrderByAddedAtDesc(ownerEmail);
 
         if (cartItems.isEmpty()) {
             throw new IllegalStateException("Корзина пуста");
@@ -42,7 +53,19 @@ public class OrderService {
 
         Order order = new Order();
         order.setDeliveryAddress(address);
-        order.setStatus("SHIPPED"); // Имитация быстрой доставки для демо
+        order.setOwnerEmail(ownerEmail);
+        order.setStatus("PENDING");
+
+        for (CartItem ci : cartItems) {
+            Product product = ci.getProduct();
+            if (product.getStatus() != com.aria.enums.ProductStatus.ACTIVE
+                    && product.getStatus() != com.aria.enums.ProductStatus.DISCOUNTED) {
+                throw new IllegalStateException("Товар «" + product.getName() + "» больше не продаётся");
+            }
+            if (product.getQuantityOnHand() == null || product.getQuantityOnHand() < ci.getQuantity()) {
+                throw new IllegalStateException("Недостаточный остаток товара «" + product.getName() + "»");
+            }
+        }
 
         BigDecimal total = BigDecimal.ZERO;
 
@@ -58,19 +81,17 @@ public class OrderService {
             total = total.add(lineTotal);
 
             // Списываем со склада (уменьшаем остаток)
-            if (product.getQuantityOnHand() >= ci.getQuantity()) {
-                product.setQuantityOnHand(product.getQuantityOnHand() - ci.getQuantity());
-                productRepo.save(product);
-            }
+            product.setQuantityOnHand(product.getQuantityOnHand() - ci.getQuantity());
+            productRepo.save(product);
         }
 
         order.setTotalAmount(total);
         Order savedOrder = orderRepo.save(order);
 
         // Очищаем корзину после оформления
-        cartRepo.deleteAll();
+        cartRepo.deleteAllByOwnerEmail(ownerEmail);
 
-        System.out.println("[ORDER] Заказ #" + savedOrder.getId() + " оформлен. Сумма: " + total + " ₽");
+        System.out.println("[ORDER] Заказ #" + savedOrder.getId() + " оформлен. Сумма: " + total + " ₸");
 
         return savedOrder;
     }

@@ -19,18 +19,18 @@ public class CompetitorAnalyzerService {
 
             // Базовая цена зависит от категории (примерные рыночные диапазоны)
             double basePrice = switch (category.toLowerCase()) {
-                case "продукты" -> 150.0 + (rand.nextDouble() * 600);      // 150-750 руб
-                case "дом/текстиль" -> 800.0 + (rand.nextDouble() * 1500);  // 800-2300 руб
-                case "электроника" -> 1000.0 + (rand.nextDouble() * 3000); // 1000-4000 руб
-                case "промо" -> 500.0 + (rand.nextDouble() * 1000);        // 500-1500 руб
-                default -> 300.0 + (rand.nextDouble() * 700);              // 300-1000 руб
+                case "продукты" -> (150.0 + (rand.nextDouble() * 600)) * 5.36;
+                case "дом/текстиль" -> (800.0 + (rand.nextDouble() * 1500)) * 5.36;
+                case "электроника" -> (1000.0 + (rand.nextDouble() * 3000)) * 5.36;
+                case "промо" -> (500.0 + (rand.nextDouble() * 1000)) * 5.36;
+                default -> (300.0 + (rand.nextDouble() * 700)) * 5.36;
             };
 
             // Применяем отклонение
             BigDecimal calculated = BigDecimal.valueOf(basePrice * (1 + deviation))
                     .setScale(2, RoundingMode.HALF_UP);
 
-            System.out.println("[ARIA-Market] " + productName + " -> рынок: " + calculated + " руб.");
+            System.out.println("[ARIA-Market] " + productName + " -> рыночный ориентир: " + calculated + " ₸");
             return calculated;
         } catch (Exception e) {
             e.printStackTrace();

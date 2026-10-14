@@ -5,10 +5,9 @@ import com.aria.entity.OrderItem;
 import com.aria.entity.Product;
 import com.aria.service.OrderService;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URLEncoder;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -25,14 +24,14 @@ public class OrderController {
 
     @Transactional(readOnly = true)
     @GetMapping
-    public List<Map<String, Object>> getAll() {
-        return service.getAllOrders().stream().map(this::orderToMap).collect(Collectors.toList());
+    public List<Map<String, Object>> getAll(Authentication authentication) {
+        return service.getOrders(authentication.getName()).stream().map(this::orderToMap).collect(Collectors.toList());
     }
 
     @PostMapping("/checkout")
-    public Map<String, Object> checkout(@RequestBody Map<String, String> data) {
-        String address = data.getOrDefault("address", "г. Москва, ул. Пушкина, д. Колотушкина");
-        Order order = service.createOrderFromCart(address);
+    public Map<String, Object> checkout(@RequestBody Map<String, String> data, Authentication authentication) {
+        String address = data.getOrDefault("address", "г. Кызылорда, Казахстан");
+        Order order = service.createOrderFromCart(authentication.getName(), address);
         return orderToMap(order);
     }
 
@@ -51,7 +50,7 @@ public class OrderController {
             if (p != null) {
                 itemMap.put("productName", p.getName());
                 itemMap.put("productSku", p.getSku());
-                itemMap.put("imageUrl", "https://placehold.co/400x300/1e293b/3b82f6?text=" + URLEncoder.encode(p.getName(), StandardCharsets.UTF_8));
+                itemMap.put("imageUrl", p.getImageUrl() != null ? p.getImageUrl() : "/images/product-generic.svg");
             }
             return itemMap;
         }).collect(Collectors.toList());
