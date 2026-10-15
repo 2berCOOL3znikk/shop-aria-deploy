@@ -69,6 +69,7 @@
     document.body.insertBefore(nav, document.body.firstChild);
     const toastBox = document.getElementById("toast-container") || document.createElement("div");
     toastBox.id = "toast-container"; toastBox.classList.add("toast-container");
+    toastBox.setAttribute("aria-live", "polite"); toastBox.setAttribute("aria-atomic", "false");
     if (!toastBox.isConnected) document.body.appendChild(toastBox);
     document.querySelectorAll("body > footer:not(#aria-shell-footer)").forEach(el => el.remove());
     let footer = document.getElementById("aria-shell-footer");

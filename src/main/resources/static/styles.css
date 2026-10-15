@@ -995,3 +995,14 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
   .report-actions button,.lot-entry .table-actions button { width:100%; }
   .lot-entry { align-items:stretch;flex-direction:column; }
 }
+/* Final accessibility and restrained interaction polish */
+.aria-shell-links a { border-radius:7px;transition:color .16s ease,background-color .16s ease; }
+.aria-shell-links a:hover { background:var(--bg-elevated); }
+.aria-shell-actions button,.aria-shell-burger,.report-actions button { transition:transform .16s ease,background-color .16s ease,border-color .16s ease; }
+.aria-shell-actions button:hover,.report-actions button:hover { transform:translateY(-1px); }
+.btn-glow,.btn-outline,.btn-filter { border-radius:10px; }
+.btn-glow:hover,.btn-filter:hover { box-shadow:var(--shadow-md); }
+.btn-outline:hover { background:var(--bg-elevated); }
+.shell-user-button:hover { background:var(--bg-elevated); }
+.toast-container { pointer-events:none; }
+.toast { pointer-events:auto; }
