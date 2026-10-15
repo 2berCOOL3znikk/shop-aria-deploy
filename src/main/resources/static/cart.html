@@ -106,6 +106,7 @@
 
         const total = items.reduce((sum, it) => sum + it.priceAtAddTime * it.quantity, 0);
         document.getElementById('cart-total').innerHTML =
+            '<label class="cart-address-label" for="delivery-address">Адрес доставки</label><input id="delivery-address" type="text" autocomplete="street-address" value="г. Кызылорда, Казахстан" aria-label="Адрес доставки">' +
             '<div style="display:flex;justify-content:space-between;align-items:center;">' +
             '<div><b style="font-size:20px;"><span data-i18n="cart.total">Итого:</span> ' + ariaMoney.format(total) + '</b></div>' +
             '<button class="btn-glow" onclick="checkout()" data-i18n="cart.checkout">Оформить заказ</button>' +
@@ -132,8 +133,8 @@
     }
 
     async function checkout() {
-        const address = prompt('Адрес доставки в Казахстане', 'г. Кызылорда, Казахстан');
-        if (!address || !address.trim()) return;
+        const address = document.getElementById('delivery-address')?.value || '';
+        if (!address.trim()) { showToast('Укажите адрес доставки', 'error'); return; }
         try {
             const res = await ariaAuth.authFetch('/api/orders/checkout', {
                 method: 'POST',

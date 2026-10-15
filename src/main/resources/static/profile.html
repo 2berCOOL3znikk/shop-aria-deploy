@@ -26,29 +26,24 @@
     </div>
 </nav>
 
-<main class="container" style="max-width:1000px;margin:40px auto;padding:0 20px;">
-    <h1 style="margin-bottom:30px;" data-i18n="profile.title">Мой Кабинет</h1>
-
-    <div style="display:grid;grid-template-columns:1fr 1fr;gap:30px;">
-        <div class="glass-card" style="padding:24px;">
-            <h2 style="margin-bottom:20px;" data-i18n="profile.personal">Личная информация</h2>
-            <input type="email" id="email" data-i18n-placeholder="profile.email" placeholder="Email" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <input type="text" id="fullName" data-i18n-placeholder="profile.fullName" placeholder="ФИО" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <input type="tel" id="phone" data-i18n-placeholder="profile.phone" placeholder="Телефон" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <input type="text" id="address" data-i18n-placeholder="profile.address" placeholder="Адрес" style="width:100%;padding:12px;margin-bottom:12px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <button class="btn-glow" onclick="saveProfile()" style="width:100%;" data-i18n="profile.save">Сохранить</button>
-        </div>
-
-        <div class="glass-card" style="padding:24px;">
-            <h2 id="favorites-heading" style="margin-bottom:20px;" data-i18n="profile.favorites">Избранное ❤️</h2>
-            <div id="favorites-list"></div>
-        </div>
-    </div>
-
-    <div class="glass-card" style="padding:24px;margin-top:30px;">
-        <h2 style="margin-bottom:20px;" data-i18n="profile.orders">Мои заказы </h2>
-        <div id="orders"></div>
-    </div>
+<main class="container profile-page">
+  <h1 data-i18n="profile.title">Мой кабинет</h1>
+  <section class="glass-card profile-form">
+    <h2 data-i18n="profile.personal">Личная информация</h2>
+    <label for="email" data-i18n="profile.email">Email</label>
+    <input type="email" id="email" data-i18n-placeholder="profile.email" placeholder="Email" readonly>
+    <label for="fullName" data-i18n="profile.fullName">ФИО</label>
+    <input type="text" id="fullName" data-i18n-placeholder="profile.fullName" placeholder="ФИО">
+    <label for="phone" data-i18n="profile.phone">Телефон</label>
+    <input type="tel" id="phone" data-i18n-placeholder="profile.phone" placeholder="Телефон">
+    <label for="address" data-i18n="profile.address">Адрес</label>
+    <input type="text" id="address" data-i18n-placeholder="profile.address" placeholder="Адрес">
+    <button class="btn-glow" onclick="saveProfile()" data-i18n="profile.save">Сохранить</button>
+  </section>
+  <section class="glass-card profile-orders">
+    <h2 data-i18n="profile.orders">Мои заказы</h2>
+    <div id="orders"></div>
+  </section>
 </main>
 
 <div class="toast-container" id="toast-container"></div>
@@ -87,8 +82,9 @@
         if (!ariaAuth.requireLogin()) return;
         try {
             const email = ariaAuth.getUserEmail();
-            const res = await ariaAuth.authFetch('/api/profile/me');
+            const res = await ariaAuth.authFetch('/api/profile/' + encodeURIComponent(email));
             const data = await res.json();
+            document.getElementById('email').value = data.found ? (data.data.email || email) : email;
             if (data.found) {
                 document.getElementById('email').value = data.data.email || '';
                 document.getElementById('fullName').value = data.data.fullName || '';
@@ -144,7 +140,7 @@
             const orders = await res.json();
             const box = document.getElementById('orders');
             if (orders.length === 0) {
-                box.innerHTML = '<p style="color:var(--text-muted);" data-i18n="profile.noOrders">Заказов пока нет</p>';
+                box.innerHTML = '<div class="empty-state"><span aria-hidden="true">▣</span><p data-i18n="profile.noOrders">Заказов пока нет</p><a href="/index.html" class="btn-outline">Открыть каталог</a></div>';
                 return;
             }
             box.innerHTML = orders.map(o =>
@@ -166,7 +162,6 @@
     ariaI18n.initI18n();
     loadCartCount();
     loadProfile();
-    loadFavorites();
     loadOrders();
 </script>
 </body>
