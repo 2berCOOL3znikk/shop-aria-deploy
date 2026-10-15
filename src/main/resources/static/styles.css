@@ -907,3 +907,27 @@ img.product-card-image, .product-card-image { background: #edf2f2; }
 .critical-block { border-left:3px solid var(--accent-orange);padding-left:14px; }
 .expired-block { border-left:3px solid var(--accent-red);padding-left:14px; }
 @media(max-width:700px){.claim-row,.verification-row,.logistics-block li{align-items:flex-start;flex-direction:column}.admin-operation-heading{align-items:flex-start;flex-direction:column}}
+/* Управление ARIA и история */
+.aria-reason-tabs { display:flex;gap:8px;flex-wrap:wrap;margin:14px 0; }
+.aria-reason-tabs button { border:1px solid var(--border-color);border-radius:999px;padding:8px 13px;background:var(--bg-surface);color:var(--text-secondary);cursor:pointer; }
+.aria-reason-tabs button[aria-pressed="true"] { background:var(--accent-blue);border-color:var(--accent-blue);color:white; }
+.admin-table-empty { padding:36px!important;text-align:center;color:var(--text-muted); }
+.admin-inline-chart { width:100%;height:auto;min-width:510px;color:var(--text-secondary); }
+#status-chart,#category-chart { overflow-x:auto; }
+.analysis-history-page { max-width:1050px;margin:34px auto;padding:0 22px; }
+.analysis-history-page header { margin:22px 0 26px; }
+.analysis-history-page h1 { margin:8px 0;font-size:clamp(30px,4vw,42px); }
+.analysis-history-page header p { max-width:720px;color:var(--text-secondary);line-height:1.55; }
+.history-back { color:var(--text-secondary);text-decoration:none; }
+.history-filters { display:flex;gap:10px;flex-wrap:wrap;margin-bottom:18px; }
+.history-filters input { padding:10px 12px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-elevated);color:var(--text-primary); }
+.history-filters input[type="search"] { flex:1;min-width:220px; }
+.analysis-history-list { display:grid;gap:14px; }
+.history-log { padding:18px; }
+.history-log-top,.history-stats { display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap; }
+.history-log-top span,.history-stats span { color:var(--text-secondary); }
+.history-stats { margin-top:12px; }
+.history-log p { margin:12px 0 0;color:var(--text-secondary); }
+.history-empty { padding:30px;text-align:center;color:var(--text-secondary); }
+#analysis-history-link { margin-left:12px;text-decoration:none; }
+@media(max-width:680px){#analysis-history-link{margin:12px 0 0;display:inline-flex}.history-stats{flex-direction:column}}
