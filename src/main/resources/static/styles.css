@@ -826,3 +826,23 @@ img.product-card-image, .product-card-image { background: #edf2f2; }
   .aria-shell-links a{padding:11px 4px;border-top:1px solid var(--border-color);font-size:15px}
   .shell-footer-columns{grid-template-columns:1fr;gap:22px}
 }
+/* Каталог ARIA */
+.aria-catalog-hero { display:grid;grid-template-columns:minmax(0,1.15fr) minmax(220px,.85fr);align-items:center;gap:28px;margin:24px auto 22px;max-width:1300px;padding:clamp(22px,4vw,46px); }
+.aria-hero-copy h1 { max-width:780px;margin:12px 0;font-size:clamp(30px,4.2vw,54px);line-height:1.08;letter-spacing:-.035em; }
+.aria-hero-copy p { max-width:700px;color:var(--text-secondary);font-size:17px;line-height:1.55; }
+.aria-hero-copy small { display:block;margin-top:22px;color:var(--text-muted);font-size:11px; }
+.aria-hero-actions { display:flex;gap:12px;flex-wrap:wrap;margin-top:20px; }
+.aria-hero-actions a { text-decoration:none; }
+.aria-hero-illustration { max-width:290px;margin:auto; }
+.aria-hero-illustration svg { display:block;width:100%;height:auto; }
+.aria-rating { display:flex;align-items:center;gap:7px;color:#9b7434;font-size:13px; }
+.aria-rating small { color:var(--text-muted);font-size:11px; }
+.aria-product-art { display:block;padding:12px;background:var(--bg-elevated); }
+.aria-product-art .product-card-image { width:100%;height:178px;object-fit:contain; }
+.aria-product-card .product-card-content { display:flex;flex-direction:column;gap:10px; }
+.aria-old-price { margin-left:7px;color:var(--text-muted);font-size:13px;font-weight:400;text-decoration:line-through; }
+.aria-favorite-button { min-width:44px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-surface);color:var(--accent-blue);font-size:19px;cursor:pointer; }
+.catalog-more { display:block;margin:26px auto 0; }
+.catalog-empty { padding:56px 20px;text-align:center;color:var(--text-secondary); }
+.catalog-empty span { font-size:32px;color:var(--accent-blue); }
+@media(max-width:720px){.aria-catalog-hero{grid-template-columns:1fr}.aria-hero-illustration{max-width:220px;order:-1}.aria-hero-copy h1{font-size:34px}}
