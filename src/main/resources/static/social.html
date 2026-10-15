@@ -118,14 +118,13 @@
 
   async function claimOffer(id) {
     if (ariaAuth.getRole() !== 'ORG') { location.href = '/login.html?next=%2Fsocial.html'; return; }
-    if (!confirm('Забрать весь лот? Количество будет зарезервировано за вашей организацией.')) return;
     try {
       const res = await ariaAuth.authFetch('/api/social/offers/' + id + '/claim', {method:'POST'});
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || 'Не удалось забрать лот');
       document.getElementById('partner-message').textContent = 'Лот зарезервирован. Свяжитесь с магазином для согласования времени и документов передачи.';
       await Promise.all([loadSocial(), loadClaims()]);
-    } catch(e) { alert(e.message); }
+    } catch(e) { showToast(e.message, 'error'); }
   }
 
   async function downloadClaimAct(id) {
@@ -137,7 +136,7 @@
       link.href = url; link.download = `aria-social-act-${id}.html`;
       document.body.appendChild(link); link.click(); link.remove();
       setTimeout(() => URL.revokeObjectURL(url), 30000);
-    } catch(e) { alert(e.message); }
+    } catch(e) { showToast(e.message, 'error'); }
   }
 
   updateAuthNav();
@@ -148,5 +147,6 @@
   loadSocial();
   loadClaims();
 </script>
+    <script src="/js/social-mvp.js"></script>
 </body>
 </html>
