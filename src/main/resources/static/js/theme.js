@@ -1,42 +1,21 @@
-// Модуль управления темой (светлая/тёмная) для ARIA Shop
 window.ariaTheme = {
-    getTheme: function() {
-        return localStorage.getItem('aria_theme') || 'light';
-    },
-
-    applyTheme: function(theme) {
-        document.documentElement.dataset.theme = theme;
-        localStorage.setItem('aria_theme', theme);
-        this.updateThemeButton();
-    },
-
-    toggleTheme: function() {
-        const current = this.getTheme();
-        const next = current === 'dark' ? 'light' : 'dark';
-        this.applyTheme(next);
-    },
-
-    updateThemeButton: function() {
-        const btn = document.getElementById('theme-toggle-btn');
-        if (btn) {
-            const theme = this.getTheme();
-            btn.textContent = theme === 'dark' ? '☀' : '◐';
-            btn.title = theme === 'dark' ? 'Включить светлую тему' : 'Включить тёмную тему';
-        }
-    },
-
-    initTheme: function() {
-        const theme = this.getTheme();
-        document.documentElement.dataset.theme = theme;
-        this.updateThemeButton();
-    }
+  getTheme() { return localStorage.getItem("aria_theme") || "light"; },
+  applyTheme(value) {
+    const theme = value === "dark" ? "dark" : "light";
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem("aria_theme", theme);
+    this.updateThemeButton();
+  },
+  toggleTheme() { this.applyTheme(this.getTheme() === "dark" ? "light" : "dark"); },
+  updateThemeButton() {
+    const button = document.getElementById("theme-toggle-btn");
+    if (!button) return;
+    button.textContent = this.getTheme() === "dark" ? "☀" : "🌙";
+    button.title = this.getTheme() === "dark" ? "Светлая тема" : "Тёмная тема";
+  },
+  initTheme() { this.applyTheme(this.getTheme()); }
 };
-
-// Применяем тему сразу при загрузке
-if (document.readyState === 'loading') {
-    document.addEventListener('DOMContentLoaded', function() {
-        window.ariaTheme.initTheme();
-    });
-} else {
-    window.ariaTheme.initTheme();
-}
+window.theme = window.ariaTheme;
+document.documentElement.dataset.theme = localStorage.getItem("aria_theme") || "light";
+if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => window.ariaTheme.initTheme());
+else window.ariaTheme.initTheme();

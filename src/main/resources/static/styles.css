@@ -787,3 +787,42 @@ img.product-card-image, .product-card-image { background: #edf2f2; }
     .nav-links { flex-wrap:wrap;gap:10px; }
     .responsive-grid { grid-template-columns:repeat(auto-fill,minmax(220px,1fr)); }
 }
+
+/* Единая оболочка ARIA */
+.aria-shell { display:flex;align-items:center;gap:22px;min-height:72px;padding:12px clamp(16px,4vw,56px); }
+.aria-shell .logo-new { display:inline-flex;align-items:center;gap:6px;white-space:nowrap;text-decoration:none; }
+.aria-brand-mark { color:var(--accent-blue); }
+.aria-brand-shop { color:var(--text-primary);font-weight:600; }
+.aria-shell-links { display:flex;align-items:center;justify-content:center;gap:clamp(10px,1.5vw,22px);flex:1; }
+.aria-shell-links a { color:var(--text-secondary);text-decoration:none;white-space:nowrap;font-size:14px; }
+.aria-shell-links a:hover,.aria-shell-links a.active { color:var(--text-primary); }
+.aria-shell-links a.active { font-weight:700; }
+.aria-shell-actions { display:flex;align-items:center;gap:9px; }
+.shell-icon-button,.shell-lang-button,.shell-user-button { border:1px solid var(--border-color);border-radius:9px;background:var(--bg-surface);color:var(--text-primary);padding:7px 10px;cursor:pointer; }
+.shell-icon-button { font-size:17px;line-height:1; }
+.shell-user-button { font-size:13px; }
+.aria-shell-user { display:flex;align-items:center;gap:9px; }
+.aria-shell-user a { color:var(--accent-blue);text-decoration:none; }
+.shell-user-email { max-width:190px;overflow:hidden;text-overflow:ellipsis;color:var(--text-muted);font-size:13px; }
+.aria-shell-burger { display:none;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-surface);padding:8px; }
+.aria-shell-burger span { display:block;width:19px;height:2px;margin:3px;background:var(--text-primary); }
+.aria-shell-footer { margin-top:72px;padding:36px clamp(20px,6vw,80px) 20px;border-top:1px solid var(--border-color);background:var(--bg-surface); }
+.shell-footer-columns { display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:28px;max-width:1200px;margin:auto; }
+.shell-footer-columns section { display:flex;flex-direction:column;gap:10px; }
+.shell-footer-columns h2 { font-size:14px;margin:0 0 4px;color:var(--text-primary); }
+.shell-footer-columns a { color:var(--text-secondary);text-decoration:none;font-size:14px; }
+.shell-footer-columns a:hover { color:var(--accent-blue); }
+.shell-copyright { margin:32px auto 0;max-width:1200px;color:var(--text-muted);font-size:12px; }
+.product-card,.offer-card,.glass-card { box-shadow:0 1px 3px rgba(0,0,0,.1); }
+.product-card,.offer-card { transition:transform .18s ease,box-shadow .18s ease; }
+.product-card:hover,.offer-card:hover { transform:translateY(-3px);box-shadow:0 8px 20px rgba(20,40,55,.1); }
+@media(max-width:1100px){.aria-shell{gap:12px}.aria-shell-links{gap:10px}.aria-shell-links a{font-size:13px}.shell-user-email{display:none}}
+@media(max-width:880px){
+  .aria-shell{position:relative;flex-wrap:wrap;justify-content:space-between}
+  .aria-shell-burger{display:block;order:2}
+  .aria-shell-actions{order:3}
+  .aria-shell-links{display:none;order:4;flex-basis:100%;align-items:stretch;flex-direction:column;gap:0;padding:8px 0}
+  .aria-shell.menu-open .aria-shell-links{display:flex}
+  .aria-shell-links a{padding:11px 4px;border-top:1px solid var(--border-color);font-size:15px}
+  .shell-footer-columns{grid-template-columns:1fr;gap:22px}
+}

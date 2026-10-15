@@ -166,7 +166,7 @@ window.ariaI18n = {
             'lang.label': 'Язык',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ',
+            'lang.kk': 'KK',
 
             // Empty states
             'empty.cart': 'Корзина пуста',
@@ -354,7 +354,7 @@ window.ariaI18n = {
             'lang.label': 'Language',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ',
+            'lang.kk': 'KK',
 
             // Empty states
             'empty.cart': 'Cart is empty',
@@ -542,7 +542,7 @@ window.ariaI18n = {
             'lang.label': 'Тіл',
             'lang.ru': 'RU',
             'lang.en': 'EN',
-            'lang.kk': 'KZ',
+            'lang.kk': 'KK',
 
             // Бос күйлер
             'empty.cart': 'Себет бос',
@@ -617,3 +617,8 @@ window.ariaI18n = {
         this.updateLangButton();
     }
 };
+
+window.i18n = window.ariaI18n;
+Object.assign(window.ariaI18n.dictionaries.ru, { 'nav.favorites': '♡ Избранное', 'nav.support': 'Поддержка', 'nav.organization': 'Кабинет организации' });
+Object.assign(window.ariaI18n.dictionaries.en, { 'nav.favorites': '♡ Favorites', 'nav.support': 'Support', 'nav.organization': 'Organization cabinet' });
+Object.assign(window.ariaI18n.dictionaries.kk, { 'nav.favorites': '♡ Таңдаулылар', 'nav.support': 'Қолдау', 'nav.organization': 'Ұйым кабинеті' });
