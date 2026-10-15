@@ -1,0 +1,28 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARIA — О проекте</title><link rel="stylesheet" href="/styles.css">
+  <script src="/js/theme.js"></script><script src="/js/i18n.js"></script><script src="/js/shell.js"></script>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <main class="container docs-page about-page">
+    <header class="docs-hero"><span class="product-card-category">Smart Retail &amp; Social Impact</span><h1>Меньше списаний. Больше пользы.</h1><p>ARIA помогает магазину вовремя увидеть остатки, которым нужно внимание, и направить пригодные товары в социальную помощь через проверенные организации.</p><a class="btn-glow" href="/index.html">Открыть каталог</a></header>
+    <section class="glass-card about-explainer"><h2>Как ARIA помогает магазину</h2><div class="about-rules"><article><span>01</span><h3>Сроки</h3><p>Подсвечивает скоропорт и позиции, у которых срок уже истёк. Окончательную пригодность оценивает сотрудник.</p></article><article><span>02</span><h3>Остатки</h3><p>Находит товар без продаж более 180 дней и предлагает проверить спрос и наличие.</p></article><article><span>03</span><h3>Цена и маржа</h3><p>Показывает возможный ценовой риск или отрицательную маржу, чтобы ответственный сотрудник принял решение.</p></article><article><span>04</span><h3>Социальное распределение</h3><p>Подходящие позиции можно объединять в лоты и предлагать проверенным фондам и приютам.</p></article></div><p class="about-human-rule"><strong>AI предлагает действие. Человек проверяет данные и подтверждает решение.</strong> Система сама не оценивает безопасность еды и не подтверждает факт передачи.</p></section>
+    <section class="glass-card flow-card" id="flow"><h2>Путь товара</h2><p>Каждый переход отражает отдельное решение магазина или подтверждённую операцию.</p>
+      <div class="flow-scroll"><svg class="product-flow-svg" viewBox="0 0 1050 180" role="img" aria-label="ACTIVE → DISCOUNTED → SOCIAL → TRANSFERRED → WRITTEN_OFF">
+        <defs><marker id="arrow" markerWidth="10" markerHeight="10" refX="8" refY="5" orient="auto"><path d="M0 0L10 5L0 10z" fill="#82918a"/></marker></defs>
+        <g fill="none" stroke="#82918a" stroke-width="3" marker-end="url(#arrow)"><path d="M190 88H230"/><path d="M390 88H430"/><path d="M590 88H630"/><path d="M790 88H830"/></g>
+        <g font-family="system-ui,sans-serif" text-anchor="middle"><rect x="30" y="52" width="160" height="72" rx="16" fill="#dfe9e2"/><text x="110" y="96" fill="#263b33" font-size="17" font-weight="700">ACTIVE</text>
+        <rect x="230" y="52" width="160" height="72" rx="16" fill="#efe5d4"/><text x="310" y="96" fill="#4c3d28" font-size="17" font-weight="700">DISCOUNTED</text>
+        <rect x="430" y="52" width="160" height="72" rx="16" fill="#e5ebdd"/><text x="510" y="96" fill="#34432f" font-size="17" font-weight="700">SOCIAL</text>
+        <rect x="630" y="52" width="160" height="72" rx="16" fill="#dce7e4"/><text x="710" y="96" fill="#29423d" font-size="17" font-weight="700">TRANSFERRED</text>
+        <rect x="830" y="52" width="190" height="72" rx="16" fill="#eee2df"/><text x="925" y="96" fill="#4b3734" font-size="17" font-weight="700">WRITTEN_OFF</text></g>
+      </svg></div>
+    </section>
+    <section class="impact-section"><div><span class="product-card-category">Измеримый результат</span><h2>Социальный эффект</h2><p>Счётчики отражают фактические статусы и опубликованные лоты демо-склада.</p></div><div class="impact-cards"><article class="glass-card"><strong id="about-saved">0</strong><span>Спасено от списания</span></article><article class="glass-card"><strong id="about-social">0</strong><span>В соц. разделе</span></article><article class="glass-card"><strong id="about-processing">0</strong><span>В обработке ARIA</span></article></div></section>
+  </main>
+  <script src="/js/auth.js"></script><script src="/js/about.js"></script>
+</body>
+</html>

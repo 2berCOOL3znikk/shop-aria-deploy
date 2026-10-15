@@ -212,7 +212,7 @@
 </main>
 
 <section class="container" style="max-width:1400px;margin:0 auto 30px;padding:0 20px;display:grid;grid-template-columns:repeat(auto-fit,minmax(320px,1fr));gap:20px;">
-    <div class="glass-card" style="padding:22px;"><h2>Акты и партии</h2><p class="admin-note">Документ можно скачать и распечатать для подписания обеими сторонами.</p><div id="lots-container">Загрузка...</div></div>
+    <div class="glass-card" style="padding:22px;"><h2>Акты и партии</h2><p class="admin-note">Документ можно скачать и распечатать для подписания обеими сторонами.</p><div class="report-actions"><button class="btn-outline" type="button" onclick="downloadAriaReport('inventory.csv')">Остатки · CSV</button><button class="btn-outline" type="button" onclick="downloadAriaReport('acts.csv')">Передачи · CSV</button></div><div id="lots-container">Загрузка...</div></div>
     <div class="glass-card" style="padding:22px;"><h2>Подключить фонд или приют</h2><p class="admin-note">Создайте учётную запись партнёра. После входа организация сможет забрать опубликованный лот на соцполке.</p>
         <form id="org-form" style="display:grid;gap:10px;margin-top:14px;">
             <input id="org-name" required maxlength="120" placeholder="Название фонда / приюта">
@@ -259,10 +259,17 @@
 
     function showToast(msg, type = 'success') {
         const container = document.getElementById('toast-container');
+        container.setAttribute('aria-live', 'polite');
         const toast = document.createElement('div');
         toast.className = 'toast ' + type;
-        const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
-        toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + msg + '</span>';
+        const icon = document.createElement('span');
+        icon.className = 'toast-icon';
+        icon.setAttribute('aria-hidden', 'true');
+        icon.textContent = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
+        const message = document.createElement('span');
+        message.className = 'toast-message';
+        message.textContent = String(msg ?? '');
+        toast.append(icon, message);
         container.appendChild(toast);
         setTimeout(() => toast.remove(), 3500);
     }
@@ -535,7 +542,7 @@
             const lots = await res.json();
             const box = document.getElementById('lots-container');
             if (!lots.length) { box.innerHTML = '<p class="admin-note">Пока нет сформированных партий.</p>'; return; }
-            box.innerHTML = lots.map(lot => `<div class="lot-entry"><div><strong>Акт ARIA-${lot.id} · ${lot.partner}</strong><div class="admin-note">${new Date(lot.createdAt).toLocaleString('ru-KZ')} · ${lot.itemCount} поз. · ${lot.quantity} шт. · ${lot.state}</div></div><button class="btn-outline" onclick="downloadAct(${lot.id})">Скачать акт</button></div>`).join('');
+            box.innerHTML = lots.map(lot => `<div class="lot-entry"><div><strong>Акт ARIA-${lot.id} · ${lot.partner}</strong><div class="admin-note">${new Date(lot.createdAt).toLocaleString('ru-KZ')} · ${lot.itemCount} поз. · ${lot.quantity} шт. · ${lot.state}</div></div><button class="btn-outline" onclick="downloadAct(${lot.id})">Скачать акт</button><button class="btn-outline" onclick="printTransferAct(Number(this.previousElementSibling.getAttribute('onclick').match(/\d+/)[0]))">Печать акта</button></div>`).join('');
         } catch(e) { document.getElementById('lots-container').textContent = e.message; }
     }
 
@@ -650,5 +657,6 @@
 </script>
     <script src="/js/admin-operations.js"></script>
     <script src="/js/admin-mvp.js"></script>
+    <script src="/js/admin-docs.js"></script>
 </body>
 </html>

@@ -2,16 +2,20 @@ package com.aria.controller;
 
 import com.aria.entity.Product;
 import com.aria.entity.TransferLot;
+import com.aria.entity.TransferRecord;
 import com.aria.enums.ProductStatus;
 import com.aria.repository.ProductRepository;
 import com.aria.repository.TransferLotRepository;
+import com.aria.repository.TransferRecordRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -22,10 +26,12 @@ public class AriaLogisticsController {
     private static final int LOT_THRESHOLD = 10;
     private final ProductRepository products;
     private final TransferLotRepository lots;
+    private final TransferRecordRepository transferRecords;
 
-    public AriaLogisticsController(ProductRepository products, TransferLotRepository lots) {
+    public AriaLogisticsController(ProductRepository products, TransferLotRepository lots, TransferRecordRepository transferRecords) {
         this.products = products;
         this.lots = lots;
+        this.transferRecords = transferRecords;
     }
 
     @GetMapping("/queue")
@@ -80,10 +86,16 @@ public class AriaLogisticsController {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Состав лота изменён; обновите страницу");
             }
         }
+        LocalDateTime transferredAt = LocalDateTime.now();
+        List<TransferRecord> snapshots = new ArrayList<>();
         lot.getItems().forEach(product -> {
+            snapshots.add(new TransferRecord(lot.getId(), product.getId(), product.getSku(), product.getName(),
+                    product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand(), product.getUnitCost(),
+                    lot.getPartner() == null ? "" : lot.getPartner(), transferredAt));
             product.setStatus(ProductStatus.TRANSFERRED);
             product.setQuantityOnHand(0);
         });
+        transferRecords.saveAll(snapshots);
         lot.setState("TRANSFERRED");
         lots.save(lot);
         return Map.of("id", lot.getId(), "state", lot.getState(), "itemCount", lot.getItems().size());

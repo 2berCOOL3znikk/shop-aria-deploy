@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>ARIA — Поддержка</title><link rel="stylesheet" href="/styles.css">
+  <script src="/js/theme.js"></script><script src="/js/i18n.js"></script><script src="/js/shell.js"></script>
+</head>
+<body>
+  <div class="bg-mesh"></div>
+  <main class="container docs-page support-page">
+    <header class="docs-hero"><span class="product-card-category">Мы на связи</span><h1>Поддержка ARIA</h1><p>Опишите вопрос или впечатление. Команда проекта рассмотрит сообщение; для демо-версии ответ может быть не мгновенным.</p></header>
+    <div class="support-grid">
+      <section class="glass-card feedback-card">
+        <h2>Обратная связь</h2>
+        <form id="feedback-form">
+          <label for="feedback-message">Сообщение</label><textarea id="feedback-message" name="message" required maxlength="2000" rows="5" placeholder="Чем можем помочь?"></textarea>
+          <label for="feedback-rating">Оценка</label><select id="feedback-rating" name="rating" required><option value="5">5 — отлично</option><option value="4">4 — хорошо</option><option value="3">3 — нормально</option><option value="2">2 — есть проблемы</option><option value="1">1 — плохо</option></select>
+          <label for="feedback-email">Email для ответа (необязательно)</label><input id="feedback-email" name="email" type="email" autocomplete="email" placeholder="name@example.kz">
+          <div class="honeypot-field" aria-hidden="true"><label for="feedback-website">Website</label><input id="feedback-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
+          <div class="captcha-line"><label id="captcha-question" for="captcha-answer">Загрузка проверочного вопроса…</label><button type="button" class="btn-outline" id="captcha-refresh" aria-label="Обновить вопрос">↻</button></div>
+          <input id="captcha-answer" name="captchaAnswer" inputmode="numeric" pattern="[0-9]*" required placeholder="Ответ">
+          <input id="captcha-id" name="captchaId" type="hidden">
+          <button class="btn-glow" type="submit">Отправить сообщение</button>
+        </form>
+      </section>
+      <aside class="support-aside">
+        <section class="glass-card contact-card"><h2>Контакты</h2><p><strong>Telegram</strong><br><a href="https://t.me/aria_shop_kz" target="_blank" rel="noopener noreferrer">@aria_shop_kz</a></p><p><strong>Email</strong><br><a href="mailto:support@aria.shop">support@aria.shop</a> <small>(демо)</small></p><p><strong>Часы связи</strong><br>Демо: пн–пт, 10:00–18:00 · Кызылорда</p></section>
+        <section class="glass-card faq-card" id="faq"><h2>Частые вопросы</h2>
+          <details><summary>Как оформить возврат?</summary><p>В демо-магазине заказ создаёт запись для показа процесса. Реальный возврат согласуется с продавцом по правилам конкретного товара.</p></details>
+          <details><summary>Что означает срок годности на карточке?</summary><p>Это дата из складских данных. ARIA показывает риск и предлагает действие; сотрудник проверяет товар перед решением.</p></details>
+          <details><summary>Кто может забрать товар с соц. полки?</summary><p>Просматривать предложения могут все. Бронировать их могут только организации после проверки администратором.</p></details>
+          <details><summary>Есть ли доставка в демо?</summary><p>Форма заказа сохраняет демонстрационный адрес и не запускает реальную доставку или оплату.</p></details>
+        </section>
+      </aside>
+    </div>
+  </main>
+  <script src="/js/auth.js"></script><script src="/js/feedback.js"></script>
+</body>
+</html>
