@@ -26,7 +26,7 @@ class FavoriteServiceTest {
     private ProductRepository productRepository;
 
     @InjectMocks
-    private FavoriteService favoriteService;
+    private FavoriteServicebak favoriteService;
 
     @Test
     void addFavorite_isIdempotent() {

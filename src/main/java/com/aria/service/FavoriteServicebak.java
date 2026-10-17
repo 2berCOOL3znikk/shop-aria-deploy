@@ -11,13 +11,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
-public class FavoriteService {
+public class FavoriteServicebak {
     private static final String LEGACY_OWNER = "demo@aria.shop";
 
     private final WishlistRepository wishlistRepo;
     private final ProductRepository productRepo;
 
-    public FavoriteService(WishlistRepository wishlistRepo, ProductRepository productRepo) {
+    public FavoriteServicebak(WishlistRepository wishlistRepo, ProductRepository productRepo) {
         this.wishlistRepo = wishlistRepo;
         this.productRepo = productRepo;
     }

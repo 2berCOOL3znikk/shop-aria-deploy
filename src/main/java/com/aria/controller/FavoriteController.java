@@ -1,7 +1,7 @@
 package com.aria.controller;
 
 import com.aria.entity.Product;
-import com.aria.service.FavoriteService;
+import com.aria.service.FavoriteServicebak;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.security.core.Authentication;
 
@@ -12,9 +12,9 @@ import java.util.Map;
 @RestController
 @RequestMapping("/api/favorites")
 public class FavoriteController {
-    private final FavoriteService favoriteService;
+    private final FavoriteServicebak favoriteService;
 
-    public FavoriteController(FavoriteService favoriteService) {
+    public FavoriteController(FavoriteServicebak favoriteService) {
         this.favoriteService = favoriteService;
     }
 
