@@ -1006,3 +1006,92 @@ button:focus-visible,a:focus-visible,input:focus-visible,select:focus-visible,te
 .shell-user-button:hover { background:var(--bg-elevated); }
 .toast-container { pointer-events:none; }
 .toast { pointer-events:auto; }
+
+/* ============ ARIA THEME FIX (aditive tail, перекрывает конфликт двух :root) ============ */
+/* Единая зеркальная пара: ПОВЕРХНОСТИ нейтральные в обеих темах, акцент ОДИН синий.
+   Зелёный/красный/оранжевый — только семантические (цена/успех/риск), НЕ фон темы. */
+:root,
+:root[data-theme="dark"] {
+    --bg-base:#0b0f14; --bg-surface:#121821; --bg-elevated:#1a2230;
+    --bg-modal-overlay:rgba(0,0,0,.66);
+    --text-primary:#e6edf3; --text-secondary:#9aa7b4; --text-muted:#6b7785;
+    --accent:#6ea8fe; --accent-strong:#4c8dff;          /* единственный акцент */
+    --accent-blue:var(--accent); --accent-purple:#8b8cf8;
+    --accent-green:#3fb950; --accent-orange:#d29922; --accent-red:#f85149; --accent-pink:#f778ba;
+    --border-color:rgba(255,255,255,.09); --glass-blur:0px;
+    --shadow-sm:0 1px 2px rgba(0,0,0,.4); --shadow-md:0 6px 18px rgba(0,0,0,.45);
+    --shadow-lg:0 14px 38px rgba(0,0,0,.55); --glow-blue:none; --glow-purple:none;
+    --ring:rgba(110,168,254,.5);
+}
+:root[data-theme="light"] {
+    --bg-base:#f6f8fa; --bg-surface:#ffffff; --bg-elevated:#eef1f5;
+    --bg-modal-overlay:rgba(15,23,42,.45);
+    --text-primary:#1f2933; --text-secondary:#52606d; --text-muted:#7b8794;
+    --accent:#2563eb; --accent-strong:#1d4ed8;
+    --accent-blue:var(--accent); --accent-purple:#6d5ce0;
+    --accent-green:#1a7f37; --accent-orange:#b06f00; --accent-red:#cf222e; --accent-pink:#bf3989;
+    --border-color:rgba(31,41,51,.12); --glass-blur:0px;
+    --shadow-sm:0 1px 2px rgba(31,41,51,.08); --shadow-md:0 6px 18px rgba(31,41,51,.12);
+    --shadow-lg:0 14px 38px rgba(31,41,51,.18); --glow-blue:none; --glow-purple:none;
+    --ring:rgba(37,99,235,.35);
+}
+/* плавная смена темы без FOUC */
+html[data-theme] body, html[data-theme] .glass-card, html[data-theme] .product-card,
+html[data-theme] .nav-glass, html[data-theme] .aria-shell, html[data-theme] .aria-shell-footer {
+    transition: background-color .25s ease, color .25s ease, border-color .25s ease;
+}
+/* модалка слушает тему (чинит «в белой теме анализ синий») */
+.modal-content { background:var(--bg-surface); color:var(--text-primary); border:1px solid var(--border-color); box-shadow:var(--shadow-lg); }
+.modal-header { border-bottom-color:var(--border-color); }
+.modal-body, .modal-close { color:var(--text-primary); }
+.modal-close:hover { color:var(--accent-red); }
+/* единая форма фото (чинит разнородность карточек): любой исходник вписан в один прямоугольник */
+.product-card-image,
+.aria-product-art .product-card-image,
+.favorite-card .product-card-image,
+.similar-card img {
+    width:100%; aspect-ratio:4/3; height:auto; object-fit:cover; object-position:center;
+    background:var(--bg-elevated); border-radius:14px; display:block;
+}
+/* семантические цвета через var (чинит захардкоженный teal/green в бейджах и рейтинге) */
+.badge-social,.badge-discounted,.badge-written_off { background:color-mix(in srgb,var(--accent-green) 14%,var(--bg-elevated)); color:var(--accent-green); }
+.aria-rating { color:var(--accent-orange); }
+.aria-rating small { color:var(--text-muted); }
+.product-card-price { color:var(--text-primary); }            /* цена не зелёная — зелёный только успех/скидка-смысл */
+.aria-old-price { color:var(--text-muted); }
+/* мягкие theme-aware тени карточек */
+.product-card,.offer-card,.glass-card { box-shadow:var(--shadow-sm); border-color:var(--border-color); }
+.product-card:hover,.offer-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
+/* ПЛАВНОСТЬ: скролл не телепорт */
+html { scroll-behavior:smooth; }
+/* появление карточек со stagger (классы навешивает рендер; если не навешивает — просто не анимируется, не ломается) */
+@keyframes cardIn { from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
+.product-card,.offer-card,.similar-card,.history-log { animation:cardIn .45s cubic-bezier(.22,.61,.36,1) both; }
+.responsive-grid > *:nth-child(2){animation-delay:.04s} .responsive-grid > *:nth-child(3){animation-delay:.08s}
+.responsive-grid > *:nth-child(4){animation-delay:.12s} .responsive-grid > *:nth-child(5){animation-delay:.16s}
+.responsive-grid > *:nth-child(6){animation-delay:.20s} .responsive-grid > *:nth-child(7){animation-delay:.24s}
+.responsive-grid > *:nth-child(8){animation-delay:.28s} .similar-row > *:nth-child(2){animation-delay:.05s}
+.similar-row > *:nth-child(3){animation-delay:.1s} .similar-row > *:nth-child(4){animation-delay:.15s}
+/* ТОСТЫ: плавный вход И выход + разные типы (add/remove визуально различаются) */
+.toast { background:var(--bg-surface); color:var(--text-primary); border:1px solid var(--border-color);
+    border-left:4px solid var(--accent-green); box-shadow:var(--shadow-lg); backdrop-filter:none;
+    opacity:0; transform:translateY(10px) scale(.98); transition:opacity .28s ease, transform .28s cubic-bezier(.22,.61,.36,1); }
+.toast.show { opacity:1; transform:none; }
+.toast.out { opacity:0; transform:translateY(-8px) scale(.98); }
+.toast .toast-icon { width:22px;height:22px;border-radius:50%;display:grid;place-items:center;font-size:13px;font-weight:800;color:#fff;flex:0 0 auto; }
+.toast.success { border-left-color:var(--accent-green); } .toast.success .toast-icon{ background:var(--accent-green); }
+.toast.info    { border-left-color:var(--accent); }       .toast.info .toast-icon{ background:var(--accent); }
+.toast.warning { border-left-color:var(--accent-orange); }.toast.warning .toast-icon{ background:var(--accent-orange); }
+.toast.error   { border-left-color:var(--accent-red); }   .toast.error .toast-icon{ background:var(--accent-red); }
+.toast.remove  { border-left-color:var(--text-muted); }   .toast.remove .toast-icon{ background:var(--text-muted); }
+/* ЛАЙК: pop-анимация + активное состояние (классы навешивает JS рендера; CSS готов) */
+.aria-favorite-button { transition:transform .18s ease, color .18s ease, background-color .18s ease; color:var(--text-muted); }
+.aria-favorite-button:hover { color:var(--accent-pink); background:color-mix(in srgb,var(--accent-pink) 12%,var(--bg-surface)); }
+.aria-favorite-button.is-active { color:var(--accent-pink); border-color:color-mix(in srgb,var(--accent-pink) 40%,var(--border-color)); }
+@keyframes heartPop { 0%{transform:scale(1)} 40%{transform:scale(1.28)} 70%{transform:scale(.94)} 100%{transform:scale(1)} }
+.aria-favorite-button.pop { animation:heartPop .34s cubic-bezier(.22,.61,.36,1); }
+@media (prefers-reduced-motion: reduce) {
+    html{scroll-behavior:auto}
+    .product-card,.offer-card,.similar-card,.history-log,.toast,.aria-favorite-button.pop{animation:none!important}
+    .toast{transition:opacity .01ms!important}
+}

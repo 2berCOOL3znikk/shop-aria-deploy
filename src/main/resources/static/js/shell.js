@@ -85,10 +85,54 @@
     lang.textContent = (langCode() || "ru").toUpperCase();
   }
   window.ariaShell = { render, refreshLanguage };
-  window.showToast = window.showToast || function (message, type = "success") {
-    const container = document.getElementById("toast-container") || document.body.appendChild(Object.assign(document.createElement("div"), { id: "toast-container", className: "toast-container" }));
-    const toast = document.createElement("div"); toast.className = "toast " + (type === "error" ? "error" : "success"); toast.textContent = String(message ?? ""); container.appendChild(toast);
-    window.setTimeout(() => toast.remove(), 3500);
+  // ProductImage: каскад источников картинки = локальный файл пользователя → URL из словаря → SVG-заглушка.
+  // Офлайн-safe: если сеть/ссылка недоступны, onerror тихо деградирует в SVG, битых иконок не будет.
+  window.ProductImage = (function () {
+    const CAT_SVG = {
+      "Продукты":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M30 38h60l-8 34H38z" fill="#caa46a"/><path d="M44 38c0-10 8-16 16-16s16 6 16 16" fill="none" stroke="#8a6d3b" stroke-width="4"/><circle cx="50" cy="52" r="7" fill="#e0574f"/><circle cx="66" cy="50" r="6" fill="#5aa469"/><circle cx="78" cy="56" r="5" fill="#e0b34f"/></svg>',
+      "Дом/текстиль":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M40 70V40a20 20 0 0 1 40 0v30z" fill="#cfd8e3"/><rect x="52" y="48" width="16" height="22" rx="3" fill="#9fb0c3"/></svg>',
+      "Электроника":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><rect x="34" y="26" width="52" height="38" rx="6" fill="#3a4756"/><rect x="40" y="32" width="40" height="26" rx="3" fill="#6ea8fe"/><rect x="48" y="66" width="24" height="6" rx="3" fill="#3a4756"/></svg>',
+      "Промо":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><rect x="34" y="40" width="52" height="30" rx="4" fill="#d98cb3"/><rect x="34" y="34" width="52" height="10" rx="3" fill="#c06a99"/><path d="M60 34c-6-10-18-6-12 2M60 34c6-10 18-6 12 2" stroke="#8a4f72" stroke-width="3" fill="none"/></svg>'
+    };
+    const GENERIC = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M30 38h60l-8 34H38z" fill="#caa46a"/></svg>';
+    // Сюда впиши прямые ссылки на фото по категориям (Wikimedia CC и т.п.). Пока пусто — сразу SVG.
+    // Пример: "Продукты": "https://upload.wikimedia.org/.../banana.jpg"
+    const CATEGORY_URL = {};
+    function svgFor(cat) { return "data:image/svg+xml;utf8," + encodeURIComponent(CAT_SVG[cat] || GENERIC); }
+    function localFor(p) { const sku = (p && (p.sku || p.code)) || (p && p.id); return sku ? "/images/products/" + String(sku).trim() + ".jpg" : null; }
+    function urlFor(p) { const c = p && p.category; return (c && CATEGORY_URL[c]) || null; }
+    // кандидатов: локальный файл > URL > SVG. attach один раз вешает цепочку onerror.
+    function attach(img, p) {
+      if (!img || img.dataset.piBound === "1") return;
+      img.dataset.piBound = "1";
+      const cat = (p && p.category) || "";
+      const chain = [localFor(p), urlFor(p), svgFor(cat)].filter(Boolean);
+      let i = 0;
+      const next = () => { if (i < chain.length) { img.src = chain[i++]; } };
+      img.onerror = () => { if (i < chain.length) { img.src = chain[i++]; } else { img.onerror = null; } };
+      next();
+    }
+    return { attach, svgFor, localFor, urlFor };
+  })();
+
+  // showToast: разные типы (success/info/warning/error/remove) с иконкой и плавным входом-выходом.
+  window.showToast = function (message, type) {
+    type = type || "success";
+    const ICON = { success:"✓", info:"i", warning:"!", error:"✕", remove:"−" };
+    const box = document.getElementById("toast-container") || document.body.appendChild(
+        Object.assign(document.createElement("div"), { id:"toast-container", className:"toast-container" }));
+    const el = document.createElement("div");
+    el.className = "toast " + type;
+    el.innerHTML = '<span class="toast-icon">' + (ICON[type] || "•") + '</span><span class="toast-message"></span>';
+    el.querySelector(".toast-message").textContent = String(message ?? "");
+    box.appendChild(el);
+    requestAnimationFrame(() => el.classList.add("show"));           // плавный вход
+    const kill = () => { el.classList.remove("show"); el.classList.add("out"); setTimeout(() => el.remove(), 320); };
+    const timer = setTimeout(kill, 3200);
+    el.addEventListener("mouseenter", () => clearTimeout(timer));    // pause-on-hover
+    el.addEventListener("mouseleave", () => setTimeout(kill, 1200));
+    return el;
   };
+
   document.addEventListener("DOMContentLoaded", render);
 })();
