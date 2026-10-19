@@ -112,9 +112,9 @@
         .stat-val { font-size: 2rem; font-weight: 700; color: var(--text-primary); margin-bottom: 4px; }
         .stat-lbl { font-size: 0.9rem; color: var(--text-muted); }
     </style>
-    <script src="/js/theme.js"></script>
-    <script src="/js/i18n.js"></script>
-    <script src="/js/shell.js"></script>
+
+
+
 </head>
 <body>
 
@@ -180,7 +180,7 @@
     </div>
     <div class="stat-item">
         <div class="stat-val mono">Офлайн</div>
-        <div class="stat-lbl">каталог и фото работают без внешних картинок</div>
+        <div class="stat-lbl">при отсутствии сети вместо фото показываются SVG-заглушки</div>
     </div>
 </div>
 
@@ -188,19 +188,13 @@
     ARIA — демонстрационный проект. Сравнение цен, доставка и уведомления партнёров используют учебные данные и требуют подключения внешних систем для пилота.
 </footer>
 
-<script src="/js/auth.js"></script>
-<script>
-    function updateAuthNav() {
-        const authNav = document.getElementById('auth-nav');
-        if (ariaAuth.isLoggedIn()) {
-            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
-                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
-        } else {
-            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
-        }
-    }
-    updateAuthNav();
-</script>
 
+
+
+<script src="/js/theme.js"></script>
+  <script src="/js/i18n.js"></script>
+  <script src="/js/shell.js"></script>
+  <script src="/js/auth.js"></script>
+  <script src="/js/page-home-inline-1.js"></script>
 </body>
 </html>
