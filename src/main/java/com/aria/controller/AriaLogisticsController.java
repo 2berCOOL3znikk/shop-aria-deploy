@@ -12,18 +12,23 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/aria/logistics")
 public class AriaLogisticsController {
     private static final int LOT_THRESHOLD = 10;
+    private static final Set<String> ACT_STAGES = Set.of("DRAFT", "CONFIRMED", "PRINTED", "SIGNED");
     private final ProductRepository products;
     private final TransferLotRepository lots;
     private final TransferRecordRepository transferRecords;
@@ -47,12 +52,13 @@ public class AriaLogisticsController {
         List<Product> waiting = candidates.stream()
                 .filter(p -> p.getExpiryDate() == null || ChronoUnit.DAYS.between(today, p.getExpiryDate()) > 3)
                 .toList();
-        int waitingUnits = waiting.stream().mapToInt(p -> p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand()).sum();
-        List<Map<String, Object>> draftLots = lots.findAll().stream().filter(lot -> "DRAFT".equals(lot.getState())).map(lot -> {
+        int waitingUnits = waiting.stream().mapToInt(p -> Math.max(0, p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand())).sum();
+        List<Map<String, Object>> draftLots = lots.findAll().stream().filter(lot -> ACT_STAGES.contains(lot.getState())).map(lot -> {
             Map<String, Object> row = new HashMap<>();
             row.put("id", lot.getId());
             row.put("partner", lot.getPartner());
             row.put("itemCount", lot.getItems().size());
+            row.put("quantity", lot.getItems().stream().mapToInt(p -> Math.max(0, p.getQuantityOnHand() == null ? 0 : p.getQuantityOnHand())).sum());
             row.put("createdAt", lot.getCreatedAt());
             row.put("state", lot.getState());
             return row;
@@ -69,13 +75,30 @@ public class AriaLogisticsController {
         );
     }
 
+    @PostMapping("/lots/{lotId}/confirm")
+    @Transactional
+    public Map<String, Object> confirmAct(@PathVariable Long lotId) {
+        return advanceAct(lotId, "DRAFT", "CONFIRMED");
+    }
+
+    @PostMapping("/lots/{lotId}/mark-printed")
+    @Transactional
+    public Map<String, Object> markActPrinted(@PathVariable Long lotId) {
+        return advanceAct(lotId, "CONFIRMED", "PRINTED");
+    }
+
+    @PostMapping("/lots/{lotId}/sign")
+    @Transactional
+    public Map<String, Object> signAct(@PathVariable Long lotId) {
+        return advanceAct(lotId, "PRINTED", "SIGNED");
+    }
+
     @PostMapping("/lots/{lotId}/confirm-transfer")
     @Transactional
     public Map<String, Object> confirmTransfer(@PathVariable Long lotId) {
-        TransferLot lot = lots.findById(lotId)
-                .orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Лот не найден"));
-        if (!"DRAFT".equals(lot.getState())) {
-            throw new ResponseStatusException(HttpStatus.CONFLICT, "Лот не ожидает подтверждения передачи");
+        TransferLot lot = findLot(lotId);
+        if (!"SIGNED".equals(lot.getState())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Сначала распечатайте и подпишите акт обеими сторонами");
         }
         LocalDate today = LocalDate.now();
         for (Product product : lot.getItems()) {
@@ -91,7 +114,7 @@ public class AriaLogisticsController {
         lot.getItems().forEach(product -> {
             snapshots.add(new TransferRecord(lot.getId(), product.getId(), product.getSku(), product.getName(),
                     product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand(), product.getUnitCost(),
-                    lot.getPartner() == null ? "" : lot.getPartner(), transferredAt));
+                    lot.getPartner() == null ? "" : lot.getPartner(), transferredAt, product.getAriaReason()));
             product.setStatus(ProductStatus.TRANSFERRED);
             product.setQuantityOnHand(0);
         });
@@ -99,6 +122,84 @@ public class AriaLogisticsController {
         lot.setState("TRANSFERRED");
         lots.save(lot);
         return Map.of("id", lot.getId(), "state", lot.getState(), "itemCount", lot.getItems().size());
+    }
+
+    @GetMapping("/history")
+    @Transactional(readOnly = true)
+    public List<Map<String, Object>> transferHistory() {
+        List<Map<String, Object>> history = new ArrayList<>();
+        for (TransferLot lot : lots.findAll()) {
+            List<TransferRecord> snapshots = transferRecords.findByLotIdOrderByIdAsc(lot.getId());
+            List<Map<String, Object>> items = new ArrayList<>();
+            int quantity = 0;
+            BigDecimal total = BigDecimal.ZERO;
+            if (!snapshots.isEmpty()) {
+                for (TransferRecord record : snapshots) {
+                    int itemQuantity = record.getQuantity() == null ? 0 : record.getQuantity();
+                    BigDecimal unitCost = record.getUnitCost() == null ? BigDecimal.ZERO : record.getUnitCost();
+                    BigDecimal amount = unitCost.multiply(BigDecimal.valueOf(itemQuantity));
+                    quantity += itemQuantity;
+                    total = total.add(amount);
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("sku", record.getSku());
+                    item.put("name", record.getProductName());
+                    item.put("quantity", itemQuantity);
+                    item.put("reason", record.getReason());
+                    item.put("unitCost", record.getUnitCost());
+                    item.put("amount", amount.setScale(2, RoundingMode.HALF_UP));
+                    items.add(item);
+                }
+            } else {
+                for (Product product : lot.getItems()) {
+                    int itemQuantity = product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand();
+                    BigDecimal unitCost = product.getUnitCost() == null ? BigDecimal.ZERO : product.getUnitCost();
+                    BigDecimal amount = unitCost.multiply(BigDecimal.valueOf(itemQuantity));
+                    quantity += itemQuantity;
+                    total = total.add(amount);
+                    Map<String, Object> item = new LinkedHashMap<>();
+                    item.put("sku", product.getSku());
+                    item.put("name", product.getName());
+                    item.put("quantity", itemQuantity);
+                    item.put("reason", product.getAriaReason());
+                    item.put("unitCost", product.getUnitCost());
+                    item.put("amount", amount.setScale(2, RoundingMode.HALF_UP));
+                    items.add(item);
+                }
+            }
+            LocalDateTime occurredAt = snapshots.isEmpty() ? lot.getCreatedAt() : snapshots.get(0).getTransferredAt();
+            Map<String, Object> row = new LinkedHashMap<>();
+            row.put("id", lot.getId());
+            row.put("partner", lot.getPartner());
+            row.put("createdAt", occurredAt);
+            row.put("state", lot.getState());
+            row.put("itemCount", items.size());
+            row.put("quantity", quantity);
+            row.put("totalAmount", total.setScale(2, RoundingMode.HALF_UP));
+            row.put("items", items);
+            history.add(row);
+        }
+        history.sort((left, right) -> {
+            LocalDateTime a = (LocalDateTime) left.get("createdAt");
+            LocalDateTime b = (LocalDateTime) right.get("createdAt");
+            if (a == null) return b == null ? 0 : 1;
+            if (b == null) return -1;
+            return b.compareTo(a);
+        });
+        return history;
+    }
+
+    private Map<String, Object> advanceAct(Long lotId, String expected, String next) {
+        TransferLot lot = findLot(lotId);
+        if (!expected.equals(lot.getState())) {
+            throw new ResponseStatusException(HttpStatus.CONFLICT, "Недопустимый переход статуса акта");
+        }
+        lot.setState(next);
+        lots.save(lot);
+        return Map.of("id", lot.getId(), "state", lot.getState(), "itemCount", lot.getItems().size());
+    }
+
+    private TransferLot findLot(Long lotId) {
+        return lots.findById(lotId).orElseThrow(() -> new ResponseStatusException(HttpStatus.NOT_FOUND, "Лот не найден"));
     }
 
     private Map<String, Object> productRow(Product product) {

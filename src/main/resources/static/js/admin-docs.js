@@ -26,11 +26,17 @@
       setTimeout(() => URL.revokeObjectURL(url), 30000);
     } catch (error) { showToast(error.message, "error"); }
   };
-  window.printTransferAct = async function (lotId) {
+  window.printTransferAct = async function (lotId, markPrinted = true) {
     if (!requireAdmin()) return;
     const printWindow = window.open("about:blank", "_blank");
     if (!printWindow) { showToast("Разрешите открытие окна для печати акта", "error"); return; }
     try {
+      if (markPrinted) {
+        const response = await ariaAuth.authFetch("/api/aria/logistics/lots/" + encodeURIComponent(lotId) + "/mark-printed", { method: "POST" });
+        const result = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(result.message || result.error || "Не удалось отметить печать акта");
+        window.refreshLogisticsQueue?.();
+      }
       const blob = await reportRequest("acts/" + encodeURIComponent(lotId) + "/printable");
       printWindow.location.href = URL.createObjectURL(blob);
     } catch (error) {

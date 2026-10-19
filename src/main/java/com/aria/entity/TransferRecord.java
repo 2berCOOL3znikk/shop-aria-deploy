@@ -17,11 +17,15 @@ public class TransferRecord {
     @Column(precision = 12, scale = 2) private BigDecimal unitCost;
     @Column(nullable = false, length = 120) private String partner;
     @Column(nullable = false) private LocalDateTime transferredAt;
+    @Column(length = 1000) private String reason;
 
     public TransferRecord() {}
     public TransferRecord(Long lotId, Long productId, String sku, String productName, Integer quantity, BigDecimal unitCost, String partner, LocalDateTime transferredAt) {
+        this(lotId, productId, sku, productName, quantity, unitCost, partner, transferredAt, null);
+    }
+    public TransferRecord(Long lotId, Long productId, String sku, String productName, Integer quantity, BigDecimal unitCost, String partner, LocalDateTime transferredAt, String reason) {
         this.lotId = lotId; this.productId = productId; this.sku = sku; this.productName = productName;
-        this.quantity = quantity; this.unitCost = unitCost; this.partner = partner; this.transferredAt = transferredAt;
+        this.quantity = quantity; this.unitCost = unitCost; this.partner = partner; this.transferredAt = transferredAt; this.reason = reason;
     }
     public Long getId() { return id; }
     public Long getLotId() { return lotId; }
@@ -32,4 +36,5 @@ public class TransferRecord {
     public BigDecimal getUnitCost() { return unitCost; }
     public String getPartner() { return partner; }
     public LocalDateTime getTransferredAt() { return transferredAt; }
+    public String getReason() { return reason; }
 }

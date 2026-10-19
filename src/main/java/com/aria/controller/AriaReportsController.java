@@ -71,10 +71,10 @@ public class AriaReportsController {
         List<ActRow> rows = new ArrayList<>();
         List<TransferRecord> snapshots = records.findByLotIdOrderByIdAsc(lotId);
         if (!snapshots.isEmpty()) {
-            snapshots.forEach(item -> rows.add(new ActRow(item.getSku(), item.getProductName(), item.getQuantity(), item.getUnitCost())));
+            snapshots.forEach(item -> rows.add(new ActRow(item.getSku(), item.getProductName(), item.getQuantity(), item.getUnitCost(), item.getReason())));
         } else {
             for (Product product : lot.getItems()) {
-                rows.add(new ActRow(product.getSku(), product.getName(), product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand(), product.getUnitCost()));
+                rows.add(new ActRow(product.getSku(), product.getName(), product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand(), product.getUnitCost(), product.getAriaReason()));
             }
         }
         StringBuilder table = new StringBuilder();
@@ -84,7 +84,7 @@ public class AriaReportsController {
             total = total.add(line);
             table.append("<tr><td>").append(html(row.sku())).append("</td><td>").append(html(row.name())).append("</td><td>")
                     .append(row.quantity()).append("</td><td>").append(row.unitCost() == null ? "—" : row.unitCost().toPlainString())
-                    .append("</td><td>").append(line.toPlainString()).append("</td></tr>");
+                    .append("</td><td>").append(line.toPlainString()).append("</td><td>").append(html(row.reason())).append("</td></tr>");
         }
         LocalDate date = lot.getCreatedAt() == null ? LocalDate.now() : lot.getCreatedAt().toLocalDate();
         String document = """
@@ -98,7 +98,7 @@ public class AriaReportsController {
                 </style></head><body><div class="toolbar"><button onclick="window.print()">Печать / сохранить в PDF</button></div>
                 <h1>Акт приёма-передачи ARIA-%d</h1><p>Дата: %s</p><p>Передающая сторона: ARIA · Smart Retail &amp; Social Impact</p>
                 <p>Принимающая организация: %s</p><p>Статус лота: %s</p>
-                <table><thead><tr><th>SKU</th><th>Товар</th><th>Количество</th><th>Себестоимость за единицу, ₸</th><th>Сумма, ₸</th></tr></thead><tbody>%s</tbody></table>
+                <table><thead><tr><th>SKU</th><th>Товар</th><th>Количество</th><th>Себестоимость за единицу, ₸</th><th>Сумма, ₸</th><th>Основание ARIA</th></tr></thead><tbody>%s</tbody></table>
                 <p><strong>Итого:</strong> %s ₸</p>
                 <p>Подписи сторон подтверждают фактическое количество и состояние переданных позиций.</p>
                 <div class="sign"><span>Передал: __________________________</span><span>Принял: __________________________</span></div>
@@ -124,5 +124,5 @@ public class AriaReportsController {
         return value == null ? "" : value.replace("&","&amp;").replace("<","&lt;").replace(">","&gt;").replace("\"","&quot;").replace("'","&#39;");
     }
 
-    private record ActRow(String sku, String name, int quantity, BigDecimal unitCost) {}
+    private record ActRow(String sku, String name, int quantity, BigDecimal unitCost, String reason) {}
 }
