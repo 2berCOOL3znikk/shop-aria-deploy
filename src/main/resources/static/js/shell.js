@@ -1,12 +1,15 @@
 (function () {
   "use strict";
+
   const labels = {
     ru: { catalog: "Каталог", social: "Соц. полка", favorites: "♡ Избранное", cart: "Корзина", profile: "Профиль", admin: "Управление", org: "Кабинет организации", support: "Поддержка", login: "Войти", logout: "Выйти", project: "Проект", about: "О проекте", how: "Как это работает", privacy: "Конфиденциальность", contact: "Связаться", faq: "FAQ", telegram: "Telegram", mission: "Соц. миссия", funds: "Помощь фондам и приютам" },
     en: { catalog: "Catalog", social: "Social shelf", favorites: "♡ Favorites", cart: "Cart", profile: "Profile", admin: "Management", org: "Organization cabinet", support: "Support", login: "Sign in", logout: "Sign out", project: "Project", about: "About", how: "How it works", privacy: "Privacy", contact: "Contact", faq: "FAQ", telegram: "Telegram", mission: "Social mission", funds: "Support charities and shelters" },
     kk: { catalog: "Каталог", social: "Әлеуметтік сөре", favorites: "♡ Таңдаулылар", cart: "Себет", profile: "Профиль", admin: "Басқару", org: "Ұйым кабинеті", support: "Қолдау", login: "Кіру", logout: "Шығу", project: "Жоба", about: "Жоба туралы", how: "Қалай жұмыс істейді", privacy: "Құпиялылық", contact: "Байланыс", faq: "FAQ", telegram: "Telegram", mission: "Әлеуметтік миссия", funds: "Қорлар мен панажайларға көмек" }
   };
+
   const langCode = () => window.ariaI18n && window.ariaI18n.getLang ? window.ariaI18n.getLang() : "ru";
   const t = key => (labels[langCode()] || labels.ru)[key] || labels.ru[key] || key;
+
   function makeLink(href, text, key) {
     const a = document.createElement("a");
     a.href = href;
@@ -15,6 +18,7 @@
     if (location.pathname.toLowerCase().endsWith(href.split("#")[0].toLowerCase())) a.classList.add("active");
     return a;
   }
+
   function refreshLanguage() {
     const activeNav = document.getElementById("aria-shell-links");
     const footer = document.getElementById("aria-shell-footer");
@@ -23,116 +27,184 @@
     const languageButton = document.getElementById("lang-toggle-btn");
     if (languageButton) languageButton.textContent = (langCode() || "ru").toUpperCase();
   }
+
   function render() {
     if (!document.body || document.body.dataset.ariaShell === "rendered") return;
     document.body.dataset.ariaShell = "rendered";
+
     const oldNav = document.querySelector("body > nav.nav-glass");
     const nav = document.createElement("nav");
     nav.className = "nav-glass aria-shell";
     nav.setAttribute("aria-label", "ARIA");
+
     const brand = document.createElement("a");
     brand.href = "/index.html";
     brand.className = "logo-new";
-    brand.innerHTML = '<span class="aria-brand-mark">◆</span><span class="gradient-text">ARIA</span><span class="aria-brand-shop">Shop</span>';
+    brand.innerHTML = '<span class="aria-brand-mark">◆</span> <span class="gradient-text">ARIA</span> <span class="aria-brand-shop">Shop</span>';
     nav.appendChild(brand);
+
     const links = document.createElement("div");
     links.className = "nav-links aria-shell-links";
     links.id = "aria-shell-links";
+
     const role = window.ariaAuth && window.ariaAuth.getRole ? window.ariaAuth.getRole() : null;
-    [makeLink("/index.html", t("catalog"), "catalog"), makeLink("/social.html", t("social"), "social"), makeLink("/favorites.html", t("favorites"), "favorites"), makeLink("/cart.html", t("cart"), "cart"), makeLink("/profile.html", t("profile"), "profile")].forEach(link => links.appendChild(link));
+    [makeLink("/index.html", t("catalog"), "catalog"),
+      makeLink("/social.html", t("social"), "social"),
+      makeLink("/favorites.html", t("favorites"), "favorites"),
+      makeLink("/cart.html", t("cart"), "cart"),
+      makeLink("/profile.html", t("profile"), "profile")].forEach(link => links.appendChild(link));
+
     if (role === "ORG") links.appendChild(makeLink("/social.html#claims-section", t("org"), "org"));
     if (role === "ADMIN") links.appendChild(makeLink("/admin.html", t("admin"), "admin"));
     links.appendChild(makeLink("/support.html", t("support"), "support"));
+
     nav.appendChild(links);
+
     const actions = document.createElement("div");
     actions.className = "aria-shell-actions";
+
     const theme = document.createElement("button");
-    theme.type = "button"; theme.id = "theme-toggle-btn"; theme.className = "shell-icon-button"; theme.setAttribute("aria-label", "Сменить тему");
+    theme.type = "button";
+    theme.id = "theme-toggle-btn";
+    theme.className = "shell-icon-button";
+    theme.setAttribute("aria-label", "Сменить тему");
     theme.addEventListener("click", () => window.ariaTheme && window.ariaTheme.toggleTheme());
     actions.appendChild(theme);
+
     const lang = document.createElement("button");
-    lang.type = "button"; lang.id = "lang-toggle-btn"; lang.className = "shell-lang-button";
-    lang.addEventListener("click", () => { if (window.ariaI18n) window.ariaI18n.cycleLang(); refreshLanguage(); });
+    lang.type = "button";
+    lang.id = "lang-toggle-btn";
+    lang.className = "shell-lang-button";
+    lang.addEventListener("click", () => {
+      if (window.ariaI18n) window.ariaI18n.cycleLang();
+      refreshLanguage();
+    });
     actions.appendChild(lang);
+
     const user = document.createElement("div");
-    user.id = "auth-nav"; user.className = "aria-shell-user";
+    user.id = "auth-nav";
+    user.className = "aria-shell-user";
+
     if (window.ariaAuth && window.ariaAuth.isLoggedIn()) {
-      const email = document.createElement("span"); email.className = "shell-user-email"; email.textContent = window.ariaAuth.getUserEmail() || ""; user.appendChild(email);
-      const logout = document.createElement("button"); logout.type = "button"; logout.className = "shell-user-button"; logout.textContent = t("logout"); logout.addEventListener("click", () => window.ariaAuth.logout()); user.appendChild(logout);
-    } else user.appendChild(makeLink("/login.html", t("login"), "login"));
-    actions.appendChild(user); nav.appendChild(actions);
+      const email = document.createElement("span");
+      email.className = "shell-user-email";
+      email.textContent = window.ariaAuth.getUserEmail() || "";
+      user.appendChild(email);
+
+      const logout = document.createElement("button");
+      logout.type = "button";
+      logout.className = "shell-user-button";
+      logout.textContent = t("logout");
+      logout.addEventListener("click", () => window.ariaAuth.logout());
+      user.appendChild(logout);
+    } else {
+      user.appendChild(makeLink("/login.html", t("login"), "login"));
+    }
+
+    actions.appendChild(user);
+    nav.appendChild(actions);
+
     const burger = document.createElement("button");
-    burger.type = "button"; burger.className = "aria-shell-burger"; burger.setAttribute("aria-label", "Открыть меню"); burger.setAttribute("aria-expanded", "false"); burger.innerHTML = "<span></span><span></span><span></span>";
-    burger.addEventListener("click", () => { const open = nav.classList.toggle("menu-open"); burger.setAttribute("aria-expanded", String(open)); });
+    burger.type = "button";
+    burger.className = "aria-shell-burger";
+    burger.setAttribute("aria-label", "Открыть меню");
+    burger.setAttribute("aria-expanded", "false");
+    burger.innerHTML = "<span></span><span></span><span></span>";
+    burger.addEventListener("click", () => {
+      const open = nav.classList.toggle("menu-open");
+      burger.setAttribute("aria-expanded", String(open));
+    });
     nav.insertBefore(burger, links);
+
     if (oldNav) oldNav.remove();
     document.body.insertBefore(nav, document.body.firstChild);
+
     const toastBox = document.getElementById("toast-container") || document.createElement("div");
-    toastBox.id = "toast-container"; toastBox.classList.add("toast-container");
-    toastBox.setAttribute("aria-live", "polite"); toastBox.setAttribute("aria-atomic", "false");
+    toastBox.id = "toast-container";
+    toastBox.classList.add("toast-container");
+    toastBox.setAttribute("aria-live", "polite");
+    toastBox.setAttribute("aria-atomic", "false");
     if (!toastBox.isConnected) document.body.appendChild(toastBox);
+
     document.querySelectorAll("body > footer:not(#aria-shell-footer)").forEach(el => el.remove());
+
     let footer = document.getElementById("aria-shell-footer");
     if (!footer) {
-      footer = document.createElement("footer"); footer.id = "aria-shell-footer"; footer.className = "aria-shell-footer";
-      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="https://t.me/aria_shop_kz" target="_blank" rel="noopener noreferrer" data-shell-footer="telegram"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail &amp; Social Impact · Казахстан</p>';
+      footer = document.createElement("footer");
+      footer.id = "aria-shell-footer";
+      footer.className = "aria-shell-footer";
+      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="https://t.me/aria_shop_kz" target="_blank" rel="noopener noreferrer" data-shell-footer="telegram"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
       document.body.appendChild(footer);
     }
+
     footer.querySelectorAll("[data-shell-footer]").forEach(el => el.textContent = t(el.dataset.shellFooter));
     links.querySelectorAll("[data-shell-label]").forEach(el => el.textContent = t(el.dataset.shellLabel));
+
     theme.textContent = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "☀" : "🌙";
     theme.title = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "Светлая тема" : "Тёмная тема";
     lang.textContent = (langCode() || "ru").toUpperCase();
   }
-  window.ariaShell = { render, refreshLanguage };
-  // ProductImage: каскад источников картинки = локальный файл пользователя → URL из словаря → SVG-заглушка.
-  // Офлайн-safe: если сеть/ссылка недоступны, onerror тихо деградирует в SVG, битых иконок не будет.
-  window.ProductImage = (function () {
-    const CAT_SVG = {
-      "Продукты":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M30 38h60l-8 34H38z" fill="#caa46a"/><path d="M44 38c0-10 8-16 16-16s16 6 16 16" fill="none" stroke="#8a6d3b" stroke-width="4"/><circle cx="50" cy="52" r="7" fill="#e0574f"/><circle cx="66" cy="50" r="6" fill="#5aa469"/><circle cx="78" cy="56" r="5" fill="#e0b34f"/></svg>',
-      "Дом/текстиль":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M40 70V40a20 20 0 0 1 40 0v30z" fill="#cfd8e3"/><rect x="52" y="48" width="16" height="22" rx="3" fill="#9fb0c3"/></svg>',
-      "Электроника":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><rect x="34" y="26" width="52" height="38" rx="6" fill="#3a4756"/><rect x="40" y="32" width="40" height="26" rx="3" fill="#6ea8fe"/><rect x="48" y="66" width="24" height="6" rx="3" fill="#3a4756"/></svg>',
-      "Промо":'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><rect x="34" y="40" width="52" height="30" rx="4" fill="#d98cb3"/><rect x="34" y="34" width="52" height="10" rx="3" fill="#c06a99"/><path d="M60 34c-6-10-18-6-12 2M60 34c6-10 18-6 12 2" stroke="#8a4f72" stroke-width="3" fill="none"/></svg>'
-    };
-    const GENERIC = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 90"><rect width="120" height="90" fill="#eef3f7"/><path d="M30 38h60l-8 34H38z" fill="#caa46a"/></svg>';
-    // Сюда впиши прямые ссылки на фото по категориям (Wikimedia CC и т.п.). Пока пусто — сразу SVG.
-    // Пример: "Продукты": "https://upload.wikimedia.org/.../banana.jpg"
-    const CATEGORY_URL = {};
-    function svgFor(cat) { return "data:image/svg+xml;utf8," + encodeURIComponent(CAT_SVG[cat] || GENERIC); }
-    function localFor(p) { const sku = (p && (p.sku || p.code)) || (p && p.id); return sku ? "/images/products/" + String(sku).trim() + ".jpg" : null; }
-    function urlFor(p) { const c = p && p.category; return (c && CATEGORY_URL[c]) || null; }
-    // кандидатов: локальный файл > URL > SVG. attach один раз вешает цепочку onerror.
-    function attach(img, p) {
-      if (!img || img.dataset.piBound === "1") return;
-      img.dataset.piBound = "1";
-      const cat = (p && p.category) || "";
-      const chain = [localFor(p), urlFor(p), svgFor(cat)].filter(Boolean);
-      let i = 0;
-      const next = () => { if (i < chain.length) { img.src = chain[i++]; } };
-      img.onerror = () => { if (i < chain.length) { img.src = chain[i++]; } else { img.onerror = null; } };
-      next();
-    }
-    return { attach, svgFor, localFor, urlFor };
-  })();
 
-  // showToast: разные типы (success/info/warning/error/remove) с иконкой и плавным входом-выходом.
+  // === НОВЫЙ SHOWTOAST С РАЗЛИЧИЕМ ТИПОВ И ПЛАВНЫМИ АНИМАЦИЯМИ ===
   window.showToast = function (message, type) {
-    type = type || "success";
-    const ICON = { success:"✓", info:"i", warning:"!", error:"✕", remove:"−" };
-    const box = document.getElementById("toast-container") || document.body.appendChild(
-        Object.assign(document.createElement("div"), { id:"toast-container", className:"toast-container" }));
-    const el = document.createElement("div");
-    el.className = "toast " + type;
-    el.innerHTML = '<span class="toast-icon">' + (ICON[type] || "•") + '</span><span class="toast-message"></span>';
-    el.querySelector(".toast-message").textContent = String(message ?? "");
-    box.appendChild(el);
-    requestAnimationFrame(() => el.classList.add("show"));           // плавный вход
-    const kill = () => { el.classList.remove("show"); el.classList.add("out"); setTimeout(() => el.remove(), 320); };
-    const timer = setTimeout(kill, 3200);
-    el.addEventListener("mouseenter", () => clearTimeout(timer));    // pause-on-hover
-    el.addEventListener("mouseleave", () => setTimeout(kill, 1200));
+    message = String(message ?? '');
+
+    // Автоматически определяем тип по тексту сообщения
+    if (!type || type === 'success') {
+      if (/удал|убран|removed|dismiss|снят|отмен|очищ/i.test(message)) type = 'remove';
+      else if (/ошибк|error|не удалось|запрещ|доступ|403|401|500|пуст/i.test(message)) type = 'error';
+      else if (/важно|вниман|warning|осторож|критич|срочн/i.test(message)) type = 'warning';
+      else if (/инфо|info|справк|обнов/i.test(message)) type = 'info';
+      else type = 'success';
+    }
+
+    const ICONS = { success: "✓", info: "i", warning: "!", error: "✕", remove: "−" };
+    const container = document.getElementById('toast-container') ||
+        document.body.appendChild(Object.assign(document.createElement('div'), { id: 'toast-container', className: 'toast-container' }));
+
+    const el = document.createElement('div');
+    el.className = 'toast ' + type;
+    el.innerHTML = '<span class="toast-icon">' + (ICONS[type] || '•') + '</span><span class="toast-message"></span>';
+    el.querySelector('.toast-message').textContent = message;
+    container.appendChild(el);
+
+    requestAnimationFrame(() => el.classList.add('show'));           // плавный вход
+
+    let killed = false;
+    const kill = () => {
+      if (killed) return;
+      killed = true;
+      el.classList.remove('show');
+      el.classList.add('out');                                     // плавный уход
+      setTimeout(() => el.remove(), 340);
+    };
+
+    let timer = setTimeout(kill, 5200);                              // ~5 секунд — успеваешь прочитать
+    el.addEventListener('mouseenter', () => clearTimeout(timer));   // пауза под курсором
+    el.addEventListener('mouseleave', () => { timer = setTimeout(kill, 1400); });
+
     return el;
   };
 
+  // === ЕДИНАЯ ФУНКЦИЯ ДЛЯ ЛАЙКОВ (работает на всех страницах) ===
+  window.bindFavoriteButton = function (btn, productId, isFav) {
+    btn.classList.toggle('is-active', !!isFav);
+    btn.innerHTML = isFav ? '♥' : '♡';
+    btn.onclick = async function () {
+      if (!window.ariaAuth || !window.ariaAuth.requireLogin()) return;
+      try {
+        const res = await window.ariaAuth.authFetch('/api/favorites/' + productId, { method: 'POST' });
+        const data = await res.json();
+        const nowFav = !!data.isFavorite;
+        btn.classList.toggle('is-active', nowFav);
+        btn.innerHTML = nowFav ? '♥' : '♡';
+        btn.classList.add('pop');
+        setTimeout(() => btn.classList.remove('pop'), 340);
+        window.showToast(nowFav ? 'Добавлено в избранное' : 'Удалено из избранного');
+      } catch(e) { window.showToast('Ошибка', 'error'); }
+    };
+  };
+
+  window.ariaShell = { render, refreshLanguage };
   document.addEventListener("DOMContentLoaded", render);
 })();

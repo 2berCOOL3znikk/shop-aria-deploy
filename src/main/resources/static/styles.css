@@ -1,6 +1,6 @@
 /* --- DESIGN SYSTEM V3: FULL E-COMMERCE EXPERIENCE --- */
 /* Use system fonts so the storefront also renders on an offline campus network. */
-
+html { scroll-behavior: smooth; }
 :root {
     /* Colors - Dark Theme (Default) */
     --bg-base: #0a0c10;
@@ -1094,4 +1094,84 @@ html { scroll-behavior:smooth; }
     html{scroll-behavior:auto}
     .product-card,.offer-card,.similar-card,.history-log,.toast,.aria-favorite-button.pop{animation:none!important}
     .toast{transition:opacity .01ms!important}
+}
+
+
+/* ===== ARIA FIX TAIL (aditive) ===== */
+@keyframes cardIn{ from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
+/* ЛАЙК: фиксированный квадрат = одинаковый оптический размер для ♡ и ♥ */
+.aria-favorite-button{ width:44px; height:44px; min-width:44px; display:inline-grid; place-items:center; line-height:1;
+    font-size:20px; border:1px solid var(--border-color); border-radius:10px; background:var(--bg-surface); color:var(--text-muted);
+    transition:transform .18s ease,color .18s ease,background-color .18s ease; cursor:pointer; }
+.aria-favorite-button:hover{ color:var(--accent-pink); background:color-mix(in srgb,var(--accent-pink) 12%,var(--bg-surface)); }
+.aria-favorite-button.is-active{ color:var(--accent-pink); border-color:color-mix(in srgb,var(--accent-pink) 40%,var(--border-color)); }
+@keyframes heartPop{ 0%{transform:scale(1)} 40%{transform:scale(1.28)} 70%{transform:scale(.94)} 100%{transform:scale(1)} }
+.aria-favorite-button.pop{ animation:heartPop .34s cubic-bezier(.22,.61,.36,1); }
+/* Модалка слушает тему (чинит «в белой теме анализ синий») */
+.modal-content{ background:var(--bg-surface)!important; color:var(--text-primary); }
+/* Единая форма фото (все исходники в один прямоугольник) */
+.product-card-image{ width:100%; aspect-ratio:4/3; height:auto!important; object-fit:cover; object-position:center; background:var(--bg-elevated); display:block; }
+@media (prefers-reduced-motion: reduce){
+    *,*::before,*::after{ animation-duration:.01ms!important; transition-duration:.01ms!important; scroll-behavior:auto!important; }
+}
+
+/* ===== FIX THEMES & ANIMATIONS ===== */
+html { scroll-behavior: smooth; }
+
+/* Строгая пара light/dark без teal фона */
+:root[data-theme="light"] {
+    --bg-base: #ffffff !important;
+    --bg-surface: #f8fafc !important;
+    --bg-elevated: #f1f5f9 !important;
+    --text-primary: #0f172a !important;
+    --accent-blue: #2563eb !important;
+}
+:root[data-theme="dark"], :root:not([data-theme]) {
+    --bg-base: #0a0c10 !important;
+    --bg-surface: rgba(255,255,255,0.03) !important;
+    --bg-elevated: rgba(255,255,255,0.06) !important;
+    --text-primary: #f8fafc !important;
+    --accent-blue: #3b82f6 !important;
+}
+
+/* Модалка слушает тему */
+.modal-content { background: var(--bg-surface) !important; color: var(--text-primary) !important; border: 1px solid var(--border-color) !important; }
+
+/* Единая форма фото */
+.product-card-image { width: 100% !important; aspect-ratio: 4/3 !important; height: auto !important; object-fit: cover !important; background: var(--bg-elevated) !important; display: block !important; }
+
+/* Тосты: разные типы + плавные анимации */
+.toast { opacity: 0; transform: translateY(10px) scale(.98); transition: opacity .28s ease, transform .28s cubic-bezier(.22,.61,.36,1); }
+.toast.show { opacity: 1; transform: none; }
+.toast.out { opacity: 0; transform: translateY(-8px) scale(.98); }
+.toast.success { border-left-color: var(--accent-green); }
+.toast.remove { border-left-color: var(--text-muted); }
+.toast.error { border-left-color: var(--accent-red); }
+.toast.warning { border-left-color: var(--accent-orange); }
+.toast.info { border-left-color: var(--accent-blue); }
+.toast-icon { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; font-size: 13px; font-weight: 800; color: #fff; flex: 0 0 auto; }
+.toast.success .toast-icon { background: var(--accent-green); }
+.toast.remove .toast-icon { background: var(--text-muted); }
+.toast.error .toast-icon { background: var(--accent-red); }
+.toast.warning .toast-icon { background: var(--accent-orange); }
+.toast.info .toast-icon { background: var(--accent-blue); }
+
+/* Лайки: фиксированный квадрат + pop-анимация */
+@keyframes heartPop { 0%{transform:scale(1)} 40%{transform:scale(1.28)} 70%{transform:scale(.94)} 100%{transform:scale(1)} }
+.aria-favorite-button { min-width: 44px; width: 44px; height: 44px; display: inline-grid; place-items: center; line-height: 1; font-size: 20px; border: 1px solid var(--border-color); border-radius: 10px; background: var(--bg-surface); color: var(--text-muted); cursor: pointer; transition: transform .18s ease, color .18s ease, background-color .18s ease; }
+.aria-favorite-button:hover { color: var(--accent-pink); background: color-mix(in srgb, var(--accent-pink) 12%, var(--bg-surface)); }
+.aria-favorite-button.is-active { color: var(--accent-pink); border-color: color-mix(in srgb, var(--accent-pink) 40%, var(--border-color)); }
+.aria-favorite-button.pop { animation: heartPop .34s cubic-bezier(.22,.61,.36,1); }
+
+/* Stagger появления карточек */
+@keyframes cardIn { from{opacity:0; transform:translateY(14px);} to{opacity:1; transform:none;} }
+.product-card, .offer-card, .similar-card, .history-log { animation: cardIn .45s cubic-bezier(.22,.61,.36,1) both; }
+.responsive-grid > *:nth-child(2){animation-delay:.04s} .responsive-grid > *:nth-child(3){animation-delay:.08s}
+.responsive-grid > *:nth-child(4){animation-delay:.12s} .responsive-grid > *:nth-child(5){animation-delay:.16s}
+.responsive-grid > *:nth-child(6){animation-delay:.20s} .responsive-grid > *:nth-child(7){animation-delay:.24s}
+.responsive-grid > *:nth-child(8){animation-delay:.28s}
+
+@media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }

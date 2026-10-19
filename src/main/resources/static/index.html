@@ -86,13 +86,44 @@
 <script>
     const state = { products: [], favoriteIds: new Set(), cartCount: 0, allCategories: new Set() };
 
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        toast.innerHTML = '<span class="toast-icon">' + (type === 'error' ? '❌' : '✅') + '</span><span class="toast-message">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
+    function showToast(message, type = 'success') {
+        message = String(message ?? '');
+
+        // Автоматически различаем добавление/удаление даже если вызвали одним типом
+        if (!type || type === 'success') {
+            if (/удал|убран|removed|dismiss|снят|отмен|очищ/i.test(message)) type = 'remove';
+            else if (/ошибк|error|не удалось|запрещ|доступ|403|401|500|пуст/i.test(message)) type = 'error';
+            else if (/важно|вниман|warning|осторож|критич|срочн/i.test(message)) type = 'warning';
+            else if (/инфо|info|справк|обнов/i.test(message)) type = 'info';
+            else type = 'success';
+        }
+
+        const ICON = { success: "✓", info: "i", warning: "!", error: "✕", remove: "−" };
+        const container = document.getElementById('toast-container') ||
+            document.body.appendChild(Object.assign(document.createElement('div'), { id: 'toast-container', className: 'toast-container' }));
+
+        const el = document.createElement('div');
+        el.className = 'toast ' + type;
+        el.innerHTML = '<span class="toast-icon">' + (ICON[type] || '•') + '</span><span class="toast-message"></span>';
+        el.querySelector('.toast-message').textContent = message;
+        container.appendChild(el);
+
+        requestAnimationFrame(() => el.classList.add('show'));           // плавный вход
+
+        let killed = false;
+        const kill = () => {
+            if (killed) return;
+            killed = true;
+            el.classList.remove('show');
+            el.classList.add('out');                                     // плавный уход
+            setTimeout(() => el.remove(), 340);
+        };
+
+        let timer = setTimeout(kill, 5200);                              // ~5 секунд — успеваешь прочитать
+        el.addEventListener('mouseenter', () => clearTimeout(timer));   // пауза под курсором
+        el.addEventListener('mouseleave', () => { timer = setTimeout(kill, 1400); });
+
+        return el;
     }
 
     function escapeHtml(value) {
@@ -135,11 +166,16 @@
             const data = await res.json();
             if (data.isFavorite) {
                 state.favoriteIds.add(productId);
-                btn.innerHTML = '❤️';
+                btn.innerHTML = '♥';
+                btn.classList.add('is-active', 'pop');
+                setTimeout(() => btn.classList.remove('pop'), 340);
                 showToast('Добавлено в избранное');
             } else {
                 state.favoriteIds.delete(productId);
-                btn.innerHTML = '🤍';
+                btn.innerHTML = '♡';
+                btn.classList.remove('is-active');
+                btn.classList.add('pop');
+                setTimeout(() => btn.classList.remove('pop'), 340);
                 showToast('Удалено из избранного');
             }
         } catch(e) { showToast('Ошибка', 'error'); }
@@ -193,19 +229,40 @@
     function renderProducts(products) {
         const grid = document.getElementById('products');
         if (products.length === 0) {
-            grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px;" data-i18n="catalog.noProducts">Товары не найдены</p>';
+            grid.style.opacity = '0';
+            setTimeout(() => {
+                grid.innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px;" data-i18n="catalog.noProducts">Товары не найдены</p>';
+                grid.style.transition = 'opacity .25s ease';
+                grid.style.opacity = '1';
+            }, 150);
             return;
+            grid.querySelectorAll('.aria-favorite-button').forEach(btn => {
+                const id = Number(btn.dataset.id);
+                window.bindFavoriteButton(btn, id, state.favoriteIds.has(id));
+            });
         }
 
-        grid.innerHTML = products.map(p => {
-            const isFav = state.favoriteIds.has(p.id);
-            const expiryLevel = getExpiryLevel(p.expiryDate);
-            const discountBadge = getDiscountBadge(p.marketDealPercent);
-            const imageUrl = p.imageUrl || '/images/product-generic.svg';
+        grid.style.transition = 'opacity .18s ease';
+        grid.style.opacity = '0.25';                       // мягкий уход старой сетки
+        const html = products.map(p => {
+
+            // Приоритет: ТВОЙ локальный файл (по SKU) > поле базы > общая заглушка.
+            // Если файла нет — браузер получит 404 и onerror ниже тихо переключит на следующий источник.
+            const sku = String(p.sku || '').trim();
+            const sources = [];
+            if (sku) sources.push('/images/products/' + sku + '.jpg');
+            if (p.imageUrl) sources.push(p.imageUrl);
+            sources.push('/images/product-generic.svg');
+            const imageUrl = sources[0];
+            const chainAttr = JSON.stringify(sources.slice(1)).replace(/'/g, "&#39;");
 
             return '<div class="product-card" style="position:relative;">' +
                 (discountBadge ? '<span class="discount-badge">' + discountBadge + '</span>' : '') +
-                '<a href="/product.html?id=' + p.id + '" aria-label="Подробнее о товаре ' + escapeHtml(p.name) + '"><img src="' + imageUrl + '" onerror="this.src=\'/images/product-generic.svg\'" alt="' + escapeHtml(p.name) + '" class="product-card-image"></a>' +
+                '<a href="/product.html?id=' + p.id + '" aria-label="Подробнее о товаре ' + escapeHtml(p.name) + '">' +
+                '<img src="' + imageUrl + '" data-chain=\'' + chainAttr + '\' data-ci="0" ' +
+                'onerror="(function(i){var c=JSON.parse(i.getAttribute(\'data-chain\')||\'[]\'),n=(+i.dataset.ci)|0;if(n<c.length){i.dataset.ci=n+1;i.src=c[n];}else{i.onerror=null;}})(this)" ' +
+                'alt="' + escapeHtml(p.name) + '" class="product-card-image">' +
+                '</a>' +
                 '<div class="product-card-content">' +
                 '<div class="product-card-category">' + escapeHtml(p.category || 'Без категории') + '</div>' +
                 '<a class="product-card-name" href="/product.html?id=' + p.id + '">' + escapeHtml(p.name) + '</a>' +
@@ -218,13 +275,30 @@
                     '<div class="product-card-price">' + ariaMoney.format(p.unitPrice) + '</div>') +
                 '<div class="product-card-actions">' +
                 '<button class="btn-add-cart" onclick="addToCart(' + p.id + ')">В корзину</button>' +
-                '<button onclick="toggleFavorite(' + p.id + ',this)" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:10px 14px;border-radius:10px;cursor:pointer;font-size:18px;">' + (isFav ? '❤️' : '🤍') + '</button>' +
+                '<button class="aria-favorite-button' + (isFav ? ' is-active' : '') + '" data-id="' + p.id + '">' + (isFav ? '♥' : '♡') + '</button>' +
                 '</div>' +
                 '</div>' +
                 '</div>';
         }).join('');
-    }
 
+        setTimeout(() => {
+            grid.innerHTML = html;                          // вставляем новую сетку
+            grid.style.opacity = '1';                        // плавное появление
+            // stagger по карточкам для эффекта «разлёта»
+            Array.from(grid.children).forEach((el, i) => {
+                el.style.animation = 'none';
+                void el.offsetWidth;                         // форсируем reflow
+                el.style.animation = 'cardIn .45s cubic-bezier(.22,.61,.36,1) both';
+                el.style.animationDelay = Math.min(i * 0.04, 0.4) + 's';
+            });
+        }, 180);
+        // Привязываем лайки ко всем кнопкам
+        grid.querySelectorAll('.aria-favorite-button').forEach(btn => {
+            const id = Number(btn.dataset.id);
+            window.bindFavoriteButton(btn, id, state.favoriteIds.has(id));
+        });
+
+    }
     function filterAndSort() {
         const search = document.getElementById('search').value.toLowerCase();
         const category = document.getElementById('category-chips').querySelector('.active').dataset.category;
