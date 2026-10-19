@@ -477,18 +477,6 @@ body {
     box-shadow: 0 4px 15px rgba(16, 185, 129, 0.4);
 }
 
-.discount-badge {
-    position: absolute;
-    top: 12px;
-    left: 12px;
-    background: var(--accent-red);
-    color: white;
-    font-size: 12px;
-    font-weight: 700;
-    padding: 6px 10px;
-    border-radius: 8px;
-    z-index: 2;
-}
 
 /* Category Chips */
 .category-chips {
@@ -840,7 +828,6 @@ img.product-card-image, .product-card-image { background: #edf2f2; }
 .aria-product-art { display:block;padding:12px;background:var(--bg-elevated); }
 .aria-product-art .product-card-image { width:100%;height:178px;object-fit:contain; }
 .aria-product-card .product-card-content { display:flex;flex-direction:column;gap:10px; }
-.aria-old-price { margin-left:7px;color:var(--text-muted);font-size:13px;font-weight:400;text-decoration:line-through; }
 .aria-favorite-button { min-width:44px;border:1px solid var(--border-color);border-radius:10px;background:var(--bg-surface);color:var(--accent-blue);font-size:19px;cursor:pointer; }
 .catalog-more { display:block;margin:26px auto 0; }
 .catalog-empty { padding:56px 20px;text-align:center;color:var(--text-secondary); }
@@ -1058,7 +1045,6 @@ html[data-theme] .nav-glass, html[data-theme] .aria-shell, html[data-theme] .ari
 .aria-rating { color:var(--accent-orange); }
 .aria-rating small { color:var(--text-muted); }
 .product-card-price { color:var(--text-primary); }            /* цена не зелёная — зелёный только успех/скидка-смысл */
-.aria-old-price { color:var(--text-muted); }
 /* мягкие theme-aware тени карточек */
 .product-card,.offer-card,.glass-card { box-shadow:var(--shadow-sm); border-color:var(--border-color); }
 .product-card:hover,.offer-card:hover { box-shadow:var(--shadow-md); transform:translateY(-3px); }
@@ -1175,3 +1161,34 @@ html { scroll-behavior: smooth; }
     html { scroll-behavior: auto; }
     *, *::before, *::after { animation-duration: .01ms !important; transition-duration: .01ms !important; }
 }
+.catalog-loading { grid-column:1/-1; min-height:120px;display:grid;place-items:center;color:var(--text-secondary);background:var(--bg-surface);border:1px solid var(--border-color);border-radius:14px; }
+.product-card-image,.similar-card img { display:block;width:100%;height:190px;object-fit:cover;background:var(--bg-elevated); }
+.product-image-frame { margin:0;padding:0;overflow:hidden; }
+.product-main-image { display:block;width:100%;height:clamp(300px,42vw,480px);object-fit:cover;background:var(--bg-elevated); }
+.image-credit { padding:10px 14px;color:var(--text-muted);font-size:12px;line-height:1.5; }
+.image-credit a { color:inherit; }
+.cart-item-image,.profile-product-image { flex:0 0 auto;object-fit:cover;border-radius:8px;background:var(--bg-elevated); }
+.admin-product-cell { display:flex;align-items:center;gap:10px;min-width:190px; }
+.admin-product-cell > div { display:grid;gap:4px; }
+.admin-product-cell small { color:var(--text-secondary); }
+.admin-product-thumb { width:58px;height:58px;flex:0 0 58px;object-fit:cover;border-radius:9px;background:var(--bg-elevated); }
+.aria-confirm-backdrop { position:fixed;inset:0;z-index:5000;display:grid;place-items:center;padding:20px;background:rgba(15,22,20,.62);backdrop-filter:blur(5px); }
+.aria-confirm-dialog { width:min(460px,100%);padding:24px; }
+.aria-confirm-dialog h2 { margin:0 0 10px; }
+.aria-confirm-message { color:var(--text-secondary);line-height:1.55; }
+.aria-confirm-actions { display:flex;justify-content:flex-end;gap:10px;margin-top:22px; }
+.act-lifecycle { margin:24px 0;padding:24px; }
+.act-lifecycle > p { color:var(--text-secondary);line-height:1.6; }
+.act-lifecycle-steps { display:grid;grid-template-columns:repeat(5,minmax(0,1fr));gap:10px;padding:0;margin:20px 0;list-style:none; }
+.act-lifecycle-steps li { display:grid;align-content:start;gap:8px;padding:14px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-elevated); }
+.act-lifecycle-steps li span { color:var(--text-secondary);font-size:13px;line-height:1.45; }
+.lot-history-entry { padding:16px 0;border-bottom:1px solid var(--border-color); }
+.lot-history-heading { display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap; }
+.lot-history-items { margin:10px 0 0;padding-left:20px;color:var(--text-secondary); }
+.lot-history-total { margin-top:8px;font-weight:700; }
+@media(max-width:760px) { .act-lifecycle-steps { grid-template-columns:1fr 1fr; } }
+@media(max-width:460px) { .act-lifecycle-steps { grid-template-columns:1fr; } }
+.admin-header-actions { display:flex;gap:10px;flex-wrap:wrap;align-items:end; }
+.admin-partner-field { display:grid;gap:5px;min-width:min(260px,100%);color:var(--text-secondary);font-size:12px; }
+.admin-partner-field input { min-width:0;padding:10px 12px;border:1px solid var(--border-color);border-radius:9px;background:var(--bg-surface);color:var(--text-primary);font:inherit;font-size:14px; }
+.admin-history-nav-link { white-space:nowrap; }

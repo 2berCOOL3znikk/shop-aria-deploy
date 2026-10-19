@@ -1,12 +1,6 @@
 (function () {
   const escape = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
-  const localArt = category => {
-    const text = String(category || "").toLowerCase();
-    const fill = text.includes("электрон") ? "#dbe6ed" : text.includes("дом") ? "#eae1d5" : text.includes("промо") ? "#e1eadd" : "#efe3d3";
-    const svg = '<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 130"><rect width="180" height="130" rx="18" fill="' + fill + '"/><path d="M48 50h84l-8 55H56z" fill="#a27a59"/><path d="M56 59h68l-7 39H63z" fill="#ead7b6"/><circle cx="79" cy="76" r="9" fill="#b76e51"/><circle cx="103" cy="83" r="10" fill="#849a70"/></svg>';
-    return "data:image/svg+xml;charset=UTF-8," + encodeURIComponent(svg);
-  };
-  const addBreadcrumbs = name => {
+    const addBreadcrumbs = name => {
     if (document.getElementById("product-breadcrumbs")) return;
     const node = document.createElement("nav");
     node.id = "product-breadcrumbs";
@@ -58,7 +52,7 @@
       const products = await response.json();
       const matches = products.filter(p => String(p.category || "") === String(current.category || "") && String(p.id) !== String(current.id)).slice(0, 8);
       const row = document.getElementById("similar-row");
-      row.innerHTML = matches.length ? matches.map(p => '<a class="similar-card glass-card" href="/product.html?id=' + encodeURIComponent(p.id) + '"><img src="' + localArt(p.category) + '" alt=""><span class="product-card-category">' + escape(p.category || "") + '</span><strong>' + escape(p.name) + '</strong><span>' + formatKZT(p.displayPrice ?? p.unitPrice) + '</span></a>').join("") : '<p class="admin-note">В этой категории пока нет других товаров.</p>';
+      row.innerHTML = matches.length ? matches.map(p => '<a class="similar-card glass-card" href="/product.html?id=' + encodeURIComponent(p.id) + '">' + CatalogImages.imageTag(p, { alt: p.name }) + '<span class="product-card-category">' + escape(p.category || "") + '</span><strong>' + escape(p.name) + '</strong><span>' + formatKZT(p.displayPrice ?? p.unitPrice) + '</span></a>').join("") : '<p class="admin-note">В этой категории пока нет других товаров.</p>';
     } catch (_) {}
   }
   function enhance() {

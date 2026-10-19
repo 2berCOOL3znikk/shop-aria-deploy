@@ -2,9 +2,9 @@
   "use strict";
 
   const labels = {
-    ru: { catalog: "Каталог", social: "Соц. полка", favorites: "♡ Избранное", cart: "Корзина", profile: "Профиль", admin: "Управление", org: "Кабинет организации", support: "Поддержка", login: "Войти", logout: "Выйти", project: "Проект", about: "О проекте", how: "Как это работает", privacy: "Конфиденциальность", contact: "Связаться", faq: "FAQ", telegram: "Telegram", mission: "Соц. миссия", funds: "Помощь фондам и приютам" },
-    en: { catalog: "Catalog", social: "Social shelf", favorites: "♡ Favorites", cart: "Cart", profile: "Profile", admin: "Management", org: "Organization cabinet", support: "Support", login: "Sign in", logout: "Sign out", project: "Project", about: "About", how: "How it works", privacy: "Privacy", contact: "Contact", faq: "FAQ", telegram: "Telegram", mission: "Social mission", funds: "Support charities and shelters" },
-    kk: { catalog: "Каталог", social: "Әлеуметтік сөре", favorites: "♡ Таңдаулылар", cart: "Себет", profile: "Профиль", admin: "Басқару", org: "Ұйым кабинеті", support: "Қолдау", login: "Кіру", logout: "Шығу", project: "Жоба", about: "Жоба туралы", how: "Қалай жұмыс істейді", privacy: "Құпиялылық", contact: "Байланыс", faq: "FAQ", telegram: "Telegram", mission: "Әлеуметтік миссия", funds: "Қорлар мен панажайларға көмек" }
+    ru: { write: "Написать нам", catalog: "Каталог", social: "Соц. полка", favorites: "♡ Избранное", cart: "Корзина", profile: "Профиль", admin: "Управление", org: "Кабинет организации", support: "Поддержка", login: "Войти", logout: "Выйти", project: "Проект", about: "О проекте", how: "Как это работает", privacy: "Конфиденциальность", contact: "Связаться", faq: "FAQ", telegram: "Telegram", mission: "Соц. миссия", funds: "Помощь фондам и приютам" },
+    en: { write: "Write to us", catalog: "Catalog", social: "Social shelf", favorites: "♡ Favorites", cart: "Cart", profile: "Profile", admin: "Management", org: "Organization cabinet", support: "Support", login: "Sign in", logout: "Sign out", project: "Project", about: "About", how: "How it works", privacy: "Privacy", contact: "Contact", faq: "FAQ", telegram: "Telegram", mission: "Social mission", funds: "Support charities and shelters" },
+    kk: { write: "Бізге жазыңыз", catalog: "Каталог", social: "Әлеуметтік сөре", favorites: "♡ Таңдаулылар", cart: "Себет", profile: "Профиль", admin: "Басқару", org: "Ұйым кабинеті", support: "Қолдау", login: "Кіру", logout: "Шығу", project: "Жоба", about: "Жоба туралы", how: "Қалай жұмыс істейді", privacy: "Құпиялылық", contact: "Байланыс", faq: "FAQ", telegram: "Telegram", mission: "Әлеуметтік миссия", funds: "Қорлар мен панажайларға көмек" }
   };
 
   const langCode = () => window.ariaI18n && window.ariaI18n.getLang ? window.ariaI18n.getLang() : "ru";
@@ -133,7 +133,7 @@
       footer = document.createElement("footer");
       footer.id = "aria-shell-footer";
       footer.className = "aria-shell-footer";
-      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="https://t.me/aria_shop_kz" target="_blank" rel="noopener noreferrer" data-shell-footer="telegram"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
+      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="mailto:support@aria.shop?subject=ARIA%20Shop" data-shell-footer="write"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
       document.body.appendChild(footer);
     }
 
@@ -205,6 +205,23 @@
     };
   };
 
-  window.ariaShell = { render, refreshLanguage };
+    window.ariaShell = { render, refreshLanguage };
+  window.ariaShell.confirm = function (message) {
+    return new Promise(resolve => {
+      const overlay = document.createElement("div");
+      overlay.className = "aria-confirm-backdrop";
+      overlay.innerHTML = '<section class="aria-confirm-dialog glass-card" role="dialog" aria-modal="true" aria-labelledby="aria-confirm-title"><h2 id="aria-confirm-title">Подтвердите действие</h2><p class="aria-confirm-message"></p><div class="aria-confirm-actions"><button type="button" class="btn-outline" data-choice="cancel">Отмена</button><button type="button" class="btn-glow" data-choice="confirm">Подтвердить</button></div></section>';
+      overlay.querySelector(".aria-confirm-message").textContent = String(message ?? "");
+      const finish = choice => { overlay.remove(); document.removeEventListener("keydown", onKeydown); resolve(choice); };
+      const onKeydown = event => { if (event.key === "Escape") finish(false); };
+      overlay.addEventListener("click", event => { if (event.target === overlay) finish(false); });
+      overlay.querySelector('[data-choice="cancel"]').addEventListener("click", () => finish(false));
+      overlay.querySelector('[data-choice="confirm"]').addEventListener("click", () => finish(true));
+      document.addEventListener("keydown", onKeydown);
+      document.body.appendChild(overlay);
+      overlay.querySelector('[data-choice="confirm"]').focus();
+    });
+  };
+  window.alert = message => window.showToast(String(message ?? ""), "error");
   document.addEventListener("DOMContentLoaded", render);
 })();
