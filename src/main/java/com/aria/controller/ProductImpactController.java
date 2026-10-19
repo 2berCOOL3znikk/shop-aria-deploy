@@ -10,8 +10,10 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.time.LocalDate;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 @RestController
 @RequestMapping("/api/products")
@@ -38,5 +40,27 @@ public class ProductImpactController {
         long social = Math.max(socialProducts, openOfferUnits);
         long processing = all.stream().filter(p -> p.getStatus() == ProductStatus.CANDIDATE || p.getStatus() == ProductStatus.DISCOUNTED).count();
         return Map.of("savedCount", saved, "socialCount", social, "processingCount", processing);
+    }
+
+    @GetMapping("/impact/positions")
+    public Map<String, Long> getPositionImpact() {
+        List<Product> all = products.findAll();
+        LocalDate today = LocalDate.now();
+        Set<Long> saved = new HashSet<>();
+        Set<Long> social = new HashSet<>();
+        Set<Long> processing = new HashSet<>();
+
+        for (Product product : all) {
+            Long id = product.getId();
+            if (id == null) continue;
+            if (product.getStatus() == ProductStatus.TRANSFERRED || product.getStatus() == ProductStatus.RESERVED) saved.add(id);
+            if (product.getStatus() == ProductStatus.SOCIAL) social.add(id);
+            if (product.getStatus() == ProductStatus.CANDIDATE || product.getStatus() == ProductStatus.DISCOUNTED) processing.add(id);
+        }
+        for (SocialOffer offer : offers.findAll()) {
+            if (!"OPEN".equals(offer.getStatus()) || (offer.getValidUntil() != null && offer.getValidUntil().isBefore(today))) continue;
+            if (offer.getProduct() != null && offer.getProduct().getId() != null) social.add(offer.getProduct().getId());
+        }
+        return Map.of("savedCount", (long) saved.size(), "socialCount", (long) social.size(), "processingCount", (long) processing.size());
     }
 }

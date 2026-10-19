@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  fetch("/api/products/impact").then(response => response.ok ? response.json() : Promise.reject()).then(data => {
+  fetch("/api/products/impact/positions").then(response => response.ok ? response.json() : Promise.reject()).then(data => {
     [["about-saved", data.savedCount], ["about-social", data.socialCount], ["about-processing", data.processingCount]].forEach(([id, value]) => {
       const node = document.getElementById(id), target = Number(value || 0), start = 0, duration = 750, began = performance.now();
       const animate = now => {
