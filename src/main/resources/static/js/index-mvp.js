@@ -15,6 +15,7 @@
   window.renderProducts = function (products) {
     currentList = products.slice();
     const grid = document.getElementById("products");
+    if (!grid) return;
     if (!products.length) {
       grid.innerHTML = '<div class="catalog-empty" style="grid-column:1/-1"><span aria-hidden="true">⌕</span><h3>Ничего не найдено</h3><p>Попробуйте изменить запрос или выбрать другую категорию.</p></div>';
       document.getElementById("catalog-more")?.remove();
@@ -24,26 +25,34 @@
     grid.innerHTML = visible.map(p => {
       const expiry = expiryInfo(p.expiryDate);
       const price = p.displayPrice ?? p.unitPrice;
+      const basePrice = Number(p.unitPrice);
+      const currentPrice = Number(price);
+      const oldPrice = Number.isFinite(basePrice) && Number.isFinite(currentPrice) && currentPrice < basePrice
+        ? '<del class="product-card-old-price">' + money(basePrice) + '</del>'
+        : '';
       const favorite = state.favoriteIds.has(p.id);
-      return '<article class="product-card aria-product-card">' +
+      return '<article class="product-card aria-product-card" data-product-card="' + encodeURIComponent(p.id) + '">' +
         '<a class="aria-product-art" href="/product.html?id=' + encodeURIComponent(p.id) + '">' + CatalogImages.imageTag(p, { className: "product-card-image", alt: p.name }) + '</a>' +
         '<div class="product-card-content"><div class="product-card-category">' + escape(p.category || "Без категории") + '</div>' +
-        '<div class="aria-rating" aria-label="Рейтинг 4,5 из 5" data-rating-product="' + encodeURIComponent(p.id) + '"><span>★★★★★</span><small>4,5 · отзывы покупателей</small></div>' +
+        '<div class="aria-rating" data-rating-product="' + encodeURIComponent(p.id) + '" hidden></div>' +
         '<a class="product-card-name" href="/product.html?id=' + encodeURIComponent(p.id) + '">' + escape(p.name) + '</a>' +
         '<div class="product-card-stock">В наличии: ' + Number(p.quantityOnHand || 0) + ' шт.</div>' +
         (expiry ? '<span class="expiry-pill ' + expiry.cls + '">' + expiry.label + '</span>' : '') +
-        '<div class="product-card-price">' + money(price) + '</div>' +
+        '<div class="product-card-price">' + money(price) + oldPrice + '</div>' +
         '<div class="product-card-actions"><button class="btn-add-cart" onclick="addToCart(' + Number(p.id) + ')">В корзину</button>' +
         '<button class="aria-favorite-button" aria-label="Избранное" onclick="toggleFavorite(' + Number(p.id) + ',this)">' + (favorite ? "♥" : "♡") + '</button></div></div></article>';
     }).join("");
     visible.forEach(product => fetch("/api/reviews/product/" + encodeURIComponent(product.id)).then(r => r.ok ? r.json() : []).then(reviews => {
-      if (!Array.isArray(reviews) || !reviews.length) return;
-      const avg = reviews.reduce((sum, review) => sum + Number(review.rating || 0), 0) / reviews.length;
+      const validReviews = Array.isArray(reviews) ? reviews.filter(review => Number(review.rating) >= 1 && Number(review.rating) <= 5) : [];
+      if (!validReviews.length) return;
+      const avg = validReviews.reduce((sum, review) => sum + Number(review.rating), 0) / validReviews.length;
       const rating = grid.querySelector('[data-rating-product="' + product.id + '"]');
       if (!rating) return;
       rating.setAttribute("aria-label", "Рейтинг " + avg.toFixed(1) + " из 5");
-      rating.querySelector("small").textContent = avg.toFixed(1).replace(".", ",") + " · " + reviews.length + " отзывов";
-    }).catch(() => {}));    let more = document.getElementById("catalog-more");
+      rating.innerHTML = '<span aria-hidden="true">' + "★".repeat(Math.round(avg)) + "☆".repeat(5 - Math.round(avg)) + '</span><small>' + avg.toFixed(1).replace(".", ",") + " · " + validReviews.length + " отзывов</small>";
+      rating.hidden = false;
+    }).catch(() => {}));
+    let more = document.getElementById("catalog-more");
     if (!more) {
       more = document.createElement("button");
       more.id = "catalog-more"; more.className = "btn-outline catalog-more";
@@ -76,8 +85,7 @@
     const intro = document.querySelector(".catalog-intro");
     if (!intro) return;
     intro.className = "aria-catalog-hero glass-card";
-    intro.innerHTML = '<div class="aria-hero-copy"><span class="product-card-category">ARIA · Казахстан</span><h1>ARIA — магазин, который не выбрасывает еду</h1><p>Помогаем магазинам сокращать списания и направлять подходящие товары людям через проверенные организации.</p><div class="aria-hero-actions"><a class="btn-glow" href="#catalog">В каталог</a><a class="btn-outline" href="/about.html">Как это работает</a></div><a class="btn-outline" href="mailto:support@aria.shop?subject=ARIA%20Shop">Написать нам</a></div><div class="aria-hero-illustration" aria-hidden="true"><svg viewBox="0 0 280 220" role="img"><rect x="34" y="36" width="212" height="156" rx="30" fill="var(--bg-elevated)"/><path d="M69 89h142l-13 78H82z" fill="#9a7658"/><path d="M77 99h126l-10 58H87z" fill="#e6c99b"/><circle cx="113" cy="112" r="16" fill="#b86649"/><circle cx="148" cy="122" r="18" fill="#819b6e"/><circle cx="177" cy="109" r="13" fill="#d7a84d"/><path d="M136 97c3-28 33-29 37 0" fill="none" stroke="#758e69" stroke-width="7" stroke-linecap="round"/></svg></div>';
-    document.querySelector("main.container")?.setAttribute("id", "catalog");
+    intro.innerHTML = '<div class="aria-hero-copy"><span class="product-card-category">ARIA · Казахстан</span><h1>ARIA — магазин, который не выбрасывает еду</h1><p>Помогаем магазинам сокращать списания и направлять подходящие товары людям через проверенные организации.</p><div class="aria-hero-actions"><a class="btn-glow" href="#products">В каталог</a><a class="btn-outline" href="/about.html">Как это работает</a><a class="btn-outline" href="mailto:support@aria.shop?subject=ARIA%20Shop">Написать нам</a></div></div><div class="aria-hero-illustration" aria-hidden="true"><svg viewBox="0 0 280 220" role="img"><rect x="34" y="36" width="212" height="156" rx="30" fill="var(--bg-elevated)"/><path d="M69 89h142l-13 78H82z" fill="#9a7658"/><path d="M77 99h126l-10 58H87z" fill="#e6c99b"/><circle cx="113" cy="112" r="16" fill="#b86649"/><circle cx="148" cy="122" r="18" fill="#819b6e"/><circle cx="177" cy="109" r="13" fill="#d7a84d"/><path d="M136 97c3-28 33-29 37 0" fill="none" stroke="#758e69" stroke-width="7" stroke-linecap="round"/></svg></div>';
   }
 
   function updateImpact() {

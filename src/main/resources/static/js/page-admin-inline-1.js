@@ -3,33 +3,6 @@ let isAnalyzing = false;
     let selectedProductIds = new Set();
     let selectCriticalCandidatesOnNextLoad = true;
 
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        container.setAttribute('aria-live', 'polite');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        const icon = document.createElement('span');
-        icon.className = 'toast-icon';
-        icon.setAttribute('aria-hidden', 'true');
-        icon.textContent = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
-        const message = document.createElement('span');
-        message.className = 'toast-message';
-        message.textContent = String(msg ?? '');
-        toast.append(icon, message);
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    function updateAuthNav() {
-        const authNav = document.getElementById('auth-nav');
-        if (ariaAuth.isLoggedIn()) {
-            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
-                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
-        } else {
-            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
-        }
-    }
-
     // Expiry level calculation
     function getExpiryLevel(expiryDate) {
         if (!expiryDate) return { class: 'expiry-good', text: 'Н/Д' };
@@ -54,7 +27,7 @@ let isAnalyzing = false;
         const qty = Number(p.quantityOnHand || 0);
         const unitPrice = Number(p.unitPrice || 0);
         const unitCost = Number(p.unitCost || 0);
-        const marginPercent = unitCost > 0 ? Math.round((unitPrice - unitCost) / unitCost * 100) : null;
+        const marginPercent = unitPrice > 0 ? Math.round((unitPrice - unitCost) / unitPrice * 100) : null;
         const isCritical = !expired && daysLeft !== null && daysLeft <= 7;
         const canTransfer = p.status === 'CANDIDATE' && !expired && qty > 0;
         const aboveMarket = Number(p.marketAvgPrice || 0) > 0 && unitPrice > Number(p.marketAvgPrice) * 1.2;
@@ -75,7 +48,7 @@ let isAnalyzing = false;
             <td>
                 <span class="expiry-pill ${expired || isCritical ? 'expiry-critical' : expiryLevel.class}">${riskText}</span>
             </td>
-            <td class="table-actions">${canTransfer ? `<button class="btn-outline" onclick="publishSocialOffer(${p.id},${qty},'${p.expiryDate || ''}')">На соцполку</button>` : ''}${p.status !== 'WRITTEN_OFF' && p.status !== 'TRANSFERRED' && p.status !== 'RESERVED' ? `<button class="admin-action-btn" onclick="writeOffProduct(${p.id})">Списать</button>` : ''}<label class="btn-outline" style="padding:6px 9px;cursor:pointer;">Фото<input type="file" accept="image/jpeg,image/png" aria-label="Загрузить фото товара" style="display:none" onchange="uploadProductPhoto(${p.id},this)"></label></td>
+            <td class="table-actions">${canTransfer ? `<button class="btn-outline" onclick="publishSocialOffer(${p.id},${qty},'${p.expiryDate || ''}')">На соцполку</button>` : ''}${p.status !== 'WRITTEN_OFF' && p.status !== 'TRANSFERRED' && p.status !== 'RESERVED' ? `<button class="admin-action-btn" onclick="writeOffProduct(${p.id})">Списать</button>` : ''}</td>
         </tr>`;
     }
 
@@ -266,21 +239,6 @@ let isAnalyzing = false;
         } catch(e) { showToast(e.message, 'error'); }
     }
 
-    async function uploadProductPhoto(productId, input) {
-        const file = input.files && input.files[0];
-        if (!file) return;
-        const form = new FormData();
-        form.append('photo', file);
-        try {
-            const res = await ariaAuth.authFetch('/api/admin/products/' + productId + '/photo', {method:'POST', body:form});
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.error || 'Не удалось загрузить фотографию');
-            showToast('Фото товара сохранено. Оно будет видно в каталоге и соцполке.');
-            await loadProducts();
-        } catch(e) { showToast(e.message, 'error'); }
-        finally { input.value = ''; }
-    }
-
     async function loadLots() {
         const box = document.getElementById('lots-container');
         const escapeText = value => String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -367,7 +325,6 @@ let isAnalyzing = false;
         await Promise.all([loadStats(), loadProducts(), loadLots()]);
     }
 
-    updateAuthNav();
     ariaTheme.initTheme();
     ariaI18n.initI18n();
     if (ariaAuth.getRole() !== 'ADMIN') {

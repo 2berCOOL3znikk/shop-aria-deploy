@@ -25,16 +25,6 @@
       box.querySelectorAll("button").forEach(tab => tab.setAttribute("aria-pressed", String(tab === button)));
       window.applyFilters();
     });
-    const navLinks = document.getElementById("aria-shell-links");
-    if (navLinks && !document.getElementById("analysis-history-link")) {
-      const link = document.createElement("a");
-      link.id = "analysis-history-link";
-      link.href = "/analysis-history.html";
-      link.className = "admin-history-nav-link";
-      link.textContent = "История анализов";
-      const supportLink = navLinks.querySelector('a[href="/support.html"]');
-      navLinks.insertBefore(link, supportLink || null);
-    }
     const note = document.querySelector(".admin-filter-row")?.previousElementSibling;
     if (note && note.classList.contains("admin-note")) note.textContent = "Показываются предложения ARIA. Администратор подтверждает скидку, списание или передачу; просроченные товары заблокированы.";
   }

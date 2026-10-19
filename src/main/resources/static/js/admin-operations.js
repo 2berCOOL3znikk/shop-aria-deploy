@@ -41,10 +41,12 @@
       const critical = Array.isArray(data.critical) ? data.critical : [];
       const expired = Array.isArray(data.expired) ? data.expired : [];
       const items = rows => rows.map(item => '<li><span><strong>' + escape(item.name) + '</strong> · ' + escape(item.sku) + ' · ' + Number(item.quantity) + ' шт.' + (item.expiryDate ? ' · до ' + escape(item.expiryDate) : '') + '</span><small>' + escape(item.reason || "") + '</small></li>').join("");
-      const waitingUnits = waiting.reduce((total, item) => total + Math.max(0, Number(item.quantity || 0)), 0);
+      const waitingUnits = Math.max(0, Number(data.waitingUnits) || waiting.reduce((total, item) => total + Math.max(0, Number(item.quantity || 0)), 0));
       const threshold = Math.max(1, Number(data.threshold) || 10);
-      const waitingProgress = Math.min(100, Math.floor(waitingUnits * 100 / threshold));
-      const waitingAction = waitingUnits >= threshold ? '<button class="btn-glow" onclick="createLotFromQueue(\'waiting\')">Сформировать обычный лот</button>' : '<p class="admin-note">Партия копится до порога. Передача не запускается автоматически.</p>';
+      const displayedUnits = Math.min(waitingUnits, threshold);
+      const waitingProgress = Math.min(100, Math.floor(displayedUnits * 100 / threshold));
+      const waitingBacklog = Math.max(0, waitingUnits - threshold);
+      const waitingAction = waitingUnits >= threshold ? '<button class="btn-glow" onclick="createLotFromQueue(\'waiting\')">Сформировать лот из ожидающих товаров</button>' : '<p class="admin-note">Партия копится до порога. Передача не запускается автоматически.</p>';
       const criticalAction = critical.length ? '<button class="btn-glow" onclick="createLotFromQueue(\'critical\')">Сформировать срочный лот</button>' : '<p class="admin-note">Срочных позиций сейчас нет.</p>';
       const acts = Array.isArray(data.draftLots) ? data.draftLots : [];
       const pendingActs = acts.length ? acts.map(lot => {
@@ -54,7 +56,7 @@
           : '<button class="btn-outline" onclick="advanceActStage(' + Number(lot.id) + ',\'' + escape(lot.state) + '\')">' + stage.action + '</button>';
         return '<div class="claim-row"><span><strong>Акт ARIA-' + Number(lot.id) + ' · ' + stage.label + '</strong><br>' + escape(lot.partner) + ' · ' + Number(lot.itemCount) + ' SKU · ' + Number(lot.quantity || 0) + ' шт.</span>' + button + '</div>';
       }).join("") : '<p class="admin-note">Нет актов, ожидающих завершения.</p>';
-      box.innerHTML = '<div class="logistics-block"><h3>Ждут наполнения</h3><p>' + waitingUnits + ' / ' + threshold + ' единиц</p><div class="lot-progress" role="progressbar" aria-valuemin="0" aria-valuemax="' + threshold + '" aria-valuenow="' + Math.min(waitingUnits, threshold) + '"><span style="width:' + waitingProgress + '%"></span></div><ul>' + items(waiting) + '</ul>' + waitingAction + '</div><div class="logistics-block critical-block"><h3>Критические — отправить сейчас</h3><ul>' + items(critical) + '</ul>' + criticalAction + '</div><div class="logistics-block expired-block"><h3>Срок истёк — передача заблокирована</h3><ul>' + items(expired) + '</ul>' + (expired.length ? '<p class="admin-error">Просроченное нельзя резервировать или передавать.</p>' : '<p class="admin-note">Просроченных позиций нет.</p>') + '</div><div class="logistics-block"><h3>Акты в работе</h3><p class="admin-note">Акт — документ для фонда: распечатать, сверить позиции, подписать обеим сторонам.</p>' + pendingActs + '</div>';
+      box.innerHTML = '<div class="logistics-block"><h3>Ждут наполнения</h3><p class="logistics-progress-label"><strong>' + displayedUnits + ' / ' + threshold + ' единиц</strong> · порог партии</p><div class="lot-progress" role="progressbar" aria-valuemin="0" aria-valuemax="' + threshold + '" aria-valuenow="' + displayedUnits + '" aria-valuetext="' + displayedUnits + ' из ' + threshold + ' единиц до порога"><span style="width:' + waitingProgress + '%"></span></div>' + (waitingBacklog ? '<p class="admin-note logistics-backlog">В очереди сверх порога: <strong>' + waitingBacklog + ' ед.</strong></p>' : '') + '<ul>' + items(waiting) + '</ul>' + waitingAction + '</div><div class="logistics-block critical-block"><h3>Критические — отправить сейчас</h3><ul>' + items(critical) + '</ul>' + criticalAction + '</div><div class="logistics-block expired-block"><h3>Срок истёк — передача заблокирована</h3><ul>' + items(expired) + '</ul>' + (expired.length ? '<p class="admin-error">Просроченное нельзя резервировать или передавать.</p>' : '<p class="admin-note">Просроченных позиций нет.</p>') + '</div><div class="logistics-block"><h3>Акты в работе</h3><p class="admin-note">Акт — документ для фонда: распечатать, сверить позиции, подписать обеим сторонам.</p>' + pendingActs + '</div>';
     } catch (error) { box.innerHTML = '<p class="admin-error">' + escape(error.message) + '</p>'; }
   }
   window.refreshLogisticsQueue = loadLogistics;

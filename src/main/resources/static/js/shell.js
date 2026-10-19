@@ -9,6 +9,11 @@
 
   const langCode = () => window.ariaI18n && window.ariaI18n.getLang ? window.ariaI18n.getLang() : "ru";
   const t = key => (labels[langCode()] || labels.ru)[key] || labels.ru[key] || key;
+  const setNavLabel = link => {
+    const badge = link.querySelector(".shell-cart-count");
+    link.textContent = t(link.dataset.shellLabel);
+    if (badge) link.appendChild(badge);
+  };
 
   function makeLink(href, text, key) {
     const a = document.createElement("a");
@@ -22,7 +27,7 @@
   function refreshLanguage() {
     const activeNav = document.getElementById("aria-shell-links");
     const footer = document.getElementById("aria-shell-footer");
-    if (activeNav) activeNav.querySelectorAll("[data-shell-label]").forEach(el => el.textContent = t(el.dataset.shellLabel));
+    if (activeNav) activeNav.querySelectorAll("[data-shell-label]").forEach(setNavLabel);
     if (footer) footer.querySelectorAll("[data-shell-footer]").forEach(el => el.textContent = t(el.dataset.shellFooter));
     const languageButton = document.getElementById("lang-toggle-btn");
     if (languageButton) languageButton.textContent = (langCode() || "ru").toUpperCase();
@@ -48,10 +53,19 @@
     links.id = "aria-shell-links";
 
     const role = window.ariaAuth && window.ariaAuth.getRole ? window.ariaAuth.getRole() : null;
+    const cartLink = makeLink("/cart.html", t("cart"), "cart");
+    const cartBadge = document.createElement("span");
+    cartBadge.id = "cart-count";
+    cartBadge.className = "shell-cart-count";
+    cartBadge.textContent = "0";
+    cartBadge.hidden = true;
+    cartBadge.setAttribute("aria-label", "Товаров в корзине: 0");
+    cartLink.appendChild(cartBadge);
+
     [makeLink("/index.html", t("catalog"), "catalog"),
       makeLink("/social.html", t("social"), "social"),
       makeLink("/favorites.html", t("favorites"), "favorites"),
-      makeLink("/cart.html", t("cart"), "cart"),
+      cartLink,
       makeLink("/profile.html", t("profile"), "profile")].forEach(link => links.appendChild(link));
 
     if (role === "ORG") links.appendChild(makeLink("/social.html#claims-section", t("org"), "org"));
@@ -138,12 +152,36 @@
     }
 
     footer.querySelectorAll("[data-shell-footer]").forEach(el => el.textContent = t(el.dataset.shellFooter));
-    links.querySelectorAll("[data-shell-label]").forEach(el => el.textContent = t(el.dataset.shellLabel));
+    links.querySelectorAll("[data-shell-label]").forEach(setNavLabel);
 
     theme.textContent = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "☀" : "🌙";
     theme.title = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "Светлая тема" : "Тёмная тема";
     lang.textContent = (langCode() || "ru").toUpperCase();
+    window.refreshCartBadge();
   }
+
+  window.refreshCartBadge = async function () {
+    const badge = document.getElementById("cart-count");
+    if (!badge) return 0;
+    if (!window.ariaAuth || !window.ariaAuth.isLoggedIn()) {
+      badge.textContent = "0";
+      badge.setAttribute("aria-label", "Товаров в корзине: 0");
+      badge.hidden = true;
+      return 0;
+    }
+    try {
+      const response = await window.ariaAuth.authFetch("/api/cart/total");
+      if (!response.ok) throw new Error("Не удалось обновить корзину");
+      const data = await response.json();
+      const count = Math.max(0, Number(data.itemCount) || 0);
+      badge.textContent = count > 99 ? "99+" : String(count);
+      badge.setAttribute("aria-label", "Товаров в корзине: " + count);
+      badge.hidden = count === 0;
+      return count;
+    } catch (_) {
+      return Number(badge.textContent) || 0;
+    }
+  };
 
   // === НОВЫЙ SHOWTOAST С РАЗЛИЧИЕМ ТИПОВ И ПЛАВНЫМИ АНИМАЦИЯМИ ===
   window.showToast = function (message, type) {

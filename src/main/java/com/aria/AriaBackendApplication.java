@@ -56,17 +56,17 @@ public class AriaBackendApplication {
 				// === ПРОДУКТЫ (категория: Продукты) ===
 				Product coffee = products.save(new Product("SKU-1001", "Кофе в зёрнах 1 кг", "Продукты",
 						120 + rand.nextInt(50), t.minusDays(20 + rand.nextInt(10)), 40 + rand.nextInt(20),
-						new BigDecimal("350"), new BigDecimal("7050"), t.plusDays(300)));
+						new BigDecimal("350"), new BigDecimal("550"), t.plusDays(300)));
 				coffee.setImageUrl("/images/products/SKU-1001.jpg");
 
 				Product tea = products.save(new Product("SKU-1002", "Чай зелёный 250 г", "Продукты",
 						80 + rand.nextInt(30), t.minusDays(35 + rand.nextInt(15)), 22 + rand.nextInt(10),
-						new BigDecimal("120"), new BigDecimal("8050"), t.plusDays(200)));
+						new BigDecimal("120"), new BigDecimal("180"), t.plusDays(200)));
 				tea.setImageUrl("/images/products/SKU-1002.jpg");
 
 				Product chocolate = products.save(new Product("SKU-1003", "Шоколад горький 70%", "Продукты",
 						150 + rand.nextInt(50), t.minusDays(15 + rand.nextInt(10)), 65 + rand.nextInt(30),
-						new BigDecimal("80"), new BigDecimal("1050"), t.plusDays(180)));
+						new BigDecimal("80"), new BigDecimal("140"), t.plusDays(180)));
 				chocolate.setImageUrl("/images/products/SKU-1003.jpg");
 
 				Product pasta = products.save(new Product("SKU-1004", "Паста спагетти 500г", "Продукты",
@@ -76,28 +76,28 @@ public class AriaBackendApplication {
 
 				Product honey = products.save(new Product("SKU-1005", "Мёд цветочный 500г", "Продукты",
 						60 + rand.nextInt(30), t.minusDays(45 + rand.nextInt(20)), 15 + rand.nextInt(10),
-						new BigDecimal("280"), new BigDecimal("7285"), t.plusDays(730)));
+						new BigDecimal("280"), new BigDecimal("450"), t.plusDays(730)));
 				honey.setImageUrl("/images/products/SKU-1005.jpg");
 
 				// === ДОМ/ТЕКСТИЛЬ ===
 				Product blanket = products.save(new Product("SKU-2001", "Плед шерстяной", "Дом/текстиль",
 						60 + rand.nextInt(20), t.minusDays(210 + rand.nextInt(30)), 0,
-						new BigDecimal("900"), new BigDecimal("5350"), null));
+						new BigDecimal("900"), new BigDecimal("1500"), null));
 				blanket.setImageUrl("/images/products/SKU-2001.jpg");
 
 				Product vase = products.save(new Product("SKU-2002", "Ваза керамическая", "Дом/текстиль",
 						40 + rand.nextInt(15), t.minusDays(240 + rand.nextInt(40)), 0,
-						new BigDecimal("700"), new BigDecimal("2450"), null));
+						new BigDecimal("700"), new BigDecimal("1100"), null));
 				vase.setImageUrl("/images/products/SKU-2002.jpg");
 
 				Product towel = products.save(new Product("SKU-2003", "Полотенце махровое", "Дом/текстиль",
 						100 + rand.nextInt(50), t.minusDays(30 + rand.nextInt(20)), 35 + rand.nextInt(20),
-						new BigDecimal("250"), new BigDecimal("2570"), null));
+						new BigDecimal("250"), new BigDecimal("400"), null));
 				towel.setImageUrl("/images/products/SKU-2003.jpg");
 
 				Product pillow = products.save(new Product("SKU-2004", "Подушка ортопедическая", "Дом/текстиль",
 						50 + rand.nextInt(25), t.minusDays(195 + rand.nextInt(25)), 2 + rand.nextInt(5),
-						new BigDecimal("1200"), new BigDecimal("21700"), null));
+						new BigDecimal("1200"), new BigDecimal("2000"), null));
 				pillow.setImageUrl("/images/products/SKU-2004.jpg");
 
 				// === ЭЛЕКТРОНИКА ===
@@ -108,39 +108,39 @@ public class AriaBackendApplication {
 
 				Product headphones = products.save(new Product("SKU-4002", "Наушники беспроводные", "Электроника",
 						45 + rand.nextInt(20), t.minusDays(25 + rand.nextInt(15)), 28 + rand.nextInt(15),
-						new BigDecimal("2500"), new BigDecimal("2650"), null));
+						new BigDecimal("2500"), new BigDecimal("3600"), null));
 				headphones.setImageUrl("/images/products/SKU-4002.jpg");
 
 				Product charger = products.save(new Product("SKU-4003", "Зарядное устройство USB-C", "Электроника",
 						80 + rand.nextInt(40), t.minusDays(10 + rand.nextInt(10)), 55 + rand.nextInt(25),
-						new BigDecimal("450"), new BigDecimal("3350"), null));
+						new BigDecimal("450"), new BigDecimal("700"), null));
 				charger.setImageUrl("/images/products/SKU-4003.jpg");
 
 				// === СКОРОПОРТ (<30 дней до истечения) ===
 				Product yogurt = products.save(new Product("SKU-3001", "Йогурт питьевой", "Продукты",
 						200 + rand.nextInt(100), t.minusDays(10 + rand.nextInt(5)), 90 + rand.nextInt(40),
-						new BigDecimal("28"), new BigDecimal("620"), t.plusDays(12))); // скоропорт!
+						new BigDecimal("28"), new BigDecimal("45"), t.plusDays(12))); // скоропорт!
 				yogurt.setImageUrl("/images/products/SKU-3001.jpg");
 
 				Product milk = products.save(new Product("SKU-3002", "Молоко 3.2% 1л", "Продукты",
 						150 + rand.nextInt(80), t.minusDays(8 + rand.nextInt(5)), 110 + rand.nextInt(50),
-						new BigDecimal("45"), new BigDecimal("9350"), t.plusDays(18))); // скоропорт!
+						new BigDecimal("45"), new BigDecimal("80"), t.plusDays(18))); // скоропорт!
 				milk.setImageUrl("/images/products/SKU-3002.jpg");
 
 				Product cheese = products.save(new Product("SKU-3003", "Сыр твёрдый 300г", "Продукты",
 						80 + rand.nextInt(40), t.minusDays(12 + rand.nextInt(8)), 45 + rand.nextInt(25),
-						new BigDecimal("180"), new BigDecimal("1420"), t.plusDays(25))); // скоропорт!
+						new BigDecimal("180"), new BigDecimal("280"), t.plusDays(25))); // скоропорт!
 				cheese.setImageUrl("/images/products/SKU-3003.jpg");
 
 				// === ПРОМО (нулевая маржа) ===
 				Product giftSet = products.save(new Product("SKU-5001", "Подарочный набор", "Промо",
 						15 + rand.nextInt(10), t.minusDays(190 + rand.nextInt(20)), 0,
-						new BigDecimal("800"), new BigDecimal("24090"), null)); // нулевая маржа
+						new BigDecimal("800"), new BigDecimal("800"), null)); // нулевая маржа
 				giftSet.setImageUrl("/images/products/SKU-5001.jpg");
 
 				Product sampler = products.save(new Product("SKU-5002", "Дегустационный сет", "Промо",
 						25 + rand.nextInt(15), t.minusDays(150 + rand.nextInt(30)), 3 + rand.nextInt(5),
-						new BigDecimal("500"), new BigDecimal("3990"), null)); // нулевая маржа
+						new BigDecimal("500"), new BigDecimal("500"), null)); // нулевая маржа
 				sampler.setImageUrl("/images/products/SKU-5002.jpg");
 
 				// === ХАРАКТЕРИСТИКИ ===

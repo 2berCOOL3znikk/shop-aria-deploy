@@ -80,6 +80,12 @@
             color: var(--accent-blue);
             text-decoration: none;
         }
+        .demo-accounts { margin-top:22px;padding:15px;border:1px solid var(--border-color);border-radius:12px;background:var(--bg-surface);font-size:13px;line-height:1.7; }
+        .demo-accounts h2 { margin:0 0 7px;font-size:14px;color:var(--text-primary); }
+        .demo-accounts p { margin:3px 0;color:var(--text-secondary); }
+        .demo-accounts code { color:var(--accent-blue); }
+        .captcha-question-row { display:flex;align-items:center;justify-content:space-between;gap:10px;margin-top:8px; }
+        .captcha-refresh { border:1px solid var(--border-color);border-radius:8px;background:var(--bg-surface);color:var(--text-primary);padding:6px 9px;cursor:pointer; }
     </style>
 </head>
 <body>
@@ -114,8 +120,8 @@
 
             <!-- Капча -->
             <div id="captcha-container" style="margin-bottom: 16px;">
-                <input type="text" id="captcha-answer" placeholder="Ответ на вопрос" style="width: 100%; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-size: 15px; box-sizing: border-box;">
-                <div id="captcha-question" style="margin-top: 8px; font-size: 13px; color: var(--text-muted);">Загрузка капчи...</div>
+                <input type="text" id="captcha-answer" inputmode="numeric" autocomplete="off" required placeholder="Ответ на вопрос" aria-label="Ответ на проверочный пример" style="width: 100%; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-size: 15px; box-sizing: border-box;">
+                <div class="captcha-question-row"><div id="captcha-question" aria-live="polite" style="font-size: 13px; color: var(--text-muted);">Загрузка капчи...</div><button id="captcha-refresh" class="captcha-refresh" type="button" onclick="window.loadRegisterCaptcha()" aria-label="Обновить пример">↻</button></div>
             </div>
             <input type="hidden" id="captcha-id">
 
@@ -125,22 +131,18 @@
         <div class="guest-link">
             <a href="/index.html">Продолжить без входа — витрина открыта</a>
         </div>
+        <section class="demo-accounts" aria-label="Демо-аккаунты для учебного проекта">
+            <h2>Учебные аккаунты</h2>
+            <p>Покупатель: <code>user@aria.shop</code> / <code>user123</code></p>
+            <p>Администратор: <code>admin@aria.shop</code> / <code>admin123</code></p>
+            <p>Фонд: <code>fund@aria.shop</code> / <code>fund123</code></p>
+        </section>
     </div>
 </div>
 
 <div class="toast-container" id="toast-container"></div>
 
 <script>
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        const icon = type === 'error' ? '❌' : '✅';
-        toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
     function switchTab(tab) {
         document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
         document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
@@ -151,8 +153,28 @@
         } else {
             document.querySelector('.tab-btn:last-child').classList.add('active');
             document.getElementById('register-form').classList.add('active');
+            window.loadRegisterCaptcha();
         }
     }
+
+    window.loadRegisterCaptcha = async function () {
+        const question = document.getElementById('captcha-question');
+        const id = document.getElementById('captcha-id');
+        const answer = document.getElementById('captcha-answer');
+        question.textContent = 'Загружаем проверочный пример…';
+        id.value = '';
+        answer.value = '';
+        try {
+            const response = await fetch('/api/auth/captcha', { cache: 'no-store' });
+            if (!response.ok) throw new Error('Капча временно недоступна');
+            const challenge = await response.json();
+            id.value = challenge.id || '';
+            question.textContent = challenge.question || 'Нажмите ↻, чтобы получить новый пример';
+            if (!id.value) throw new Error('Сервер не выдал проверочный пример');
+        } catch (error) {
+            question.textContent = error.message || 'Не удалось загрузить капчу';
+        }
+    };
 
     async function handleLogin(event) {
         event.preventDefault();
@@ -196,12 +218,23 @@
         const email = document.getElementById('register-email').value;
         const password = document.getElementById('register-password').value;
         const errorDiv = document.getElementById('register-error');
+        const captchaId = document.getElementById('captcha-id').value.trim();
+        const captchaAnswer = document.getElementById('captcha-answer').value.trim();
+        const website = document.querySelector('#register-form [name="website"]').value.trim();
+
+        if (!captchaId || !captchaAnswer) {
+            errorDiv.textContent = 'Загрузите пример и введите ответ на капчу';
+            errorDiv.classList.add('show');
+            if (!captchaId) window.loadRegisterCaptcha();
+            return;
+        }
+        errorDiv.classList.remove('show');
 
         try {
             const res = await fetch('/api/auth/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, fullName })
+                body: JSON.stringify({ email, password, fullName, website, captchaId, captchaAnswer })
             });
 
             if (res.ok) {
@@ -214,13 +247,15 @@
                 localStorage.removeItem('aria_next');
                 location.href = safeNext(next, data.role);
             } else {
-                const err = await res.json();
+                const err = await res.json().catch(() => ({}));
                 errorDiv.textContent = err.error || 'Ошибка регистрации';
                 errorDiv.classList.add('show');
+                window.loadRegisterCaptcha();
             }
         } catch (e) {
             errorDiv.textContent = 'Ошибка соединения с сервером';
             errorDiv.classList.add('show');
+            window.loadRegisterCaptcha();
         }
     }
 
@@ -237,6 +272,7 @@
     }
     if (localStorage.getItem('aria_role') === 'ADMIN') location.replace('/admin.html');
     else if (localStorage.getItem('aria_role') === 'ORG') location.replace('/social.html');
+    window.loadRegisterCaptcha();
 </script>
 </body>
 </html>

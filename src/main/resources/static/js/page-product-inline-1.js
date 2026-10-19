@@ -4,65 +4,43 @@ let productId = null;
         return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
     }
 
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        const icon = type === 'error' ? '❌' : type === 'warning' ? '⚠️' : '✅';
-        toast.innerHTML = '<span class="toast-icon">' + icon + '</span><span class="toast-message">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    function updateAuthNav() {
-        const authNav = document.getElementById('auth-nav');
-        if (ariaAuth.isLoggedIn()) {
-            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
-                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
-        } else {
-            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
-        }
-    }
-
     async function loadCartCount() {
-        if (!ariaAuth.isLoggedIn()) return;
-        try {
-            const res = await ariaAuth.authFetch('/api/cart/total');
-            const data = await res.json();
-            document.getElementById('cart-count').textContent = data.itemCount || 0;
-        } catch(e) {}
+        if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
     }
 
     async function addToCart(id) {
         if (!ariaAuth.requireLogin()) return;
         try {
-            await ariaAuth.authFetch('/api/cart/add?productId=' + id + '&qty=1', { method: 'POST' });
+            const response = await ariaAuth.authFetch('/api/cart/add?productId=' + encodeURIComponent(id) + '&qty=1', { method: 'POST' });
+            if (!response.ok) throw new Error('Не удалось добавить товар в корзину');
             await loadCartCount();
-            showToast('Товар добавлен в корзину');
-        } catch(e) { showToast('Ошибка добавления', 'error'); }
+            window.showToast('Товар добавлен в корзину');
+        } catch(e) { window.showToast(e.message || 'Ошибка добавления', 'error'); }
     }
 
     async function toggleFavorite(id, btn) {
         if (!ariaAuth.requireLogin()) return;
         try {
-            const res = await ariaAuth.authFetch('/api/favorites/' + id, { method: 'POST' });
+            const res = await ariaAuth.authFetch('/api/favorites/' + encodeURIComponent(id), { method: 'POST' });
+            if (!res.ok) throw new Error('Не удалось обновить избранное');
             const data = await res.json();
-            if (data.success) {
+            if (data.isFavorite) {
                 btn.textContent = '❤️ В избранном';
-                showToast('Добавлено в избранное');
+                window.showToast('Добавлено в избранное');
             } else {
                 btn.textContent = '🤍 В избранное';
-                showToast('Удалено из избранного');
+                window.showToast('Удалено из избранного');
             }
-        } catch(e) { showToast('Ошибка', 'error'); }
+        } catch(e) { window.showToast(e.message || 'Ошибка', 'error'); }
     }
 
     async function loadReviews() {
         try {
-            const res = await fetch('/api/reviews/product/' + productId);
+            const res = await fetch('/api/reviews/product/' + encodeURIComponent(productId));
+            if (!res.ok) throw new Error('Не удалось загрузить отзывы');
             const reviews = await res.json();
             const list = document.getElementById('reviews-list');
-            if (reviews.length === 0) {
+            if (!Array.isArray(reviews) || reviews.length === 0) {
                 list.innerHTML = '<p style="color:var(--text-muted);padding:20px;text-align:center;" data-i18n="product.noReviews">Пока нет отзывов. Будьте первым!</p>';
                 return;
             }
@@ -82,10 +60,11 @@ let productId = null;
     }
 
     async function submitReview() {
+        if (!productId || document.getElementById('reviews').hidden) return;
         const author = document.getElementById('review-author').value || 'Аноним';
         const comment = document.getElementById('review-comment').value;
         const rating = parseInt(document.getElementById('review-rating').value);
-        if (!comment) { showToast(ariaI18n.t('product.reviewError'), 'error'); return; }
+        if (!comment.trim()) { window.showToast(ariaI18n.t('product.reviewError'), 'error'); return; }
         try {
             const res = await fetch('/api/reviews', {
                 method: 'POST',
@@ -93,22 +72,26 @@ let productId = null;
                 body: JSON.stringify({ productId, author, comment, rating })
             });
             if (!res.ok) throw new Error('Не удалось сохранить отзыв');
-            showToast(ariaI18n.t('toast.reviewAdded'));
+            window.showToast(ariaI18n.t('toast.reviewAdded'));
             document.getElementById('review-comment').value = '';
             loadReviews();
-        } catch(e) { showToast(ariaI18n.t('toast.error'), 'error'); }
+        } catch(e) { window.showToast(ariaI18n.t('toast.error'), 'error'); }
     }
 
     async function loadProduct() {
         const params = new URLSearchParams(location.search);
         productId = params.get('id');
         if (!productId) { location.href = '/index.html'; return; }
+        const reviews = document.getElementById('reviews');
+        if (reviews) reviews.hidden = true;
 
         try {
-            const res = await fetch('/api/products/' + productId);
+            const res = await fetch('/api/products/' + encodeURIComponent(productId));
+            if (!res.ok) throw Object.assign(new Error('Товар не найден'), { status: res.status });
             const data = await res.json();
             const p = data.product;
             const d = data.details;
+            if (!p || !p.id) throw Object.assign(new Error('Товар не найден'), { status: 404 });
 
             let isFav = false;
             if (ariaAuth.isLoggedIn()) {
@@ -116,6 +99,11 @@ let productId = null;
                 if (favRes.ok) isFav = (await favRes.json()).isFavorite;
             }
             const displayProduct = Object.assign({}, p, { imageUrl: p.imageUrl || (d && d.imageUrl) || "" });
+            const displayPrice = Number(p.displayPrice ?? p.unitPrice);
+            const unitPrice = Number(p.unitPrice);
+            const oldPrice = Number.isFinite(displayPrice) && Number.isFinite(unitPrice) && displayPrice < unitPrice
+                ? '<del class="product-detail-old-price">' + ariaMoney.format(unitPrice) + '</del>'
+                : '';
             // Статус на русском
             const statusLabels = { 'ACTIVE': 'В продаже', 'DISCOUNTED': 'Специальная цена' };
             const statusText = statusLabels[p.status] || p.status;
@@ -129,7 +117,7 @@ let productId = null;
                 '<h1 style="margin-bottom:10px;">' + escapeHtml(p.name) + '</h1>' +
                 '<div style="color:var(--text-muted);margin-bottom:20px;">Код: ' + escapeHtml(p.sku) + ' · ' + escapeHtml(p.category || '') + '</div>' +
                 '<section class="product-description"><h2>Описание товара</h2><p>' + escapeHtml(d && d.descriptionLong ? d.descriptionLong : 'Подробное описание пока не добавлено.') + '</p></section>' +
-                '<div style="font-size:32px;font-weight:700;color:var(--accent-blue);margin-bottom:20px;">' + ariaMoney.format(p.displayPrice ?? p.unitPrice) + '</div>' +
+                '<div class="product-detail-price">' + ariaMoney.format(displayPrice) + oldPrice + '</div>' +
 
                 // Характеристики
                 (d ? '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
@@ -150,18 +138,20 @@ let productId = null;
 
                 // Кнопки
                 '<div style="display:flex;gap:10px;">' +
-                '<button class="btn-glow" onclick="addToCart(' + p.id + ')" style="flex:1;">Добавить в корзину</button>' +
+                '<button class="btn-add-cart" onclick="addToCart(' + p.id + ')" style="flex:1;">Добавить в корзину</button>' +
                 '<button class="btn-outline" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? '❤️ В избранном' : '🤍 В избранное') + '</button>' +
                 '</div>' +
                 '</div>';
 
+            if (reviews) reviews.hidden = false;
             loadReviews();
         } catch(e) {
-            document.getElementById('product').innerHTML = '<p style="grid-column:1/-1;text-align:center;color:var(--accent-red);padding:60px;">Товар не найден</p>';
+            if (reviews) reviews.hidden = true;
+            document.getElementById('similar-products')?.setAttribute('hidden', 'hidden');
+            document.getElementById('product').innerHTML = '<section class="product-not-found glass-card"><span aria-hidden="true">⌕</span><h1>' + (e.status === 404 ? 'Товар не найден' : 'Не удалось загрузить товар') + '</h1><p>Проверьте ссылку или выберите товар в каталоге.</p><a class="btn-glow" href="/index.html">Вернуться в каталог</a></section>';
         }
     }
 
-    updateAuthNav();
     ariaTheme.initTheme();
     ariaI18n.initI18n();
     loadCartCount();

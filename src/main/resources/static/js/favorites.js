@@ -21,6 +21,7 @@
     try {
       const response = await ariaAuth.authFetch("/api/cart/add?productId=" + encodeURIComponent(id) + "&qty=1", { method: "POST" });
       if (!response.ok) throw new Error("Не удалось добавить товар");
+      if (typeof window.refreshCartBadge === "function") await window.refreshCartBadge();
       showToast("Товар добавлен в корзину");
     } catch (error) { showToast(error.message, "error"); }
   };

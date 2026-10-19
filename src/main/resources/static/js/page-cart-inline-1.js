@@ -1,31 +1,7 @@
 let items = [];
 
-    function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        toast.innerHTML = '<span class="toast-icon">' + (type === 'error' ? '❌' : '✅') + '</span><span class="toast-message">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    function updateAuthNav() {
-        const authNav = document.getElementById('auth-nav');
-        if (ariaAuth.isLoggedIn()) {
-            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
-                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
-        } else {
-            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
-        }
-    }
-
     async function loadCartCount() {
-        if (!ariaAuth.isLoggedIn()) return;
-        try {
-            const res = await ariaAuth.authFetch('/api/cart/total');
-            const data = await res.json();
-            document.getElementById('cart-count').textContent = data.itemCount || 0;
-        } catch(e) {}
+        if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
     }
 
     async function loadCart() {
@@ -36,7 +12,7 @@ let items = [];
             render();
             await loadCartCount();
         } catch(e) {
-            showToast('Ошибка загрузки корзины', 'error');
+            window.showToast('Ошибка загрузки корзины', 'error');
         }
     }
 
@@ -49,7 +25,7 @@ let items = [];
         }
         box.innerHTML = items.map(it =>
             '<div class="glass-card" style="display:flex;align-items:center;gap:20px;padding:16px;margin-bottom:15px;">' +
-            CatalogImages.imageTag({ productName: it.productName, category: it.category, imageUrl: it.imageUrl }, { className: "cart-item-image", alt: it.productName, style: "width:80px;height:80px;object-fit:cover;border-radius:8px;" }) +
+            CatalogImages.imageTag({ productName: it.productName, productSku: it.productSku, category: it.category, imageUrl: it.imageUrl }, { className: "cart-item-image", alt: it.productName, style: "width:80px;height:80px;object-fit:cover;border-radius:8px;" }) +
             '<div style="flex:1;">' +
             '<h3 style="margin:0 0 5px 0;">' + it.productName + '</h3>' +
             '<div style="color:var(--text-muted);font-size:12px;">SKU: ' + it.productSku + '</div>' +
@@ -80,7 +56,7 @@ let items = [];
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || data.error || 'Не удалось изменить количество');
             await loadCart();
-        } catch(e) { showToast(e.message, 'error'); }
+        } catch(e) { window.showToast(e.message, 'error'); }
     }
 
     async function removeItem(id) {
@@ -89,13 +65,13 @@ let items = [];
         try {
             await ariaAuth.authFetch('/api/cart/' + id, { method: 'DELETE' });
             await loadCartCount();
-            showToast('Товар удалён');
-        } catch(e) { showToast('Ошибка', 'error'); }
+            window.showToast('Товар удалён');
+        } catch(e) { window.showToast('Ошибка', 'error'); }
     }
 
     async function checkout() {
         const address = document.getElementById('delivery-address')?.value || '';
-        if (!address.trim()) { showToast('Укажите адрес доставки', 'error'); return; }
+        if (!address.trim()) { window.showToast('Укажите адрес доставки', 'error'); return; }
         try {
             const res = await ariaAuth.authFetch('/api/orders/checkout', {
                 method: 'POST',
@@ -104,14 +80,13 @@ let items = [];
             });
             const data = await res.json();
             if (!res.ok) throw new Error(data.message || 'Не удалось оформить заказ');
-            showToast('Заказ #' + data.id + ' принят. Статус: ' + data.status);
+            window.showToast('Заказ #' + data.id + ' принят. Статус: ' + data.status);
             items = [];
             render();
             await loadCartCount();
-        } catch(e) { showToast('Ошибка оформления', 'error'); }
+        } catch(e) { window.showToast('Ошибка оформления', 'error'); }
     }
 
-    updateAuthNav();
     ariaTheme.initTheme();
     ariaI18n.initI18n();
     loadCart();

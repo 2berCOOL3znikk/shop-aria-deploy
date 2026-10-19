@@ -1,28 +1,5 @@
-function showToast(msg, type = 'success') {
-        const container = document.getElementById('toast-container');
-        const toast = document.createElement('div');
-        toast.className = 'toast ' + type;
-        toast.innerHTML = '<span class="toast-icon">' + (type === 'error' ? '❌' : '✅') + '</span><span class="toast-message">' + msg + '</span>';
-        container.appendChild(toast);
-        setTimeout(() => toast.remove(), 3500);
-    }
-
-    function updateAuthNav() {
-        const authNav = document.getElementById('auth-nav');
-        if (ariaAuth.isLoggedIn()) {
-            authNav.innerHTML = '<span style="font-size:14px;color:var(--text-muted);margin-right:15px;">' + ariaAuth.getUserEmail() + '</span>' +
-                '<button onclick="ariaAuth.logout()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);padding:6px 12px;border-radius:6px;cursor:pointer;font-size:13px;">Выйти</button>';
-        } else {
-            authNav.innerHTML = '<a href="/login.html" style="color:var(--accent-blue);text-decoration:none;font-size:14px;">Войти</a>';
-        }
-    }
-
     async function loadCartCount() {
-        try {
-            const res = await ariaAuth.authFetch('/api/cart/total');
-            const data = await res.json();
-            document.getElementById('cart-count').textContent = data.itemCount || 0;
-        } catch(e) {}
+        if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
     }
 
     async function loadProfile() {
@@ -53,8 +30,8 @@ function showToast(msg, type = 'success') {
                     address: document.getElementById('address').value
                 })
             });
-            showToast('Профиль сохранён');
-        } catch(e) { showToast('Ошибка', 'error'); }
+            window.showToast('Профиль сохранён');
+        } catch(e) { window.showToast('Ошибка', 'error'); }
     }
 
     async function loadFavorites() {
@@ -104,7 +81,6 @@ function showToast(msg, type = 'success') {
         } catch(e) {}
     }
 
-    updateAuthNav();
     ariaTheme.initTheme();
     ariaI18n.initI18n();
     loadCartCount();
