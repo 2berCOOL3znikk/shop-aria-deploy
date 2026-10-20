@@ -56,55 +56,52 @@ public class AriaBackendApplication {
 				// === ПРОДУКТЫ (категория: Продукты) ===
 				Product coffee = products.save(new Product("SKU-1001", "Кофе в зёрнах 1 кг", "Продукты",
 						120 + rand.nextInt(50), t.minusDays(20 + rand.nextInt(10)), 40 + rand.nextInt(20),
-						new BigDecimal("350"), new BigDecimal("550"), t.plusDays(300)));
+						new BigDecimal("350"), new BigDecimal("12700"), t.plusDays(300)));
 				coffee.setImageUrl("/images/products/SKU-1001.jpg");
 
 				Product tea = products.save(new Product("SKU-1002", "Чай зелёный 250 г", "Продукты",
 						80 + rand.nextInt(30), t.minusDays(35 + rand.nextInt(15)), 22 + rand.nextInt(10),
-						new BigDecimal("120"), new BigDecimal("180"), t.plusDays(200)));
+						new BigDecimal("120"), new BigDecimal("4100"), t.plusDays(200)));
 				tea.setImageUrl("/images/products/SKU-1002.jpg");
 
 				Product chocolate = products.save(new Product("SKU-1003", "Шоколад горький 70%", "Продукты",
 						150 + rand.nextInt(50), t.minusDays(15 + rand.nextInt(10)), 65 + rand.nextInt(30),
-						new BigDecimal("80"), new BigDecimal("140"), t.plusDays(180)));
+						new BigDecimal("80"), new BigDecimal("1540"), t.plusDays(180)));
 				chocolate.setImageUrl("/images/products/SKU-1003.jpg");
 
 				Product pasta = products.save(new Product("SKU-1004", "Паста спагетти 500г", "Продукты",
 						200 + rand.nextInt(100), t.minusDays(5 + rand.nextInt(10)), 120 + rand.nextInt(50),
-						new BigDecimal("990"), new BigDecimal("990"), t.plusDays(365)));
+						new BigDecimal("990"), new BigDecimal("1800"), t.plusDays(365)));
 				pasta.setImageUrl("/images/products/SKU-1004.jpg");
 
 				Product honey = products.save(new Product("SKU-1005", "Мёд цветочный 500г", "Продукты",
 						60 + rand.nextInt(30), t.minusDays(45 + rand.nextInt(20)), 15 + rand.nextInt(10),
-						new BigDecimal("280"), new BigDecimal("450"), t.plusDays(730)));
+						new BigDecimal("280"), new BigDecimal("3450"), t.plusDays(730)));
 				honey.setImageUrl("/images/products/SKU-1005.jpg");
 
 				// === ДОМ/ТЕКСТИЛЬ ===
 				Product blanket = products.save(new Product("SKU-2001", "Плед шерстяной", "Дом/текстиль",
 						60 + rand.nextInt(20), t.minusDays(210 + rand.nextInt(30)), 0,
-						new BigDecimal("900"), new BigDecimal("1500"), null));
+						new BigDecimal("900"), new BigDecimal("4990"), null));
 				blanket.setImageUrl("/images/products/SKU-2001.jpg");
 
 				Product vase = products.save(new Product("SKU-2002", "Ваза керамическая", "Дом/текстиль",
 						40 + rand.nextInt(15), t.minusDays(240 + rand.nextInt(40)), 0,
-						new BigDecimal("700"), new BigDecimal("1100"), null));
+						new BigDecimal("700"), new BigDecimal("7540"), null));
 				vase.setImageUrl("/images/products/SKU-2002.jpg");
 
 				Product towel = products.save(new Product("SKU-2003", "Полотенце махровое", "Дом/текстиль",
 						100 + rand.nextInt(50), t.minusDays(30 + rand.nextInt(20)), 35 + rand.nextInt(20),
-						new BigDecimal("250"), new BigDecimal("400"), null));
+						new BigDecimal("250"), new BigDecimal("3850"), null));
 				towel.setImageUrl("/images/products/SKU-2003.jpg");
 
 				Product pillow = products.save(new Product("SKU-2004", "Подушка ортопедическая", "Дом/текстиль",
 						50 + rand.nextInt(25), t.minusDays(195 + rand.nextInt(25)), 2 + rand.nextInt(5),
-						new BigDecimal("1200"), new BigDecimal("2000"), null));
+						new BigDecimal("1200"), new BigDecimal("8550"), null));
 				pillow.setImageUrl("/images/products/SKU-2004.jpg");
 
 				// === ЭЛЕКТРОНИКА ===
-				Product gadget = products.save(new Product("SKU-4001", "Гаджет-аксессуар X", "Электроника",
-						30 + rand.nextInt(15), t.minusDays(60 + rand.nextInt(20)), 1 + rand.nextInt(3),
-						new BigDecimal("1200"), new BigDecimal("1100"), null)); // отрицательная маржа!
-				gadget.setImageUrl("/images/products/SKU-4001.jpg");
+
 
 				Product headphones = products.save(new Product("SKU-4002", "Наушники беспроводные", "Электроника",
 						45 + rand.nextInt(20), t.minusDays(25 + rand.nextInt(15)), 28 + rand.nextInt(15),
@@ -113,34 +110,34 @@ public class AriaBackendApplication {
 
 				Product charger = products.save(new Product("SKU-4003", "Зарядное устройство USB-C", "Электроника",
 						80 + rand.nextInt(40), t.minusDays(10 + rand.nextInt(10)), 55 + rand.nextInt(25),
-						new BigDecimal("450"), new BigDecimal("700"), null));
+						new BigDecimal("450"), new BigDecimal("1540"), null));
 				charger.setImageUrl("/images/products/SKU-4003.jpg");
 
 				// === СКОРОПОРТ (<30 дней до истечения) ===
 				Product yogurt = products.save(new Product("SKU-3001", "Йогурт питьевой", "Продукты",
 						200 + rand.nextInt(100), t.minusDays(10 + rand.nextInt(5)), 90 + rand.nextInt(40),
-						new BigDecimal("28"), new BigDecimal("45"), t.plusDays(12))); // скоропорт!
+						new BigDecimal("28"), new BigDecimal("450"), t.plusDays(12))); // скоропорт!
 				yogurt.setImageUrl("/images/products/SKU-3001.jpg");
 
 				Product milk = products.save(new Product("SKU-3002", "Молоко 3.2% 1л", "Продукты",
 						150 + rand.nextInt(80), t.minusDays(8 + rand.nextInt(5)), 110 + rand.nextInt(50),
-						new BigDecimal("45"), new BigDecimal("80"), t.plusDays(18))); // скоропорт!
+						new BigDecimal("45"), new BigDecimal("750"), t.plusDays(18))); // скоропорт!
 				milk.setImageUrl("/images/products/SKU-3002.jpg");
 
 				Product cheese = products.save(new Product("SKU-3003", "Сыр твёрдый 300г", "Продукты",
 						80 + rand.nextInt(40), t.minusDays(12 + rand.nextInt(8)), 45 + rand.nextInt(25),
-						new BigDecimal("180"), new BigDecimal("280"), t.plusDays(25))); // скоропорт!
+						new BigDecimal("180"), new BigDecimal("2300"), t.plusDays(25))); // скоропорт!
 				cheese.setImageUrl("/images/products/SKU-3003.jpg");
 
 				// === ПРОМО (нулевая маржа) ===
 				Product giftSet = products.save(new Product("SKU-5001", "Подарочный набор", "Промо",
 						15 + rand.nextInt(10), t.minusDays(190 + rand.nextInt(20)), 0,
-						new BigDecimal("800"), new BigDecimal("800"), null)); // нулевая маржа
+						new BigDecimal("800"), new BigDecimal("18000"), null)); // нулевая маржа
 				giftSet.setImageUrl("/images/products/SKU-5001.jpg");
 
 				Product sampler = products.save(new Product("SKU-5002", "Дегустационный сет", "Промо",
 						25 + rand.nextInt(15), t.minusDays(150 + rand.nextInt(30)), 3 + rand.nextInt(5),
-						new BigDecimal("500"), new BigDecimal("500"), null)); // нулевая маржа
+						new BigDecimal("500"), new BigDecimal("2890"), null)); // нулевая маржа
 				sampler.setImageUrl("/images/products/SKU-5002.jpg");
 
 				// === ХАРАКТЕРИСТИКИ ===
@@ -154,7 +151,7 @@ public class AriaBackendApplication {
 				details.save(new ProductDetail(towel, "HomeTextile", "Голубой", "70x140 см", new BigDecimal("0.4"), "Экологичные полотенца из органического чесаного хлопка, вдохновленные природой Скандинавии. Отличаются сдержанной палитрой (оттенки мха, мокрого камня, тумана) и высокой плотностью."));
 				details.save(new ProductDetail(pillow, "SleepWell", "Белый", "50x70 см", new BigDecimal("1.5"), "Высокотехнологичные подушки из адаптивной пены с памятью формы, разработанные совместно с сомнологами.\n" +
 						"Слоган: Форма вашего идеального сна."));
-				details.save(new ProductDetail(gadget, "TechPro", "Чёрный", "Универсальный", new BigDecimal("0.15"), "Универсальный адаптер Type-C, поддержка PD 65W. Совместим с MacBook."));
+
 				details.save(new ProductDetail(headphones, "SoundMax", "Чёрный", "One Size", new BigDecimal("0.3"), "Наушники беспроводные FLARX – портативный аксессуар для прослушивания музыки и общения. С помощью сенсорного управления можно менять трек, регулировать громкость и включать звонки."));
 				details.save(new ProductDetail(charger, "PowerBank", "Белый", "Компактный", new BigDecimal("0.2"), "Зарядные устройства USB-C различаются по мощности, количеству портов и поддерживаемым протоколам быстрой зарядки, поэтому выбор зависит от того, какое именно устройство вам нужно заряжать (смартфон, планшет или ноутбук)"));
 				details.save(new ProductDetail(yogurt, "Danone", "Белый", "0.5 л", new BigDecimal("0.5"), "Питьевой йогурт натуральный 2% — вкусный и полезный выбор для поддержания здоровья и энергии в течение дня. Этот йогурт не содержит ГМО, что делает его отличным вариантом для тех, кто заботится о своём питании."));

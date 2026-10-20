@@ -1244,3 +1244,12 @@ html { scroll-behavior: smooth; }
 @keyframes analysisCheck { from{opacity:0;transform:scale(.45)} to{opacity:1;transform:scale(1)} }
 @keyframes analysisResultIn { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:none} }
 @media(prefers-reduced-motion:reduce){.analysis-overlay.active .analysis-box::before,.analysis-overlay.active .analysis-box h3::after,.analysis-overlay.active .progress-fill::after,.analysis-steps .step.active .step-icon{animation:none!important}}
+
+.contact-card .btn-glow {
+    color: #fff !important;
+    -webkit-text-fill-color: #fff;
+    font-size: 16px !important;
+    text-indent: 0;
+    opacity: 1;
+    visibility: visible;
+}
