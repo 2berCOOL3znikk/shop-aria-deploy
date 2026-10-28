@@ -57,6 +57,8 @@ public class ControlService {
     }
     public void applyDiscount(Long id,DiscountInput input){
         Product p=inventory.lock(id);inventory.ensureLegacyLot(p);inventory.synchronize(p);
+        if(input.expectedPrice()!=null && pricing.price(p,input.percent()).compareTo(input.expectedPrice())!=0)
+            throw new IllegalStateException("Цена товара изменилась после расчёта. Обновите сценарий и подтвердите скидку заново");
         if(input.percent()!=0 || !(p.getStatus()==ProductStatus.ACTIVE||p.getStatus()==ProductStatus.DISCOUNTED||p.getStatus()==ProductStatus.CANDIDATE))pricing.validate(p,input.percent());
         if(p.getArchived()) throw new IllegalStateException("Товар архивирован");
         p.setDiscountPercent(input.percent());p.setStatus(input.percent()==0?ProductStatus.ACTIVE:ProductStatus.DISCOUNTED);

@@ -43,7 +43,9 @@ public class InventoryService {
     }
     @Transactional(readOnly=true)
     public int available(Product p) {
-        List<InventoryLot> rows=lots.findByProductId(p.getId());
+        return available(p,lots.findByProductId(p.getId()));
+    }
+    public int available(Product p,List<InventoryLot> rows) {
         if (rows.isEmpty()) return p.getExpiryDate()!=null && p.getExpiryDate().isBefore(LocalDate.now()) ? 0 : Math.max(0,p.getQuantityOnHand()==null?0:p.getQuantityOnHand());
         return Math.toIntExact(rows.stream().filter(this::usable).mapToLong(InventoryLot::getQuantity).sum());
     }

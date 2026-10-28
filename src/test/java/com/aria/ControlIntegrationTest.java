@@ -26,6 +26,7 @@ class ControlIntegrationTest {
     @Autowired ProductRepository products;
     @Autowired OrderRepository orders;
     @Autowired com.aria.service.AriaService analysis;
+    @Autowired AuditEventRepository auditEvents;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org;
@@ -88,6 +89,53 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/orders",user,null).raw).contains("Тестовый товар").doesNotContain("Другое название");
         shipped.setShippedAt(java.time.LocalDateTime.now().minusDays(31));orders.save(shipped);
         assertThat(orders.shippedUnitsSince(java.time.LocalDateTime.now().minusDays(30)).stream().filter(row->((Number)row[0]).longValue()==p)).isEmpty();
+    }
+    @Test void adminStockReadExcludesExpiredLotsWithoutChangingStoredProduct()throws Exception {
+        long p=product();long lotId=lot(p,"STALE",5,2).id();
+        var row=lots.findById(lotId).orElseThrow();row.setExpiryDate(LocalDate.now().minusDays(1));lots.save(row);
+        assertThat(products.findById(p).orElseThrow().getQuantityOnHand()).isEqualTo(5);
+        long before=auditEvents.count();var reply=call("GET",base+"/products",admin,null);
+        var list=json.readValue(reply.raw,List.class);
+        var product=(Map<?,?>)list.stream().filter(item->((Number)((Map<?,?>)item).get("id")).longValue()==p).findFirst().orElseThrow();
+        assertThat(((Number)product.get("quantityOnHand")).intValue()).isZero();
+        assertThat(products.findById(p).orElseThrow().getQuantityOnHand()).isEqualTo(5);
+        assertThat(auditEvents.count()).isEqualTo(before);
+        assertThat(((Number)call("GET",base+"/overview",admin,null).body.get("expiredUnits")).longValue()).isGreaterThanOrEqualTo(5);
+    }
+    @Test void orderPagesSearchSnapshotsAndKeepStableStatusFilteredPages()throws Exception {
+        long p=product();lot(p,"PAGED",12,40);String marker="HISTORY-"+UUID.randomUUID();
+        var product=products.findById(p).orElseThrow();product.setName(marker);products.save(product);
+        long first=order(p,1),second=order(p,2),third=order(p,3);
+        assertThat(call("PUT",base+"/orders/"+second+"/status",admin,Map.of("status","SHIPPED","reason","Доставка")).status).isEqualTo(200);
+        product=products.findById(p).orElseThrow();product.setName("Переименован");products.save(product);
+        var page0=call("GET",base+"/orders/page?q="+marker+"&state=PENDING&size=1&sort=oldest",admin,null);
+        assertThat(page0.status).as(page0.raw).isEqualTo(200);assertThat(((Number)page0.body.get("totalElements")).intValue()).isEqualTo(2);
+        var content=(List<?>)page0.body.get("content");var firstRow=(Map<?,?>)content.getFirst();assertThat(((Number)firstRow.get("id")).longValue()).isEqualTo(first);
+        var item=(Map<?,?>)((List<?>)firstRow.get("items")).getFirst();assertThat(item.containsKey("productName")).isTrue();assertThat(item.containsKey("product")).isFalse();
+        var page1=call("GET",base+"/orders/page?q="+marker+"&state=PENDING&size=1&page=1&sort=oldest",admin,null);
+        assertThat(((Number)((Map<?,?>)((List<?>)page1.body.get("content")).getFirst()).get("id")).longValue()).isEqualTo(third);
+    }
+    @Test void adminPagedListsRejectInvalidQueriesAndEscapeSearchWildcards()throws Exception {
+        assertThat(call("GET",base+"/orders/page",null,null).status).isEqualTo(401);
+        assertThat(call("GET",base+"/audit/page",user,null).status).isEqualTo(403);
+        for(String path:List.of("/orders/page?size=101","/orders/page?page=-1","/orders/page?sort=bad","/orders/page?state=bad","/audit/page?size=0"))
+            assertThat(call("GET",base+path,admin,null).status).isEqualTo(400);
+        String prefix="AUDIT-"+UUID.randomUUID();
+        for(String suffix:List.of("%_","xx")){AuditEvent event=new AuditEvent();event.setActor("test-admin");event.setAction("READ_TEST");event.setResource("audit:test");event.setDetails(prefix+suffix);auditEvents.save(event);}
+        var result=call("GET",base+"/audit/page?q="+prefix+"%25_&size=1",admin,null);
+        assertThat(result.status).as(result.raw).isEqualTo(200);assertThat(((Number)result.body.get("totalElements")).intValue()).isEqualTo(1);
+        assertThat(result.raw).contains(prefix+"%_");
+        AuditEvent translated=new AuditEvent();translated.setActor("test-admin");translated.setAction("PRODUCT_PHOTO_UPDATED");translated.setResource("photo:test");translated.setDetails(prefix);auditEvents.save(translated);
+        var russian=call("GET",base+"/audit/page?q="+java.net.URLEncoder.encode("Обновлено фото",java.nio.charset.StandardCharsets.UTF_8),admin,null);
+        assertThat(russian.status).isEqualTo(200);assertThat(russian.raw).contains("PRODUCT_PHOTO_UPDATED");
+    }
+    @Test void discountConfirmationCannotUseAnOutdatedPrice()throws Exception {
+        long p=product();lot(p,"QUOTE",5,20);
+        var changed=new HashMap<>(productBody("QUOTE-"+p));changed.put("unitPrice",1100);
+        assertThat(call("PUT",base+"/products/"+p,admin,changed).status).isEqualTo(200);
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",10,"reason","Старый расчёт","expectedPrice",900)).status).isEqualTo(409);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",10,"reason","Новый расчёт","expectedPrice",990)).status).isEqualTo(200);
     }
     @Test void adminBoundaryValidationAndStaticStyles()throws Exception {
         assertThat(call("GET",base+"/products",null,null).status).isEqualTo(401);

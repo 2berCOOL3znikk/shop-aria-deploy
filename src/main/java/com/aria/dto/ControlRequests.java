@@ -12,7 +12,10 @@ public final class ControlRequests {
  public record LotInput(@NotNull Long productId,Long supplierId,@NotBlank @Size(max=80) String lotNumber,
   @NotNull @PastOrPresent LocalDate receivedAt,@PastOrPresent LocalDate manufacturedAt,LocalDate expiryDate,
   @Min(1) @Max(1000000) int quantity,@NotNull @DecimalMin("0.00") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal unitCost) {}
- public record DiscountInput(@Min(0) @Max(90) int percent,@NotBlank @Size(max=1000) String reason) {}
+ public record DiscountInput(@Min(0) @Max(90) int percent,@NotBlank @Size(max=1000) String reason,
+  @DecimalMin("0.01") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal expectedPrice) {
+  public DiscountInput(int percent,String reason){this(percent,reason,null);}
+ }
  public record ReasonInput(@NotBlank @Size(max=1000) String reason) {}
  public record OrderStateInput(@NotBlank @Pattern(regexp="SHIPPED|DELIVERED|CANCELLED") String status,@NotBlank @Size(max=1000) String reason) {}
  public record PolicyInput(@NotBlank @Size(max=120) String category,
