@@ -159,6 +159,7 @@ public class SocialService {
         if(cancel){offer.setStatus("CANCELLED");p.setStatus(ProductStatus.CANDIDATE);}
         else {
             if(offer.getValidUntil()!=null && offer.getValidUntil().isBefore(LocalDate.now())) throw new IllegalStateException("Срок выдачи истёк. Отмените резерв и проверьте партии");
+            if(offer.getOrgId()==null||verifications.findByUserId(offer.getOrgId()).filter(v->"VERIFIED".equals(v.getStatus())).isEmpty())throw new IllegalStateException("Проверка организации больше не действительна. Выдача запрещена");
             inventory.consume(p,offer.getQuantityClaimed(),"SOCIAL_TRANSFER_STOCK");
             offer.setStatus("TRANSFERRED"); p.setStatus(p.getQuantityOnHand()==0?ProductStatus.TRANSFERRED:ProductStatus.CANDIDATE);
             offer.setTransferredAt(java.time.LocalDateTime.now());

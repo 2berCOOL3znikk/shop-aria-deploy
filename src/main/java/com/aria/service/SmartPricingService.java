@@ -24,14 +24,16 @@ public class SmartPricingService {
     private final ControlService control;private final AuditService audit;private final TransactionTemplate transaction;
     private final SmartPricingSettingsRepository settings;
     private final CompetitorPriceService competitors;
-    private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
+    private final CharityEligibilityService charities;
+    private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().enable(tools.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
     public SmartPricingService(ProductRepository products,InventoryLotRepository lots,OrderRepository orders,
         PricingDecisionRepository decisions,PriceChangeRepository changes,InventoryService inventory,PricingService pricing,
-        PolicyService policies,ControlService control,AuditService audit,PlatformTransactionManager manager,SmartPricingSettingsRepository settings,CompetitorPriceService competitors){
+        PolicyService policies,ControlService control,AuditService audit,PlatformTransactionManager manager,SmartPricingSettingsRepository settings,CompetitorPriceService competitors,CharityEligibilityService charities){
         this.products=products;this.lots=lots;this.orders=orders;this.decisions=decisions;this.changes=changes;
         this.inventory=inventory;this.pricing=pricing;this.policies=policies;this.control=control;this.audit=audit;this.transaction=new TransactionTemplate(manager);
         this.settings=settings;
         this.competitors=competitors;
+        this.charities=charities;
     }
     public Map<String,Object> analyzeAll(boolean onlyDue){
         int analyzed=0,failed=0;var now=LocalDateTime.now();
@@ -101,6 +103,7 @@ public class SmartPricingService {
         // Refresh decision after product lock: concurrent confirmations must not apply twice.
         refresh(d);if(!"PENDING".equals(d.status))throw new IllegalStateException("Решение уже обработано");
         if(!eligible(p))throw new IllegalStateException("Товар недоступен");
+        if(percent==null&&"AI".equals(d.source)&&!Set.of("PRICE","KEEP").contains(d.strategy))throw new IllegalStateException("AI выбрал непрайсовое действие. Изменение цены требует отдельного ручного решения");
         inventory.ensureLegacyLot(p);inventory.synchronize(p);
         var fresh=SmartPricingEngine.evaluate(facts(p));
         if(!d.reviewAt.isAfter(LocalDateTime.now())||!d.fingerprint.equals(fingerprint(fresh)))throw new IllegalStateException("Данные или срок рекомендации изменились. Запустите новый анализ");
@@ -135,9 +138,22 @@ public class SmartPricingService {
         var result=new LinkedHashMap<String,Object>();result.put("id",d.id);result.put("productId",d.productId);result.put("createdAt",d.createdAt);result.put("reviewAt",d.reviewAt);result.put("status",d.status);
         result.put("report",json.readValue(d.reportJson,Map.class));result.put("explanation",d.explanationJson==null?null:json.readValue(d.explanationJson,Map.class));
         result.put("source",d.source);result.put("selectedPercent",d.selectedPercent);result.put("aiRequestedAt",d.aiRequestedAt);result.put("aiCompletedAt",d.aiCompletedAt);
+        result.put("strategy",d.strategy);
         result.put("decidedAt",d.decidedAt);result.put("decidedBy",d.decidedBy);result.put("decisionReason",d.decisionReason);result.put("appliedPercent",d.appliedPercent);result.put("appliedPrice",d.appliedPrice);return result;
     }
-    @Transactional(readOnly=true) public Map<String,Object> explanationFacts(Long id){var d=decision(id);var report=json.readValue(d.reportJson,Map.class);return Map.of("decisionId",id,"report",report);}
+    @Transactional(readOnly=true) public Map<String,Object> explanationFacts(Long id){
+        var d=decision(id);var report=json.readValue(d.reportJson,Map.class);var p=products.findById(d.productId).orElseThrow();
+        var stats=(Map<?,?>)report.get("sales");double rate=((Number)stats.get("unitsPerDay")).doubleValue();int quantity=inventory.available(p);
+        double risk=((List<?>)report.get("scenarios")).stream().mapToDouble(s->((Number)((Map<?,?>)s).get("estimatedExpiredUnits")).doubleValue()).min().orElse(0);
+        var alternatives=new LinkedHashMap<String,Object>();alternatives.put("socialPossible",risk>0&&quantity>0);alternatives.put("matchingVerifiedOrganizations",charities.matching(p).size());alternatives.put("socialNote","Данные организаций не выдумываются. Регион, пригодность, хранение и транспорт требуют подтверждения. Только черновик без резерва.");
+        alternatives.put("reorderBasis",rate>0?"Средняя частота подтверждённых отгрузок; срок поставки и сезонность неизвестны":"Нет подтверждённых продаж для расчёта закупки");
+        if(rate>0){alternatives.put("daysOfCoverEstimate",Math.round(quantity/rate*100d)/100d);alternatives.put("unitsFor14DaysEstimate",Math.max(0,(int)Math.ceil(rate*14-quantity)));}
+        return Map.of("decisionId",id,"report",report,"alternatives",alternatives);
+    }
+    @Transactional public Map<String,Object> currentForProposal(Long id){
+        var d=decision(id);var p=inventory.lock(d.productId);refresh(d);inventory.synchronize(p);var fresh=SmartPricingEngine.evaluate(facts(p));
+        if(!"PENDING".equals(d.status)||!d.reviewAt.isAfter(LocalDateTime.now())||!d.fingerprint.equals(fingerprint(fresh)))throw new IllegalStateException("Сначала создайте актуальную рекомендацию для социальной проверки");return json.readValue(json.writeValueAsString(fresh),Map.class);
+    }
     @Transactional public Map<String,Object> saveExplanation(Long id,Map<String,Object> explanation){var d=decision(id);if("AI".equals(explanation.get("mode"))||d.explanationJson==null)d.explanationJson=json.writeValueAsString(explanation);return explanation;}
     @Transactional(readOnly=true) public List<Map<String,Object>> history(Long productId){
         var now=LocalDateTime.now();var history=changes.findByProductIdOrderByChangedAtDescIdDesc(productId);var result=new ArrayList<Map<String,Object>>();
@@ -160,7 +176,8 @@ public class SmartPricingService {
         int target="AI".equals(d.source)&&d.selectedPercent!=null?d.selectedPercent:report.suggestedPercent();
         String action=target>report.facts().currentPercent()?"DISCOUNT":target<report.facts().currentPercent()?"RESTORE":"KEEP";
         String block=null;
-        if(!json.readValue(config.allowedCategoriesJson,List.class).contains(PolicyService.categoryKey(report.facts().category())))block="Категория не разрешена владельцем";
+        if("AI".equals(d.source)&&!"PRICE".equals(d.strategy))block="AI выбрал непрайсовое действие: нужно подтверждение администратора";
+        else if(!json.readValue(config.allowedCategoriesJson,List.class).contains(PolicyService.categoryKey(report.facts().category())))block="Категория не разрешена владельцем";
         else if("AI".equals(d.source)&&("LOW".equals(report.confidence())||d.explanationJson==null||!Boolean.FALSE.equals(json.readValue(d.explanationJson,Map.class).get("requiresConfirmation"))))block="AI требует ручного подтверждения: недостаточная уверенность или сомнения";
         else if(!config.allowLowConfidence&&"LOW".equals(report.confidence()))block="Низкая уверенность: требуется ручное подтверждение";
         else if(target>config.maximumDiscount)block="Рекомендуемая скидка превышает лимит автопилота";
@@ -215,12 +232,16 @@ public class SmartPricingService {
         if(!"PENDING".equals(d.status)||!Objects.equals(d.aiClaim,claim.token())||!Objects.equals(config.version,claim.settingsVersion())||!config.externalAiEnabled||scheduled&&!config.scheduledAiEnabled)throw new IllegalStateException("AI-ответ устарел или разрешение изменилось");
         inventory.synchronize(p);var report=SmartPricingEngine.evaluate(facts(p));
         if(!d.reviewAt.isAfter(LocalDateTime.now())||!d.fingerprint.equals(fingerprint(report)))throw new IllegalStateException("Данные изменились во время AI-анализа");
-        d.source="ENGINE";d.selectedPercent=null;
+        d.source="ENGINE";d.selectedPercent=null;d.strategy="PRICE";
         if("AI".equals(response.get("mode"))){
             Object raw=response.get("suggestedPercent");
             if(!(raw instanceof Number n)||n.doubleValue()!=n.intValue()||report.scenarios().stream().noneMatch(s->s.percent()==n.intValue()))throw new IllegalStateException("AI выбрал недопустимый сценарий");
             if(!(response.get("reviewAfterHours") instanceof Number h)||!List.of(6,12,24).contains(h.intValue())||h.doubleValue()!=h.intValue()||h.intValue()>report.reviewAfterHours())throw new IllegalStateException("Недопустимый срок пересмотра AI");
             pricing.validate(p,n.intValue());d.source="AI";d.selectedPercent=n.intValue();
+            String strategy=String.valueOf(response.getOrDefault("strategy","PRICE"));if(!Set.of("PRICE","PROMOTE","SOCIAL_REVIEW","REORDER","KEEP").contains(strategy))throw new IllegalStateException("Недопустимая стратегия AI");d.strategy=strategy;
+            if("KEEP".equals(strategy)&&n.intValue()!=report.facts().currentPercent())throw new IllegalStateException("Сохранение цены не может менять скидку");
+            if("SOCIAL_REVIEW".equals(strategy)&&report.scenarios().stream().mapToDouble(s->s.estimatedExpiredUnits()).min().orElse(0)<=0)throw new IllegalStateException("Нет рассчитанного риска списания для социальной стратегии");
+            if("REORDER".equals(strategy)&&(report.sales().unitsPerDay()<=0||report.sales().unitsPerDay()*14<=report.facts().quantity()))throw new IllegalStateException("Нет данных для рекомендации закупки");
             var proposed=LocalDateTime.now().plusHours(h.intValue());if(proposed.isBefore(d.reviewAt))d.reviewAt=proposed;
         }
         d.explanationJson=json.writeValueAsString(response);d.aiCompletedAt=LocalDateTime.now();d.aiClaim=null;

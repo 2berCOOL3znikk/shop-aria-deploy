@@ -16,6 +16,7 @@ public class PricingDecision {
     @Column(nullable=false,columnDefinition="text") public String reportJson;
     @Column(columnDefinition="text") public String explanationJson;
     @Column(nullable=false,length=10,columnDefinition="varchar(10) default 'ENGINE'") public String source="ENGINE";
+    @Column(nullable=false,length=20,columnDefinition="varchar(20) default 'PRICE'") public String strategy="PRICE";
     public Integer selectedPercent;
     public LocalDateTime aiRequestedAt;
     public LocalDateTime aiCompletedAt;

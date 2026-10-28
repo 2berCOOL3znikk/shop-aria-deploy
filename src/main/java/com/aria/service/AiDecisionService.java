@@ -11,10 +11,13 @@ import java.util.Map;
 @Service
 public class AiDecisionService {
     private final SmartPricingService smart;private final IntelligenceService ai;private final PricingDecisionRepository decisions;
+    private final SocialProposalService social;
     @Value("${aria.smart-pricing.schedule-enabled:true}") private boolean scheduling;
-    public AiDecisionService(SmartPricingService smart,IntelligenceService ai,PricingDecisionRepository decisions){this.smart=smart;this.ai=ai;this.decisions=decisions;}
+    public AiDecisionService(SmartPricingService smart,IntelligenceService ai,PricingDecisionRepository decisions,SocialProposalService social){this.smart=smart;this.ai=ai;this.decisions=decisions;this.social=social;}
     public Map<String,Object> decide(Long id,boolean scheduled){
-        var claim=smart.claimAi(id,scheduled);var result=ai.decidePricing(claim.facts());return smart.completeAi(claim,result,scheduled);
+        var claim=smart.claimAi(id,scheduled);var result=ai.decidePricing(claim.facts());var saved=smart.completeAi(claim,result,scheduled);
+        if("AI".equals(saved.get("source"))&&"SOCIAL_REVIEW".equals(saved.get("strategy"))){try{saved.put("socialProposal",social.propose(id));}catch(IllegalStateException e){saved.put("socialProposalNote","Черновик не создан: пересчитайте данные и проверьте пригодность");}}
+        return saved;
     }
     public Map<String,Object> status(){return ai.pricingStatus();}
     @Scheduled(fixedDelay=60000,initialDelay=60000)

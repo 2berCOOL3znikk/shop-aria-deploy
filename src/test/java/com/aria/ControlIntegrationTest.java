@@ -30,9 +30,10 @@ class ControlIntegrationTest {
     @Autowired SmartPricingSettingsRepository smartSettings;
     @Autowired PriceChangeRepository priceChanges;
     @Autowired com.aria.service.SmartPricingService smartPricing;
+    @Autowired OrganizationVerificationRepository organizationVerifications;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
-    private String admin,user,org;
+    private String admin,user,org,orgEmail;
     private final String base="/api/admin/control";
     record Reply(int status,Map<String,Object> body,String raw) {long id(){return ((Number)body.get("id")).longValue();}}
     @BeforeEach void setup()throws Exception{
@@ -40,7 +41,7 @@ class ControlIntegrationTest {
         String suffix=UUID.randomUUID().toString();
         admin=account("a"+suffix,Role.ADMIN);user=account("u"+suffix,Role.USER);org=account("o"+suffix,Role.ORG);
     }
-    private String account(String name,Role role)throws Exception {String email=name+"@test.local";users.save(new AppUser(email,passwords.encode("testPassword123"),name,role));return (String)call("POST","/api/auth/login",null,Map.of("email",email,"password","testPassword123")).body.get("token");}
+    private String account(String name,Role role)throws Exception {String email=name+"@test.local";if(role==Role.ORG)orgEmail=email;users.save(new AppUser(email,passwords.encode("testPassword123"),name,role));return (String)call("POST","/api/auth/login",null,Map.of("email",email,"password","testPassword123")).body.get("token");}
     private Reply call(String method,String path,String token,Object data)throws Exception {
         var builder=HttpRequest.newBuilder(URI.create("http://localhost:"+env.getProperty("local.server.port")+path));
         if(token!=null)builder.header("Authorization","Bearer "+token);
@@ -365,6 +366,32 @@ class ControlIntegrationTest {
         String old=header+row.replace(date,java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusDays(8).withNano(0).toString());
         assertThat(call("POST",path+"/import",admin,Map.of("sourceId",source,"identityConfirmed",true,"csv",old)).status).isEqualTo(200);
         assertThat(((Map<?,?>)call("GET",path+"/products/"+p,admin,null).body.get("comparison")).get("status")).isEqualTo("NO_VERIFIED_PRICES");
+    }
+    private long verifiedCharity()throws Exception {
+        long id=users.findByEmail(orgEmail).orElseThrow().getId();var v=new OrganizationVerification();v.setUserId(id);v.setOrganizationName("Синтетическая организация для теста");v.setRegistrationNumber("TEST-"+UUID.randomUUID());v.setStatus("VERIFIED");organizationVerifications.save(v);return id;
+    }
+    private void charityAcceptance(long organizationId)throws Exception {
+        var result=call("PUT",base+"/social-proposals/organizations/"+organizationId,admin,Map.of("region","Тестовый регион","categories",List.of("Продукты"),"storageConditions","Условия подтверждены только в тестовом сценарии","minimumRemainingDays",1,"active",true,"informationConfirmed",true));assertThat(result.status).as(result.raw).isEqualTo(200);
+    }
+    @Test void socialProposalDoesNotReserveBeforeExplicitVerifiedApprovalAndUsesExistingHandover()throws Exception {
+        long p=product();lot(p,"DONATE",10,2);long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";
+        assertThat(call("POST",path+"/decisions/"+decision,user,null).status).isEqualTo(403);
+        var proposal=call("POST",path+"/decisions/"+decision,admin,null);assertThat(proposal.status).as(proposal.raw).isEqualTo(200);assertThat(proposal.body.get("status")).isEqualTo("PROPOSED");assertThat(call("POST",path+"/decisions/"+decision,admin,null).id()).isEqualTo(proposal.id());
+        assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.ACTIVE);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
+        long organization=verifiedCharity();var approval=new HashMap<String,Object>(Map.of("organizationId",organization,"quantity",5,"validUntil",LocalDate.now().plusDays(2).toString(),"reason","Согласовано","suitabilityConfirmed",true,"transportConfirmed",true));
+        assertThat(call("POST",path+"/"+proposal.id()+"/approve",admin,approval).status).isEqualTo(409);charityAcceptance(organization);
+        approval.put("suitabilityConfirmed",false);assertThat(call("POST",path+"/"+proposal.id()+"/approve",admin,approval).status).isEqualTo(400);approval.put("suitabilityConfirmed",true);
+        var approved=call("POST",path+"/"+proposal.id()+"/approve",admin,approval);assertThat(approved.status).as(approved.raw).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.RESERVED);
+        assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);long offer=((Number)approved.body.get("offerId")).longValue();
+        assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Фактическая выдача подтверждена")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(5);
+        assertThat(call("GET",path,admin,null).raw).contains("TRANSFERRED");
+    }
+    @Test void socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover()throws Exception {
+        long p=product();lot(p,"DONATE",10,2);long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";long proposal=call("POST",path+"/decisions/"+decision,admin,null).id();long organization=verifiedCharity();charityAcceptance(organization);
+        var approved=call("POST",path+"/"+proposal+"/approve",admin,Map.of("organizationId",organization,"quantity",10,"validUntil",LocalDate.now().plusDays(2).toString(),"reason","Согласовано","suitabilityConfirmed",true,"transportConfirmed",true));assertThat(approved.status).as(approved.raw).isEqualTo(200);
+        var v=organizationVerifications.findByUserId(organization).orElseThrow();v.setStatus("PENDING_VERIFICATION");organizationVerifications.save(v);long offer=((Number)approved.body.get("offerId")).longValue();
+        assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Проверка отменена")).status).isEqualTo(409);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
+        assertThat(call("POST",path+"/"+proposal+"/cancel",admin,Map.of("reason","Не подтверждена организация")).status).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.CANDIDATE);
     }
     private long statisticalPricingProduct()throws Exception {
         var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",1600);
