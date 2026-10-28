@@ -9,12 +9,15 @@ import java.util.*;
 /** External model can explain aggregate facts, but has no write tools or authority over stock/prices. */
 @Service
 public class IntelligenceService {
+    @Value("${aria.intelligence.external-enabled:true}")
+    private boolean externalEnabled=true;
     private final String key,model;
     private final HttpClient client=HttpClient.newBuilder().connectTimeout(Duration.ofSeconds(8)).build();
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     public IntelligenceService(@Value("${ARIA_OPENROUTER_API_KEY:}")String key,@Value("${ARIA_OPENROUTER_MODEL:openai/gpt-4o-mini}")String model){this.key=key;this.model=model;}
     public Map<String,Object> explain(Map<String,Object> facts){
         String fallback=String.join("\n",((List<?>)facts.get("briefing")).stream().map(Object::toString).toList());
+        if(!externalEnabled)return Map.of("mode","RULES","configured",false,"text",fallback,"note","Сводка рассчитана по данным магазина. Внешний AI отключён в бесплатном режиме.");
         if(key.isBlank())return Map.of("mode","RULES","configured",false,"text",fallback,"note","Сводка рассчитана Java. Для AI-объяснения задайте серверную переменную ARIA_OPENROUTER_API_KEY.");
         try {
             String body=json.writeValueAsString(Map.of("model",model,"temperature",0.2,"max_tokens",700,"messages",List.of(

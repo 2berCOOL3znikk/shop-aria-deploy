@@ -11,6 +11,11 @@ import java.util.Map;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
+    @ExceptionHandler({org.springframework.dao.DataAccessResourceFailureException.class,org.springframework.transaction.CannotCreateTransactionException.class})
+    public ResponseEntity<Map<String,String>> handleStorageUnavailable(Exception exception) {
+        return ResponseEntity.status(HttpStatus.SERVICE_UNAVAILABLE).header("Retry-After","30")
+            .body(Map.of("message","Хранилище временно недоступно или пробуждается. Повторите запрос через 30 секунд"));
+    }
     @ExceptionHandler({org.springframework.dao.OptimisticLockingFailureException.class,org.springframework.dao.PessimisticLockingFailureException.class})
     public ResponseEntity<Map<String,String>> handleConcurrent(Exception ex){return ResponseEntity.status(409).body(Map.of("message","Данные уже изменены другим сотрудником. Обновите страницу и повторите действие"));}
     @ExceptionHandler(org.springframework.web.server.ResponseStatusException.class)

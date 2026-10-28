@@ -9,6 +9,10 @@ import java.time.LocalDateTime;
 @Component
 @EnableScheduling
 public class ScheduledTasks {
+    @org.springframework.beans.factory.annotation.Value("${aria.stock-refresh-enabled:true}")
+    private boolean stockRefreshEnabled;
+    @org.springframework.beans.factory.annotation.Value("${aria.background-analysis-enabled:true}")
+    private boolean backgroundAnalysisEnabled;
 
     private final AriaService ariaService;
     private final com.aria.service.InventoryService inventory;
@@ -18,11 +22,12 @@ public class ScheduledTasks {
         this.inventory=inventory;
     }
     @Scheduled(fixedDelay=300000,initialDelay=300000)
-    public void refreshAvailableStock(){inventory.initializeExisting();}
+    public void refreshAvailableStock(){if(stockRefreshEnabled)inventory.initializeExisting();}
 
     // Запускает анализ каждые 24 часа (86400000 мс)
     @Scheduled(fixedRate = 86400000)
     public void runDailyAriaAnalysis() {
+        if(!backgroundAnalysisEnabled)return;
         System.out.println("[SCHEDULER] Запуск автоматического анализа ARIA... " + LocalDateTime.now());
         try {
             AriaService.AnalysisReport report = ariaService.analyze();
