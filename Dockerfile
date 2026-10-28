@@ -13,5 +13,5 @@ COPY --from=build /workspace/target/aria-backend-0.0.1-SNAPSHOT.jar /app/aria.ja
 USER 10001
 EXPOSE 8080
 # Keep heap below the 512 MB instance limit, leaving room for JVM native memory.
-ENV LOGGING_LEVEL_ROOT=INFO
-ENTRYPOINT ["java", "-Xms64m", "-Xmx256m", "-XX:+UseSerialGC", "-XX:ActiveProcessorCount=2", "-XX:TieredStopAtLevel=1", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/aria.jar"]
+ENV LOGGING_LEVEL_ROOT=INFO TZ=Asia/Qyzylorda
+ENTRYPOINT ["java", "-Duser.timezone=Asia/Qyzylorda", "-Xms64m", "-Xmx256m", "-XX:+UseSerialGC", "-XX:ActiveProcessorCount=2", "-XX:TieredStopAtLevel=1", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/aria.jar"]

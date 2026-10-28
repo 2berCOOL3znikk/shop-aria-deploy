@@ -31,12 +31,17 @@ public class AriaService {
     private final InventoryService inventory;
     private final PricingService pricing;
     private final PolicyService policies;
+    private final com.aria.repository.OrderRepository orders;
+    @org.springframework.beans.factory.annotation.Value("${aria.seed-demo-catalog:false}")
+    private boolean demoCatalog;
+    @org.springframework.beans.factory.annotation.Value("${aria.demo-market-enabled:false}")
+    private boolean demoMarketEnabled;
 
     public AriaService(ProductRepository products,
                        TransferLotRepository lots,
                        CompetitorAnalyzerService competitorService,
                        AriaLogRepository logRepo,
-                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing,PolicyService policies) {
+                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing,PolicyService policies, com.aria.repository.OrderRepository orders) {
         this.products = products;
         this.lots = lots;
         this.competitorService = competitorService;
@@ -44,6 +49,7 @@ public class AriaService {
         this.discountRepo = discountRepo;
         this.inventory=inventory;this.pricing=pricing;
         this.policies=policies;
+        this.orders=orders;
     }
 
     @Transactional
@@ -51,6 +57,9 @@ public class AriaService {
         System.out.println("\n[ARIA] === НАЧАЛО АНАЛИЗА === " + LocalDateTime.now());
         LocalDate today = LocalDate.now();
         List<Product> all = products.findAll();
+        java.util.Map<Long,Integer> sales=new java.util.HashMap<>();
+        if(!demoCatalog)for(Object[] row:orders.shippedUnitsSince(LocalDateTime.now().minusDays(30)))
+            sales.put(((Number)row[0]).longValue(),Math.toIntExact(((Number)row[1]).longValue()));
 
         int toCandidate = 0;
         int toActive = 0;
@@ -59,13 +68,14 @@ public class AriaService {
 
         for (Product p : all) {
             if(p.getArchived()) continue;
+            if(!demoCatalog)p.setSalesLast30Days(sales.getOrDefault(p.getId(),0));
             var policy=policies.forProduct(p);
             if (p.getStatus() == ProductStatus.TRANSFERRED || p.getStatus() == ProductStatus.WRITTEN_OFF
                     || p.getStatus() == ProductStatus.RESERVED || p.getStatus() == ProductStatus.SOCIAL
                     || p.getStatus() == ProductStatus.DISCOUNTED) continue;
 
             // Заполняем рыночную цену, если её ещё нет
-            if (p.getMarketAvgPrice() == null) {
+            if (demoMarketEnabled && p.getMarketAvgPrice() == null) {
                 BigDecimal marketPrice = competitorService.findMarketAveragePrice(
                         p.getName(), p.getCategory() != null ? p.getCategory() : ""
                 );
@@ -105,7 +115,7 @@ public class AriaService {
             }
 
             // Правило 4: Цена выше рынка на 20%
-            if (p.getMarketAvgPrice() != null && p.getUnitPrice() != null) {
+            if (demoMarketEnabled && p.getMarketAvgPrice() != null && p.getUnitPrice() != null) {
                 BigDecimal marketPrice = p.getMarketAvgPrice();
                 if (marketPrice.compareTo(BigDecimal.ZERO) > 0) {
                     BigDecimal diffPercent = p.getUnitPrice()

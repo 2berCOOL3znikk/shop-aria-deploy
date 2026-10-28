@@ -17,6 +17,10 @@ public class Order {
     @Column(nullable = false)
     private LocalDateTime createdAt;
 
+    private LocalDateTime shippedAt;
+    public LocalDateTime getShippedAt(){return shippedAt;}
+    public void setShippedAt(LocalDateTime value){shippedAt=value;}
+
     @Column(precision = 12, scale = 2, nullable = false)
     private BigDecimal totalAmount;
 

@@ -14,6 +14,13 @@ public class OrderItem {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Column(length=500)
+    private String productName;
+    @Column(length=64)
+    private String productSku;
+    public String getProductName(){return productName;}
+    public String getProductSku(){return productSku;}
+
     @Column(nullable = false)
     private Integer quantity;
 
@@ -24,6 +31,8 @@ public class OrderItem {
 
     public OrderItem(Product product, int qty, BigDecimal price) {
         this.product = product;
+        this.productName=product.getName();
+        this.productSku=product.getSku();
         this.quantity = qty;
         this.pricePerUnit = price;
     }

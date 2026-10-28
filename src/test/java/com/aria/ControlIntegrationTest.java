@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
 class ControlIntegrationTest {
     @Autowired Environment env;
     @Autowired AppUserRepository users;
@@ -24,6 +24,8 @@ class ControlIntegrationTest {
     @Autowired InventoryLotRepository lots;
     @Autowired InventoryService inventory;
     @Autowired ProductRepository products;
+    @Autowired OrderRepository orders;
+    @Autowired com.aria.service.AriaService analysis;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org;
@@ -47,6 +49,46 @@ class ControlIntegrationTest {
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
     private Reply lot(long p,String number,int qty,int days)throws Exception {var r=call("POST",base+"/lots",admin,lotBody(p,number,qty,days));assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}
+    @Test void registrationRequiresSingleUseCaptchaAndDoesNotAllowRoleEscalation()throws Exception {
+        String email="new-"+UUID.randomUUID()+"@test.local";
+        Map<String,Object> input=new HashMap<>(Map.of("email",email,"password","securePassword123","fullName","Покупатель","role","ADMIN"));
+        assertThat(call("POST","/api/auth/register",null,input).status).isEqualTo(400);
+        var challenge=call("GET","/api/auth/captcha",null,null);
+        String question=(String)challenge.body.get("question");var numbers=java.util.regex.Pattern.compile("\\d+").matcher(question);numbers.find();int a=Integer.parseInt(numbers.group());numbers.find();int b=Integer.parseInt(numbers.group());
+        input.put("captchaId",challenge.body.get("id"));input.put("captchaAnswer",Integer.toString(a+b));
+        var registered=call("POST","/api/auth/register",null,input);assertThat(registered.status).as(registered.raw).isEqualTo(200);
+        assertThat(registered.body.get("role")).isEqualTo("USER");
+        input.put("email","another-"+email);assertThat(call("POST","/api/auth/register",null,input).status).isEqualTo(400);
+    }
+    @Test void passwordChangeRevokesAllEarlierTokensAndKeepsNewLoginUsable()throws Exception {
+        String email="security-"+UUID.randomUUID()+"@test.local";
+        users.save(new AppUser(email,passwords.encode("oldPassword123"),"Security",Role.USER));
+        String token=(String)call("POST","/api/auth/login",null,Map.of("email",email,"password","oldPassword123")).body.get("token");
+        String other=(String)call("POST","/api/auth/login",null,Map.of("email",email,"password","oldPassword123")).body.get("token");
+        assertThat(call("POST","/api/profile/security/password",token,Map.of("currentPassword","wrong","newPassword","newPassword456")).status).isEqualTo(400);
+        assertThat(call("GET","/api/orders",token,null).status).isEqualTo(200);
+        assertThat(call("POST","/api/profile/security/password",token,Map.of("currentPassword","oldPassword123","newPassword","newPassword456")).status).isEqualTo(200);
+        assertThat(call("GET","/api/orders",token,null).status).isEqualTo(401);assertThat(call("GET","/api/orders",other,null).status).isEqualTo(401);
+        assertThat(call("POST","/api/auth/login",null,Map.of("email",email,"password","oldPassword123")).status).isEqualTo(401);
+        assertThat(call("POST","/api/auth/login",null,Map.of("email",email,"password","newPassword456")).status).isEqualTo(200);
+    }
+    @Test void repeatedBadPasswordsAreLimitedWithoutExposingInternalErrors()throws Exception {
+        String email="missing-"+UUID.randomUUID()+"@test.local";
+        for(int i=0;i<6;i++)assertThat(call("POST","/api/auth/login",null,Map.of("email",email,"password","badPassword123")).status).isEqualTo(401);
+        assertThat(call("POST","/api/auth/login",null,Map.of("email",email,"password","badPassword123")).status).isEqualTo(429);
+    }
+    @Test void shippedSalesAndOrderNamesReflectActualConfirmedOperations()throws Exception {
+        long p=product();lot(p,"SALES",8,60);long id=order(p,2);
+        var before=orders.shippedUnitsSince(java.time.LocalDateTime.now().minusDays(30));
+        assertThat(before.stream().filter(row->((Number)row[0]).longValue()==p)).isEmpty();
+        assertThat(call("PUT",base+"/orders/"+id+"/status",admin,Map.of("status","SHIPPED","reason","Передан в доставку")).status).isEqualTo(200);
+        var shipped=orders.findById(id).orElseThrow();assertThat(shipped.getShippedAt()).isNotNull();
+        assertThat(orders.shippedUnitsSince(java.time.LocalDateTime.now().minusDays(30)).stream().filter(row->((Number)row[0]).longValue()==p).map(row->((Number)row[1]).intValue()).toList()).containsExactly(2);
+        var changed=new HashMap<>(productBody("SNAP-"+p));changed.put("name","Другое название");assertThat(call("PUT",base+"/products/"+p,admin,changed).status).isEqualTo(200);
+        assertThat(call("GET","/api/orders",user,null).raw).contains("Тестовый товар").doesNotContain("Другое название");
+        shipped.setShippedAt(java.time.LocalDateTime.now().minusDays(31));orders.save(shipped);
+        assertThat(orders.shippedUnitsSince(java.time.LocalDateTime.now().minusDays(30)).stream().filter(row->((Number)row[0]).longValue()==p)).isEmpty();
+    }
     @Test void adminBoundaryValidationAndStaticStyles()throws Exception {
         assertThat(call("GET",base+"/products",null,null).status).isEqualTo(401);
         assertThat(call("POST",base+"/products",user,productBody("DENIED")).status).isEqualTo(403);

@@ -37,6 +37,8 @@ class AriaServiceTest {
     private AriaLogRepository ariaLogRepository;
     @Mock
     private PolicyService policies;
+    @Mock
+    private com.aria.repository.OrderRepository orders;
     @org.junit.jupiter.api.BeforeEach
     void defaultPolicies(){when(policies.forProduct(any())).thenReturn(new com.aria.entity.PricingPolicy());}
 
@@ -190,9 +192,9 @@ class AriaServiceTest {
         AriaService.AnalysisReport report = ariaService.analyze();
 
         // then
-        assertThat(report.markedCandidate()).isEqualTo(3);
+        assertThat(report.markedCandidate()).isEqualTo(2);
         assertThat(report.urgent()).isEqualTo(1);
-        assertThat(report.priceOutliers()).isEqualTo(1);
+        assertThat(report.priceOutliers()).isZero();
         assertThat(report.totalScanned()).isEqualTo(3);
 
         verify(ariaLogRepository, times(1)).save(any(AriaLog.class));

@@ -23,7 +23,9 @@ public class CaptchaService {
     /**
      * Создаёт новую капчу и возвращает её ID и вопрос.
      */
-    public Map<String, String> createChallenge() {
+    public synchronized Map<String, String> createChallenge() {
+        cleanupExpired();
+        if(challenges.size()>=10000) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.TOO_MANY_REQUESTS,"Слишком много проверок. Повторите позже");
         int a = random.nextInt(10) + 1;
         int b = random.nextInt(10) + 1;
         int answer = a + b;
@@ -48,7 +50,8 @@ public class CaptchaService {
             return false;
         }
 
-        CaptchaChallenge challenge = challenges.get(captchaId);
+        // Each challenge permits only one attempt, including an incorrect answer.
+        CaptchaChallenge challenge = challenges.remove(captchaId);
         if (challenge == null) {
             return false;
         }

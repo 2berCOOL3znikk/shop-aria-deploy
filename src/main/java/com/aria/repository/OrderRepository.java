@@ -12,4 +12,7 @@ public interface OrderRepository extends JpaRepository<Order, Long> {
     java.util.Optional<Order> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);
     List<Order> findAllByOrderByCreatedAtDesc();
     List<Order> findByOwnerEmailOrderByCreatedAtDesc(String ownerEmail);
+
+    @org.springframework.data.jpa.repository.Query("select i.product.id, sum(i.quantity) from Order o join o.items i where o.shippedAt >= :since and o.status in ('SHIPPED','DELIVERED') group by i.product.id")
+    List<Object[]> shippedUnitsSince(@org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since);
 }

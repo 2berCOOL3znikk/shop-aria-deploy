@@ -14,17 +14,20 @@ import java.util.Map;
 
 @Service
 public class JwtService {
+    private final com.aria.repository.AppUserRepository users;
+    public JwtService(com.aria.repository.AppUserRepository users){this.users=users;}
 
     @Value("${jwt.secret:}")
     private String secret;
 
     private SecretKey getSigningKey() {
-        return Keys.hmacShaKeyFor(secret.getBytes());
+        return Keys.hmacShaKeyFor(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8));
     }
 
     public String generateToken(String email, Role role) {
         Map<String, Object> claims = new HashMap<>();
         claims.put("role", role.name());
+        claims.put("version",users.findByEmail(email).orElseThrow().getTokenVersion());
 
         return Jwts.builder()
                 .claims(claims)
@@ -46,7 +49,10 @@ public class JwtService {
 
     public boolean isTokenValid(String token, String email) {
         String extractedEmail = extractEmail(token);
-        return extractedEmail.equals(email) && !isTokenExpired(token);
+        Number version=extractAllClaims(token).get("version",Number.class);
+        long tokenVersion=version==null?0:version.longValue();
+        return extractedEmail.equals(email) && !isTokenExpired(token)
+                && users.findByEmail(email).map(user->user.getTokenVersion()==tokenVersion).orElse(false);
     }
 
     private boolean isTokenExpired(String token) {

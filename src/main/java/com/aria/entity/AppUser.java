@@ -24,6 +24,11 @@ public class AppUser {
     @Column(nullable = false, length = 20)
     private Role role;
 
+    @Column(nullable=false,columnDefinition="bigint default 0")
+    private long tokenVersion=0;
+    public long getTokenVersion(){return tokenVersion;}
+    public void revokeTokens(){tokenVersion++;}
+
     public AppUser() {}
 
     public AppUser(String email, String password, String fullName, Role role) {

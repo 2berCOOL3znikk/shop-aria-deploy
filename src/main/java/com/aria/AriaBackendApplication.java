@@ -28,6 +28,7 @@ public class AriaBackendApplication {
 	}
 
 	@Bean
+	@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="aria.seed-demo-catalog", havingValue="true")
 	public CommandLineRunner initData(ProductRepository products,
 									  UserProfileRepository profiles,
 									  ProductDetailRepository details,

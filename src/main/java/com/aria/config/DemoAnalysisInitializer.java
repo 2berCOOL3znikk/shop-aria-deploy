@@ -7,6 +7,7 @@ import org.springframework.context.event.EventListener;
 import org.springframework.stereotype.Component;
 
 @Component
+@org.springframework.boot.autoconfigure.condition.ConditionalOnProperty(name="aria.seed-demo-catalog", havingValue="true")
 public class DemoAnalysisInitializer {
     private final ProductRepository products;
     private final AriaService aria;

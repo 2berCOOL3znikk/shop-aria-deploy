@@ -117,6 +117,7 @@ public class OrderService {
             rows.sort(java.util.Comparator.comparing(r->r.getLot().getProduct().getId()));
             for(var row:rows) inventory.restore(row.getLot(),row.getQuantity());
         }
+        if("SHIPPED".equals(next))order.setShippedAt(LocalDateTime.now());
         order.setStatus(next);audit.record("ORDER_STATUS_CHANGED","order:"+id,current+" → "+next+" · "+reason);return order;
     }
 }

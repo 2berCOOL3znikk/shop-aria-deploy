@@ -75,7 +75,7 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                 '<span style="color:var(--accent-green);">' + ({PENDING:'Новый',SHIPPED:'Отправлен',DELIVERED:'Доставлен',CANCELLED:'Отменён'}[o.status] || o.status) + '</span>' +
                 '</div>' +
                 '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString('ru-RU') + '</div>' +
-                '<div style="margin-bottom:10px;">' + o.items.map(i => i.productName + ' × ' + i.quantity).join(', ') + '</div>' +
+                '<div style="margin-bottom:10px;">' + o.items.map(i => ariaEscape(i.productName) + ' × ' + i.quantity).join(', ') + '</div>' +
                 '<div style="font-weight:700;color:var(--accent-blue);"><span data-i18n="cart.total">Итого:</span> ' + ariaMoney.format(o.totalAmount) + '</div>' +
                 '</div>'
             ).join('');
@@ -87,3 +87,19 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
     loadCartCount();
     loadProfile();
     loadOrders();
+
+document.getElementById('password-form').addEventListener('submit',async event=>{
+    event.preventDefault();
+    const form=event.currentTarget, message=document.getElementById('password-message'), button=form.querySelector('button');
+    const currentPassword=document.getElementById('current-password').value, newPassword=document.getElementById('new-password').value;
+    if(newPassword!==document.getElementById('repeat-password').value){message.textContent='Новые пароли не совпадают';return;}
+    if(new TextEncoder().encode(newPassword).length>72){message.textContent='Пароль должен занимать не более 72 байт UTF-8';return;}
+    button.disabled=true;message.textContent='Сохраняем новый пароль…';
+    try{
+        const response=await ariaAuth.authFetch('/api/profile/security/password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({currentPassword,newPassword})});
+        const data=await response.json().catch(()=>({}));
+        if(!response.ok)throw new Error(data.message||data.error||'Не удалось изменить пароль');
+        localStorage.removeItem('aria_token');localStorage.removeItem('aria_role');localStorage.removeItem('aria_email');
+        form.reset();message.textContent=data.message;location.href='/login.html?passwordChanged=1';
+    }catch(error){message.textContent=error.message;}finally{button.disabled=false;}
+});

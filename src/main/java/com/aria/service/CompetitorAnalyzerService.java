@@ -8,7 +8,12 @@ import java.util.Random;
 @Service
 public class CompetitorAnalyzerService {
 
+    @org.springframework.beans.factory.annotation.Value("${aria.demo-market-enabled:false}")
+    private boolean demoMarketEnabled;
+
     public BigDecimal findMarketAveragePrice(String productName, String category) {
+        // No external market feed is connected. Never invent a comparison in normal operation.
+        if (!demoMarketEnabled) return null;
         try {
             // Детерминированный рандом по имени товара (всегда одинаковый результат для одного товара)
             Random rand = new Random(productName.hashCode());

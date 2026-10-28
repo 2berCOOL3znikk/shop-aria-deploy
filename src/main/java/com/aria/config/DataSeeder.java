@@ -22,6 +22,8 @@ public class DataSeeder implements CommandLineRunner {
     private boolean seedDemoUsers;
     @Value("${jwt.secret:}")
     private String jwtSecret;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.core.env.Environment environment;
 
     public DataSeeder(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder) {
         this.appUserRepository = appUserRepository;
@@ -30,13 +32,25 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        adminEmail=com.aria.service.AuthService.normalizeEmail(adminEmail);
+        if(environment.acceptsProfiles(org.springframework.core.env.Profiles.of("production"))) {
+            for(var entry:java.util.Map.of("admin@aria.shop","admin123","user@aria.shop","user123","fund@aria.shop","fund123").entrySet()) {
+                appUserRepository.findByEmail(entry.getKey()).ifPresent(user->{
+                    if(passwordEncoder.matches(entry.getValue(),user.getPassword()))
+                        throw new IllegalStateException("В базе остался учебный пароль. Смените его до включения рабочего режима");
+                });
+            }
+        }
         if (adminPassword == null || adminPassword.isBlank()) {
             throw new IllegalStateException("Задайте непустой пароль администратора в ARIA_ADMIN_PASSWORD");
         }
         if (jwtSecret == null || jwtSecret.length() < 32) {
             throw new IllegalStateException("Задайте ARIA_JWT_SECRET длиной не менее 32 символов");
         }
-        if (!appUserRepository.existsByEmail(adminEmail)) {
+        var existingAdmin=appUserRepository.findByEmailIgnoreCase(adminEmail);
+        if(existingAdmin.isPresent() && existingAdmin.get().getRole()!=Role.ADMIN)
+            throw new IllegalStateException("Email владельца уже принадлежит пользователю без роли администратора. Выберите отдельный аккаунт владельца");
+        if (existingAdmin.isEmpty()) {
             AppUser admin = new AppUser();
             admin.setEmail(adminEmail);
             admin.setPassword(passwordEncoder.encode(adminPassword));

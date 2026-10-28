@@ -30,7 +30,7 @@ public class OrderController {
 
     @PostMapping("/checkout")
     public Map<String, Object> checkout(@RequestBody Map<String, String> data, Authentication authentication) {
-        String address = data.getOrDefault("address", "г. Кызылорда, Казахстан");
+        String address = data.get("address");
         Order order = service.createOrderFromCart(authentication.getName(), address);
         return orderToMap(order);
     }
@@ -48,8 +48,8 @@ public class OrderController {
             itemMap.put("pricePerUnit", item.getPricePerUnit());
             Product p = item.getProduct();
             if (p != null) {
-                itemMap.put("productName", p.getName());
-                itemMap.put("productSku", p.getSku());
+                itemMap.put("productName", item.getProductName()!=null?item.getProductName():p.getName());
+                itemMap.put("productSku", item.getProductSku()!=null?item.getProductSku():p.getSku());
                 itemMap.put("imageUrl", p.getImageUrl() != null ? p.getImageUrl() : "/images/product-generic.svg");
             }
             return itemMap;

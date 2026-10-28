@@ -40,6 +40,20 @@
     <input type="text" id="address" data-i18n-placeholder="profile.address" placeholder="Адрес">
     <button class="btn-glow" onclick="saveProfile()" data-i18n="profile.save">Сохранить</button>
   </section>
+  <section class="glass-card profile-form">
+    <h2>Безопасность аккаунта</h2>
+    <form id="password-form">
+      <label for="current-password">Текущий пароль</label>
+      <input id="current-password" type="password" autocomplete="current-password" required maxlength="72">
+      <label for="new-password">Новый пароль — от 12 символов</label>
+      <input id="new-password" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
+      <label for="repeat-password">Повторите новый пароль</label>
+      <input id="repeat-password" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
+      <p>После смены пароля все ранее выданные сеансы завершатся.</p>
+      <button class="btn-glow" type="submit">Изменить пароль</button>
+      <p id="password-message" role="status" aria-live="polite"></p>
+    </form>
+  </section>
   <section class="glass-card profile-orders">
     <h2 data-i18n="profile.orders">Мои заказы</h2>
     <div id="orders"></div>

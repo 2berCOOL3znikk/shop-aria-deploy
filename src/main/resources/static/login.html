@@ -113,7 +113,7 @@
             <div id="register-error" class="error-message"></div>
             <input type="text" id="register-fullName" placeholder="ФИО" required>
             <input type="email" id="register-email" placeholder="Email" required>
-            <input type="password" id="register-password" placeholder="Пароль" required>
+            <input type="password" id="register-password" placeholder="Пароль — от 12 символов" required minlength="12" maxlength="72" autocomplete="new-password">
 
             <!-- Honeypot field (скрыт от людей, но боты его заполнят) -->
             <input type="text" name="website" style="display: none;" tabindex="-1" autocomplete="off">
@@ -131,12 +131,6 @@
         <div class="guest-link">
             <a href="/index.html">Продолжить без входа — витрина открыта</a>
         </div>
-        <section class="demo-accounts" aria-label="Демо-аккаунты для учебного проекта">
-            <h2>Учебные аккаунты</h2>
-            <p>Покупатель: <code>user@aria.shop</code> / <code>user123</code></p>
-            <p>Администратор: <code>admin@aria.shop</code> / <code>admin123</code></p>
-            <p>Фонд: <code>fund@aria.shop</code> / <code>fund123</code></p>
-        </section>
     </div>
 </div>
 
@@ -203,7 +197,7 @@
                 errorDiv.classList.add('show');
             } else {
                 const err = await res.json();
-                errorDiv.textContent = err.error || 'Ошибка входа';
+                errorDiv.textContent = err.error || err.message || 'Ошибка входа';
                 errorDiv.classList.add('show');
             }
         } catch (e) {
@@ -248,7 +242,7 @@
                 location.href = safeNext(next, data.role);
             } else {
                 const err = await res.json().catch(() => ({}));
-                errorDiv.textContent = err.error || 'Ошибка регистрации';
+                errorDiv.textContent = err.error || err.message || 'Ошибка регистрации';
                 errorDiv.classList.add('show');
                 window.loadRegisterCaptcha();
             }
