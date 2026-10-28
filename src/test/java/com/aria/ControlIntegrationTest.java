@@ -8,6 +8,7 @@ import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.core.env.Environment;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import java.net.URI;
 import java.net.http.*;
@@ -16,7 +17,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
 class ControlIntegrationTest {
     @Autowired Environment env;
     @Autowired AppUserRepository users;
@@ -30,6 +31,7 @@ class ControlIntegrationTest {
     @Autowired SmartPricingSettingsRepository smartSettings;
     @Autowired PriceChangeRepository priceChanges;
     @Autowired com.aria.service.SmartPricingService smartPricing;
+    @Autowired PricingDecisionRepository pricingDecisions;
     @Autowired OrganizationVerificationRepository organizationVerifications;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
@@ -351,6 +353,10 @@ class ControlIntegrationTest {
         String next=java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusMinutes(30).withNano(0).toString();
         assertThat(call("POST",path+"/import",admin,Map.of("sourceId",source,"identityConfirmed",true,"csv",csv.replace(date,next).replace("950.00","900.00"))).status).isEqualTo(200);
         assertThat(call("POST",base+"/smart-pricing/"+decision+"/apply",admin,Map.of("percent",5,"reason","Старые рыночные данные")).status).isEqualTo(409);
+        assertThat(call("POST",base+"/smart-pricing/analyze?onlyDue=true",admin,null).status).isEqualTo(200);
+        assertThat(pricingDecisions.findFirstByProductIdOrderByCreatedAtDescIdDesc(p).orElseThrow().id).isNotEqualTo(decision);
+        var changedSource=new HashMap<String,Object>(input);changedSource.put("baseUrl","https://new-prices.example.org");assertThat(call("PUT",path+"/"+source,admin,changedSource).status).isEqualTo(200);
+        assertThat(((Map<?,?>)call("GET",path+"/products/"+p,admin,null).body.get("comparison")).get("status")).isEqualTo("NO_VERIFIED_PRICES");
         var off=new HashMap<String,Object>(input);off.put("active",false);assertThat(call("PUT",path+"/"+source,admin,off).status).isEqualTo(200);
         assertThat(((Map<?,?>)call("GET",path+"/products/"+p,admin,null).body.get("comparison")).get("status")).isEqualTo("NO_VERIFIED_PRICES");
     }
@@ -393,16 +399,48 @@ class ControlIntegrationTest {
         assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Проверка отменена")).status).isEqualTo(409);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
         assertThat(call("POST",path+"/"+proposal+"/cancel",admin,Map.of("reason","Не подтверждена организация")).status).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.CANDIDATE);
     }
-    private long statisticalPricingProduct()throws Exception {
-        var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",1600);
+    @Test void publicAssistantWorksWithoutLoginAndOnlyReturnsAvailablePublicCatalog()throws Exception {
+        long p=product();lot(p,"ASSISTANT",5,20);var row=products.findById(p).orElseThrow();var input=new HashMap<>(productBody(row.getSku()));input.put("name","Уникальный шоколад помощника");call("PUT",base+"/products/"+p,admin,input);
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",10,"reason","Акция для проверки помощника")).status).isEqualTo(200);
+        var reply=call("POST","/api/assistant/query",null,Map.of("query","Найди шоколад до 2000 ₸","productIds",List.of(p),"externalAiConsent",false));assertThat(reply.status).as(reply.raw).isEqualTo(200);assertThat(reply.body.get("source")).isEqualTo("ENGINE");
+        assertThat(reply.raw).contains("Уникальный шоколад помощника").doesNotContain("unitCost","ariaReason","minimumPrice","ownerEmail","deliveryAddress","supplier","marketAvgPrice","Bearer");
+        var picks=(List<?>)reply.body.get("products");assertThat(picks).hasSize(1);assertThat(new java.math.BigDecimal(((Map<?,?>)picks.getFirst()).get("displayPrice").toString())).isEqualByComparingTo("900");
+        var cheap=call("POST","/api/assistant/query",null,Map.of("query","до 100 ₸","productIds",List.of(p),"externalAiConsent",true));assertThat((List<?>)cheap.body.get("products")).isEmpty();
+        long empty=product();assertThat(call("POST","/api/assistant/query",null,Map.of("query","Сравни товары","productIds",List.of(empty),"externalAiConsent",false)).status).isEqualTo(400);
+        assertThat(call("GET","/api/assistant/status",null,null).status).isEqualTo(200);
+    }
+    @Test void publicAssistantRespectsDiscountFiltersAndDoesNotInventCurrencyRates()throws Exception {
+        long p=product();lot(p,"ASSISTANT",3,20);
+        var regular=call("POST","/api/assistant/query",null,Map.of("query","Что сейчас со скидкой?","productIds",List.of(p),"externalAiConsent",false));assertThat(regular.status).isEqualTo(200);assertThat((List<?>)regular.body.get("products")).isEmpty();
+        assertThat(call("POST","/api/assistant/query",null,Map.of("query","до 10 USD","externalAiConsent",false)).status).isEqualTo(400);
+        assertThat(call("POST","/api/assistant/query",null,Map.of("query","x".repeat(501),"externalAiConsent",false)).status).isEqualTo(400);
+        var setting=new SmartPricingSettings();setting.publicAssistantAiEnabled=true;smartSettings.save(setting);
+        var fallback=call("POST","/api/assistant/query",null,Map.of("query","Сравни эти товары","productIds",List.of(p),"externalAiConsent",true));assertThat(fallback.status).as(fallback.raw).isEqualTo(200);assertThat(fallback.body.get("source")).isEqualTo("ENGINE");
+    }
+    @Test void unprocessableAiDecisionDoesNotStarveTheScheduledQueue()throws Exception {
+        long p=product();long id=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();enableDecisionAi();var now=java.time.LocalDateTime.now();
+        assertThat(pricingDecisions.aiCandidates(now,now.minusHours(1),now.minusSeconds(90),PageRequest.of(0,10000))).contains(id);
+        smartPricing.recordSkippedAi(id,"Нет пригодного остатка");
+        assertThat(pricingDecisions.aiCandidates(now,now.minusHours(1),now.minusSeconds(90),PageRequest.of(0,10000))).doesNotContain(id);
+        assertThat(products.findById(p).orElseThrow().getQuantityOnHand()).isZero();
+    }
+    private long statisticalPricingProduct()throws Exception {return statisticalPricingProduct(false);}
+    private long statisticalPricingProduct(boolean strong)throws Exception {
+        var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",strong?1000:1600);
         long id=call("POST",base+"/products",admin,body).id();lot(id,"STAT",5000,3);var p=products.findById(id).orElseThrow();p.setReceivedAt(LocalDate.now().minusDays(40));products.save(p);
-        int[] prices={800,1000,1250,1600},quantities={938,600,384,234};
-        for(int i=0;i<4;i++){
-            var from=LocalDate.now().minusDays(24-i*6).atStartOfDay();var price=java.math.BigDecimal.valueOf(prices[i]);
+        int[] prices=strong?new int[]{800,1600,900,1100,1250,1000}:new int[]{800,1000,1250,1600},quantities=strong?new int[]{625,156,494,331,256,400}:new int[]{938,600,384,234};
+        for(int i=0;i<prices.length;i++){
+            var from=LocalDate.now().minusDays(24-i*(strong?4:6)).atStartOfDay();var price=java.math.BigDecimal.valueOf(prices[i]);
             var change=new PriceChange();change.productId=id;change.changedAt=from;change.actor="test-statistics";change.reason="Синтетический период только для проверки";
             change.oldBasePrice=java.math.BigDecimal.valueOf(i==0?1600:prices[i-1]);change.newBasePrice=price;change.oldPercent=0;change.newPercent=0;change.costAtChange=java.math.BigDecimal.valueOf(800);change.availableAtChange=5000;priceChanges.save(change);
             var order=new com.aria.entity.Order();order.setStatus("SHIPPED");order.setShippedAt(from.plusDays(1));order.setOwnerEmail("statistics@test.local");order.setTotalAmount(price.multiply(java.math.BigDecimal.valueOf(quantities[i])));order.getItems().add(new OrderItem(p,quantities[i],price));orders.save(order);
         }return id;
+    }
+    @Test void sufficientlySupportedAiChoiceCanAutoApplyAndKeepsItsActualSource()throws Exception {
+        long p=statisticalPricingProduct(true);String path=base+"/smart-pricing";var recommendation=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(((Map<?,?>)recommendation.body.get("report")).get("confidence")).isEqualTo("MEDIUM");
+        enableDecisionAi();var setting=smartSettings.findById(1L).orElseThrow();setting.mode="AUTOPILOT";setting.maximumDiscount=10;setting.allowedCategoriesJson="[\"продукты\"]";smartSettings.save(setting);
+        var claim=smartPricing.claimAi(recommendation.id(),true);var response=new HashMap<>(aiReply(5));response.put("requiresConfirmation",false);response.put("strategy","PRICE");response.put("explanation","Достаточная устойчивая описательная история; выбран осторожный допустимый сценарий 5%");
+        var applied=smartPricing.completeAi(claim,response,true);assertThat(applied.get("status")).isEqualTo("APPLIED");assertThat(applied.get("source")).isEqualTo("AI");assertThat(applied.get("selectedPercent")).isEqualTo(5);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(5);
     }
     private Reply configureAutopilot(String category,int maximum,boolean lowConfidence)throws Exception {
         String path=base+"/smart-pricing";var current=call("GET",path+"/settings",admin,null);

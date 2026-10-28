@@ -85,6 +85,13 @@ class IntelligenceServiceTest {
         var invalid=pricingClient("{\"explanation\":\"Слишком поздно\",\"risks\":[],\"suggestedPercent\":5,\"reviewAfterHours\":24,\"requiresConfirmation\":false}");
         assertThat(new IntelligenceService("test-key","openrouter/free",invalid).decidePricing(facts)).containsEntry("mode","ENGINE");
     }
+    @Test void publicAssistantCanOnlyChooseRealIdsAndNeverSendsPurchaseCosts()throws Exception {
+        var client=pricingClient("{\"productIds\":[1]}");var row=Map.<String,Object>of("id",1,"name","Шоколад","displayPrice",1000,"unitCost",800,"ariaReason","private-internal-reason");
+        var result=new IntelligenceService("test-key","openrouter/free",client).choosePublicProducts("Шоколад до 2000",List.of(row));assertThat(result).containsEntry("mode","AI");
+        var captor=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(client).send(captor.capture(),any(HttpResponse.BodyHandler.class));assertThat(body(captor.getValue())).doesNotContain("unitCost","ariaReason","private-internal-reason");
+        var invalid=pricingClient("{\"productIds\":[999]}");assertThat(new IntelligenceService("test-key","openrouter/free",invalid).choosePublicProducts("Товар",List.of(row))).containsEntry("mode","ENGINE");
+        var forged=pricingClient("{\"productIds\":[1],\"price\":1}");assertThat(new IntelligenceService("test-key","openrouter/free",forged).choosePublicProducts("Товар",List.of(row))).containsEntry("mode","ENGINE");
+    }
     private String body(HttpRequest request)throws Exception {
         var done=new CompletableFuture<String>();var out=new java.io.ByteArrayOutputStream();
         request.bodyPublisher().orElseThrow().subscribe(new Flow.Subscriber<ByteBuffer>(){

@@ -55,6 +55,8 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/api/social/offers").permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/social/impact").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/feedback").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/api/assistant/query").permitAll()
+                        .requestMatchers(HttpMethod.GET, "/api/assistant/status").permitAll()
                         .requestMatchers(HttpMethod.POST, "/api/social/offers").hasRole("ADMIN")
                         .requestMatchers("/api/social/offers/*/claim", "/api/social/my-claims", "/api/social/my-claims/**").hasRole("ORG")
                         .requestMatchers("/api/aria/**", "/api/aria/suggestions/**", "/api/admin/**", "/api/articles/**", "/api/debug/**", "/api/feedback/**")

@@ -22,13 +22,15 @@ public class ControlController {
     private final IntelligenceService intelligence;
     private final PolicyService policies;
     private final AdminReadService adminRead;
-    public ControlController(ControlService control,InventoryService inventory,PricingService pricing,ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,AuditEventRepository events,OrderRepository orders,SocialService social,SocialOfferRepository offers,OrderService orderService,IntelligenceService intelligence,PolicyService policies,AdminReadService adminRead){
+    private final SmartPricingService smart;
+    public ControlController(ControlService control,InventoryService inventory,PricingService pricing,ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,AuditEventRepository events,OrderRepository orders,SocialService social,SocialOfferRepository offers,OrderService orderService,IntelligenceService intelligence,PolicyService policies,AdminReadService adminRead,SmartPricingService smart){
         this.control=control;this.inventory=inventory;this.pricing=pricing;this.products=products;this.details=details;this.suppliers=suppliers;this.events=events;this.orders=orders;
         this.social=social;
         this.offers=offers;
         this.orderService=orderService;
         this.intelligence=intelligence;
         this.policies=policies;this.adminRead=adminRead;
+        this.smart=smart;
     }
     @GetMapping("/products") public List<com.aria.dto.AdminViews.ProductRow> products(){return adminRead.productRows();}
     @GetMapping("/products/{id}") public Map<String,Object> product(@PathVariable Long id){var result=new HashMap<String,Object>();result.put("product",inventory.lock(id));result.put("details",details.findByProductId(id).orElse(null));return result;}
@@ -54,5 +56,8 @@ public class ControlController {
     @PostMapping("/social/{id}/confirm") public SocialOffer confirmSocial(@PathVariable Long id,@Valid @RequestBody ReasonInput input){return social.finish(id,false,input.reason());}
     @PostMapping("/social/{id}/cancel") public SocialOffer cancelSocial(@PathVariable Long id,@Valid @RequestBody ReasonInput input){return social.finish(id,true,input.reason());}
     @GetMapping("/overview") public Map<String,Object> overview(){return adminRead.overview();}
-    @PostMapping("/intelligence/briefing") public Map<String,Object> briefing(){return intelligence.explain(overview());}
+    @PostMapping("/intelligence/briefing") public Map<String,Object> briefing(){
+        var facts=overview();if(!Boolean.TRUE.equals(smart.settings().get("externalAiEnabled")))return Map.of("mode","RULES","configured",false,"text",String.join("\n",((List<?>)facts.get("briefing")).stream().map(Object::toString).toList()),"note","Расчёт Java. Для внешнего AI требуется согласие в настройках Smart Pricing.");
+        return intelligence.explain(facts);
+    }
 }

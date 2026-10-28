@@ -36,10 +36,10 @@ public class SmartPricingService {
         this.charities=charities;
     }
     public Map<String,Object> analyzeAll(boolean onlyDue){
-        int analyzed=0,failed=0;var now=LocalDateTime.now();
+        int analyzed=0,failed=0;
         for(var product:products.findAll().stream().filter(this::eligible).sorted(Comparator.comparing(Product::getId)).toList()){
-            var last=decisions.findFirstByProductIdOrderByCreatedAtDescIdDesc(product.getId());
-            if(onlyDue&&last.isPresent()&&last.get().reviewAt.isAfter(now))continue;
+            // Time alone is insufficient: stock, sales or imported prices can change before reviewAt.
+            // analyzeLocked compares the full current fingerprint and keeps an unchanged decision idempotent.
             try{transaction.execute(s->analyzeLocked(product.getId()));analyzed++;}catch(RuntimeException e){failed++;org.slf4j.LoggerFactory.getLogger(SmartPricingService.class).warn("Smart Pricing calculation failed for product {} ({})",product.getId(),e.getClass().getSimpleName());}
         }
         return Map.of("analyzed",analyzed,"failed",failed,"mode",settings.findById(1L).map(s->s.mode).orElse("RECOMMEND"));
@@ -61,7 +61,7 @@ public class SmartPricingService {
         decisions.flush();
         var d=new PricingDecision();d.productId=productId;d.createdAt=LocalDateTime.now();d.reviewAt=d.createdAt.plusHours(report.reviewAfterHours());
         d.fingerprint=fingerprint;d.reportJson=json.writeValueAsString(report);decisions.saveAndFlush(d);
-        audit.record("SMART_PRICING_RECOMMENDED","product:"+productId,report.action()+" · "+report.suggestedPercent()+"% · уверенность LOW");autopilot(d,report);return d;
+        audit.record("SMART_PRICING_RECOMMENDED","product:"+productId,report.action()+" · "+report.suggestedPercent()+"% · уверенность "+report.confidence());autopilot(d,report);return d;
     }
     private boolean eligible(Product p){return !p.getArchived()&&Set.of(com.aria.enums.ProductStatus.ACTIVE,com.aria.enums.ProductStatus.CANDIDATE,com.aria.enums.ProductStatus.DISCOUNTED).contains(p.getStatus())&&p.getUnitPrice()!=null&&p.getUnitPrice().signum()>0;}
     private Facts facts(Product p){
@@ -88,7 +88,7 @@ public class SmartPricingService {
     }
     private String fingerprint(Report report){
         try{var last=changes.findFirstByProductIdOrderByChangedAtDescIdDesc(report.facts().productId()).map(c->c.id).orElse(0L);
-            var raw=json.writeValueAsString(report.facts())+"|"+last;
+            var raw=json.writeValueAsString(report)+"|"+last;
             return HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(raw.getBytes(java.nio.charset.StandardCharsets.UTF_8)));
         }catch(java.security.NoSuchAlgorithmException e){throw new IllegalStateException("SHA-256 недоступен");}
     }
@@ -139,6 +139,7 @@ public class SmartPricingService {
         result.put("report",json.readValue(d.reportJson,Map.class));result.put("explanation",d.explanationJson==null?null:json.readValue(d.explanationJson,Map.class));
         result.put("source",d.source);result.put("selectedPercent",d.selectedPercent);result.put("aiRequestedAt",d.aiRequestedAt);result.put("aiCompletedAt",d.aiCompletedAt);
         result.put("strategy",d.strategy);
+        result.put("aiLastSkippedAt",d.aiLastSkippedAt);result.put("aiLastSkippedNote",d.aiLastSkippedNote);
         result.put("decidedAt",d.decidedAt);result.put("decidedBy",d.decidedBy);result.put("decisionReason",d.decisionReason);result.put("appliedPercent",d.appliedPercent);result.put("appliedPrice",d.appliedPrice);return result;
     }
     @Transactional(readOnly=true) public Map<String,Object> explanationFacts(Long id){
@@ -192,6 +193,7 @@ public class SmartPricingService {
     @Transactional(readOnly=true) public Map<String,Object> settings(){return settingsView(settings.findById(1L).orElseGet(SmartPricingSettings::new));}
     private Map<String,Object> settingsView(SmartPricingSettings s){
         var out=new LinkedHashMap<String,Object>();out.put("aiDailyBudget",s.aiDailyBudget);out.put("aiBudgetUsed",LocalDate.now().equals(s.aiBudgetDate)?s.aiBudgetUsed:0);out.put("version",s.version);out.put("mode",s.mode);out.put("maximumDiscount",s.maximumDiscount);out.put("cooldownHours",s.cooldownHours);
+        out.put("publicAssistantAiEnabled",s.publicAssistantAiEnabled);out.put("publicAiDailyBudget",s.publicAiDailyBudget);out.put("publicAiBudgetUsed",LocalDate.now().equals(s.publicAiBudgetDate)?s.publicAiBudgetUsed:0);
         out.put("externalAiEnabled",s.externalAiEnabled);out.put("scheduledAiEnabled",s.scheduledAiEnabled);out.put("allowLowConfidence",s.allowLowConfidence);out.put("allowRestore",s.allowRestore);out.put("allowedCategories",json.readValue(s.allowedCategoriesJson,List.class));out.put("updatedAt",s.updatedAt);return out;
     }
     @Transactional public Map<String,Object> configure(com.aria.controller.SmartPricingController.SettingsInput input){
@@ -203,12 +205,15 @@ public class SmartPricingService {
         boolean scheduled=input.scheduledAiEnabled()==null?s.scheduledAiEnabled:input.scheduledAiEnabled();
         if(scheduled&&!external)throw new IllegalArgumentException("Для расписания требуется согласие на внешний AI");
         if(input.aiDailyBudget()!=null)s.aiDailyBudget=input.aiDailyBudget()==0?10:input.aiDailyBudget();
+        if(input.publicAssistantAiEnabled()!=null)s.publicAssistantAiEnabled=input.publicAssistantAiEnabled();
+        if(input.publicAiDailyBudget()!=null)s.publicAiDailyBudget=input.publicAiDailyBudget();
+        s.consentRevision++;
         s.externalAiEnabled=external;s.scheduledAiEnabled=scheduled;s.mode=input.mode();s.maximumDiscount=input.maximumDiscount();s.cooldownHours=input.cooldownHours();s.allowLowConfidence=input.allowLowConfidence();s.allowRestore=input.allowRestore();s.allowedCategoriesJson=json.writeValueAsString(categories);s.updatedAt=LocalDateTime.now();settings.saveAndFlush(s);
         String detail=s.mode+" · AI "+s.externalAiEnabled+" · AI-расписание "+s.scheduledAiEnabled+" · AI-лимит "+s.aiDailyBudget+" · максимум "+s.maximumDiscount+"% · низкая уверенность "+s.allowLowConfidence+" · категории "+String.join(", ",categories);
         audit.record("SMART_AUTOPILOT_CONFIGURED","smart-pricing",detail.substring(0,Math.min(1000,detail.length())));return settingsView(s);
     }
     @Transactional public Map<String,Object> stop(){
-        var s=settings.lockSettings().orElseGet(SmartPricingSettings::new);s.mode="RECOMMEND";s.scheduledAiEnabled=false;s.updatedAt=LocalDateTime.now();settings.saveAndFlush(s);
+        var s=settings.lockSettings().orElseGet(SmartPricingSettings::new);s.mode="RECOMMEND";s.scheduledAiEnabled=false;s.consentRevision++;s.updatedAt=LocalDateTime.now();settings.saveAndFlush(s);
         audit.record("SMART_AUTOPILOT_STOPPED","smart-pricing","Экстренное отключение; новые автоматические изменения запрещены. Уже применённые цены можно откатить отдельно.");return settingsView(s);
     }
     public record AiClaim(Long id,String token,Long settingsVersion,Map<String,Object> facts){}
@@ -225,11 +230,11 @@ public class SmartPricingService {
         if(config.aiBudgetUsed>=config.aiDailyBudget)throw new IllegalStateException("Достигнут дневной лимит AI-решений");
         config.aiBudgetUsed++;config.lastAiRequestAt=now;settings.saveAndFlush(config);
         d.aiClaim=UUID.randomUUID().toString();d.aiRequestedAt=now;decisions.flush();
-        return new AiClaim(d.id,d.aiClaim,config.version,explanationFacts(d.id));
+        return new AiClaim(d.id,d.aiClaim,config.consentRevision,explanationFacts(d.id));
     }
     @Transactional public Map<String,Object> completeAi(AiClaim claim,Map<String,Object> response,boolean scheduled){
         var d=decision(claim.id());var p=inventory.lock(d.productId);refresh(d);var config=settings.lockSettings().orElseThrow();
-        if(!"PENDING".equals(d.status)||!Objects.equals(d.aiClaim,claim.token())||!Objects.equals(config.version,claim.settingsVersion())||!config.externalAiEnabled||scheduled&&!config.scheduledAiEnabled)throw new IllegalStateException("AI-ответ устарел или разрешение изменилось");
+        if(!"PENDING".equals(d.status)||!Objects.equals(d.aiClaim,claim.token())||!Objects.equals(config.consentRevision,claim.settingsVersion())||!config.externalAiEnabled||scheduled&&!config.scheduledAiEnabled)throw new IllegalStateException("AI-ответ устарел или разрешение изменилось");
         inventory.synchronize(p);var report=SmartPricingEngine.evaluate(facts(p));
         if(!d.reviewAt.isAfter(LocalDateTime.now())||!d.fingerprint.equals(fingerprint(report)))throw new IllegalStateException("Данные изменились во время AI-анализа");
         d.source="ENGINE";d.selectedPercent=null;d.strategy="PRICE";
@@ -239,13 +244,20 @@ public class SmartPricingService {
             if(!(response.get("reviewAfterHours") instanceof Number h)||!List.of(6,12,24).contains(h.intValue())||h.doubleValue()!=h.intValue()||h.intValue()>report.reviewAfterHours())throw new IllegalStateException("Недопустимый срок пересмотра AI");
             pricing.validate(p,n.intValue());d.source="AI";d.selectedPercent=n.intValue();
             String strategy=String.valueOf(response.getOrDefault("strategy","PRICE"));if(!Set.of("PRICE","PROMOTE","SOCIAL_REVIEW","REORDER","KEEP").contains(strategy))throw new IllegalStateException("Недопустимая стратегия AI");d.strategy=strategy;
-            if("KEEP".equals(strategy)&&n.intValue()!=report.facts().currentPercent())throw new IllegalStateException("Сохранение цены не может менять скидку");
+            if(!"PRICE".equals(strategy)&&n.intValue()!=report.facts().currentPercent())throw new IllegalStateException("Непрайсовая стратегия не может одновременно менять скидку");
             if("SOCIAL_REVIEW".equals(strategy)&&report.scenarios().stream().mapToDouble(s->s.estimatedExpiredUnits()).min().orElse(0)<=0)throw new IllegalStateException("Нет рассчитанного риска списания для социальной стратегии");
             if("REORDER".equals(strategy)&&(report.sales().unitsPerDay()<=0||report.sales().unitsPerDay()*14<=report.facts().quantity()))throw new IllegalStateException("Нет данных для рекомендации закупки");
             var proposed=LocalDateTime.now().plusHours(h.intValue());if(proposed.isBefore(d.reviewAt))d.reviewAt=proposed;
         }
-        d.explanationJson=json.writeValueAsString(response);d.aiCompletedAt=LocalDateTime.now();d.aiClaim=null;
+        d.explanationJson=json.writeValueAsString(response);d.aiCompletedAt=LocalDateTime.now();d.aiClaim=null;d.aiLastSkippedAt=null;d.aiLastSkippedNote=null;
         audit.record("SMART_AI_DECISION","decision:"+d.id,d.source+" · "+(d.selectedPercent==null?report.suggestedPercent():d.selectedPercent)+"% · исходные ограничения повторно проверены");
+        decisions.saveAndFlush(d); // apply() refreshes the row; keep the validated AI selection in the same atomic transaction.
         autopilot(d,report);return view(d);
+    }
+    @Transactional public void recordSkippedAi(Long id,String reason){
+        var d=decision(id);inventory.lock(d.productId);refresh(d);var config=settings.lockSettings().orElse(null);
+        if(config==null||!config.externalAiEnabled||!config.scheduledAiEnabled||!"PENDING".equals(d.status)||d.aiClaim!=null&&d.aiRequestedAt.isAfter(LocalDateTime.now().minusSeconds(90)))return;
+        d.aiLastSkippedAt=LocalDateTime.now();d.aiLastSkippedNote=reason.substring(0,Math.min(reason.length(),1000));
+        audit.record("SMART_AI_SKIPPED","decision:"+id,d.aiLastSkippedNote);
     }
 }

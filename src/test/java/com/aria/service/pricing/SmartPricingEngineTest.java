@@ -40,4 +40,9 @@ class SmartPricingEngineTest {
         var f=facts(List.of(new Lot(1L,100,new BigDecimal("800"),null)),List.of(sale(1,30)),List.of());
         assertThat(SmartPricingEngine.evaluate(f).scenarios()).allMatch(s->s.estimatedExpiredUnits()==0);
     }
+    @Test void stableSufficientObservationalHistoryHasModerateNotHighConfidence(){
+        var windows=List.of(new PriceExposure(new BigDecimal("800"),4,625),new PriceExposure(new BigDecimal("900"),4,494),new PriceExposure(new BigDecimal("1000"),4,400),new PriceExposure(new BigDecimal("1100"),4,331),new PriceExposure(new BigDecimal("1250"),4,256),new PriceExposure(new BigDecimal("1600"),4,156));
+        var report=SmartPricingEngine.evaluate(facts(List.of(lot(1,1000,2)),List.of(sale(1,100),sale(5,100),sale(10,100),sale(15,100),sale(20,100),sale(25,100)),windows));
+        assertThat(report.confidence()).isEqualTo("MEDIUM");assertThat(report.limitations()).anyMatch(s->s.contains("не причинный эффект"));
+    }
 }

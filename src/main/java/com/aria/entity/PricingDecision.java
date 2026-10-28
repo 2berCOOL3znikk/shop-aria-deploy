@@ -20,6 +20,8 @@ public class PricingDecision {
     public Integer selectedPercent;
     public LocalDateTime aiRequestedAt;
     public LocalDateTime aiCompletedAt;
+    public LocalDateTime aiLastSkippedAt;
+    @Column(length=1000) public String aiLastSkippedNote;
     @Column(length=36) public String aiClaim;
     public LocalDateTime decidedAt;
     @Column(length=255) public String decidedBy;

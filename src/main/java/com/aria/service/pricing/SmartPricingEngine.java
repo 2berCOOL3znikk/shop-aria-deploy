@@ -40,6 +40,9 @@ public final class SmartPricingEngine {
         limitations.add("Учтены только подтверждённые отгрузки с известной датой; отменённые и новые заказы не считаются продажами.");
         limitations.add("Периоды отсутствия товара и начала наблюдения не восстановлены. Скорость продаж не равна полному спросу.");
         var model=responseModel(f.exposures());limitations.add(model.note());
+        double trend=s30==0?0:(s7/7d)/(s30/30d);
+        String confidence=days>=28&&s30>=100&&s7>=20&&model.windows()>=6&&"OBSERVATIONAL_LOG_LINEAR".equals(model.method())&&model.upper()-model.lower()<=1&&trend>=0.5&&trend<=2?"MEDIUM":"LOW";
+        limitations.add("MEDIUM".equals(confidence)?"Умеренная уверенность означает достаточность описательных данных по заданным критериям, не причинный эффект, обученную ML-модель или гарантию прогноза.":"Недостаточно устойчивых периодов для автоматического применения выбора AI.");
         limitations.add("AVAILABLE".equals(f.competitorContext().get("status"))?"Учтены импортированные сопоставимые цены конкурентов. Они не доказывают реакцию спроса; достоверной сезонной истории нет.":"Нет проверенных цен конкурентов и достоверной сезонной истории: они не используются.");
         limitations.add("Одна цена на весь SKU. Учтены сроки и себестоимость каждой пригодной партии; горизонт оценки — 30 дней.");
         if(s30<10 || days<14)limitations.add("Мало истории: низкая уверенность. Нулевые продажи не доказывают отсутствие спроса.");
@@ -62,7 +65,7 @@ public final class SmartPricingEngine {
         if(f.quantity()==0){action="BLOCKED";reason="Нет пригодного доступного остатка. Продажа и применение рекомендации запрещены.";}
         else if(best.estimatedExpiredUnits()>0 && best.estimatedRemainingShare()>0.5){reason+=" Остаётся риск списания: отдельно проверьте пригодность и возможность социальной передачи. Ничего не резервируется автоматически.";}
         int hours=f.lots().stream().anyMatch(l->l.expiry()!=null&&!l.expiry().isAfter(f.asOf().plusDays(1)))?6:24;
-        return new Report(f,stats,model,scenarios,best.percent(),best.price(),action,"LOW",reason,hours,List.copyOf(limitations));
+        return new Report(f,stats,model,scenarios,best.percent(),best.price(),action,confidence,reason,hours,List.copyOf(limitations));
     }
     private static long units(List<Sale> sales,LocalDateTime from,LocalDateTime until){return sales.stream().filter(s->!s.shippedAt().isBefore(from)&&s.shippedAt().isBefore(until)).mapToLong(Sale::quantity).sum();}
     private record Outcome(double sold,double expired,double contribution){}
@@ -104,6 +107,6 @@ public final class SmartPricingEngine {
         for(var row:rows){double residual=Math.log(row.units()/row.days())-my-slope*(Math.log(row.price().doubleValue())-mx);rss+=residual*residual;}
         double uncertainty=3.2*Math.sqrt(rss/(rows.size()-2)/xx),elasticity=-slope;
         if(!Double.isFinite(elasticity)||elasticity<0.1||elasticity>5||uncertainty>elasticity)return fallback;
-        return new ResponseModel("OBSERVATIONAL_LOG_LINEAR",round(elasticity),Math.max(0.1,elasticity-uncertainty),Math.min(5,elasticity+uncertainty),rows.size(),"Описательная log-linear регрессия частоты отгрузок на цену по "+rows.size()+" периодам. Не причинный эффект: наличие, сезонность, реклама и задержки отгрузки не контролировались. Чувствительность ограничена 0,1–5; уверенность низкая.");
+        return new ResponseModel("OBSERVATIONAL_LOG_LINEAR",round(elasticity),Math.max(0.1,elasticity-uncertainty),Math.min(5,elasticity+uncertainty),rows.size(),"Описательная log-linear регрессия частоты отгрузок на цену по "+rows.size()+" периодам. Не причинный эффект: наличие, сезонность, реклама и задержки отгрузки не контролировались. Чувствительность ограничена 0,1–5; уверенность оценивается отдельно по достаточности и устойчивости данных.");
     }
 }
