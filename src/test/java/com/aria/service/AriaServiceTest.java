@@ -35,6 +35,10 @@ class AriaServiceTest {
 
     @Mock
     private AriaLogRepository ariaLogRepository;
+    @Mock
+    private PolicyService policies;
+    @org.junit.jupiter.api.BeforeEach
+    void defaultPolicies(){when(policies.forProduct(any())).thenReturn(new com.aria.entity.PricingPolicy());}
 
     @InjectMocks
     private AriaService ariaService;

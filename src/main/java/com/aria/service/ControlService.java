@@ -56,7 +56,8 @@ public class ControlService {
         suppliers.delete(s);audit.record("SUPPLIER_DELETED","supplier:"+id,s.getName());
     }
     public void applyDiscount(Long id,DiscountInput input){
-        Product p=inventory.lock(id);inventory.ensureLegacyLot(p);inventory.synchronize(p);pricing.validate(p,input.percent());
+        Product p=inventory.lock(id);inventory.ensureLegacyLot(p);inventory.synchronize(p);
+        if(input.percent()!=0 || !(p.getStatus()==ProductStatus.ACTIVE||p.getStatus()==ProductStatus.DISCOUNTED||p.getStatus()==ProductStatus.CANDIDATE))pricing.validate(p,input.percent());
         if(p.getArchived()) throw new IllegalStateException("Товар архивирован");
         p.setDiscountPercent(input.percent());p.setStatus(input.percent()==0?ProductStatus.ACTIVE:ProductStatus.DISCOUNTED);
         audit.record("DISCOUNT_CHANGED","product:"+id,input.percent()+"% · цена "+pricing.price(p,input.percent())+" ₸ · "+input.reason());

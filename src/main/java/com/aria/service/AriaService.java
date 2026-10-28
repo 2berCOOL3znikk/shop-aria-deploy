@@ -23,9 +23,6 @@ import java.util.List;
 @Service
 public class AriaService {
 
-    private static final int DEAD_STOCK_DAYS = 180;
-    private static final int EXPIRY_ALERT_DAYS = 30;
-
     private final ProductRepository products;
     private final TransferLotRepository lots;
     private final CompetitorAnalyzerService competitorService;
@@ -33,18 +30,20 @@ public class AriaService {
     private final DiscountSuggestionRepository discountRepo;
     private final InventoryService inventory;
     private final PricingService pricing;
+    private final PolicyService policies;
 
     public AriaService(ProductRepository products,
                        TransferLotRepository lots,
                        CompetitorAnalyzerService competitorService,
                        AriaLogRepository logRepo,
-                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing) {
+                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing,PolicyService policies) {
         this.products = products;
         this.lots = lots;
         this.competitorService = competitorService;
         this.logRepo = logRepo;
         this.discountRepo = discountRepo;
         this.inventory=inventory;this.pricing=pricing;
+        this.policies=policies;
     }
 
     @Transactional
@@ -60,6 +59,7 @@ public class AriaService {
 
         for (Product p : all) {
             if(p.getArchived()) continue;
+            var policy=policies.forProduct(p);
             if (p.getStatus() == ProductStatus.TRANSFERRED || p.getStatus() == ProductStatus.WRITTEN_OFF
                     || p.getStatus() == ProductStatus.RESERVED || p.getStatus() == ProductStatus.SOCIAL
                     || p.getStatus() == ProductStatus.DISCOUNTED) continue;
@@ -78,7 +78,7 @@ public class AriaService {
 
             // Правило 1: Мёртвый сток (>180 дней без продаж)
             long daysInStock = ChronoUnit.DAYS.between(p.getReceivedAt(), today);
-            if (daysInStock > DEAD_STOCK_DAYS && p.getSalesLast30Days() == 0) {
+            if (daysInStock > policy.getSlowStockDays() && p.getSalesLast30Days() == 0) {
                 reasons.add("не продаётся " + daysInStock + " дн.");
                 System.out.println("[ARIA] " + p.getName() + " - мёртвый сток " + daysInStock + " дн.");
             }
@@ -89,9 +89,9 @@ public class AriaService {
                 if (daysToExpiry < 0) {
                     reasons.add("срок годности истёк " + Math.abs(daysToExpiry) + " дн. назад — передача запрещена");
                     System.out.println("[ARIA] " + p.getName() + " - срок годности истёк");
-                } else if (daysToExpiry < EXPIRY_ALERT_DAYS) {
+                } else if (daysToExpiry <= policy.getWarningDays()) {
                     reasons.add("срок годности через " + daysToExpiry + " дн.");
-                    isUrgent = daysToExpiry <= 7;
+                    isUrgent = daysToExpiry <= policy.getCriticalDays();
                     System.out.println("[ARIA] " + p.getName() + " - скоропорт " + daysToExpiry + " дн.");
                 }
             }
@@ -293,9 +293,6 @@ public class AriaService {
         int suggestionsCreated = 0;
 
         for (Product p : candidates) {
-            // Пропускаем, если нет срока годности
-            if (p.getExpiryDate() == null) continue;
-
             // Пропускаем, если уже есть PENDING предложение для этого товара
             if (discountRepo.existsByProductIdAndStatus(p.getId(), "PENDING")) {
                 System.out.println("[ARIA] " + p.getName() + " - уже есть PENDING предложение, пропускаем");
@@ -303,26 +300,13 @@ public class AriaService {
             }
 
             // Вычисляем оставшиеся дни
-            long daysToExpiry = ChronoUnit.DAYS.between(today, p.getExpiryDate());
+            long daysToExpiry = p.getExpiryDate()==null?Long.MAX_VALUE:ChronoUnit.DAYS.between(today, p.getExpiryDate());
             if(daysToExpiry<0 || p.getArchived() || p.getQuantityOnHand()==null || p.getQuantityOnHand()<1) continue;
 
-            // Определяем процент скидки по тиру
-            int discountPercent = 0;
-            String reason = "";
-
-            if (daysToExpiry <= 1) {
-                discountPercent = 50;
-                reason = "Экстренная распродажа: остался " + daysToExpiry + " день до истечения срока";
-            } else if (daysToExpiry <= 7) {
-                discountPercent = 30;
-                reason = "Срочная распродажа: осталось " + daysToExpiry + " дней до истечения срока";
-            } else if (daysToExpiry <= 30) {
-                discountPercent = 15;
-                reason = "Предупреждающая скидка: осталось " + daysToExpiry + " дней до истечения срока";
-            } else {
-                // Не предлагаем скидку для товаров с долгим сроком
-                continue;
-            }
+            var recommendation=pricing.recommendation(p);
+            int discountPercent=((Number)recommendation.get("suggestedPercent")).intValue();
+            String reason=(String)recommendation.get("reason");
+            if(discountPercent<1) continue;
 
             // Создаём предложение (каждое в try/catch для изоляции ошибок)
             try {

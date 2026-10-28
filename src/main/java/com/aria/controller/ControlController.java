@@ -20,12 +20,14 @@ public class ControlController {
     private final SocialOfferRepository offers;
     private final OrderService orderService;
     private final IntelligenceService intelligence;
-    public ControlController(ControlService control,InventoryService inventory,PricingService pricing,ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,AuditEventRepository events,OrderRepository orders,SocialService social,SocialOfferRepository offers,OrderService orderService,IntelligenceService intelligence){
+    private final PolicyService policies;
+    public ControlController(ControlService control,InventoryService inventory,PricingService pricing,ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,AuditEventRepository events,OrderRepository orders,SocialService social,SocialOfferRepository offers,OrderService orderService,IntelligenceService intelligence,PolicyService policies){
         this.control=control;this.inventory=inventory;this.pricing=pricing;this.products=products;this.details=details;this.suppliers=suppliers;this.events=events;this.orders=orders;
         this.social=social;
         this.offers=offers;
         this.orderService=orderService;
         this.intelligence=intelligence;
+        this.policies=policies;
     }
     @GetMapping("/products") public List<Product> products(){return products.findAll();}
     @GetMapping("/products/{id}") public Map<String,Object> product(@PathVariable Long id){var result=new HashMap<String,Object>();result.put("product",inventory.lock(id));result.put("details",details.findByProductId(id).orElse(null));return result;}
@@ -54,9 +56,9 @@ public class ControlController {
     public Map<String,Object> overview(){
         var all=products.findAll().stream().filter(p->!p.getArchived()).toList();var lots=inventory.list();var today=LocalDate.now();
         long expired=lots.stream().filter(l->l.getActive()&&l.getQuantity()>0&&l.getExpiryDate()!=null&&l.getExpiryDate().isBefore(today)).count();
-        long soon=lots.stream().filter(l->inventory.usable(l)&&l.getExpiryDate()!=null&&!l.getExpiryDate().isAfter(today.plusDays(7))).count();
+        long soon=lots.stream().filter(l->inventory.usable(l)&&l.getExpiryDate()!=null&&!l.getExpiryDate().isAfter(today.plusDays(policies.forProduct(l.getProduct()).getCriticalDays()))).count();
         long low=all.stream().filter(p->inventory.available(p)<=(p.getLowStockThreshold()==null?5:p.getLowStockThreshold())).count();
-        return Map.of("products",all.size(),"expiredLots",expired,"urgentLots",soon,"lowStock",low,"pendingOrders",orders.findAll().stream().filter(o->"PENDING".equals(o.getStatus())).count(),"briefing",List.of("Проверьте "+expired+" просроченных партий: они исключены из доступного остатка.","У "+soon+" партий срок истекает в течение 7 дней. Рассчитайте скидку или согласуйте передачу.","У "+low+" товаров остаток ниже установленного порога. Подготовьте поступление."));
+        return Map.of("products",all.size(),"expiredLots",expired,"urgentLots",soon,"lowStock",low,"pendingOrders",orders.findAll().stream().filter(o->"PENDING".equals(o.getStatus())).count(),"briefing",List.of("Проверьте "+expired+" просроченных партий: они исключены из доступного остатка.","У "+soon+" партий критический срок по настройкам категорий. Рассчитайте скидку или согласуйте передачу.","У "+low+" товаров остаток ниже установленного порога. Подготовьте поступление."));
     }
     @PostMapping("/intelligence/briefing") public Map<String,Object> briefing(){return intelligence.explain(overview());}
 }

@@ -124,4 +124,30 @@ class ControlIntegrationTest {
         var response=call("GET","/api/favorites",user,null);assertThat(response.status).isEqualTo(200);
         assertThat(response.raw).contains("displayPrice").doesNotContain("unitCost","marketAvgPrice","ariaReason");
     }
+    @Test void categoryPolicyCapsMarginAndCanBeResetWithoutChangingPrice()throws Exception {
+        String category="policy-"+UUID.randomUUID();var body=new HashMap<>(productBody("POLICY-"+UUID.randomUUID()));body.put("category",category);
+        var created=call("POST",base+"/products",admin,body);assertThat(created.status).as(created.raw).isEqualTo(200);long p=created.id();lot(p,"RULES",5,5);
+        var policy=new HashMap<String,Object>(Map.of("category",category,"warningDays",20,"criticalDays",2,"clearanceDays",0,"warningPercent",12,"criticalPercent",25,"clearancePercent",45,"slowStockDays",90,"slowStockPercent",10,"minimumMarginPercent",10));
+        assertThat(call("PUT",base+"/policies",user,policy).status).isEqualTo(403);
+        assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(200);
+        var preview=call("GET",base+"/pricing/"+p+"?percent=12",admin,null);assertThat(preview.status).isEqualTo(200);
+        assertThat(((Map<?,?>)preview.body.get("current")).get("allowed")).isEqualTo(false);
+        assertThat(((Map<?,?>)preview.body.get("recommendation")).get("suggestedPercent")).isEqualTo(11);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",11,"reason","Маржа не ниже 10%")).status).isEqualTo(200);
+        policy.put("minimumMarginPercent",20);assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(409);
+        assertThat(call("DELETE",base+"/policies?category="+category,admin,null).status).isEqualTo(200);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(11);
+    }
+    @Test void invalidPolicyThresholdsAreRejected()throws Exception {
+        var policy=new HashMap<String,Object>(Map.of("category","invalid-"+UUID.randomUUID(),"warningDays",1,"criticalDays",7,"clearanceDays",0,"warningPercent",15,"criticalPercent",30,"clearancePercent",50,"slowStockDays",180,"slowStockPercent",10,"minimumMarginPercent",0));
+        assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(400);
+        policy.put("warningDays",30);policy.put("warningPercent",70);assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(400);
+    }
+    @Test void soldOutDiscountCanBeClearedWithoutMakingExpiredStockSellable()throws Exception {
+        long p=product();lot(p,"EMPTY",1,5);assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",20,"reason","Срок")).status).isEqualTo(200);
+        order(p,1);assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",0,"reason","Скидка закончена")).status).isEqualTo(200);
+        assertThat(call("GET","/api/products/"+p,null,null).status).isEqualTo(404);
+    }
 }

@@ -6,7 +6,9 @@ RUN mvn -B -DskipTests package
 
 FROM eclipse-temurin:21-jre
 WORKDIR /app
-RUN useradd --system --uid 10001 --create-home aria
+RUN useradd --system --uid 10001 --create-home aria \
+    && mkdir -p /app/data \
+    && chown aria:aria /app/data
 COPY --from=build /workspace/target/aria-backend-0.0.1-SNAPSHOT.jar /app/aria.jar
 USER 10001
 EXPOSE 8080

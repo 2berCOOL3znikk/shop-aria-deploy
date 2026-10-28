@@ -15,4 +15,8 @@ public final class ControlRequests {
  public record DiscountInput(@Min(0) @Max(90) int percent,@NotBlank @Size(max=1000) String reason) {}
  public record ReasonInput(@NotBlank @Size(max=1000) String reason) {}
  public record OrderStateInput(@NotBlank @Pattern(regexp="SHIPPED|DELIVERED|CANCELLED") String status,@NotBlank @Size(max=1000) String reason) {}
+ public record PolicyInput(@NotBlank @Size(max=120) String category,
+  @NotNull @Min(1) @Max(3650) Integer warningDays,@NotNull @Min(0) @Max(3650) Integer criticalDays,@NotNull @Min(0) @Max(3650) Integer clearanceDays,
+  @NotNull @Min(0) @Max(90) Integer warningPercent,@NotNull @Min(0) @Max(90) Integer criticalPercent,@NotNull @Min(0) @Max(90) Integer clearancePercent,
+  @NotNull @Min(1) @Max(3650) Integer slowStockDays,@NotNull @Min(0) @Max(90) Integer slowStockPercent,@NotNull @Min(0) @Max(90) Integer minimumMarginPercent) {}
 }

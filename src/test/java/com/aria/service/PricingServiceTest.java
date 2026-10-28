@@ -7,7 +7,8 @@ import java.time.LocalDate;
 import java.util.List;
 import static org.assertj.core.api.Assertions.*;
 class PricingServiceTest {
-    private final PricingService pricing=new PricingService(List.of(new ExpiryDiscountRule(),new SlowStockDiscountRule()));
+    private final PolicyService policies=new PolicyService(org.mockito.Mockito.mock(com.aria.repository.PricingPolicyRepository.class),org.mockito.Mockito.mock(com.aria.repository.ProductRepository.class),org.mockito.Mockito.mock(AuditService.class));
+    private final PricingService pricing=new PricingService(List.of(new ExpiryDiscountRule(),new SlowStockDiscountRule()),policies);
     private Product product(String price,String cost){Product p=new Product();p.setUnitPrice(new BigDecimal(price));p.setUnitCost(new BigDecimal(cost));p.setQuantityOnHand(10);p.setReceivedAt(LocalDate.now());return p;}
     @Test void capsDiscountAtCostAndShowsProfit(){Product p=product("1000","800");assertThat(pricing.maximum(p)).isEqualTo(20);assertThat(pricing.preview(p,20)).containsEntry("allowed",true).containsEntry("profitPerUnit",new BigDecimal("0.00"));assertThat(pricing.preview(p,21)).containsEntry("allowed",false);}
     @Test void percentageIsRoundedDownWithoutAllowingLoss(){assertThat(pricing.maximum(product("99.99","80"))).isEqualTo(19);}
