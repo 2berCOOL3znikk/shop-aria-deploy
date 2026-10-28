@@ -11,6 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    java.util.Optional<Product> findBySkuIgnoreCase(String sku);
     boolean existsBySkuIgnoreCase(String sku);
 
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)

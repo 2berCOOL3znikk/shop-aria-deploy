@@ -336,6 +336,36 @@ class ControlIntegrationTest {
         var claim=smartPricing.claimAi(id,false);smartPricing.completeAi(claim,aiReply(5),false);
         assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
     }
+    @Test void competitorImportUsesVerifiedIdentityAndInvalidatesStalePricingDecision()throws Exception {
+        long p=product();lot(p,"MARKET",10,30);var product=products.findById(p).orElseThrow();product.setBarcode("4006381333931");products.save(product);String path=base+"/competitors";
+        var input=Map.of("name","Тестовый разрешённый источник","baseUrl","https://prices.example.org","active",true,"permissionConfirmed",true);
+        assertThat(call("POST",path,user,input).status).isEqualTo(403);long source=call("POST",path,admin,input).id();
+        String date=java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusHours(1).withNano(0).toString();
+        String csv="sku,barcode,unit,price,currency,observedAt,url\n"+product.getSku()+",4006381333931,шт,950.00,KZT,"+date+",https://prices.example.org/item";
+        var body=Map.of("sourceId",source,"csv",csv,"identityConfirmed",true);
+        var imported=call("POST",path+"/import",admin,body);assertThat(imported.status).as(imported.raw).isEqualTo(200);assertThat(imported.body.get("imported")).isEqualTo(1);
+        assertThat(call("POST",path+"/import",admin,body).body.get("duplicates")).isEqualTo(1);
+        var compared=call("GET",path+"/products/"+p,admin,null);var context=(Map<?,?>)compared.body.get("comparison");assertThat(context.get("position")).isEqualTo("HIGHER");assertThat(new java.math.BigDecimal(context.get("medianPrice").toString())).isEqualByComparingTo("950");
+        long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();
+        String next=java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusMinutes(30).withNano(0).toString();
+        assertThat(call("POST",path+"/import",admin,Map.of("sourceId",source,"identityConfirmed",true,"csv",csv.replace(date,next).replace("950.00","900.00"))).status).isEqualTo(200);
+        assertThat(call("POST",base+"/smart-pricing/"+decision+"/apply",admin,Map.of("percent",5,"reason","Старые рыночные данные")).status).isEqualTo(409);
+        var off=new HashMap<String,Object>(input);off.put("active",false);assertThat(call("PUT",path+"/"+source,admin,off).status).isEqualTo(200);
+        assertThat(((Map<?,?>)call("GET",path+"/products/"+p,admin,null).body.get("comparison")).get("status")).isEqualTo("NO_VERIFIED_PRICES");
+    }
+    @Test void competitorImportIsAtomicAndRejectsWrongCurrencyPackageAndSource()throws Exception {
+        long p=product();var product=products.findById(p).orElseThrow();product.setBarcode("4006381333931");products.save(product);String path=base+"/competitors";
+        long source=call("POST",path,admin,Map.of("name","Тестовый CSV","baseUrl","https://csv.example.org","active",true,"permissionConfirmed",true)).id();
+        String date=java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusHours(1).withNano(0).toString();
+        String header="sku,barcode,unit,price,currency,observedAt,url\n",row=product.getSku()+",4006381333931,шт,950.00,KZT,"+date+",https://csv.example.org/item";
+        for(String bad:List.of(row.replace("KZT","USD"),row.replace("шт","кг"),row.replace("4006381333931","4006381333932"),row.replace("csv.example.org","other.example.org"))){
+            var result=call("POST",path+"/import",admin,Map.of("sourceId",source,"identityConfirmed",true,"csv",header+row+"\n"+bad));assertThat(result.status).as(result.raw).isEqualTo(400);
+            var history=(List<?>)call("GET",path+"/products/"+p,admin,null).body.get("history");assertThat(history).isEmpty();
+        }
+        String old=header+row.replace(date,java.time.OffsetDateTime.now(java.time.ZoneOffset.UTC).minusDays(8).withNano(0).toString());
+        assertThat(call("POST",path+"/import",admin,Map.of("sourceId",source,"identityConfirmed",true,"csv",old)).status).isEqualTo(200);
+        assertThat(((Map<?,?>)call("GET",path+"/products/"+p,admin,null).body.get("comparison")).get("status")).isEqualTo("NO_VERIFIED_PRICES");
+    }
     private long statisticalPricingProduct()throws Exception {
         var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",1600);
         long id=call("POST",base+"/products",admin,body).id();lot(id,"STAT",5000,3);var p=products.findById(id).orElseThrow();p.setReceivedAt(LocalDate.now().minusDays(40));products.save(p);

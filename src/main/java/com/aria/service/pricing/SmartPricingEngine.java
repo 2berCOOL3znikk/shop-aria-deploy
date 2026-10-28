@@ -13,7 +13,9 @@ public final class SmartPricingEngine {
     public record PriceExposure(BigDecimal price,double days,long units){}
     public record Facts(Long productId,String sku,String name,String category,LocalDate asOf,
         BigDecimal basePrice,BigDecimal currentPrice,int currentPercent,BigDecimal minimumPrice,int maximumPercent,
-        int quantity,int observedDays,List<Lot> lots,List<Sale> sales,List<PriceExposure> exposures,List<String> limitations){}
+        int quantity,int observedDays,List<Lot> lots,List<Sale> sales,List<PriceExposure> exposures,List<String> limitations,Map<String,Object> competitorContext){
+        public Facts(Long productId,String sku,String name,String category,LocalDate asOf,BigDecimal basePrice,BigDecimal currentPrice,int currentPercent,BigDecimal minimumPrice,int maximumPercent,int quantity,int observedDays,List<Lot> lots,List<Sale> sales,List<PriceExposure> exposures,List<String> limitations){this(productId,sku,name,category,asOf,basePrice,currentPrice,currentPercent,minimumPrice,maximumPercent,quantity,observedDays,lots,sales,exposures,limitations,Map.of());}
+    }
     public record SalesStats(long units7,long units14,long units30,int observedDays,double unitsPerDay,
         Double approximateRateLow,Double approximateRateHigh){}
     public record Scenario(int percent,BigDecimal price,double estimatedUnits,double estimatedUnitsLow,
@@ -38,7 +40,7 @@ public final class SmartPricingEngine {
         limitations.add("Учтены только подтверждённые отгрузки с известной датой; отменённые и новые заказы не считаются продажами.");
         limitations.add("Периоды отсутствия товара и начала наблюдения не восстановлены. Скорость продаж не равна полному спросу.");
         var model=responseModel(f.exposures());limitations.add(model.note());
-        limitations.add("Нет проверенных цен конкурентов и достоверной сезонной истории: они не используются.");
+        limitations.add("AVAILABLE".equals(f.competitorContext().get("status"))?"Учтены импортированные сопоставимые цены конкурентов. Они не доказывают реакцию спроса; достоверной сезонной истории нет.":"Нет проверенных цен конкурентов и достоверной сезонной истории: они не используются.");
         limitations.add("Одна цена на весь SKU. Учтены сроки и себестоимость каждой пригодной партии; горизонт оценки — 30 дней.");
         if(s30<10 || days<14)limitations.add("Мало истории: низкая уверенность. Нулевые продажи не доказывают отсутствие спроса.");
         var percents=new TreeSet<Integer>();percents.add(0);

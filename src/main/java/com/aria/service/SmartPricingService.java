@@ -23,13 +23,15 @@ public class SmartPricingService {
     private final InventoryService inventory;private final PricingService pricing;private final PolicyService policies;
     private final ControlService control;private final AuditService audit;private final TransactionTemplate transaction;
     private final SmartPricingSettingsRepository settings;
+    private final CompetitorPriceService competitors;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     public SmartPricingService(ProductRepository products,InventoryLotRepository lots,OrderRepository orders,
         PricingDecisionRepository decisions,PriceChangeRepository changes,InventoryService inventory,PricingService pricing,
-        PolicyService policies,ControlService control,AuditService audit,PlatformTransactionManager manager,SmartPricingSettingsRepository settings){
+        PolicyService policies,ControlService control,AuditService audit,PlatformTransactionManager manager,SmartPricingSettingsRepository settings,CompetitorPriceService competitors){
         this.products=products;this.lots=lots;this.orders=orders;this.decisions=decisions;this.changes=changes;
         this.inventory=inventory;this.pricing=pricing;this.policies=policies;this.control=control;this.audit=audit;this.transaction=new TransactionTemplate(manager);
         this.settings=settings;
+        this.competitors=competitors;
     }
     public Map<String,Object> analyzeAll(boolean onlyDue){
         int analyzed=0,failed=0;var now=LocalDateTime.now();
@@ -80,7 +82,7 @@ public class SmartPricingService {
             long units=sales.stream().filter(s->!s.shippedAt().isBefore(from)&&s.shippedAt().isBefore(end)&&s.price().compareTo(price)==0).mapToLong(Sale::quantity).sum();
             exposures.add(new PriceExposure(price,Duration.between(from,end).toSeconds()/86400d,units));
         }
-        return new Facts(p.getId(),p.getSku(),p.getName(),p.getCategory(),today,p.getUnitPrice(),pricing.price(p,p.getDiscountPercent()),p.getDiscountPercent(),minimum,max,inventory.available(p,stock),observed,rows,sales,exposures,List.of("История изменений цен ведётся с включения Smart Pricing; более ранние акции не восстановлены."));
+        return new Facts(p.getId(),p.getSku(),p.getName(),p.getCategory(),today,p.getUnitPrice(),pricing.price(p,p.getDiscountPercent()),p.getDiscountPercent(),minimum,max,inventory.available(p,stock),observed,rows,sales,exposures,List.of("История изменений цен ведётся с включения Smart Pricing; более ранние акции не восстановлены."),competitors.context(p));
     }
     private String fingerprint(Report report){
         try{var last=changes.findFirstByProductIdOrderByChangedAtDescIdDesc(report.facts().productId()).map(c->c.id).orElse(0L);
