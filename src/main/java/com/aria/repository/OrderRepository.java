@@ -7,6 +7,8 @@ import java.util.List;
 
 @Repository
 public interface OrderRepository extends JpaRepository<Order, Long>, org.springframework.data.jpa.repository.JpaSpecificationExecutor<Order> {
+    @org.springframework.data.jpa.repository.Query("select o.shippedAt, i.quantity, i.pricePerUnit from Order o join o.items i where i.product.id=:productId and o.shippedAt>=:since and o.shippedAt<=:until and o.status in ('SHIPPED','DELIVERED') order by o.shippedAt,o.id,i.id")
+    List<Object[]> pricingSales(@org.springframework.data.repository.query.Param("productId") Long productId,@org.springframework.data.repository.query.Param("since") java.time.LocalDateTime since,@org.springframework.data.repository.query.Param("until") java.time.LocalDateTime until);
     @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
     @org.springframework.data.jpa.repository.Query("select o from Order o where o.id=:id")
     java.util.Optional<Order> findLockedById(@org.springframework.data.repository.query.Param("id") Long id);

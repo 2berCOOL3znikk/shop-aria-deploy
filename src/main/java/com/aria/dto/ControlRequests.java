@@ -7,7 +7,8 @@ public final class ControlRequests {
  public record ProductInput(@NotBlank @Size(max=64) String sku,@NotBlank @Size(max=500) String name,
   @NotBlank @Size(max=120) String category,@NotNull @DecimalMin("0.01") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal unitPrice,
   @Size(max=100) String brand,@Size(max=10000) String description,@Size(max=500) String imageUrl,
-  @Size(max=64) String barcode,@NotBlank @Size(max=20) String unit,@Min(0) @Max(1000000) int lowStockThreshold) {}
+  @Size(max=64) String barcode,@NotBlank @Size(max=20) String unit,@Min(0) @Max(1000000) int lowStockThreshold,
+  @DecimalMin("0.01") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal minimumPrice) {}
  public record SupplierInput(@NotBlank @Size(max=160) String name,@Size(max=160) String contact,@Size(max=1000) String notes,boolean active) {}
  public record LotInput(@NotNull Long productId,Long supplierId,@NotBlank @Size(max=80) String lotNumber,
   @NotNull @PastOrPresent LocalDate receivedAt,@PastOrPresent LocalDate manufacturedAt,LocalDate expiryDate,

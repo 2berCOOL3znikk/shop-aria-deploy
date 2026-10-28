@@ -16,7 +16,7 @@ import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
 
-@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
+@SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
 class ControlIntegrationTest {
     @Autowired Environment env;
     @Autowired AppUserRepository users;
@@ -27,12 +27,15 @@ class ControlIntegrationTest {
     @Autowired OrderRepository orders;
     @Autowired com.aria.service.AriaService analysis;
     @Autowired AuditEventRepository auditEvents;
+    @Autowired SmartPricingSettingsRepository smartSettings;
+    @Autowired PriceChangeRepository priceChanges;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org;
     private final String base="/api/admin/control";
     record Reply(int status,Map<String,Object> body,String raw) {long id(){return ((Number)body.get("id")).longValue();}}
     @BeforeEach void setup()throws Exception{
+        smartSettings.deleteAll(); // isolated test DB only: every scenario starts in RECOMMEND
         String suffix=UUID.randomUUID().toString();
         admin=account("a"+suffix,Role.ADMIN);user=account("u"+suffix,Role.USER);org=account("o"+suffix,Role.ORG);
     }
@@ -222,7 +225,7 @@ class ControlIntegrationTest {
         assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(200);
         var preview=call("GET",base+"/pricing/"+p+"?percent=12",admin,null);assertThat(preview.status).isEqualTo(200);
         assertThat(((Map<?,?>)preview.body.get("current")).get("allowed")).isEqualTo(false);
-        assertThat(((Map<?,?>)preview.body.get("recommendation")).get("suggestedPercent")).isEqualTo(11);
+        assertThat(((Map<?,?>)preview.body.get("recommendation")).get("suggestedPercent")).isEqualTo(0);
         assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
         assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",11,"reason","Маржа не ниже 10%")).status).isEqualTo(200);
         policy.put("minimumMarginPercent",20);assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(409);
@@ -233,6 +236,117 @@ class ControlIntegrationTest {
         var policy=new HashMap<String,Object>(Map.of("category","invalid-"+UUID.randomUUID(),"warningDays",1,"criticalDays",7,"clearanceDays",0,"warningPercent",15,"criticalPercent",30,"clearancePercent",50,"slowStockDays",180,"slowStockPercent",10,"minimumMarginPercent",0));
         assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(400);
         policy.put("warningDays",30);policy.put("warningPercent",70);assertThat(call("PUT",base+"/policies",admin,policy).status).isEqualTo(400);
+    }
+    @Test void smartPricingRequiresAdminAndAnalysisDoesNotChangePrices()throws Exception {
+        long p=product();lot(p,"SMART",10,3);String path=base+"/smart-pricing";
+        assertThat(call("GET",path,null,null).status).isEqualTo(401);
+        assertThat(call("GET",path,user,null).status).isEqualTo(403);
+        assertThat(call("POST",path+"/products/"+p+"/analyze",org,null).status).isEqualTo(403);
+        var r=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(r.status).as(r.raw).isEqualTo(200);
+        var report=(Map<?,?>)r.body.get("report");assertThat(report.get("confidence")).isEqualTo("LOW");
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(call("POST",path+"/products/"+p+"/analyze",admin,null).id()).isEqualTo(r.id());
+        assertThat(call("POST",path+"/"+r.id()+"/reject",admin,Map.of("reason","Недостаточно истории")).status).isEqualTo(200);
+        assertThat(call("POST",path+"/"+r.id()+"/apply",admin,Map.of("reason","Повторное подтверждение","percent",5)).status).isEqualTo(409);
+    }
+    @Test void smartPricingRejectsStaleInventoryAndSupersedesOldDecision()throws Exception {
+        long p=product();lot(p,"SMART-OLD",10,3);String path=base+"/smart-pricing";
+        long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();lot(p,"SMART-NEW",3,9);
+        assertThat(call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Старый расчёт","percent",10)).status).isEqualTo(409);
+        var updated=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(updated.id()).isNotEqualTo(id);
+        assertThat(call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Заменённый расчёт","percent",10)).status).isEqualTo(409);
+    }
+    @Test void smartPricingHonorsFloorAndRollbackWritesActualHistory()throws Exception {
+        var body=new HashMap<>(productBody("SMART-FLOOR-"+UUID.randomUUID()));body.put("minimumPrice",950);
+        long p=call("POST",base+"/products",admin,body).id();lot(p,"SMART",10,5);String path=base+"/smart-pricing";
+        long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();
+        assertThat(call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Ниже минимума","percent",6)).status).isEqualTo(409);
+        var applied=call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Проверяем спрос","percent",5));assertThat(applied.status).as(applied.raw).isEqualTo(200);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(5);
+        assertThat(call("GET",path+"/products/"+p+"/history",admin,null).raw).contains("Проверяем спрос","unitsBefore7Days","revenueAfter");
+        assertThat(call("POST",path+"/"+id+"/rollback",admin,Map.of("reason","Отмена эксперимента")).status).isEqualTo(200);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(call("POST",path+"/"+id+"/rollback",admin,Map.of("reason","Повторно")).status).isEqualTo(409);
+    }
+    @Test void smartRollbackCannotOverwriteLaterManualPriceChange()throws Exception {
+        long p=product();lot(p,"SMART",10,5);String path=base+"/smart-pricing";
+        long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();
+        assertThat(call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Эксперимент","percent",5)).status).isEqualTo(200);
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("reason","Другое решение","percent",10)).status).isEqualTo(200);
+        assertThat(call("POST",path+"/"+id+"/rollback",admin,Map.of("reason","Устаревший откат")).status).isEqualTo(409);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(10);
+    }
+    @Test void smartPricingConfirmationIsAtomicAndOnlyAppliesOnce()throws Exception {
+        long p=product();lot(p,"SMART",10,5);String path=base+"/smart-pricing";
+        long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();var pool=Executors.newFixedThreadPool(2);
+        try{var first=pool.submit(()->call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Первый","percent",5)).status);
+            var second=pool.submit(()->call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Второй","percent",5)).status);
+            assertThat(List.of(first.get(30,TimeUnit.SECONDS),second.get(30,TimeUnit.SECONDS))).containsExactlyInAnyOrder(200,409);
+        }finally{pool.shutdownNow();}
+        var history=json.readValue(call("GET",path+"/products/"+p+"/history",admin,null).raw,List.class);assertThat(history).hasSize(1);
+    }
+    @Test void smartPricingBlocksExpiredLotsAndDoesNotCallExternalAiWhenDisabled()throws Exception {
+        long p=product();long lot=lot(p,"SMART",4,1).id();var l=lots.findById(lot).orElseThrow();l.setExpiryDate(LocalDate.now().minusDays(1));lots.save(l);String path=base+"/smart-pricing";
+        var r=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(((Map<?,?>)r.body.get("report")).get("action")).isEqualTo("BLOCKED");
+        assertThat(call("POST",path+"/"+r.id()+"/apply",admin,Map.of("reason","Просрочено","percent",5)).status).isEqualTo(409);
+        var ai=call("POST",path+"/"+r.id()+"/explain",admin,null);assertThat(ai.status).isEqualTo(200);assertThat(ai.body.get("mode")).isEqualTo("ENGINE");
+    }
+    @Test void smartPricingUsesShippedHistoryAndActualPromotionOutcomes()throws Exception {
+        long p=product();lot(p,"SMART",10,30);long pending=order(p,2);String path=base+"/smart-pricing";
+        var before=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(((Map<?,?>)((Map<?,?>)before.body.get("report")).get("sales")).get("units30")).isEqualTo(0);
+        call("PUT",base+"/orders/"+pending+"/status",admin,Map.of("status","SHIPPED","reason","Реальная отгрузка"));
+        assertThat(call("POST",path+"/"+before.id()+"/apply",admin,Map.of("reason","Продажи изменились","percent",5)).status).isEqualTo(409);
+        var r=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(((Map<?,?>)((Map<?,?>)r.body.get("report")).get("sales")).get("units30")).isEqualTo(2);
+        assertThat(call("POST",path+"/"+r.id()+"/apply",admin,Map.of("reason","Акция","percent",5)).status).isEqualTo(200);
+        long next=order(p,1);call("PUT",base+"/orders/"+next+"/status",admin,Map.of("status","SHIPPED","reason","После акции"));
+        var history=json.readValue(call("GET",path+"/products/"+p+"/history",admin,null).raw,List.class);var first=(Map<?,?>)history.getFirst();
+        assertThat(first.get("unitsBefore7Days")).isEqualTo(2);assertThat(first.get("unitsAfter")).isEqualTo(1);assertThat(new java.math.BigDecimal(first.get("revenueAfter").toString())).isEqualByComparingTo("950");
+    }
+    @Test void smartPricingDoesNotTreatUnknownLegacyCostAsZero()throws Exception {
+        long id=product();var p=products.findById(id).orElseThrow();p.setQuantityOnHand(5);p.setUnitCost(null);p.setExpiryDate(LocalDate.now().plusDays(5));products.save(p);
+        var result=call("POST",base+"/smart-pricing/products/"+id+"/analyze",admin,null);assertThat(result.status).isEqualTo(409);assertThat(result.raw).contains("себестоимость");assertThat(lots.findByProductId(id)).isEmpty();
+    }
+    private long statisticalPricingProduct()throws Exception {
+        var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",1600);
+        long id=call("POST",base+"/products",admin,body).id();lot(id,"STAT",5000,3);var p=products.findById(id).orElseThrow();p.setReceivedAt(LocalDate.now().minusDays(40));products.save(p);
+        int[] prices={800,1000,1250,1600},quantities={938,600,384,234};
+        for(int i=0;i<4;i++){
+            var from=LocalDate.now().minusDays(24-i*6).atStartOfDay();var price=java.math.BigDecimal.valueOf(prices[i]);
+            var change=new PriceChange();change.productId=id;change.changedAt=from;change.actor="test-statistics";change.reason="Синтетический период только для проверки";
+            change.oldBasePrice=java.math.BigDecimal.valueOf(i==0?1600:prices[i-1]);change.newBasePrice=price;change.oldPercent=0;change.newPercent=0;change.costAtChange=java.math.BigDecimal.valueOf(800);change.availableAtChange=5000;priceChanges.save(change);
+            var order=new com.aria.entity.Order();order.setStatus("SHIPPED");order.setShippedAt(from.plusDays(1));order.setOwnerEmail("statistics@test.local");order.setTotalAmount(price.multiply(java.math.BigDecimal.valueOf(quantities[i])));order.getItems().add(new OrderItem(p,quantities[i],price));orders.save(order);
+        }return id;
+    }
+    private Reply configureAutopilot(String category,int maximum,boolean lowConfidence)throws Exception {
+        String path=base+"/smart-pricing";var current=call("GET",path+"/settings",admin,null);
+        var body=new HashMap<String,Object>();body.put("version",current.body.get("version"));body.put("mode","AUTOPILOT");body.put("maximumDiscount",maximum);body.put("cooldownHours",24);body.put("allowLowConfidence",lowConfidence);body.put("allowRestore",false);body.put("allowedCategories",List.of(category));return call("PUT",path+"/settings",admin,body);
+    }
+    @Test void autopilotRequiresExplicitBoundsAndHonorsCategoryConfidenceAndDiscountLimits()throws Exception {
+        long p=statisticalPricingProduct();String path=base+"/smart-pricing";
+        var first=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(first.status).as(first.raw).isEqualTo(200);
+        assertThat(((Map<?,?>)first.body.get("report")).get("action")).isEqualTo("DISCOUNT");assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(configureAutopilot("*",90,true).status).isEqualTo(400);
+        assertThat(configureAutopilot("Электроника",90,true).status).isEqualTo(200);
+        call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(configureAutopilot("Продукты",90,false).status).isEqualTo(200);
+        call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(configureAutopilot("Продукты",1,true).status).isEqualTo(200);
+        call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(configureAutopilot("Продукты",90,true).status).isEqualTo(200);
+        var applied=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(applied.status).as(applied.raw).isEqualTo(200);assertThat(applied.body.get("status")).isEqualTo("APPLIED");assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isBetween(1,50);
+        assertThat(call("POST",path+"/stop",admin,null).body.get("mode")).isEqualTo("RECOMMEND");
+        assertThat(call("POST",path+"/"+applied.id()+"/rollback",admin,Map.of("reason","Откат автоматического решения")).status).isEqualTo(200);
+        call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+    }
+    @Test void autopilotCooldownPreventsFrequentChangesAndSettingsCannotBeOverwrittenStale()throws Exception {
+        long p=statisticalPricingProduct();String path=base+"/smart-pricing";
+        assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",5,"reason","Недавнее ручное изменение")).status).isEqualTo(200);
+        var config=configureAutopilot("Продукты",90,true);assertThat(config.status).isEqualTo(200);
+        var result=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(result.status).as(result.raw).isEqualTo(200);assertThat(result.body.get("status")).isEqualTo("PENDING");assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(5);
+        assertThat(auditEvents.findTop100ByOrderByCreatedAtDescIdDesc()).anyMatch(e->"SMART_AUTOPILOT_SKIPPED".equals(e.getAction())&&e.getDetails().contains("Пауза"));
+        var stale=new HashMap<String,Object>(config.body);stale.put("version",-1);assertThat(call("PUT",path+"/settings",admin,stale).status).isEqualTo(409);
+        assertThat(call("POST",path+"/stop",user,null).status).isEqualTo(403);
+        assertThat(call("PUT",path+"/settings",user,config.body).status).isEqualTo(403);
     }
     @Test void soldOutDiscountCanBeClearedWithoutMakingExpiredStockSellable()throws Exception {
         long p=product();lot(p,"EMPTY",1,5);assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",20,"reason","Срок")).status).isEqualTo(200);

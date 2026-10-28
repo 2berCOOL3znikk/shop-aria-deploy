@@ -47,6 +47,11 @@ public class Product {
     @Column(precision = 12, scale = 2)
     private BigDecimal unitPrice;
 
+    @Column(precision=12,scale=2)
+    private BigDecimal minimumPrice;
+    public BigDecimal getMinimumPrice(){return minimumPrice;}
+    public void setMinimumPrice(BigDecimal value){minimumPrice=value;}
+
     private LocalDate expiryDate;
 
     @Enumerated(EnumType.STRING)

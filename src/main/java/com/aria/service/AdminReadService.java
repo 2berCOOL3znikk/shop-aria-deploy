@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
 @Transactional(readOnly=true)
 public class AdminReadService {
     private static final Map<String,String> ACTIONS=Map.ofEntries(
+        Map.entry("SMART_PRICING_RECOMMENDED","Рекомендация Smart Pricing"),Map.entry("SMART_PRICING_APPLIED","Решение Smart Pricing применено"),Map.entry("SMART_PRICING_REJECTED","Рекомендация отклонена"),Map.entry("SMART_PRICING_ROLLED_BACK","Откат цены"),
+        Map.entry("SMART_AUTOPILOT_APPLIED","Автопилот изменил цену"),Map.entry("SMART_AUTOPILOT_SKIPPED","Автопилот пропустил изменение"),Map.entry("SMART_AUTOPILOT_CONFIGURED","Настройки автопилота"),Map.entry("SMART_AUTOPILOT_STOPPED","Автопилот экстренно выключен"),
         Map.entry("PRODUCT_CREATED","Создан товар"),Map.entry("PRODUCT_UPDATED","Изменён товар"),Map.entry("PRODUCT_ARCHIVED","Товар архивирован"),Map.entry("PRODUCT_PHOTO_UPDATED","Обновлено фото"),
         Map.entry("LOT_RECEIVED","Принята партия"),Map.entry("LOT_UPDATED","Исправлена партия"),Map.entry("LOT_WRITTEN_OFF","Списана партия"),Map.entry("PRODUCT_WRITTEN_OFF","Товар списан"),
         Map.entry("DISCOUNT_CHANGED","Изменена скидка"),Map.entry("ORDER_CREATED","Создан заказ"),Map.entry("ORDER_STOCK","Отгрузка заказа"),Map.entry("ORDER_STOCK_RETURNED","Возврат товара из заказа"),Map.entry("ORDER_STATUS_CHANGED","Изменён статус заказа"),

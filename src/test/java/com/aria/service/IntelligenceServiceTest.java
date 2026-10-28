@@ -40,6 +40,44 @@ class IntelligenceServiceTest {
         assertThat(result).containsEntry("mode","RULES").containsEntry("text","Просроченных партий: 0");
         verify(client,times(1)).send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class));
     }
+    private Map<String,Object> pricingFacts(){return Map.of("decisionId",1,"report",Map.of("scenarios",List.of(Map.of("percent",0),Map.of("percent",5)),"confidence","LOW"));}
+    private HttpClient pricingClient(String content)throws Exception {
+        var client=mock(HttpClient.class);HttpResponse<String> response=mock(HttpResponse.class);
+        when(response.statusCode()).thenReturn(200);
+        var json=tools.jackson.databind.json.JsonMapper.builder().build();
+        when(response.body()).thenReturn(json.writeValueAsString(Map.of("model","test/model:free","choices",List.of(Map.of("message",Map.of("content",content))))));
+        when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenReturn(response);return client;
+    }
+    @Test void pricingJsonIsValidatedAndNeverSentToMutationTools()throws Exception {
+        var client=pricingClient("{\"explanation\":\"Истории мало\",\"risks\":[\"Неизвестна реакция\"],\"suggestedPercent\":5}");
+        var service=new IntelligenceService("test-key","openrouter/free",client);
+        assertThat(service.explainPricing(pricingFacts())).containsEntry("mode","AI").containsEntry("suggestedPercent",5);
+        var captor=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(client).send(captor.capture(),any(HttpResponse.BodyHandler.class));
+        var request=tools.jackson.databind.json.JsonMapper.builder().build().readValue(body(captor.getValue()),Map.class);
+        assertThat(request).doesNotContainKeys("tools","models");assertThat(((Map<?,?>)request.get("response_format")).get("type")).isEqualTo("json_schema");
+        assertThat(((Map<?,?>)request.get("provider")).get("require_parameters")).isEqualTo(true);
+        assertThat(((Map<?,?>)((Map<?,?>)request.get("provider")).get("max_price")).values()).allMatch(v->((Number)v).intValue()==0);
+        assertThat(service.explainPricing(pricingFacts())).containsEntry("mode","ENGINE");verify(client,times(1)).send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class));
+    }
+    @Test void pricingRejectsHallucinatedPercentAndFractionalPercent()throws Exception {
+        for(String percent:List.of("80","5.5","-1","null")){
+            var client=pricingClient("{\"explanation\":\"Пример\",\"risks\":[],\"suggestedPercent\":"+percent+"}");
+            assertThat(new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts())).containsEntry("mode","ENGINE");
+        }
+    }
+    @Test void pricingRejectsInvalidJsonExtraFieldsAndMalformedRisks()throws Exception {
+        for(String content:List.of("not json","{\"explanation\":\"Пример\",\"risks\":[],\"suggestedPercent\":5,\"execute\":true}","{\"explanation\":\"Пример\",\"risks\":[1],\"suggestedPercent\":5}")){
+            var client=pricingClient(content);assertThat(new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts())).containsEntry("mode","ENGINE");
+        }
+    }
+    @Test void pricingNoKeyOrPaidModelNeverContactsProvider(){
+        var client=mock(HttpClient.class);assertThat(new IntelligenceService("","openrouter/free",client).explainPricing(pricingFacts())).containsEntry("mode","ENGINE");
+        assertThat(new IntelligenceService("test-key","paid/model",client).explainPricing(pricingFacts())).containsEntry("mode","ENGINE");verifyNoInteractions(client);
+    }
+    @Test void pricingTimeoutIsNotMisreportedAsInvalidJson()throws Exception {
+        var client=mock(HttpClient.class);when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenThrow(new HttpTimeoutException("timeout"));
+        var result=new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts());assertThat(result).containsEntry("mode","ENGINE");assertThat((String)result.get("note")).contains("25 секунд").doesNotContain("структуры");
+    }
     private String body(HttpRequest request)throws Exception {
         var done=new CompletableFuture<String>();var out=new java.io.ByteArrayOutputStream();
         request.bodyPublisher().orElseThrow().subscribe(new Flow.Subscriber<ByteBuffer>(){

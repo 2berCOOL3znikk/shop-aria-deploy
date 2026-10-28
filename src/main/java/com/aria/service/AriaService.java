@@ -32,6 +32,7 @@ public class AriaService {
     private final PricingService pricing;
     private final PolicyService policies;
     private final com.aria.repository.OrderRepository orders;
+    private final PriceHistoryService priceHistory;
     @org.springframework.beans.factory.annotation.Value("${aria.seed-demo-catalog:false}")
     private boolean demoCatalog;
     @org.springframework.beans.factory.annotation.Value("${aria.demo-market-enabled:false}")
@@ -41,7 +42,7 @@ public class AriaService {
                        TransferLotRepository lots,
                        CompetitorAnalyzerService competitorService,
                        AriaLogRepository logRepo,
-                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing,PolicyService policies, com.aria.repository.OrderRepository orders) {
+                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing,PolicyService policies, com.aria.repository.OrderRepository orders,PriceHistoryService priceHistory) {
         this.products = products;
         this.lots = lots;
         this.competitorService = competitorService;
@@ -50,6 +51,7 @@ public class AriaService {
         this.inventory=inventory;this.pricing=pricing;
         this.policies=policies;
         this.orders=orders;
+        this.priceHistory=priceHistory;
     }
 
     @Transactional
@@ -354,6 +356,7 @@ public class AriaService {
         product=inventory.lock(product.getId());
         inventory.synchronize(product);
         pricing.validate(product,suggestion.getSuggestedPercent());
+        priceHistory.record(product,product.getUnitPrice(),product.getDiscountPercent(),suggestion.getSuggestedPercent(),"Подтверждено прежнее предложение #"+suggestionId);
         product.setStatus(ProductStatus.DISCOUNTED);
         product.setDiscountPercent(suggestion.getSuggestedPercent());
 

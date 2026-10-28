@@ -19,10 +19,13 @@ public class PricingService {
         return p.getUnitPrice().multiply(BigDecimal.valueOf(100-percent)).divide(BigDecimal.valueOf(100),2,RoundingMode.HALF_UP);
     }
     public int maximum(Product p) {
-        return com.aria.service.pricing.PricingMath.maximumDiscount(p.getUnitPrice(),p.getUnitCost(),policies.forProduct(p).getMinimumMarginPercent());
+        int max=com.aria.service.pricing.PricingMath.maximumDiscount(p.getUnitPrice(),p.getUnitCost(),policies.forProduct(p).getMinimumMarginPercent());
+        while(max>0 && (price(p,max).signum()<=0 || p.getMinimumPrice()!=null && price(p,max).compareTo(p.getMinimumPrice())<0))max--;
+        return max;
     }
     public void validate(Product p,int percent) {
         price(p,percent);
+        if(price(p,percent).signum()<=0 || (p.getMinimumPrice()!=null && price(p,percent).compareTo(p.getMinimumPrice())<0))throw new IllegalStateException("Цена ниже установленного минимума");
         if(p.getStatus()==ProductStatus.SOCIAL || p.getStatus()==ProductStatus.RESERVED || p.getStatus()==ProductStatus.TRANSFERRED || p.getStatus()==ProductStatus.WRITTEN_OFF) throw new IllegalStateException("Скидка недоступна для текущего статуса товара");
         if(p.getExpiryDate()!=null && p.getExpiryDate().isBefore(LocalDate.now())) throw new IllegalStateException("Просроченный товар продавать запрещено");
         if(p.getQuantityOnHand()==null || p.getQuantityOnHand()<1) throw new IllegalStateException("Нет пригодного остатка для продажи");
@@ -34,17 +37,12 @@ public class PricingService {
         result.put("percent",percent);result.put("price",price);result.put("unitCost",cost);result.put("maximumPercent",maximum(p));
         result.put("minimumMarginPercent",policies.forProduct(p).getMinimumMarginPercent());
         result.put("profitPerUnit",cost==null?null:price.subtract(cost));
-        result.put("marginPercent",cost==null?null:price.subtract(cost).multiply(BigDecimal.valueOf(100)).divide(price,2,RoundingMode.HALF_UP));
+        result.put("marginPercent",cost==null||price.signum()<=0?null:price.subtract(cost).multiply(BigDecimal.valueOf(100)).divide(price,2,RoundingMode.HALF_UP));
         result.put("revenueIfAllSold",price.multiply(BigDecimal.valueOf(p.getQuantityOnHand()==null?0:p.getQuantityOnHand())));
         try {validate(p,percent);result.put("allowed",true);result.put("warning","");}catch(IllegalArgumentException|IllegalStateException e){result.put("allowed",false);result.put("warning",e.getMessage());}
         return result;
     }
     public Map<String,Object> recommendation(Product p) {
-        long days=p.getExpiryDate()==null?Long.MAX_VALUE:ChronoUnit.DAYS.between(LocalDate.now(),p.getExpiryDate());
-        var policy=policies.forProduct(p);
-        int target=days<0?0:rules.stream().mapToInt(rule->rule.suggest(p,LocalDate.now(),policy)).max().orElse(0);
-        int suggested=Math.min(target,maximum(p));
-        String reason=days<0?"Срок истёк: продажа запрещена. Проверьте партии и оформите списание.":target==0?"Нет основания для скидки по срокам или оборачиваемости.":"Правило категории «"+policy.getCategory()+"» предлагает "+target+"%; предел по себестоимости и марже — "+maximum(p)+"%. Итог: "+suggested+"%.";
-        return Map.of("suggestedPercent",suggested,"reason",reason,"scenarios",List.of(preview(p,0),preview(p,10),preview(p,20),preview(p,30),preview(p,50)));
+        return Map.of("suggestedPercent",0,"reason","Это ручной калькулятор. Рекомендации по продажам и риску партий доступны в разделе ARIA Smart Pricing; фиксированные скидки по числу дней не назначаются.","scenarios",List.of(preview(p,0),preview(p,10),preview(p,20),preview(p,30),preview(p,50)));
     }
 }

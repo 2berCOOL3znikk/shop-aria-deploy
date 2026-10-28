@@ -21,11 +21,16 @@ public class ControlService {
     private final InventoryService inventory;
     private final PricingService pricing;
     private final AuditService audit;
-    public ControlService(ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,InventoryLotRepository lots,InventoryService inventory,PricingService pricing,AuditService audit){
+    private final PriceHistoryService priceHistory;
+    public ControlService(ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,InventoryLotRepository lots,InventoryService inventory,PricingService pricing,AuditService audit,PriceHistoryService priceHistory){
         this.products=products;this.details=details;this.suppliers=suppliers;this.lots=lots;this.inventory=inventory;this.pricing=pricing;this.audit=audit;
+        this.priceHistory=priceHistory;
     }
     public Product saveProduct(Long id,ProductInput input){
         Product p=id==null?new Product():inventory.lock(id);
+        var oldPrice=p.getUnitPrice();int oldPercent=p.getDiscountPercent()==null?0:p.getDiscountPercent();
+        p.setMinimumPrice(input.minimumPrice());
+        if(input.minimumPrice()!=null && input.unitPrice().compareTo(input.minimumPrice())<0)throw new IllegalArgumentException("Базовая цена ниже минимальной");
         if ((id==null || !input.sku().trim().equalsIgnoreCase(p.getSku())) && products.existsBySkuIgnoreCase(input.sku().trim())) throw new IllegalStateException("SKU уже занят другим товаром");
         if(id!=null && p.getArchived()) throw new IllegalStateException("Товар архивирован");
         if(input.imageUrl()!=null && !input.imageUrl().isBlank() && !input.imageUrl().startsWith("/images/") && !input.imageUrl().matches("/api/products/\\d+/photo") && !input.imageUrl().matches("https://[^\\s]+")) throw new IllegalArgumentException("Фото: загруженное изображение, путь /images/… или ссылка https://…");
@@ -35,6 +40,7 @@ public class ControlService {
         if(id==null){p.setReceivedAt(LocalDate.now());p.setUnitCost(java.math.BigDecimal.ZERO);}
         if(p.getDiscountPercent()!=null && p.getDiscountPercent()>0) pricing.validate(p,p.getDiscountPercent());
         products.saveAndFlush(p);
+        if(oldPrice!=null)priceHistory.record(p,oldPrice,oldPercent,oldPercent,"Изменение карточки товара");
         ProductDetail detail=details.findByProductId(p.getId()).orElseGet(ProductDetail::new);detail.setProduct(p);detail.setBrand(input.brand());detail.setDescriptionLong(input.description());details.save(detail);
         audit.record(id==null?"PRODUCT_CREATED":"PRODUCT_UPDATED","product:"+p.getId(),p.getSku()+" · "+p.getName()+" · цена "+p.getUnitPrice()+" ₸");return p;
     }
@@ -61,6 +67,7 @@ public class ControlService {
             throw new IllegalStateException("Цена товара изменилась после расчёта. Обновите сценарий и подтвердите скидку заново");
         if(input.percent()!=0 || !(p.getStatus()==ProductStatus.ACTIVE||p.getStatus()==ProductStatus.DISCOUNTED||p.getStatus()==ProductStatus.CANDIDATE))pricing.validate(p,input.percent());
         if(p.getArchived()) throw new IllegalStateException("Товар архивирован");
+        priceHistory.record(p,p.getUnitPrice(),p.getDiscountPercent()==null?0:p.getDiscountPercent(),input.percent(),input.reason());
         p.setDiscountPercent(input.percent());p.setStatus(input.percent()==0?ProductStatus.ACTIVE:ProductStatus.DISCOUNTED);
         audit.record("DISCOUNT_CHANGED","product:"+id,input.percent()+"% · цена "+pricing.price(p,input.percent())+" ₸ · "+input.reason());
     }
