@@ -11,6 +11,12 @@ public class SmartPricingSettings {
     @Column(nullable=false) public int cooldownHours=24;
     @Column(nullable=false) public boolean allowLowConfidence=false;
     @Column(nullable=false) public boolean allowRestore=false;
+    @Column(nullable=false,columnDefinition="boolean default false") public boolean externalAiEnabled=false;
+    @Column(nullable=false,columnDefinition="boolean default false") public boolean scheduledAiEnabled=false;
+    @Column(nullable=false,columnDefinition="integer default 10") public int aiDailyBudget=10;
+    @Column(nullable=false,columnDefinition="integer default 0") public int aiBudgetUsed=0;
+    public java.time.LocalDate aiBudgetDate;
+    public LocalDateTime lastAiRequestAt;
     @Column(nullable=false,columnDefinition="text") public String allowedCategoriesJson="[]";
     @Column(nullable=false) public LocalDateTime updatedAt=LocalDateTime.now();
 }

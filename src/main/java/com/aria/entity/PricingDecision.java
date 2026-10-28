@@ -15,6 +15,11 @@ public class PricingDecision {
     @Column(nullable=false,length=64) public String fingerprint;
     @Column(nullable=false,columnDefinition="text") public String reportJson;
     @Column(columnDefinition="text") public String explanationJson;
+    @Column(nullable=false,length=10,columnDefinition="varchar(10) default 'ENGINE'") public String source="ENGINE";
+    public Integer selectedPercent;
+    public LocalDateTime aiRequestedAt;
+    public LocalDateTime aiCompletedAt;
+    @Column(length=36) public String aiClaim;
     public LocalDateTime decidedAt;
     @Column(length=255) public String decidedBy;
     @Column(length=1000) public String decisionReason;

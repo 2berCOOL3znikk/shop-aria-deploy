@@ -13,7 +13,8 @@ public class SmartPricingController {
     public record Approval(@Min(0) @Max(90) Integer percent,@NotBlank @Size(max=900) String reason){}
     public record SettingsInput(Long version,@NotBlank @Pattern(regexp="RECOMMEND|AUTOPILOT") String mode,
         @Min(0) @Max(90) int maximumDiscount,@Min(1) @Max(720) int cooldownHours,
-        boolean allowLowConfidence,boolean allowRestore,@NotNull @Size(max=50) List<@NotBlank @Size(max=120) String> allowedCategories){}
+        boolean allowLowConfidence,boolean allowRestore,@NotNull @Size(max=50) List<@NotBlank @Size(max=120) String> allowedCategories,
+        Boolean externalAiEnabled,Boolean scheduledAiEnabled,@Min(0) @Max(50) Integer aiDailyBudget){}
     @GetMapping("/settings") public Map<String,Object> settings(){return smart.settings();}
     @PutMapping("/settings") public Map<String,Object> configure(@Valid @RequestBody SettingsInput input){return smart.configure(input);}
     @PostMapping("/stop") public Map<String,Object> stop(){return smart.stop();}

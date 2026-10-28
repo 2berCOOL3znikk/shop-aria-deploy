@@ -29,6 +29,7 @@ class ControlIntegrationTest {
     @Autowired AuditEventRepository auditEvents;
     @Autowired SmartPricingSettingsRepository smartSettings;
     @Autowired PriceChangeRepository priceChanges;
+    @Autowired com.aria.service.SmartPricingService smartPricing;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org;
@@ -305,6 +306,35 @@ class ControlIntegrationTest {
     @Test void smartPricingDoesNotTreatUnknownLegacyCostAsZero()throws Exception {
         long id=product();var p=products.findById(id).orElseThrow();p.setQuantityOnHand(5);p.setUnitCost(null);p.setExpiryDate(LocalDate.now().plusDays(5));products.save(p);
         var result=call("POST",base+"/smart-pricing/products/"+id+"/analyze",admin,null);assertThat(result.status).isEqualTo(409);assertThat(result.raw).contains("себестоимость");assertThat(lots.findByProductId(id)).isEmpty();
+    }
+    private void enableDecisionAi()throws Exception {
+        var current=call("GET",base+"/smart-pricing/settings",admin,null);var body=new HashMap<>(current.body);
+        body.put("externalAiEnabled",true);body.put("scheduledAiEnabled",true);body.put("aiDailyBudget",3);
+        var result=call("PUT",base+"/smart-pricing/settings",admin,body);assertThat(result.status).as(result.raw).isEqualTo(200);
+    }
+    private Map<String,Object> aiReply(int percent){return Map.of("mode","AI","suggestedPercent",percent,"reviewAfterHours",12,"requiresConfirmation",true,"explanation","Выбран допустимый эксперимент, данных мало","risks",List.of("Нет причинной оценки"),"model","test-model:free");}
+    @Test void aiStrategyNeedsConsentThenPersistsSourceAndUsesSelectedScenario()throws Exception {
+        long p=product();lot(p,"AI",10,5);String path=base+"/smart-pricing";long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();
+        assertThat(call("POST",path+"/"+id+"/ai-decide",admin,null).status).isEqualTo(409);enableDecisionAi();
+        var claim=smartPricing.claimAi(id,false);var completed=smartPricing.completeAi(claim,aiReply(5),false);
+        assertThat(completed.get("source")).isEqualTo("AI");assertThat(completed.get("selectedPercent")).isEqualTo(5);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+        assertThat(call("POST",path+"/"+id+"/apply",admin,Map.of("reason","Подтверждаю AI-сценарий")).status).isEqualTo(200);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isEqualTo(5);
+    }
+    @Test void emergencyStopInvalidatesAiInFlightAndAiCannotSelectOutsideEngineScenarios()throws Exception {
+        long p=product();lot(p,"AI",10,5);String path=base+"/smart-pricing";long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();enableDecisionAi();
+        var claim=smartPricing.claimAi(id,true);assertThatThrownBy(()->smartPricing.completeAi(claim,aiReply(80),true)).isInstanceOf(IllegalStateException.class);
+        call("POST",path+"/stop",admin,null);assertThatThrownBy(()->smartPricing.completeAi(claim,aiReply(5),true)).isInstanceOf(IllegalStateException.class);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+    }
+    @Test void aiUnavailableKeepsEngineAndLowConfidenceAiNeverAutoApplies()throws Exception {
+        long p=product();lot(p,"AI",10,5);String path=base+"/smart-pricing";long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();enableDecisionAi();
+        var result=call("POST",path+"/"+id+"/ai-decide",admin,null);assertThat(result.status).as(result.raw).isEqualTo(200);assertThat(result.body.get("source")).isEqualTo("ENGINE");
+        assertThat(call("GET",path+"/ai-status",user,null).status).isEqualTo(403);
+        assertThat(call("GET",path+"/ai-status",admin,null).raw).doesNotContain("sk-or-v1-","Bearer");
+        var setting=smartSettings.findById(1L).orElseThrow();setting.lastAiRequestAt=java.time.LocalDateTime.now().minusMinutes(2);setting.mode="AUTOPILOT";setting.allowLowConfidence=true;setting.allowedCategoriesJson="[\"продукты\"]";smartSettings.save(setting);
+        var claim=smartPricing.claimAi(id,false);smartPricing.completeAi(claim,aiReply(5),false);
+        assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
     }
     private long statisticalPricingProduct()throws Exception {
         var body=new HashMap<>(productBody("STAT-"+UUID.randomUUID()));body.put("unitPrice",1600);

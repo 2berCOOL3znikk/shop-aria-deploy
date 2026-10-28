@@ -1,0 +1,13 @@
+alter table pricing_decisions add column source varchar(10) not null default 'ENGINE';
+alter table pricing_decisions add column selected_percent integer;
+alter table pricing_decisions add column ai_requested_at timestamp;
+alter table pricing_decisions add column ai_completed_at timestamp;
+alter table pricing_decisions add column ai_claim varchar(36);
+alter table smart_pricing_settings add column external_ai_enabled boolean not null default false;
+alter table smart_pricing_settings add column scheduled_ai_enabled boolean not null default false;
+alter table smart_pricing_settings add column ai_daily_budget integer not null default 10;
+alter table smart_pricing_settings add column ai_budget_used integer not null default 0;
+alter table smart_pricing_settings add column ai_budget_date date;
+alter table smart_pricing_settings add column last_ai_request_at timestamp;
+alter table pricing_decisions add constraint ck_ai_source check(source in ('AI','ENGINE'));
+alter table pricing_decisions add constraint ck_ai_percent check(selected_percent is null or selected_percent between 0 and 90);

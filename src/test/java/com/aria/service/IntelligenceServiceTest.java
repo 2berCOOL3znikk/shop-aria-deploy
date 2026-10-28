@@ -78,6 +78,13 @@ class IntelligenceServiceTest {
         var client=mock(HttpClient.class);when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenThrow(new HttpTimeoutException("timeout"));
         var result=new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts());assertThat(result).containsEntry("mode","ENGINE");assertThat((String)result.get("note")).contains("25 секунд").doesNotContain("структуры");
     }
+    @Test void activeDecisionRequiresBoundedReviewAndConfirmationFlag()throws Exception {
+        var facts=Map.<String,Object>of("report",Map.of("scenarios",List.of(Map.of("percent",0),Map.of("percent",5)),"reviewAfterHours",12));
+        var good=pricingClient("{\"explanation\":\"Проверить эксперимент\",\"risks\":[],\"suggestedPercent\":5,\"reviewAfterHours\":6,\"requiresConfirmation\":true}");
+        assertThat(new IntelligenceService("test-key","openrouter/free",good).decidePricing(facts)).containsEntry("mode","AI").containsEntry("suggestedPercent",5);
+        var invalid=pricingClient("{\"explanation\":\"Слишком поздно\",\"risks\":[],\"suggestedPercent\":5,\"reviewAfterHours\":24,\"requiresConfirmation\":false}");
+        assertThat(new IntelligenceService("test-key","openrouter/free",invalid).decidePricing(facts)).containsEntry("mode","ENGINE");
+    }
     private String body(HttpRequest request)throws Exception {
         var done=new CompletableFuture<String>();var out=new java.io.ByteArrayOutputStream();
         request.bodyPublisher().orElseThrow().subscribe(new Flow.Subscriber<ByteBuffer>(){
