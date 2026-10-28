@@ -54,6 +54,8 @@
       status.textContent = messages[verificationStatus] || "Статус проверки: " + verificationStatus;
       form.hidden = verificationStatus === "PENDING_VERIFICATION" || verificationStatus === "VERIFIED";
       if (message) message.textContent = verificationStatus === "VERIFIED" ? "Организация проверена: бронирование доступно." : "Сначала отправьте заявку на проверку организации.";
+      const proof=document.querySelector('.social-proof');
+      if(proof) proof.textContent=verificationStatus==='VERIFIED'?'После бронирования скачайте акт и согласуйте выдачу. Передачу подтверждает сотрудник магазина.':'Отправьте данные организации на проверку. После подтверждения станет доступно бронирование.';
     } catch (error) { status.textContent = error.message; }
   }
 
@@ -85,7 +87,7 @@
     section.style.display = "block";
     try {
       const claims = await request("/api/social/my-claims");
-      document.getElementById("claims-list").innerHTML = claims.length ? claims.map(c => '<div class="claim-row"><span><strong>' + escape(c.productName) + '</strong> · забронировано ' + Number(c.claimedQuantity || 0) + ' шт.</span><button class="btn-outline" onclick="downloadClaimAct(' + Number(c.id) + ')">Акт передачи</button></div>').join("") : '<p class="admin-note">Забронированных лотов пока нет.</p>';
+      document.getElementById("claims-list").innerHTML = claims.length ? claims.map(c => '<div class="claim-row"><span><strong>' + escape(c.productName) + '</strong> · ' + (c.status==='TRANSFERRED'?'передано':'забронировано') + ' ' + Number(c.claimedQuantity || 0) + ' шт.</span><button class="btn-outline" onclick="downloadClaimAct(' + Number(c.id) + ')">Акт передачи</button></div>').join("") : '<p class="admin-note">Забронированных лотов пока нет.</p>';
     } catch (_) { document.getElementById("claims-list").textContent = "Не удалось загрузить бронирования."; }
   }
 

@@ -1,0 +1,38 @@
+name: Verify ARIA
+on: [push, pull_request]
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    services:
+      postgres:
+        image: postgres:17-alpine
+        env:
+          POSTGRES_DB: aria_test
+          POSTGRES_USER: aria_test
+          POSTGRES_PASSWORD: ci-only-password
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd "pg_isready -U aria_test -d aria_test"
+          --health-interval 5s
+          --health-timeout 5s
+          --health-retries 10
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '21'
+          cache: maven
+      - run: chmod +x mvnw
+      - run: ./mvnw -B clean verify
+      - run: ./mvnw -B -Dtest=ControlIntegrationTest test
+        env:
+          ARIA_TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/aria_test
+          ARIA_TEST_DATABASE_USER: aria_test
+          ARIA_TEST_DATABASE_PASSWORD: ci-only-password
+          ARIA_TEST_DATABASE_DRIVER: org.postgresql.Driver
+          ARIA_TEST_FLYWAY: 'true'
+          ARIA_TEST_SCHEMA_MODE: validate

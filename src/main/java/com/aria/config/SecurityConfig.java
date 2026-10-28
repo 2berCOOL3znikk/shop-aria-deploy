@@ -45,7 +45,7 @@ public class SecurityConfig {
                                 "/api/auth/**",
                                 "/api/hello",
                                 "/actuator/health",
-                                "/", "/*.html", "/css/**", "/js/**", "/images/**", "/styles.css", "/favicon.ico",
+                                "/", "/*.html", "/css/**", "/js/**", "/images/**", "/styles.css", "/control.css", "/favicon.ico",
                                 "/h2-console/**"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").hasRole("ADMIN")

@@ -7,8 +7,14 @@ import java.time.LocalDateTime;
 import com.aria.enums.ProductStatus;
 
 @Entity
-@Table(name = "products")
+@Table(name = "products", uniqueConstraints=@UniqueConstraint(name="uk_product_sku",columnNames="sku"))
 public class Product {
+    @Column(nullable=false, columnDefinition="boolean default false")
+    private boolean archived = false;
+    @Version @Column(nullable=false,columnDefinition="bigint default 0")
+    private long version;
+    public boolean getArchived() { return archived; }
+    public void setArchived(boolean value) { archived=value; }
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -59,6 +65,34 @@ public class Product {
     // Процент скидки для динамического ценообразования (0 = без скидки)
     @Column(nullable = false)
     private Integer discountPercent = 0;
+
+    // === Поля для админ-панели (все nullable, backward compatible) ===
+    @Column(length = 64)
+    private String barcode;              // Штрихкод EAN/UPC
+
+    @Column
+    private Integer vatPercent = 20;     // НДС (%)
+
+    @Column(length = 20)
+    private String unit = "шт";          // Единица измерения (шт/кг/л)
+
+    @Column(length = 120)
+    private String subcategory;           // Подкатегория
+
+    @Column(length = 500)
+    private String tags;                // Теги (через запятую)
+
+    @Column(length = 120)
+    private String supplier;           // Поставщик
+
+    @Column(length = 2000)
+    private String notes;               // Примечания
+
+    @Column(length = 100)
+    private String dimensions;          // Габариты (Д×Ш×В)
+
+    @Column
+    private Integer lowStockThreshold = 5; // Минимальный остаток для уведомлений
 
     public Product() {}
 
@@ -125,6 +159,34 @@ public class Product {
 
     public Integer getDiscountPercent() { return discountPercent; }
     public void setDiscountPercent(Integer v) { discountPercent = v; }
+
+    // === Геттеры и сеттеры новых полей ===
+    public String getBarcode() { return barcode; }
+    public void setBarcode(String v) { barcode = v; }
+
+    public Integer getVatPercent() { return vatPercent; }
+    public void setVatPercent(Integer v) { vatPercent = v; }
+
+    public String getUnit() { return unit; }
+    public void setUnit(String v) { unit = v; }
+
+    public String getSubcategory() { return subcategory; }
+    public void setSubcategory(String v) { subcategory = v; }
+
+    public String getTags() { return tags; }
+    public void setTags(String v) { tags = v; }
+
+    public String getSupplier() { return supplier; }
+    public void setSupplier(String v) { supplier = v; }
+
+    public String getNotes() { return notes; }
+    public void setNotes(String v) { notes = v; }
+
+    public String getDimensions() { return dimensions; }
+    public void setDimensions(String v) { dimensions = v; }
+
+    public Integer getLowStockThreshold() { return lowStockThreshold; }
+    public void setLowStockThreshold(Integer v) { lowStockThreshold = v; }
 
     private static String defaultImageFor(String category) {
         if (category == null) return "/images/product-generic.svg";

@@ -21,10 +21,13 @@ public class ProductController {
 
     private final ProductRepository repo;
     private final ProductDetailRepository detailRepo;
+    private final com.aria.service.InventoryService inventory;
+    private final com.aria.service.PublicProductView view;
 
-    public ProductController(ProductRepository repo, ProductDetailRepository detailRepo) {
+    public ProductController(ProductRepository repo, ProductDetailRepository detailRepo, com.aria.service.InventoryService inventory,com.aria.service.PublicProductView view) {
         this.repo = repo;
         this.detailRepo = detailRepo;
+        this.inventory=inventory; this.view=view;
     }
 
     /**
@@ -45,36 +48,7 @@ public class ProductController {
     /**
      * Публичное представление товара без закупочной себестоимости и внутренних метрик склада.
      */
-    private Map<String, Object> productToMap(Product product) {
-        Map<String, Object> map = new HashMap<>();
-        map.put("id", product.getId());
-        map.put("sku", product.getSku());
-        map.put("name", product.getName());
-        map.put("imageUrl", product.getImageUrl() != null ? product.getImageUrl() : "/images/product-generic.svg");
-        map.put("category", product.getCategory());
-        map.put("quantityOnHand", product.getQuantityOnHand());
-        map.put("unitPrice", product.getUnitPrice());
-        map.put("discountPercent", product.getDiscountPercent());
-        map.put("displayPrice", computeDisplayPrice(product));
-        map.put("expiryDate", product.getExpiryDate());
-        if (product.getStatus() == ProductStatus.ACTIVE || product.getStatus() == ProductStatus.DISCOUNTED) {
-            map.put("status", product.getStatus().name());
-        }
-        int sales = product.getSalesLast30Days() == null ? 0 : product.getSalesLast30Days();
-        map.put("popularityRank", sales >= 50 ? 3 : sales >= 20 ? 2 : sales > 0 ? 1 : 0);
-        if (product.getMarketAvgPrice() != null && product.getMarketAvgPrice().compareTo(BigDecimal.ZERO) > 0
-                && product.getUnitPrice() != null && product.getUnitPrice().compareTo(product.getMarketAvgPrice()) < 0) {
-            BigDecimal dealPercent = product.getMarketAvgPrice().subtract(product.getUnitPrice())
-                    .multiply(BigDecimal.valueOf(100)).divide(product.getMarketAvgPrice(), 0, RoundingMode.HALF_UP);
-            map.put("marketDealPercent", dealPercent.intValue());
-        }
-        detailRepo.findByProductId(product.getId()).ifPresent(detail -> {
-            map.put("brand", detail.getBrand());
-            map.put("description", detail.getDescriptionLong());
-            map.put("size", detail.getSize());
-        });
-        return map;
-    }
+    private Map<String, Object> productToMap(Product product) { return view.summary(product); }
 
     @GetMapping
     public List<Product> all() {
@@ -89,7 +63,7 @@ public class ProductController {
     private List<Product> sellableProducts() {
         List<Product> products = new ArrayList<>(repo.findByStatus(ProductStatus.ACTIVE));
         products.addAll(repo.findByStatus(ProductStatus.DISCOUNTED));
-        return products.stream().filter(p -> p.getQuantityOnHand() != null && p.getQuantityOnHand() > 0).toList();
+        return products.stream().filter(p -> !p.getArchived() && p.getUnitPrice()!=null && p.getUnitPrice().signum()>0 && inventory.available(p)>0).toList();
     }
 
     @GetMapping("/social")
@@ -102,10 +76,10 @@ public class ProductController {
     @GetMapping("/{id}")
     public Map<String, Object> getById(@PathVariable Long id) {
         Product product = repo.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("Товар не найден: " + id));
+                .orElseThrow(() -> new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Товар не найден"));
         if ((product.getStatus() != ProductStatus.ACTIVE && product.getStatus() != ProductStatus.DISCOUNTED)
-                || product.getQuantityOnHand() == null || product.getQuantityOnHand() < 1) {
-            throw new IllegalArgumentException("Товар не найден в каталоге");
+                || product.getArchived() || inventory.available(product)<1) {
+            throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Товар не найден в каталоге");
         }
 
         ProductDetail details = detailRepo.findByProductId(id).orElse(null);
@@ -137,7 +111,7 @@ public class ProductController {
         } else {
             products = repo.searchProducts(q.trim()).stream()
                     .filter(p -> p.getStatus() == ProductStatus.ACTIVE || p.getStatus() == ProductStatus.DISCOUNTED)
-                    .filter(p -> p.getQuantityOnHand() != null && p.getQuantityOnHand() > 0)
+                    .filter(p -> !p.getArchived() && inventory.available(p)>0)
                     .toList();
         }
         return products.stream().map(this::productToMap).toList();

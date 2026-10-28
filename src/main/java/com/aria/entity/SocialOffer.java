@@ -8,6 +8,18 @@ import java.time.LocalDateTime;
 @Entity
 @Table(name = "social_offers")
 public class SocialOffer {
+    @Column(length=500) private String productNameSnapshot;
+    @Column(length=64) private String skuSnapshot;
+    @Column(precision=12,scale=2) private BigDecimal unitCostSnapshot;
+    private LocalDate expirySnapshot;
+    private LocalDateTime transferredAt;
+    public String getProductNameSnapshot(){return productNameSnapshot;}
+    public String getSkuSnapshot(){return skuSnapshot;}
+    public BigDecimal getUnitCostSnapshot(){return unitCostSnapshot;}
+    public LocalDate getExpirySnapshot(){return expirySnapshot;}
+    public LocalDateTime getTransferredAt(){return transferredAt;}
+    public void setTransferredAt(LocalDateTime value){transferredAt=value;}
+    public void snapshotProduct(){productNameSnapshot=product.getName();skuSnapshot=product.getSku();unitCostSnapshot=product.getUnitCost();expirySnapshot=product.getExpiryDate();}
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

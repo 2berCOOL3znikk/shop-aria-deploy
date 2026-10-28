@@ -32,11 +32,13 @@ public class AriaLogisticsController {
     private final ProductRepository products;
     private final TransferLotRepository lots;
     private final TransferRecordRepository transferRecords;
+    private final com.aria.service.InventoryService inventory;
 
-    public AriaLogisticsController(ProductRepository products, TransferLotRepository lots, TransferRecordRepository transferRecords) {
+    public AriaLogisticsController(ProductRepository products, TransferLotRepository lots, TransferRecordRepository transferRecords, com.aria.service.InventoryService inventory) {
         this.products = products;
         this.lots = lots;
         this.transferRecords = transferRecords;
+        this.inventory=inventory;
     }
 
     @GetMapping("/queue")
@@ -102,6 +104,7 @@ public class AriaLogisticsController {
         }
         LocalDate today = LocalDate.now();
         for (Product product : lot.getItems()) {
+            inventory.lock(product.getId());
             if (product.getExpiryDate() != null && product.getExpiryDate().isBefore(today)) {
                 throw new ResponseStatusException(HttpStatus.CONFLICT, "Просроченный товар нельзя передать");
             }
@@ -115,6 +118,7 @@ public class AriaLogisticsController {
             snapshots.add(new TransferRecord(lot.getId(), product.getId(), product.getSku(), product.getName(),
                     product.getQuantityOnHand() == null ? 0 : product.getQuantityOnHand(), product.getUnitCost(),
                     lot.getPartner() == null ? "" : lot.getPartner(), transferredAt, product.getAriaReason()));
+            inventory.consume(product,product.getQuantityOnHand(),"TRANSFER_STOCK");
             product.setStatus(ProductStatus.TRANSFERRED);
             product.setQuantityOnHand(0);
         });

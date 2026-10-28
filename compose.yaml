@@ -32,6 +32,8 @@ services:
       ARIA_JWT_SECRET: ${ARIA_JWT_SECRET:-local-only-aria-jwt-secret-change-before-any-public-host-2026}
       ARIA_SEED_DEMO_USERS: ${ARIA_SEED_DEMO_USERS:-true}
       ARIA_RESET_DATA_ON_START: "false"
+      ARIA_OPENROUTER_API_KEY: ${ARIA_OPENROUTER_API_KEY:-}
+      ARIA_OPENROUTER_MODEL: ${ARIA_OPENROUTER_MODEL:-openai/gpt-4o-mini}
     ports:
       - "8080:8080"
 

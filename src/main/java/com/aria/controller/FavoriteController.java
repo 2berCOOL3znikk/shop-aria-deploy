@@ -13,14 +13,16 @@ import java.util.Map;
 @RequestMapping("/api/favorites")
 public class FavoriteController {
     private final FavoriteServicebak favoriteService;
+    private final com.aria.service.PublicProductView view;
 
-    public FavoriteController(FavoriteServicebak favoriteService) {
+    public FavoriteController(FavoriteServicebak favoriteService,com.aria.service.PublicProductView view) {
         this.favoriteService = favoriteService;
+        this.view=view;
     }
 
     @GetMapping
-    public List<Product> getFavorites(Authentication authentication) {
-        return favoriteService.getAllFavorites(authentication.getName());
+    public List<Map<String,Object>> getFavorites(Authentication authentication) {
+        return favoriteService.getAllFavorites(authentication.getName()).stream().map(view::summary).toList();
     }
 
     @PostMapping("/{productId}")

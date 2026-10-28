@@ -31,7 +31,7 @@ public class ProductImpactController {
         List<Product> all = products.findAll();
         List<SocialOffer> allOffers = offers.findAll();
         LocalDate today = LocalDate.now();
-        long saved = all.stream().filter(p -> p.getStatus() == ProductStatus.TRANSFERRED || p.getStatus() == ProductStatus.RESERVED).count();
+        long saved = all.stream().filter(p -> p.getStatus() == ProductStatus.TRANSFERRED).count();
         long socialProducts = all.stream().filter(p -> p.getStatus() == ProductStatus.SOCIAL).count();
         long openOfferUnits = allOffers.stream()
                 .filter(o -> "OPEN".equals(o.getStatus()))
@@ -53,11 +53,12 @@ public class ProductImpactController {
         for (Product product : all) {
             Long id = product.getId();
             if (id == null) continue;
-            if (product.getStatus() == ProductStatus.TRANSFERRED || product.getStatus() == ProductStatus.RESERVED) saved.add(id);
+            if (product.getStatus() == ProductStatus.TRANSFERRED) saved.add(id);
             if (product.getStatus() == ProductStatus.SOCIAL) social.add(id);
             if (product.getStatus() == ProductStatus.CANDIDATE || product.getStatus() == ProductStatus.DISCOUNTED) processing.add(id);
         }
         for (SocialOffer offer : offers.findAll()) {
+            if("TRANSFERRED".equals(offer.getStatus())) saved.add(offer.getProduct().getId());
             if (!"OPEN".equals(offer.getStatus()) || (offer.getValidUntil() != null && offer.getValidUntil().isBefore(today))) continue;
             if (offer.getProduct() != null && offer.getProduct().getId() != null) social.add(offer.getProduct().getId());
         }

@@ -1,3 +1,4 @@
+function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
 let items = [];
 
     async function loadCartCount() {
@@ -27,8 +28,8 @@ let items = [];
             '<div class="glass-card" style="display:flex;align-items:center;gap:20px;padding:16px;margin-bottom:15px;">' +
             CatalogImages.imageTag({ productName: it.productName, productSku: it.productSku, category: it.category, imageUrl: it.imageUrl }, { className: "cart-item-image", alt: it.productName, style: "width:80px;height:80px;object-fit:cover;border-radius:8px;" }) +
             '<div style="flex:1;">' +
-            '<h3 style="margin:0 0 5px 0;">' + it.productName + '</h3>' +
-            '<div style="color:var(--text-muted);font-size:12px;">SKU: ' + it.productSku + '</div>' +
+            '<h3 style="margin:0 0 5px 0;">' + ariaEscape(it.productName) + '</h3>' +
+            '<div style="color:var(--text-muted);font-size:12px;">SKU: ' + ariaEscape(it.productSku) + '</div>' +
             '<div style="color:var(--accent-blue);font-weight:700;margin-top:5px;">' + ariaMoney.format(it.priceAtAddTime) + '</div>' +
             '</div>' +
             '<div style="display:flex;align-items:center;gap:10px;">' +

@@ -1,5 +1,8 @@
 HELP.md
 target/
+data/
+*.mv.db
+*.trace.db
 .env
 .env.*
 !.env.example
@@ -35,3 +38,5 @@ build/
 
 ### VS Code ###
 .vscode/
+
+*.log

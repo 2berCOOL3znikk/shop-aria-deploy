@@ -102,10 +102,11 @@ public class SocialController {
         AppUser organization = users.findByEmail(authentication.getName())
                 .orElseThrow(() -> new IllegalArgumentException("Организация не найдена"));
         SocialOffer offer = socialService.getClaim(id, organization.getId());
-        String productName = esc(offer.getProduct().getName());
-        String productSku = esc(offer.getProduct().getSku());
+        if(offer.getUnitCostSnapshot()==null) throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Для старой передачи не сохранена стоимость. Требуется ручная сверка документа");
+        String productName = esc(offer.getProductNameSnapshot()==null?offer.getProduct().getName():offer.getProductNameSnapshot());
+        String productSku = esc(offer.getSkuSnapshot()==null?offer.getProduct().getSku():offer.getSkuSnapshot());
         String reason = esc(offer.getProduct().getAriaReason());
-        java.math.BigDecimal unitCost = offer.getProduct().getUnitCost() == null ? java.math.BigDecimal.ZERO : offer.getProduct().getUnitCost();
+        java.math.BigDecimal unitCost = offer.getUnitCostSnapshot()==null?java.math.BigDecimal.ZERO:offer.getUnitCostSnapshot();
         int quantity = offer.getQuantityClaimed() == null ? 0 : offer.getQuantityClaimed();
         String html = """
                 <!doctype html><html lang="ru"><meta charset="utf-8"><title>Акт передачи ARIA-%d</title>

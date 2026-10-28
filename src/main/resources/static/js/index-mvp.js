@@ -73,8 +73,8 @@
       const text = [p.name, p.sku, p.description, p.category].join(" ").toLocaleLowerCase("ru");
       return (!query || text.includes(query)) && (!category || p.category === category);
     });
-    if (sort === "price-asc") filtered.sort((a, b) => Number(a.unitPrice) - Number(b.unitPrice));
-    else if (sort === "price-desc") filtered.sort((a, b) => Number(b.unitPrice) - Number(a.unitPrice));
+    if (sort === "price-asc") filtered.sort((a, b) => Number(a.displayPrice ?? a.unitPrice) - Number(b.displayPrice ?? b.unitPrice));
+    else if (sort === "price-desc") filtered.sort((a, b) => Number(b.displayPrice ?? b.unitPrice) - Number(a.displayPrice ?? a.unitPrice));
     else if (sort === "expiry-asc") filtered.sort((a, b) => (a.expiryDate || "9999-12-31").localeCompare(b.expiryDate || "9999-12-31"));
     else if (sort === "popular") filtered.sort((a, b) => Number(b.popularityRank || 0) - Number(a.popularityRank || 0));
     pageSize = 12;

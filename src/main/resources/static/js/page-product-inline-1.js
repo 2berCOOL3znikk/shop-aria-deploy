@@ -60,13 +60,13 @@ let productId = null;
     }
 
     async function submitReview() {
-        if (!productId || document.getElementById('reviews').hidden) return;
+        if (!productId || document.getElementById('reviews').hidden || !ariaAuth.requireLogin()) return;
         const author = document.getElementById('review-author').value || 'Аноним';
         const comment = document.getElementById('review-comment').value;
         const rating = parseInt(document.getElementById('review-rating').value);
         if (!comment.trim()) { window.showToast(ariaI18n.t('product.reviewError'), 'error'); return; }
         try {
-            const res = await fetch('/api/reviews', {
+            const res = await ariaAuth.authFetch('/api/reviews', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ productId, author, comment, rating })

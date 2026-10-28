@@ -1,4 +1,4 @@
-package com.yourpackage.controller; // замени на свой пакет
+package com.aria.controller;
 
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;

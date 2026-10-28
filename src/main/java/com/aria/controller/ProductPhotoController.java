@@ -21,10 +21,13 @@ public class ProductPhotoController {
     private static final Set<String> ALLOWED = Set.of("image/jpeg", "image/png");
     private final ProductRepository products;
     private final ProductPhotoRepository photos;
+    private final com.aria.service.InventoryService inventory;
+    private final com.aria.service.AuditService audit;
 
-    public ProductPhotoController(ProductRepository products, ProductPhotoRepository photos) {
+    public ProductPhotoController(ProductRepository products, ProductPhotoRepository photos,com.aria.service.InventoryService inventory,com.aria.service.AuditService audit) {
         this.products = products;
         this.photos = photos;
+        this.inventory=inventory;this.audit=audit;
     }
 
     @GetMapping("/api/products/{id}/photo")
@@ -46,11 +49,20 @@ public class ProductPhotoController {
             return ResponseEntity.badRequest().body(Map.of("error", "Поддерживаются JPEG и PNG"));
         }
         byte[] data = file.getBytes();
-        var decoded = ImageIO.read(new ByteArrayInputStream(data));
-        if (decoded == null || decoded.getWidth() > 4096 || decoded.getHeight() > 4096) {
-            return ResponseEntity.badRequest().body(Map.of("error", "Файл не является корректным изображением или его размер слишком велик"));
-        }
-        var product = products.findById(id).orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        try(var input=ImageIO.createImageInputStream(new ByteArrayInputStream(data))) {
+            var readers=ImageIO.getImageReaders(input);
+            if(!readers.hasNext())return ResponseEntity.badRequest().body(Map.of("error","Некорректное изображение"));
+            var reader=readers.next();
+            try {
+                reader.setInput(input);
+                if(reader.getWidth(0)>4096||reader.getHeight(0)>4096)return ResponseEntity.badRequest().body(Map.of("error","Максимальный размер изображения — 4096 × 4096"));
+                String format=reader.getFormatName();
+                if(!"png".equalsIgnoreCase(format)&&!"jpeg".equalsIgnoreCase(format)&&!"jpg".equalsIgnoreCase(format))return ResponseEntity.badRequest().body(Map.of("error","Разрешены только JPEG и PNG"));
+                if(reader.read(0)==null)return ResponseEntity.badRequest().body(Map.of("error","Не удалось декодировать изображение"));
+            }finally{reader.dispose();}
+        }catch(IOException e){return ResponseEntity.badRequest().body(Map.of("error","Изображение повреждено"));}
+        var product = inventory.lock(id);
+        if(product.getArchived())throw new IllegalStateException("Товар архивирован");
         ProductPhoto photo = photos.findByProductId(id).orElseGet(ProductPhoto::new);
         photo.setProduct(product);
         photo.setContentType(file.getContentType());
@@ -59,6 +71,7 @@ public class ProductPhotoController {
         photos.save(photo);
         product.setImageUrl("/api/products/" + id + "/photo");
         products.save(product);
+        audit.record("PRODUCT_PHOTO_UPDATED","product:"+id,"Обновлено изображение товара");
         return ResponseEntity.ok(Map.of("message", "Фото товара обновлено", "imageUrl", product.getImageUrl()));
     }
 }

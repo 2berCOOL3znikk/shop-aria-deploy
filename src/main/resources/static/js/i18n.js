@@ -1043,3 +1043,24 @@ window.ariaI18nObserver = new MutationObserver(records => {
 });
 if (document.body) window.ariaI18nObserver.observe(document.body, { childList: true, subtree: true });
 window.ariaI18n.initI18n();
+
+Object.assign(window.ariaI18n.uiPhrases, {
+ 'ARIA — магазин, который не выбрасывает еду': {en:'ARIA — a store that keeps good food in use',kk:'ARIA — азық-түлікті ысырап етпейтін дүкен'},
+ 'Помогаем магазинам сокращать списания и направлять подходящие товары людям через проверенные организации.': {en:'Helping stores reduce write-offs and share suitable products through verified organizations.',kk:'Дүкендерге есептен шығаруды азайтуға және жарамды тауарларды тексерілген ұйымдар арқылы беруге көмектесеміз.'},
+ 'Как это работает': {en:'How it works',kk:'Қалай жұмыс істейді'},
+ 'Все категории': {en:'All categories',kk:'Барлық санаттар'},
+ 'Срок годности: сначала ближайший': {en:'Expiry: soonest first',kk:'Жарамдылық мерзімі: алдымен жақыны'},
+ 'В корзину': {en:'Add to cart',kk:'Себетке қосу'},
+ 'Срок в норме': {en:'Within shelf life',kk:'Мерзімі қалыпты'},
+ 'Срок ≤7 дней': {en:'Expires within 7 days',kk:'Мерзімі 7 күнге дейін'},
+ 'Срок ≤30 дней': {en:'Expires within 30 days',kk:'Мерзімі 30 күнге дейін'},
+ 'Показать ещё': {en:'Show more',kk:'Тағы көрсету'},
+ 'Новый': {en:'New',kk:'Жаңа'},
+ 'Отправлен': {en:'Shipped',kk:'Жіберілді'},
+ 'Доставлен': {en:'Delivered',kk:'Жеткізілді'},
+ 'Отменён': {en:'Cancelled',kk:'Бас тартылды'},
+ 'Организация проверена: бронирование доступно.': {en:'Organization verified: reservations are available.',kk:'Ұйым тексерілген: брондау қолжетімді.'},
+ 'После бронирования скачайте акт и согласуйте выдачу. Передачу подтверждает сотрудник магазина.': {en:'Download the document after reserving and arrange pickup. A store employee confirms the handover.',kk:'Брондағаннан кейін актіні жүктеп, алуды келісіңіз. Тапсыруды дүкен қызметкері растайды.'}
+});
+window.ariaI18n.uiPatterns.push({pattern:/^В наличии: (\d+) шт\.$/,translate:(v,l)=>{const n=v.match(/\d+/)[0];return l==='en'?'In stock: '+n+' pcs.':'Қоймада: '+n+' дана';}});
+window.ariaI18n.translatePage(document.body);

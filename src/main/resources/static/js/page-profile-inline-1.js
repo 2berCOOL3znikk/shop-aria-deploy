@@ -1,3 +1,4 @@
+function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
     async function loadCartCount() {
         if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
     }
@@ -48,7 +49,7 @@
                 '<div style="display:flex;align-items:center;gap:12px;padding:12px;border-bottom:1px solid var(--border-color);">' +
                 CatalogImages.imageTag(p, { className: "profile-product-image", alt: p.name, style: "width:60px;height:60px;object-fit:cover;border-radius:8px;" }) +
                 '<div style="flex:1;">' +
-                '<div style="font-weight:600;">' + p.name + '</div>' +
+                '<div style="font-weight:600;">' + ariaEscape(p.name) + '</div>' +
                 '<div style="color:var(--accent-blue);">' + ariaMoney.format(p.displayPrice ?? p.unitPrice) + '</div>' +
                 '</div>' +
                 '<a href="/product.html?id=' + p.id + '" class="btn-outline" style="text-decoration:none;padding:8px 12px;font-size:13px;" data-i18n="catalog.details">Открыть</a>' +
@@ -71,7 +72,7 @@
                 '<div class="glass-card" style="padding:16px;margin-bottom:15px;">' +
                 '<div style="display:flex;justify-content:space-between;margin-bottom:10px;">' +
                 '<strong><span data-i18n="profile.orderNum">Заказ #</span>' + o.id + '</strong>' +
-                '<span style="color:var(--accent-green);">' + o.status + '</span>' +
+                '<span style="color:var(--accent-green);">' + ({PENDING:'Новый',SHIPPED:'Отправлен',DELIVERED:'Доставлен',CANCELLED:'Отменён'}[o.status] || o.status) + '</span>' +
                 '</div>' +
                 '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString('ru-RU') + '</div>' +
                 '<div style="margin-bottom:10px;">' + o.items.map(i => i.productName + ' × ' + i.quantity).join(', ') + '</div>' +

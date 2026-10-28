@@ -28,6 +28,8 @@ class CartServiceTest {
 
     @Mock
     private ProductRepository productRepository;
+    @Mock
+    private InventoryService inventory;
 
     @InjectMocks
     private CartService cartService;
@@ -39,9 +41,11 @@ class CartServiceTest {
         product.setId(1L);
         product.setName("Товар");
         product.setUnitPrice(new BigDecimal("99.99"));
+        product.setQuantityOnHand(2);
         product.setStatus(ProductStatus.ACTIVE);
 
         when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventory.available(product)).thenReturn(2);
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
         // when

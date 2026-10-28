@@ -11,10 +11,14 @@ import java.time.LocalDateTime;
 public class ScheduledTasks {
 
     private final AriaService ariaService;
+    private final com.aria.service.InventoryService inventory;
 
-    public ScheduledTasks(AriaService ariaService) {
+    public ScheduledTasks(AriaService ariaService,com.aria.service.InventoryService inventory) {
         this.ariaService = ariaService;
+        this.inventory=inventory;
     }
+    @Scheduled(fixedDelay=300000,initialDelay=300000)
+    public void refreshAvailableStock(){inventory.initializeExisting();}
 
     // Запускает анализ каждые 24 часа (86400000 мс)
     @Scheduled(fixedRate = 86400000)

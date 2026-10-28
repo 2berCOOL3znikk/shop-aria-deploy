@@ -51,7 +51,6 @@ class AriaServiceTest {
         deadStock.setMarketAvgPrice(new BigDecimal("100"));
 
         when(productRepository.findAll()).thenReturn(List.of(deadStock));
-        when(competitorAnalyzerService.findMarketAveragePrice(any(), any())).thenReturn(new BigDecimal("100"));
 
         // when
         AriaService.AnalysisReport report = ariaService.analyze();
@@ -64,18 +63,17 @@ class AriaServiceTest {
 
     @Test
     void analyze_marksExpiringProductAsCandidateAndUrgent() {
-        // given: товар со сроком <30 дней
+        // given: товар на границе срочного срока — 7 дней
         Product expiring = new Product();
         expiring.setId(2L);
         expiring.setName("Скоропортящийся товар");
         expiring.setReceivedAt(LocalDate.now());
         expiring.setSalesLast30Days(5);
-        expiring.setExpiryDate(LocalDate.now().plusDays(15));
+        expiring.setExpiryDate(LocalDate.now().plusDays(7));
         expiring.setStatus(ProductStatus.ACTIVE);
         expiring.setMarketAvgPrice(new BigDecimal("50"));
 
         when(productRepository.findAll()).thenReturn(List.of(expiring));
-        when(competitorAnalyzerService.findMarketAveragePrice(any(), any())).thenReturn(new BigDecimal("50"));
 
         // when
         AriaService.AnalysisReport report = ariaService.analyze();
@@ -85,6 +83,23 @@ class AriaServiceTest {
         assertThat(report.urgent()).isEqualTo(1);
         assertThat(expiring.getStatus()).isEqualTo(ProductStatus.CANDIDATE);
         assertThat(expiring.getAriaReason()).contains("срок годности");
+    }
+
+    @Test
+    void analyze_marksFifteenDayExpiryAsCandidateWithoutUrgency() {
+        Product product = new Product();
+        product.setReceivedAt(LocalDate.now());
+        product.setExpiryDate(LocalDate.now().plusDays(15));
+        product.setSalesLast30Days(5);
+        product.setStatus(ProductStatus.ACTIVE);
+        product.setMarketAvgPrice(new BigDecimal("50"));
+        when(productRepository.findAll()).thenReturn(List.of(product));
+
+        AriaService.AnalysisReport report = ariaService.analyze();
+
+        assertThat(report.markedCandidate()).isEqualTo(1);
+        assertThat(report.urgent()).isZero();
+        assertThat(product.getStatus()).isEqualTo(ProductStatus.CANDIDATE);
     }
 
     @Test
@@ -99,7 +114,6 @@ class AriaServiceTest {
         formerCandidate.setMarketAvgPrice(new BigDecimal("200"));
 
         when(productRepository.findAll()).thenReturn(List.of(formerCandidate));
-        when(competitorAnalyzerService.findMarketAveragePrice(any(), any())).thenReturn(new BigDecimal("200"));
 
         // when
         AriaService.AnalysisReport report = ariaService.analyze();
@@ -124,7 +138,6 @@ class AriaServiceTest {
         negativeMargin.setMarketAvgPrice(new BigDecimal("100"));
 
         when(productRepository.findAll()).thenReturn(List.of(negativeMargin));
-        when(competitorAnalyzerService.findMarketAveragePrice(any(), any())).thenReturn(new BigDecimal("100"));
 
         // when
         AriaService.AnalysisReport report = ariaService.analyze();
@@ -152,7 +165,7 @@ class AriaServiceTest {
         expiring.setId(2L);
         expiring.setReceivedAt(LocalDate.now());
         expiring.setSalesLast30Days(5);
-        expiring.setExpiryDate(LocalDate.now().plusDays(15));
+        expiring.setExpiryDate(LocalDate.now().plusDays(7));
         expiring.setStatus(ProductStatus.ACTIVE);
         expiring.setMarketAvgPrice(new BigDecimal("50"));
         products.add(expiring);
@@ -167,7 +180,6 @@ class AriaServiceTest {
         products.add(priceOutlier);
 
         when(productRepository.findAll()).thenReturn(products);
-        when(competitorAnalyzerService.findMarketAveragePrice(any(), any())).thenReturn(new BigDecimal("100"));
         when(ariaLogRepository.save(any(AriaLog.class))).thenReturn(new AriaLog());
 
         // when

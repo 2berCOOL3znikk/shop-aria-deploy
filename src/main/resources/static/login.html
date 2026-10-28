@@ -260,7 +260,7 @@
     }
 
     function safeNext(next, role) {
-        if (role === 'ADMIN') return next && next.startsWith('/') && !next.startsWith('//') ? next : '/admin.html';
+        if (role === 'ADMIN') return next && next.startsWith('/') && !next.startsWith('//') ? next : '/control.html';
         if (role === 'ORG') return next === '/social.html' ? next : '/social.html';
         return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/admin') ? next : '/index.html';
     }
@@ -270,7 +270,7 @@
     if (params.get('next')) {
         localStorage.setItem('aria_next', params.get('next'));
     }
-    if (localStorage.getItem('aria_role') === 'ADMIN') location.replace('/admin.html');
+    if (localStorage.getItem('aria_role') === 'ADMIN') location.replace('/control.html');
     else if (localStorage.getItem('aria_role') === 'ORG') location.replace('/social.html');
     window.loadRegisterCaptcha();
 </script>

@@ -31,17 +31,20 @@ public class AriaService {
     private final CompetitorAnalyzerService competitorService;
     private final AriaLogRepository logRepo;
     private final DiscountSuggestionRepository discountRepo;
+    private final InventoryService inventory;
+    private final PricingService pricing;
 
     public AriaService(ProductRepository products,
                        TransferLotRepository lots,
                        CompetitorAnalyzerService competitorService,
                        AriaLogRepository logRepo,
-                       DiscountSuggestionRepository discountRepo) {
+                       DiscountSuggestionRepository discountRepo, InventoryService inventory, PricingService pricing) {
         this.products = products;
         this.lots = lots;
         this.competitorService = competitorService;
         this.logRepo = logRepo;
         this.discountRepo = discountRepo;
+        this.inventory=inventory;this.pricing=pricing;
     }
 
     @Transactional
@@ -56,6 +59,7 @@ public class AriaService {
         int priceOutliers = 0;
 
         for (Product p : all) {
+            if(p.getArchived()) continue;
             if (p.getStatus() == ProductStatus.TRANSFERRED || p.getStatus() == ProductStatus.WRITTEN_OFF
                     || p.getStatus() == ProductStatus.RESERVED || p.getStatus() == ProductStatus.SOCIAL
                     || p.getStatus() == ProductStatus.DISCOUNTED) continue;
@@ -159,7 +163,7 @@ public class AriaService {
         List<Product> all = products.findAll();
         int resetCount = 0;
         for (Product p : all) {
-            if (p.getStatus() == ProductStatus.CANDIDATE || p.getStatus() == ProductStatus.RESERVED) {
+            if (p.getStatus() == ProductStatus.CANDIDATE) {
                 p.setStatus(ProductStatus.ACTIVE);
                 p.setAriaReason(null);
                 p.setMarketAvgPrice(null);
@@ -173,11 +177,11 @@ public class AriaService {
 
     @Transactional
     public Product writeOff(Long productId) {
-        Product product = products.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        Product product = inventory.lock(productId);
         if (product.getStatus() == ProductStatus.RESERVED || product.getStatus() == ProductStatus.TRANSFERRED) {
             throw new IllegalStateException("Зарезервированный или переданный товар нельзя списать повторно");
         }
+        inventory.writeOffAll(product,"Списание из панели анализа");
         product.setStatus(ProductStatus.WRITTEN_OFF);
         product.setQuantityOnHand(0);
         product.setAriaReason("Списан оператором " + LocalDate.now());
@@ -300,6 +304,7 @@ public class AriaService {
 
             // Вычисляем оставшиеся дни
             long daysToExpiry = ChronoUnit.DAYS.between(today, p.getExpiryDate());
+            if(daysToExpiry<0 || p.getArchived() || p.getQuantityOnHand()==null || p.getQuantityOnHand()<1) continue;
 
             // Определяем процент скидки по тиру
             int discountPercent = 0;
@@ -321,7 +326,9 @@ public class AriaService {
 
             // Создаём предложение (каждое в try/catch для изоляции ошибок)
             try {
-                DiscountSuggestion suggestion = new DiscountSuggestion(p, reason, discountPercent);
+                discountPercent=Math.min(discountPercent,pricing.maximum(p));
+                if(discountPercent<1) continue;
+                DiscountSuggestion suggestion = new DiscountSuggestion(p, reason+"; ограничение по себестоимости учтено", discountPercent);
                 discountRepo.save(suggestion);
                 suggestionsCreated++;
                 System.out.println("[ARIA] " + p.getName() + " - предложена скидка " + discountPercent + "% (" + reason + ")");
@@ -350,6 +357,9 @@ public class AriaService {
         }
 
         Product product = suggestion.getProduct();
+        product=inventory.lock(product.getId());
+        inventory.synchronize(product);
+        pricing.validate(product,suggestion.getSuggestedPercent());
         product.setStatus(ProductStatus.DISCOUNTED);
         product.setDiscountPercent(suggestion.getSuggestedPercent());
 

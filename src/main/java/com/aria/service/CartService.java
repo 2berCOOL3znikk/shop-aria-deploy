@@ -17,10 +17,12 @@ public class CartService {
     private static final String LEGACY_OWNER = "demo@aria.shop";
     private final CartItemRepository cartRepo;
     private final ProductRepository productRepo;
+    private final InventoryService inventory;
 
-    public CartService(CartItemRepository cartRepo, ProductRepository productRepo) {
+    public CartService(CartItemRepository cartRepo, ProductRepository productRepo, InventoryService inventory) {
         this.cartRepo = cartRepo;
         this.productRepo = productRepo;
+        this.inventory = inventory;
     }
 
     @Transactional
@@ -33,6 +35,7 @@ public class CartService {
         if (quantity < 1) throw new IllegalArgumentException("Количество должно быть больше нуля");
         Product product = productRepo.findById(productId)
                 .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        if (product.getArchived()) throw new IllegalStateException("Товар недоступен для покупки");
         if (product.getStatus() != null && product.getStatus() != ProductStatus.ACTIVE
                 && product.getStatus() != ProductStatus.DISCOUNTED) {
             throw new IllegalStateException("Товар недоступен для покупки");
@@ -41,7 +44,7 @@ public class CartService {
         CartItem item = cartRepo.findByOwnerEmailAndProductId(ownerEmail, productId)
                 .orElse(new CartItem(product, 0, priceFor(product), ownerEmail));
         int newQuantity = item.getQuantity() + quantity;
-        if (product.getQuantityOnHand() != null && newQuantity > product.getQuantityOnHand()) {
+        if (newQuantity > inventory.available(product)) {
             throw new IllegalArgumentException("На складе доступно только " + product.getQuantityOnHand() + " шт.");
         }
         item.setQuantity(newQuantity);
@@ -80,7 +83,7 @@ public class CartService {
             cartRepo.delete(item);
             return item;
         }
-        if (item.getProduct().getQuantityOnHand() != null && quantity > item.getProduct().getQuantityOnHand()) {
+        if (quantity > inventory.available(item.getProduct())) {
             throw new IllegalArgumentException("На складе доступно только " + item.getProduct().getQuantityOnHand() + " шт.");
         }
         item.setQuantity(quantity);

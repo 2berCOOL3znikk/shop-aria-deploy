@@ -7,6 +7,9 @@ import java.util.List;
 
 @Repository
 public interface CartItemRepository extends JpaRepository<CartItem, Long> {
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @org.springframework.data.jpa.repository.Query("select c from CartItem c where c.ownerEmail=:owner order by c.product.id")
+    List<CartItem> lockForCheckout(@org.springframework.data.repository.query.Param("owner") String owner);
     List<CartItem> findAllByOrderByAddedAtDesc();
     List<CartItem> findAllByOwnerEmailOrderByAddedAtDesc(String ownerEmail);
     java.util.Optional<CartItem> findByOwnerEmailAndProductId(String ownerEmail, Long productId);

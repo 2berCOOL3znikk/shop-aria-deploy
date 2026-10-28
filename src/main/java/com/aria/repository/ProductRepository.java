@@ -11,6 +11,11 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    boolean existsBySkuIgnoreCase(String sku);
+
+    @org.springframework.data.jpa.repository.Lock(jakarta.persistence.LockModeType.PESSIMISTIC_WRITE)
+    @Query("select p from Product p where p.id = :id")
+    java.util.Optional<Product> lockById(@Param("id") Long id);
 
     List<Product> findByStatus(ProductStatus status);
 

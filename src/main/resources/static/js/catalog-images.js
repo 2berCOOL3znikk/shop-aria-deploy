@@ -6,15 +6,17 @@
 
   function getSkuImage(product) {
     const sku = String(product && (product.sku || product.productSku) || "").trim();
-    return /^[A-Za-z0-9_-]+$/.test(sku) ? "/images/products/" + encodeURIComponent(sku) + ".jpg" : "";
+    const bundled = new Set(['SKU-1001','SKU-1002','SKU-1003','SKU-1004','SKU-1005','SKU-2001','SKU-2002','SKU-2003','SKU-2004','SKU-3001','SKU-3002','SKU-3003','SKU-4002','SKU-4003','SKU-5001','SKU-5002']);
+    return bundled.has(sku) ? "/images/products/" + encodeURIComponent(sku) + ".jpg" : "";
   }
 
   function getLocalProductImage(product) {
     const value = String(product && product.imageUrl || "").trim();
-    if (!value || !value.startsWith("/") || value.startsWith("//") || /[\\\s"'<>]/.test(value)) return "";
+    if (!value || /[\\\s"'<>]/.test(value)) return "";
     try {
       const parsed = new URL(value, window.location.origin);
-      return parsed.origin === window.location.origin ? parsed.pathname + parsed.search + parsed.hash : "";
+      if(parsed.origin===window.location.origin) return parsed.pathname+parsed.search+parsed.hash;
+      return parsed.protocol==='https:' ? parsed.href : '';
     } catch (_) {
       return "";
     }
@@ -27,7 +29,8 @@
   }
 
   function imageCandidates(product) {
-    return Array.from(new Set([getSkuImage(product), getLocalProductImage(product), GENERIC_IMAGE].filter(Boolean)));
+    const explicit=getLocalProductImage(product);
+    return Array.from(new Set([explicit && !explicit.endsWith('.svg') ? explicit : '', getSkuImage(product), explicit, GENERIC_IMAGE].filter(Boolean)));
   }
 
   function urlFor(product) {

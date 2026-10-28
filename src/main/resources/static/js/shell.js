@@ -69,7 +69,7 @@
       makeLink("/profile.html", t("profile"), "profile")].forEach(link => links.appendChild(link));
 
     if (role === "ORG") links.appendChild(makeLink("/social.html#claims-section", t("org"), "org"));
-    if (role === "ADMIN") links.appendChild(makeLink("/admin.html", t("admin"), "admin"));
+    if (role === "ADMIN") links.appendChild(makeLink("/control.html", t("admin"), "admin"));
     links.appendChild(makeLink("/support.html", t("support"), "support"));
 
     nav.appendChild(links);
