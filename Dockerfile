@@ -12,4 +12,6 @@ RUN useradd --system --uid 10001 --create-home aria \
 COPY --from=build /workspace/target/aria-backend-0.0.1-SNAPSHOT.jar /app/aria.jar
 USER 10001
 EXPOSE 8080
-ENTRYPOINT ["java", "-XX:MaxRAMPercentage=75.0", "-jar", "/app/aria.jar"]
+# Keep heap below the 512 MB instance limit, leaving room for JVM native memory.
+ENV LOGGING_LEVEL_ROOT=INFO
+ENTRYPOINT ["java", "-Xms64m", "-Xmx256m", "-XX:+UseSerialGC", "-XX:ActiveProcessorCount=2", "-XX:TieredStopAtLevel=1", "-XX:+ExitOnOutOfMemoryError", "-jar", "/app/aria.jar"]
