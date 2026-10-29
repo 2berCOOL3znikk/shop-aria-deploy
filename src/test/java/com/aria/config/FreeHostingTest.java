@@ -21,6 +21,14 @@ class FreeHostingTest {
         assertThat(hikari.getKeepaliveTime()).isZero();
         assertThat(hikari.getIdleTimeout()).isLessThan(300000);
         assertThat(properties.getProperty("management.health.db.enabled")).isEqualTo("false");
+        assertThat(properties.getProperty("aria.smart-pricing.schedule-enabled")).isEqualTo("false");
+    }
+    @Test void disabledAiScheduleDoesNotWakeDatabase() {
+        var smart=mock(SmartPricingService.class);var ai=mock(IntelligenceService.class);
+        var decisions=mock(com.aria.repository.PricingDecisionRepository.class);var social=mock(SocialProposalService.class);
+        var service=new AiDecisionService(smart,ai,decisions,social);
+        ReflectionTestUtils.setField(service,"scheduling",false);service.nextScheduled();
+        verifyNoInteractions(smart,ai,decisions,social);
     }
     @Test void freeBackgroundTasksDoNotOpenDatabaseConnections() {
         var inventory=mock(InventoryService.class);var analysis=mock(AriaService.class);

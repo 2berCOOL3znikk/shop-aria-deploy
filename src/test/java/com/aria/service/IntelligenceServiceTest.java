@@ -30,6 +30,8 @@ class IntelligenceServiceTest {
         var request=captor.getValue();assertThat(request.headers().firstValue("Authorization")).contains("Bearer test-key");
         String body=body(request);var json=tools.jackson.databind.json.JsonMapper.builder().build().readValue(body,Map.class);
         assertThat(json).containsEntry("model","openrouter/free").doesNotContainKey("models");
+        assertThat(((Map<?,?>)json.get("reasoning")).containsKey("enabled")).isFalse();
+        assertThat(((Map<?,?>)json.get("reasoning")).get("effort")).isEqualTo("low");
         Map<?,?> prices=(Map<?,?>)((Map<?,?>)json.get("provider")).get("max_price");
         assertThat(prices.values()).allMatch(value->((Number)value).intValue()==0);
     }
@@ -55,6 +57,7 @@ class IntelligenceServiceTest {
         var captor=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(client).send(captor.capture(),any(HttpResponse.BodyHandler.class));
         var request=tools.jackson.databind.json.JsonMapper.builder().build().readValue(body(captor.getValue()),Map.class);
         assertThat(request).doesNotContainKeys("tools","models");assertThat(((Map<?,?>)request.get("response_format")).get("type")).isEqualTo("json_schema");
+        assertThat(((Map<?,?>)request.get("reasoning")).containsKey("enabled")).isFalse();
         assertThat(((Map<?,?>)request.get("provider")).get("require_parameters")).isEqualTo(true);
         assertThat(((Map<?,?>)((Map<?,?>)request.get("provider")).get("max_price")).values()).allMatch(v->((Number)v).intValue()==0);
         assertThat(service.explainPricing(pricingFacts())).containsEntry("mode","ENGINE");verify(client,times(1)).send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class));

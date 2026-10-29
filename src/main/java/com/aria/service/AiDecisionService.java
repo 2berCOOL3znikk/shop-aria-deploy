@@ -24,7 +24,7 @@ public class AiDecisionService {
         if("AI".equals(saved.get("source"))&&"SOCIAL_REVIEW".equals(saved.get("strategy"))){try{saved.put("socialProposal",social.propose(id));}catch(IllegalStateException e){saved.put("socialProposalNote","Черновик не создан: пересчитайте данные и проверьте пригодность");}}
         return saved;
     }
-    public Map<String,Object> status(){return ai.pricingStatus();}
+    public Map<String,Object> status(){var status=new java.util.HashMap<String,Object>(ai.pricingStatus());status.put("scheduledAvailable",scheduling);return status;}
     @Scheduled(fixedDelay=60000,initialDelay=60000)
     public void nextScheduled(){
         if(!scheduling)return;var config=smart.settings();
