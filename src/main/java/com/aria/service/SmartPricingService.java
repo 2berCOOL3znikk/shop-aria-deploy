@@ -65,6 +65,7 @@ public class SmartPricingService {
         for(var old:decisions.findByProductIdAndStatus(productId,"PENDING"))old.status="SUPERSEDED";
         decisions.flush();
         var d=new PricingDecision();d.productId=productId;d.createdAt=LocalDateTime.now();d.reviewAt=d.createdAt.plusHours(report.reviewAfterHours());
+        for(var lot:existingLots)if(lot.getExpiryDate()!=null){var boundary=lot.getExpiryDate().plusDays(1).atStartOfDay();if(boundary.isAfter(d.createdAt)&&boundary.isBefore(d.reviewAt))d.reviewAt=boundary;}
         d.fingerprint=fingerprint;d.reportJson=json.writeValueAsString(report);decisions.saveAndFlush(d);
         audit.record("SMART_PRICING_RECOMMENDED","product:"+productId,report.action()+" · "+report.suggestedPercent()+"% · уверенность "+report.confidence());if(allowAutopilot)autopilot(d,report);return d;
     }
@@ -76,10 +77,10 @@ public class SmartPricingService {
         var margin=policies.forProduct(p).getMinimumMarginPercent();
         var minimum=cost.multiply(BigDecimal.valueOf(100)).divide(BigDecimal.valueOf(100-margin),2,RoundingMode.CEILING).max(new BigDecimal("0.01"));
         if(p.getMinimumPrice()!=null)minimum=minimum.max(p.getMinimumPrice());
-        var rows=usable.stream().sorted(Comparator.comparing(InventoryLot::getId)).map(l->new Lot(l.getId(),l.getQuantity(),l.getUnitCost(),l.getExpiryDate())).toList();
+        var rows=usable.stream().sorted(Comparator.comparing(InventoryLot::getId)).map(l->new Lot(l.getId(),l.getQuantity(),l.getUnitCost(),l.getExpiryDate(),l.getReceivedAt(),l.handlingStatus,l.storageRequirements)).toList();
         if(stock.isEmpty()&&inventory.available(p)>0)rows=List.of(new Lot(null,inventory.available(p),cost,p.getExpiryDate()));
         var sales=orders.pricingSales(p.getId(),today.minusDays(29).atStartOfDay(),now).stream().map(r->new Sale((LocalDateTime)r[0],((Number)r[1]).intValue(),(BigDecimal)r[2])).toList();
-        int observed=(int)Math.max(1,Math.min(30,ChronoUnit.DAYS.between(p.getReceivedAt(),today)+1));
+        var firstReceipt=stock.stream().map(InventoryLot::getReceivedAt).filter(java.util.Objects::nonNull).min(LocalDate::compareTo).orElse(p.getReceivedAt());if(p.getReceivedAt().isBefore(firstReceipt))firstReceipt=p.getReceivedAt();int observed=(int)Math.max(1,Math.min(30,ChronoUnit.DAYS.between(firstReceipt,today)+1));
         int max=pricing.maximum(p);while(max>0&&pricing.price(p,max).compareTo(minimum)<0)max--;
         var history=changes.findByProductIdOrderByChangedAtDescIdDesc(p.getId());var exposures=new ArrayList<PriceExposure>();
         for(int i=0;i<history.size();i++){
@@ -103,6 +104,7 @@ public class SmartPricingService {
         return Map.of("content",result.getContent().stream().map(this::view).toList(),"totalPages",result.getTotalPages(),"totalElements",result.getTotalElements(),"page",page,"mode",settings.findById(1L).map(s->s.mode).orElse("RECOMMEND"));
     }
     private PricingDecision decision(Long id){return decisions.findById(id).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Решение не найдено"));}
+    @Transactional(readOnly=true) public Map<String,Object> detail(Long id){return view(decision(id));}
     @Transactional public Map<String,Object> apply(Long id,Integer percent,String reason){
         var d=decision(id);Product p=inventory.lock(d.productId);
         // Refresh decision after product lock: concurrent confirmations must not apply twice.
@@ -153,7 +155,8 @@ public class SmartPricingService {
         double risk=((List<?>)report.get("scenarios")).stream().mapToDouble(s->((Number)((Map<?,?>)s).get("estimatedExpiredUnits")).doubleValue()).min().orElse(0);
         var alternatives=new LinkedHashMap<String,Object>();alternatives.put("socialPossible",risk>0&&quantity>0);alternatives.put("matchingVerifiedOrganizations",charities.matching(p).size());alternatives.put("socialNote","Данные организаций не выдумываются. Регион, пригодность, хранение и транспорт требуют подтверждения. Только черновик без резерва.");
         alternatives.put("reorderBasis",rate>0?"Средняя частота подтверждённых отгрузок; срок поставки и сезонность неизвестны":"Нет подтверждённых продаж для расчёта закупки");
-        if(rate>0){alternatives.put("daysOfCoverEstimate",Math.round(quantity/rate*100d)/100d);alternatives.put("unitsFor14DaysEstimate",Math.max(0,(int)Math.ceil(rate*14-quantity)));}
+        if(rate>0){alternatives.put("daysOfCoverEstimate",Math.round(quantity/rate*100d)/100d);var plan=(Map<?,?>)report.get("planning");int horizon=plan==null?1:((Number)plan.get("forecastDays")).intValue();alternatives.put("planningDays",horizon);alternatives.put("reorderUnitsEstimate",Math.max(0,(int)Math.min(1000000,Math.ceil(rate*horizon-quantity))));}
+        var candidates=(List<Map<String,Object>>)report.get("scenarios");var compact=new java.util.LinkedHashSet<Map<String,Object>>();candidates.stream().filter(x->((Number)x.get("percent")).intValue()==p.getDiscountPercent()||((Number)x.get("percent")).intValue()==0||((Number)x.get("percent")).intValue()==((Number)report.get("suggestedPercent")).intValue()).forEach(compact::add);candidates.stream().sorted(java.util.Comparator.comparing((Map<String,Object> x)->new java.math.BigDecimal(x.get("estimatedContribution").toString())).reversed()).limit(8).forEach(compact::add);report.put("scenarios",new java.util.ArrayList<>(compact));report.put("candidateSelectionNote","Java оценила все допустимые целые проценты; AI получает текущий, нулевой и лучшие по оценочному вкладу сценарии без права выйти за ограничения.");
         return Map.of("decisionId",id,"report",report,"alternatives",alternatives);
     }
     @Transactional public Map<String,Object> currentForProposal(Long id){
@@ -190,6 +193,7 @@ public class SmartPricingService {
         else if("RESTORE".equals(action)&&!config.allowRestore)block="Повышение цены при уменьшении скидки не разрешено";
         else if(!Set.of("DISCOUNT","RESTORE").contains(action)||Set.of("BLOCKED","REVIEW").contains(report.action()))block="Нет обоснованного изменения цены";
         else if(changes.findFirstByProductIdOrderByChangedAtDescIdDesc(d.productId).filter(c->c.changedAt.plusHours(config.cooldownHours).isAfter(LocalDateTime.now())).isPresent())block="Пауза между изменениями цены ещё не прошла";
+        if(block==null&&report.facts().lots().stream().anyMatch(l->l.storageRequirements()!=null&&!l.storageRequirements().isBlank()&&!"CONFIRMED".equals(l.handlingStatus())))block="Заявленные условия хранения партии не подтверждены; требуется сотрудник";
         if(block!=null){audit.record("SMART_AUTOPILOT_SKIPPED","decision:"+d.id,block);return;}
         // Uses exactly the same stale-data, expiry, floor and concurrency checks as a human confirmation.
         apply(d.id,target,"AUTOPILOT · "+d.source+": разрешённая категория, предел "+config.maximumDiscount+"%, пауза "+config.cooldownHours+" ч.");
@@ -254,12 +258,12 @@ public class SmartPricingService {
         if("AI".equals(response.get("mode"))){
             Object raw=response.get("suggestedPercent");
             if(!(raw instanceof Number n)||n.doubleValue()!=n.intValue()||report.scenarios().stream().noneMatch(s->s.percent()==n.intValue()))throw new IllegalStateException("AI выбрал недопустимый сценарий");
-            if(!(response.get("reviewAfterHours") instanceof Number h)||!List.of(6,12,24).contains(h.intValue())||h.doubleValue()!=h.intValue()||h.intValue()>report.reviewAfterHours())throw new IllegalStateException("Недопустимый срок пересмотра AI");
+            if(!(response.get("reviewAfterHours") instanceof Number h)||(h.intValue()<1||h.intValue()>168)||h.doubleValue()!=h.intValue()||h.intValue()>report.reviewAfterHours())throw new IllegalStateException("Недопустимый срок пересмотра AI");
             pricing.validate(p,n.intValue());d.source="AI";d.selectedPercent=n.intValue();
             String strategy=String.valueOf(response.getOrDefault("strategy","PRICE"));if(!Set.of("PRICE","PROMOTE","SOCIAL_REVIEW","REORDER","KEEP").contains(strategy))throw new IllegalStateException("Недопустимая стратегия AI");d.strategy=strategy;
             if(!"PRICE".equals(strategy)&&n.intValue()!=report.facts().currentPercent())throw new IllegalStateException("Непрайсовая стратегия не может одновременно менять скидку");
             if("SOCIAL_REVIEW".equals(strategy)&&report.scenarios().stream().mapToDouble(s->s.estimatedExpiredUnits()).min().orElse(0)<=0)throw new IllegalStateException("Нет рассчитанного риска списания для социальной стратегии");
-            if("REORDER".equals(strategy)&&(report.sales().unitsPerDay()<=0||report.sales().unitsPerDay()*14<=report.facts().quantity()))throw new IllegalStateException("Нет данных для рекомендации закупки");
+            if("REORDER".equals(strategy)&&(report.sales().unitsPerDay()<=0||report.sales().unitsPerDay()*report.planning().forecastDays()<=report.facts().quantity()))throw new IllegalStateException("Нет данных для рекомендации закупки");
             var proposed=LocalDateTime.now().plusHours(h.intValue());if(proposed.isBefore(d.reviewAt))d.reviewAt=proposed;
         }
         d.explanationJson=json.writeValueAsString(response);d.aiCompletedAt=LocalDateTime.now();d.aiClaim=null;d.aiLastSkippedAt=null;d.aiLastSkippedNote=null;

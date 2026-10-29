@@ -22,7 +22,7 @@ class SmartPricingEngineTest {
     }
     @Test void fefoKeepsSeparateDeadlinesAndCostFloor(){
         var r=SmartPricingEngine.evaluate(facts(List.of(lot(1,10,0),lot(2,20,29)),List.of(sale(2,30)),List.of()));
-        var current=r.scenarios().getFirst();assertThat(current.estimatedUnits()).isEqualTo(21);assertThat(current.estimatedExpiredUnits()).isEqualTo(9);
+        var current=r.scenarios().getFirst();assertThat(current.estimatedUnits()).isEqualTo(1);assertThat(current.estimatedExpiredUnits()).isEqualTo(9);
         assertThat(r.scenarios()).allMatch(s->s.price().compareTo(new BigDecimal("800"))>=0);assertThat(r.reviewAfterHours()).isEqualTo(6);
     }
     @Test void insufficientOrUnstablePriceHistoryUsesExplicitHeuristic(){

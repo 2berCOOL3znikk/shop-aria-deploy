@@ -9,6 +9,7 @@ import java.util.*;
 import java.math.BigDecimal;
 @Service
 public class PosService implements PosAdapter {
+ @org.springframework.beans.factory.annotation.Autowired private org.springframework.context.ApplicationEventPublisher events;
  private final PosReceiptRepository receipts;private final OrderRepository orders;private final OrderAllocationRepository allocations;
  private final InventoryService inventory;private final PricingService pricing;private final AuditService audit;
  public PosService(PosReceiptRepository r,OrderRepository o,OrderAllocationRepository a,InventoryService i,PricingService p,AuditService log){receipts=r;orders=o;allocations=a;inventory=i;pricing=p;audit=log;}
@@ -31,7 +32,7 @@ public class PosService implements PosAdapter {
  @Transactional(readOnly=true) public Object replay(Sale sale,String operator){var r=receipts.findByRequestKey(sale.requestKey()).orElseThrow(()->new IllegalStateException("Продажа ещё не завершена. Повторите запрос с тем же ключом позже"));if(!r.cashier.equals(operator)||!r.fingerprint.equals(fingerprint(sale)))throw new IllegalStateException("Ключ уже использован для другого состава или оператора");return view(r);}
  @Transactional public Object returnToQuarantine(Long id,String reason){var r=receipts.lockById(id).orElseThrow(()->new IllegalArgumentException("Чек не найден"));if("RETURN_QUARANTINE".equals(r.status))return view(r);if(!"SALE".equals(r.status))throw new IllegalStateException("Возврат недоступен");r.status="RETURN_QUARANTINE";r.returnedAt=LocalDateTime.now();r.returnReason=reason;
   // Returned goods are not sellable before physical assessment. Correct net analytics, retain the original sale.
-  var order=orders.findLockedById(r.orderId).orElseThrow();order.setStatus("RETURNED");for(var allocation:allocations.findByOrderId(order.getId()))inventory.movement(allocation.getLot(),0,allocation.getQuantity(),"RETURN_QUARANTINE","POS #"+id+": "+reason);audit.record("POS_RETURN_QUARANTINE","receipt:"+id,reason+" · количество не возвращено в продажу; деньги не возвращаются автоматически");return view(r);}
+  var order=orders.findLockedById(r.orderId).orElseThrow();order.setStatus("RETURNED");for(var item:order.getItems())events.publishEvent(new StoreChanged(item.getProduct().getId(),"POS_RETURN"));for(var allocation:allocations.findByOrderId(order.getId()))inventory.movement(allocation.getLot(),0,allocation.getQuantity(),"RETURN_QUARANTINE","POS #"+id+": "+reason);audit.record("POS_RETURN_QUARANTINE","receipt:"+id,reason+" · количество не возвращено в продажу; деньги не возвращаются автоматически");return view(r);}
  private Map<String,Object> view(PosReceipt r){return Map.of("receipt",r,"order",com.aria.dto.AdminViews.OrderRow.from(orders.findById(r.orderId).orElseThrow()),"fiscal",false,"paymentProcessed",false,"note","Внутренний чек. Эквайринг и фискализация не подключены. Возврат регистрируется в карантине; пригодный остаток сам не увеличивается.");}
  @Transactional(readOnly=true) public List<Map<String,Object>> list(){return receipts.findTop100ByOrderByCreatedAtDescIdDesc().stream().map(this::view).toList();}
 }

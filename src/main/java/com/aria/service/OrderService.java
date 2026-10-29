@@ -16,6 +16,7 @@ import java.util.List;
 
 @Service
 public class OrderService {
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.context.ApplicationEventPublisher events;
     private static final String LEGACY_OWNER = "demo@aria.shop";
 
     private final OrderRepository orderRepo;
@@ -118,6 +119,6 @@ public class OrderService {
             for(var row:rows) inventory.restore(row.getLot(),row.getQuantity());
         }
         if("SHIPPED".equals(next))order.setShippedAt(LocalDateTime.now());
-        order.setStatus(next);audit.record("ORDER_STATUS_CHANGED","order:"+id,current+" → "+next+" · "+reason);return order;
+        order.setStatus(next);for(var item:order.getItems())events.publishEvent(new StoreChanged(item.getProduct().getId(),"ORDER_STATUS_CHANGED"));audit.record("ORDER_STATUS_CHANGED","order:"+id,current+" → "+next+" · "+reason);return order;
     }
 }

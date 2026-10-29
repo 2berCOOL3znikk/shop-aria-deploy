@@ -20,6 +20,7 @@ public class SmartPricingController {
     @PutMapping("/settings") public Map<String,Object> configure(@Valid @RequestBody SettingsInput input){return smart.configure(input);}
     @PostMapping("/stop") public Map<String,Object> stop(){manager.stopPricing();return smart.settings();}
     @GetMapping public Map<String,Object> list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="25") int size){return smart.list(page,size);}
+    @GetMapping("/{id}") public Map<String,Object> detail(@PathVariable Long id){return smart.detail(id);}
     @PostMapping("/analyze") public Map<String,Object> analyze(@RequestParam(defaultValue="false") boolean onlyDue){return smart.analyzeAll(onlyDue);}
     @PostMapping("/products/{id}/analyze") public Map<String,Object> product(@PathVariable Long id){return smart.analyze(id);}
     @PostMapping("/{id}/apply") public Map<String,Object> apply(@PathVariable Long id,@Valid @RequestBody Approval approval){return smart.apply(id,approval.percent(),approval.reason());}

@@ -29,6 +29,11 @@ public class InventoryLot {
     private BigDecimal unitCost = BigDecimal.ZERO;
     @Column(nullable=false)
     private boolean active = true;
+    @Column(length=700) public String storageRequirements;
+    @Column(nullable=false,length=20) public String handlingStatus="UNKNOWN";
+    @Column(nullable=false) public long handlingRevision=0;
+    public java.time.LocalDateTime handlingCheckedAt;
+    @Column(length=255) public String handlingCheckedBy;
     public InventoryLot() {}
     public Long getId() { return id; }
     public void setId(Long value) { id = value; }

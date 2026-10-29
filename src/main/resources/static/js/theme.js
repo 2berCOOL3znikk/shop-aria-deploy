@@ -1,5 +1,5 @@
 window.ariaTheme = {
-  DEFAULT: "dark", // <-- светлая по умолчанию? поставь "light"
+  DEFAULT: "light",
   getTheme() { const v = localStorage.getItem("aria_theme"); return v === "light" || v === "dark" ? v : this.DEFAULT; },
   applyTheme(value) {
     const theme = value === "light" ? "light" : "dark";
@@ -17,6 +17,6 @@ window.ariaTheme = {
   initTheme() { this.applyTheme(this.getTheme()); }
 };
 window.theme = window.ariaTheme;
-document.documentElement.dataset.theme = (function(){ const v = localStorage.getItem("aria_theme"); return v === "light" || v === "dark" ? v : "dark"; })();
+document.documentElement.dataset.theme = (function(){ const v = localStorage.getItem("aria_theme"); return v === "light" || v === "dark" ? v : "light"; })();
 if (document.readyState === "loading") document.addEventListener("DOMContentLoaded", () => window.ariaTheme.initTheme());
 else window.ariaTheme.initTheme();

@@ -11,6 +11,7 @@ import java.util.*;
 
 @Service @Transactional
 public class CompetitorPriceService {
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.context.ApplicationEventPublisher events;
     private final CompetitorSourceRepository sources;private final CompetitorQuoteRepository quotes;
     private final ProductRepository products;private final InventoryService inventory;private final PricingService pricing;private final AuditService audit;
     public CompetitorPriceService(CompetitorSourceRepository sources,CompetitorQuoteRepository quotes,ProductRepository products,InventoryService inventory,PricingService pricing,AuditService audit){this.sources=sources;this.quotes=quotes;this.products=products;this.inventory=inventory;this.pricing=pricing;this.audit=audit;}
@@ -38,7 +39,7 @@ public class CompetitorPriceService {
                 if(!sameOrigin(row.get(6),source.baseUrl))throw new IllegalArgumentException("URL должен принадлежать разрешённому источнику");
                 var old=quotes.findBySourceIdAndProductIdAndObservedAt(sourceId,p.getId(),observed);
                 if(old.isPresent()){var q=old.get();if(q.price.compareTo(price)!=0||!q.barcode.equals(barcode)||!q.unit.equalsIgnoreCase(unit)||!q.url.equals(row.get(6)))throw new IllegalArgumentException("Запись с этой датой уже есть с другими данными");duplicates++;continue;}
-                var q=new CompetitorQuote();q.sourceId=sourceId;q.productId=p.getId();q.barcode=barcode;q.unit=unit;q.price=price;q.observedAt=observed;q.url=row.get(6);quotes.saveAndFlush(q);imported++;
+                var q=new CompetitorQuote();q.sourceId=sourceId;q.productId=p.getId();q.barcode=barcode;q.unit=unit;q.price=price;q.observedAt=observed;q.url=row.get(6);quotes.saveAndFlush(q);events.publishEvent(new StoreChanged(p.getId(),"COMPETITOR_QUOTE"));imported++;
             }catch(IllegalArgumentException|java.time.DateTimeException e){throw new IllegalArgumentException("Строка "+line+": "+(e instanceof NumberFormatException?"Неверный формат цены":e instanceof java.time.DateTimeException?"Неверная дата с часовым поясом":e.getMessage()));}
         }
         audit.record("COMPETITOR_CSV_IMPORTED","source:"+sourceId,"Добавлено "+imported+", повторов "+duplicates);return Map.of("imported",imported,"duplicates",duplicates);

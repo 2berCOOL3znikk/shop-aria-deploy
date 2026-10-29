@@ -44,6 +44,11 @@ class ControlIntegrationTest {
     @Autowired PurchaseRequestRepository purchaseRequests;
     @Autowired com.aria.service.PurchaseService purchaseService;
     @Autowired InventoryMovementRepository stockMovements;
+    @Autowired com.aria.service.ManagerQueue queue;
+    @Autowired ManagerTaskRepository taskRows;
+    @Autowired ManagerExecutionRepository executionRows;
+    @Autowired com.aria.config.ManagerDomainEvents domainEvents;
+    @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org,orgEmail;
@@ -66,11 +71,12 @@ class ControlIntegrationTest {
     private Map<String,Object> productBody(String sku){return Map.of("sku",sku,"name","Тестовый товар","category","Продукты","unitPrice",1000,"unit","шт","lowStockThreshold",2);}
     private long product()throws Exception {var result=call("POST",base+"/products",admin,productBody("TEST-"+UUID.randomUUID()));assertThat(result.status).as(result.raw).isEqualTo(200);return result.id();}
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
-    private Reply lot(long p,String number,int qty,int days)throws Exception {var r=call("POST",base+"/lots",admin,lotBody(p,number,qty,days));assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
+    private Reply lot(long p,String number,int qty,int days)throws Exception {var body=new HashMap<String,Object>(lotBody(p,number,qty,days));if(number.equals("DONATE")||number.equals("MANAGER"))body.put("receivedAt",LocalDate.now().minusDays(10).toString());var r=call("POST",base+"/lots",admin,body);assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}
     @Test void managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock()throws Exception {
         managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());
         long p=product();lot(p,"MANAGER",4,2);
+        queue.enqueue(p,"TEST_STOCK_EVENT");
         ReflectionTestUtils.setField(aiManager,"enabled",true);
         try{
             var r=aiManager.runCycle(true);assertThat(r).containsKey("scanned");
@@ -84,6 +90,42 @@ class ControlIntegrationTest {
             managerStore.stop();assertThat(managerStore.configuration()).containsEntry("mode","OFF");
             assertThat(aiManager.runCycle(true)).containsEntry("skipped","OFF_NOT_DUE_OR_LEASED");
         }finally{ReflectionTestUtils.setField(aiManager,"enabled",false);}
+    }
+    @Test void durableQueueDeduplicatesAndProtectsNewGenerationAndExpiredLease()throws Exception {
+        long p=product();managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());var run=managerStore.claim(true);
+        queue.enqueue(p,"STOCK");queue.enqueue(p,"PRICE");var row=taskRows.findAll().stream().filter(t->t.productId==p).findFirst().orElseThrow();long generation=row.generation;
+        var first=queue.claim(row.id,run.lease());assertThat(first).isNotNull();assertThat(queue.claim(row.id,run.lease())).isNull();
+        queue.enqueue(p,"NEW_SALE");queue.complete(first,java.time.LocalDateTime.now().plusHours(2),"ENGINE DECISION","KEEP",null,false,false,false,"Первая проверка");assertThat(taskRows.findById(row.id).orElseThrow().status).isEqualTo("QUEUED");
+        var second=queue.claim(row.id,run.lease());assertThat(second.generation()).isGreaterThan(generation);var expired=taskRows.findById(row.id).orElseThrow();expired.leaseUntil=java.time.LocalDateTime.now().minusSeconds(1);taskRows.saveAndFlush(expired);
+        var replacement=queue.claim(row.id,run.lease());assertThat(replacement).isNotNull();queue.complete(second,java.time.LocalDateTime.now().plusDays(1),"ENGINE DECISION","KEEP",null,false,false,false,"Устаревший исполнитель");assertThat(taskRows.findById(row.id).orElseThrow().lease).isEqualTo(replacement.lease());
+        queue.complete(replacement,java.time.LocalDateTime.now().plusHours(2),"ENGINE DECISION","KEEP",null,false,false,false,"Восстановлено");assertThat(taskRows.findById(row.id).orElseThrow().status).isEqualTo("WAITING");assertThat(executionRows.findByLease(second.lease()).orElseThrow().status).isEqualTo("INTERRUPTED");managerStore.stop();
+    }
+    @Test void stockEventsAreQueuedAfterCommitAndNeverAfterRollback()throws Exception {
+        long p=product();long lot=lot(p,"EVENT",3,10).id();ReflectionTestUtils.setField(domainEvents,"enabled",true);
+        try{new org.springframework.transaction.support.TransactionTemplate(transactionManager).execute(status->{inventory.consume(inventory.lock(p),1,"ROLLBACK_TEST");status.setRollbackOnly();return null;});assertThat(taskRows.findAll()).noneMatch(t->t.productId==p);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(3);
+            inventory.handling(lot,0,"Подтверждённый режим по упаковке","CONFIRMED",true,"Проверка сотрудника");assertThat(taskRows.findAll()).anyMatch(t->t.productId==p&&"QUEUED".equals(t.status));
+        }finally{ReflectionTestUtils.setField(domainEvents,"enabled",false);}
+    }
+    @Test void queueStopsAutomaticRetriesAfterThreeFailuresAndManualRetryIsAudited()throws Exception {
+        long p=product();managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());var run=managerStore.claim(true);queue.enqueue(p,"STOCK");var row=taskRows.findAll().stream().filter(t->t.productId==p).findFirst().orElseThrow();
+        for(int i=0;i<3;i++){var t=taskRows.findById(row.id).orElseThrow();t.dueAt=java.time.LocalDateTime.now().minusSeconds(1);taskRows.saveAndFlush(t);var claim=queue.claim(row.id,run.lease());assertThat(claim).isNotNull();queue.fail(claim,"Проверяемый отказ данных");}
+        assertThat(taskRows.findById(row.id).orElseThrow().status).isEqualTo("FAILED");assertThat(queue.claim(row.id,run.lease())).isNull();assertThat(call("POST",base+"/manager/tasks/"+row.id+"/retry",user,Map.of("reason","Повтор")).status).isEqualTo(403);assertThat(call("POST",base+"/manager/tasks/"+row.id+"/retry",admin,Map.of("reason","Причина исправлена")).status).isEqualTo(200);assertThat(taskRows.findById(row.id).orElseThrow().attempts).isZero();managerStore.stop();
+    }
+    @Test void rejectedHandlingBlocksSaleAndStaleConfirmationCannotOverrideIt()throws Exception {
+        long p=product();long id=lot(p,"HANDLING",3,10).id();
+        var evidence=new HashMap<String,Object>(Map.of("revision",0,"requirements","Условия с упаковки проверяются сотрудником","status","REJECTED","informationConfirmed",false,"reason","Обнаружено нарушение"));
+        assertThat(call("PUT",base+"/lots/"+id+"/handling",admin,evidence).status).isEqualTo(400);evidence.put("informationConfirmed",true);assertThat(call("PUT",base+"/lots/"+id+"/handling",admin,evidence).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();
+        evidence.put("status","CONFIRMED");assertThat(call("PUT",base+"/lots/"+id+"/handling",admin,evidence).status).isEqualTo(409);assertThat(call("POST",base+"/pos/sales",admin,Map.of("requestKey",UUID.randomUUID().toString(),"lines",List.of(Map.of("productId",p,"quantity",1,"expectedPrice",1000)))).status).isEqualTo(409);
+    }
+    @Test void managerComparesMinimumOrderCostAndUsesAnAffordableSupplier()throws Exception {
+        long p=product(),a=call("POST",base+"/suppliers",admin,Map.of("name","Низкая цена, большой минимум","active",true)).id(),b=call("POST",base+"/suppliers",admin,Map.of("name","Доступная поставка","active",true)).id();
+        purchaseService.quote(p,a,new java.math.BigDecimal("500"),100,1,LocalDate.now(),LocalDate.now().plusDays(7),true);purchaseService.quote(p,b,new java.math.BigDecimal("700"),2,2,LocalDate.now(),LocalDate.now().plusDays(7),true);
+        managerStates.deleteAll();var state=new AiManagerState();state.purchaseDrafts=true;state.dailyDraftBudget=new java.math.BigDecimal("2000");managerStates.saveAndFlush(state);var run=managerStore.claim(true);var result=purchaseService.prepare(run.lease(),p,2,3d);assertThat(result.get("status")).isEqualTo("DRAFT");var draft=purchaseRequests.findById(((Number)result.get("id")).longValue()).orElseThrow();assertThat(draft.supplierId).isEqualTo(b);assertThat(draft.estimatedTotal).isEqualByComparingTo("1400");assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();purchaseService.cancel(draft.id,"Завершение теста");managerStore.stop();
+    }
+    @Test void ownerPolicyChangeRevokesRunningTaskAndQueuesAFreshGeneration()throws Exception {
+        long p=product();managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());queue.enqueue(p,"STOCK");var run=managerStore.claim(true);var row=taskRows.findAll().stream().filter(t->t.productId==p).findFirst().orElseThrow();var old=queue.claim(row.id,run.lease());
+        managerStore.configure(0,"ADVISOR",false,false,false,30,java.math.BigDecimal.ZERO,null,false);var fresh=taskRows.findById(row.id).orElseThrow();assertThat(fresh.status).isEqualTo("QUEUED");assertThat(fresh.lease).isNull();assertThat(fresh.generation).isGreaterThan(old.generation());assertThat(managerStore.current(run.lease())).isFalse();assertThat(executionRows.findByLease(old.lease()).orElseThrow().status).isEqualTo("CANCELLED");
+        queue.complete(old,java.time.LocalDateTime.now().plusDays(1),"ENGINE DECISION","KEEP",null,false,false,false,"Старое исполнение");assertThat(taskRows.findById(row.id).orElseThrow().status).isEqualTo("QUEUED");managerStore.stop();
     }
     @Test void managerLeaseIsExclusiveAndOwnerMustConfirmAiAndCurrentPricingPolicy()throws Exception {
         managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());
@@ -366,7 +408,7 @@ class ControlIntegrationTest {
         assertThat(call("GET",path,user,null).status).isEqualTo(403);
         assertThat(call("POST",path+"/products/"+p+"/analyze",org,null).status).isEqualTo(403);
         var r=call("POST",path+"/products/"+p+"/analyze",admin,null);assertThat(r.status).as(r.raw).isEqualTo(200);
-        var report=(Map<?,?>)r.body.get("report");assertThat(report.get("confidence")).isEqualTo("LOW");
+        assertThat(call("GET",path+"/"+r.id(),admin,null).id()).isEqualTo(r.id());assertThat(call("GET",path+"/"+r.id(),user,null).status).isEqualTo(403);var report=(Map<?,?>)r.body.get("report");assertThat(report.get("confidence")).isEqualTo("LOW");
         assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
         assertThat(call("POST",path+"/products/"+p+"/analyze",admin,null).id()).isEqualTo(r.id());
         assertThat(call("POST",path+"/"+r.id()+"/reject",admin,Map.of("reason","Недостаточно истории")).status).isEqualTo(200);
@@ -434,7 +476,7 @@ class ControlIntegrationTest {
         body.put("externalAiEnabled",true);body.put("scheduledAiEnabled",true);body.put("aiDailyBudget",3);
         var result=call("PUT",base+"/smart-pricing/settings",admin,body);assertThat(result.status).as(result.raw).isEqualTo(200);
     }
-    private Map<String,Object> aiReply(int percent){return Map.of("mode","AI","suggestedPercent",percent,"reviewAfterHours",12,"requiresConfirmation",true,"explanation","Выбран допустимый эксперимент, данных мало","risks",List.of("Нет причинной оценки"),"model","test-model:free");}
+    private Map<String,Object> aiReply(int percent){return Map.of("mode","AI","suggestedPercent",percent,"reviewAfterHours",1,"requiresConfirmation",true,"explanation","Выбран допустимый эксперимент, данных мало","risks",List.of("Нет причинной оценки"),"model","test-model:free");}
     @Test void aiStrategyNeedsConsentThenPersistsSourceAndUsesSelectedScenario()throws Exception {
         long p=product();lot(p,"AI",10,5);String path=base+"/smart-pricing";long id=call("POST",path+"/products/"+p+"/analyze",admin,null).id();
         assertThat(call("POST",path+"/"+id+"/ai-decide",admin,null).status).isEqualTo(409);enableDecisionAi();

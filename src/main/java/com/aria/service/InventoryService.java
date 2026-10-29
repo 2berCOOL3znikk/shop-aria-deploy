@@ -16,11 +16,12 @@ import org.springframework.http.HttpStatus;
 @Service
 @Transactional
 public class InventoryService {
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.context.ApplicationEventPublisher events;
     @org.springframework.beans.factory.annotation.Autowired private com.aria.repository.InventoryMovementRepository movements;
     public void movement(InventoryLot lot,int delta,int quarantine,String type,String reason){
         var row=new com.aria.entity.InventoryMovement();row.productId=lot.getProduct().getId();row.lotId=lot.getId();row.quantityDelta=delta;row.quarantineUnits=quarantine;row.unitCost=lot.getUnitCost();row.type=type;row.reason=reason.length()>1000?reason.substring(0,1000):reason;
         if("INITIAL_BALANCE".equals(type)&&lot.getProduct().getUnitCost()==null||lot.getLotNumber().startsWith("INITIAL-")&&movements.findFirstByLotIdAndTypeOrderByIdAsc(lot.getId(),"INITIAL_BALANCE").map(m->m.unitCost==null).orElse(false))row.unitCost=null;
-        var auth=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();row.actor=auth==null?"system":auth.getName();movements.save(row);
+        var auth=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();row.actor=auth==null?"system":auth.getName();movements.save(row);events.publishEvent(new StoreChanged(lot.getProduct().getId(),type));
     }
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
@@ -45,7 +46,7 @@ public class InventoryService {
         lot.setUnitCost(p.getUnitCost()==null?BigDecimal.ZERO:p.getUnitCost()); lots.saveAndFlush(lot);movement(lot,lot.getQuantity(),0,"INITIAL_BALANCE","Начальный остаток при подключении учёта; более ранние движения не восстановлены");
     }
     public boolean usable(InventoryLot lot) {
-        return lot.getActive() && lot.getQuantity()>0 && (lot.getExpiryDate()==null || !lot.getExpiryDate().isBefore(LocalDate.now()));
+        return !"REJECTED".equals(lot.handlingStatus) && lot.getActive() && lot.getQuantity()>0 && (lot.getExpiryDate()==null || !lot.getExpiryDate().isBefore(LocalDate.now()));
     }
     @Transactional(readOnly=true)
     public int available(Product p) {
@@ -110,6 +111,14 @@ public class InventoryService {
     public void restore(InventoryLot lot,int quantity) {
         Product p=lock(lot.getProduct().getId());entityManager.refresh(lot);lot.setQuantity(Math.addExact(lot.getQuantity(),quantity));
         lots.saveAndFlush(lot);movement(lot,quantity,0,"ORDER_RETURN","Отмена нового заказа; пригодность вычисляется отдельно");synchronize(p);audit.record("ORDER_STOCK_RETURNED","lot:"+lot.getId(),"Возвращено "+quantity+" ед. Пригодность и архив проверяются отдельно");
+    }
+    public InventoryLot handling(Long id,long revision,String requirements,String status,boolean confirmed,String reason){
+        var lot=lots.findById(id).orElseThrow(()->new IllegalArgumentException("Партия не найдена"));var p=lock(lot.getProduct().getId());entityManager.refresh(lot);
+        if(lot.handlingRevision!=revision)throw new IllegalStateException("Сведения хранения изменились; обновите партию");
+        if(!"UNKNOWN".equals(status)&&!confirmed)throw new IllegalArgumentException("Подтвердите реальную проверку сотрудником");
+        if(!lot.getActive()||lot.getQuantity()==0)throw new IllegalStateException("Партия уже закрыта или израсходована");
+        lot.storageRequirements=requirements.trim();lot.handlingStatus=status;lot.handlingRevision++;lot.handlingCheckedAt=java.time.LocalDateTime.now();var auth=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();lot.handlingCheckedBy=auth==null?"system":auth.getName();
+        lots.saveAndFlush(lot);synchronize(p);events.publishEvent(new StoreChanged(p.getId(),"LOT_HANDLING_CHANGED"));audit.record("LOT_HANDLING_CONFIRMED","lot:"+id,status+" · "+reason+" · сведения сотрудника, не измерение датчиком");return lot;
     }
     public void writeOff(Long id,String reason) {
         InventoryLot lot=lots.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Партия не найдена"));

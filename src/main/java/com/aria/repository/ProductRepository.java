@@ -11,6 +11,7 @@ import java.util.List;
 
 @Repository
 public interface ProductRepository extends JpaRepository<Product, Long> {
+    @Query("select p.id,p.name from Product p where p.id in :ids") List<Object[]> namesForIds(@Param("ids") java.util.Collection<Long> ids);
     java.util.Optional<Product> findBySkuIgnoreCase(String sku);
     boolean existsBySkuIgnoreCase(String sku);
 

@@ -26,7 +26,7 @@ public class AiDecisionService {
             var fallback=Map.<String,Object>of("mode","ENGINE","note","AI-стратегия не прошла проверку. Сохранён расчёт Java.");
             saved=lease!=null?smart.completeAiFromManager(lease,claim,fallback,false):smart.completeAi(claim,fallback,scheduled);
         }
-        if("AI".equals(saved.get("source"))&&"SOCIAL_REVIEW".equals(saved.get("strategy"))){try{saved.put("socialProposal",social.propose(id));}catch(IllegalStateException e){saved.put("socialProposalNote","Черновик не создан: пересчитайте данные и проверьте пригодность");}}
+        if("AI".equals(saved.get("source"))&&"SOCIAL_REVIEW".equals(saved.get("strategy"))){try{saved.put("socialProposal",lease==null?social.propose(id):social.proposeForManager(id,lease));}catch(IllegalStateException e){saved.put("socialProposalNote","Черновик не создан: проверьте разрешение владельца, актуальность и пригодность");}}
         return saved;
     }
     public Map<String,Object> status(){var status=new java.util.HashMap<String,Object>(ai.pricingStatus());status.put("scheduledAvailable",scheduling);return status;}

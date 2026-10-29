@@ -56,7 +56,7 @@ class IntelligenceServiceTest {
         assertThat(new IntelligenceService("test-key","openrouter/free",client).decidePricing(facts)).containsEntry("mode","AI");
         var captor=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(client).send(captor.capture(),any(HttpResponse.BodyHandler.class));
         var request=tools.jackson.databind.json.JsonMapper.builder().build().readValue(body(captor.getValue()),Map.class);
-        var format=(Map<?,?>)request.get("response_format");var schema=(Map<?,?>)((Map<?,?>)format.get("json_schema")).get("schema");var props=(Map<?,?>)schema.get("properties");assertThat(((Map<?,?>)props.get("reviewAfterHours")).get("enum")).isEqualTo(List.of(6));
+        var format=(Map<?,?>)request.get("response_format");var schema=(Map<?,?>)((Map<?,?>)format.get("json_schema")).get("schema");var props=(Map<?,?>)schema.get("properties");assertThat(((Map<?,?>)props.get("reviewAfterHours")).get("enum")).isEqualTo(List.of(1,2,3,4,5,6));
     }
     @Test void truncatedCompletionIsNeverAcceptedAsAiEvenWithParsableContent()throws Exception {
         var client=mock(HttpClient.class);HttpResponse<String> response=mock(HttpResponse.class);when(response.statusCode()).thenReturn(200);

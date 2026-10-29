@@ -14,6 +14,7 @@ import java.util.*;
 @Service
 @Transactional
 public class ControlService {
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.context.ApplicationEventPublisher events;
     private final ProductRepository products;
     private final ProductDetailRepository details;
     private final SupplierRepository suppliers;
@@ -42,14 +43,14 @@ public class ControlService {
         products.saveAndFlush(p);
         if(oldPrice!=null)priceHistory.record(p,oldPrice,oldPercent,oldPercent,"Изменение карточки товара");
         ProductDetail detail=details.findByProductId(p.getId()).orElseGet(ProductDetail::new);detail.setProduct(p);detail.setBrand(input.brand());detail.setDescriptionLong(input.description());details.save(detail);
-        audit.record(id==null?"PRODUCT_CREATED":"PRODUCT_UPDATED","product:"+p.getId(),p.getSku()+" · "+p.getName()+" · цена "+p.getUnitPrice()+" ₸");return p;
+        events.publishEvent(new StoreChanged(p.getId(),"PRODUCT_CHANGED"));audit.record(id==null?"PRODUCT_CREATED":"PRODUCT_UPDATED","product:"+p.getId(),p.getSku()+" · "+p.getName()+" · цена "+p.getUnitPrice()+" ₸");return p;
     }
     public void archiveProduct(Long id){
         Product p=inventory.lock(id);
         if(p.getStatus()==ProductStatus.SOCIAL || p.getStatus()==ProductStatus.RESERVED) throw new IllegalStateException("Сначала завершите социальную передачу");
         inventory.ensureLegacyLot(p);
         if(lots.findByProductId(id).stream().anyMatch(l->l.getQuantity()>0)) throw new IllegalStateException("Перед архивированием продайте или спишите все партии товара");
-        p.setArchived(true);audit.record("PRODUCT_ARCHIVED","product:"+id,p.getSku());
+        p.setArchived(true);events.publishEvent(new StoreChanged(id,"PRODUCT_ARCHIVED"));audit.record("PRODUCT_ARCHIVED","product:"+id,p.getSku());
     }
     public Supplier saveSupplier(Long id,SupplierInput input){
         Supplier s=id==null?new Supplier():suppliers.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Поставщик не найден"));
@@ -69,6 +70,6 @@ public class ControlService {
         if(p.getArchived()) throw new IllegalStateException("Товар архивирован");
         priceHistory.record(p,p.getUnitPrice(),p.getDiscountPercent()==null?0:p.getDiscountPercent(),input.percent(),input.reason());
         p.setDiscountPercent(input.percent());p.setStatus(input.percent()==0?ProductStatus.ACTIVE:ProductStatus.DISCOUNTED);
-        audit.record("DISCOUNT_CHANGED","product:"+id,input.percent()+"% · цена "+pricing.price(p,input.percent())+" ₸ · "+input.reason());
+        events.publishEvent(new StoreChanged(id,"PRICE_CHANGED"));audit.record("DISCOUNT_CHANGED","product:"+id,input.percent()+"% · цена "+pricing.price(p,input.percent())+" ₸ · "+input.reason());
     }
 }

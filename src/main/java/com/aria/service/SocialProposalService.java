@@ -7,6 +7,9 @@ import java.time.*;
 import java.util.*;
 @Service @Transactional
 public class SocialProposalService {
+    @org.springframework.beans.factory.annotation.Autowired private AiManagerStateRepository managerStates;
+    public Map<String,Object> proposeForManager(Long id,String lease){var state=managerStates.lockState().orElseThrow();if("OFF".equals(state.mode)||!state.socialDrafts||!Objects.equals(state.lease,lease)||state.leaseUntil==null||!state.leaseUntil.isAfter(LocalDateTime.now()))throw new IllegalStateException("Разрешение социального черновика отозвано");return propose(id);}
+
     private final SocialProposalRepository proposals;private final PricingDecisionRepository decisions;private final InventoryService inventory;
     private final SmartPricingService smart;private final SocialService social;private final CharityEligibilityService charities;private final SocialOfferRepository offers;private final AuditService audit;
     @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager em;

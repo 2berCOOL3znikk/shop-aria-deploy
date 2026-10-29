@@ -2,6 +2,7 @@ package com.aria.service.analytics;
 import org.junit.jupiter.api.Test;
 import static org.assertj.core.api.Assertions.*;
 class DemandForecastTest {
+ @Test void forecastUsesRequestedHorizonAndNeverLabelsAnotherWindowAsFourteenDays(){double[] y=new double[30];java.util.Arrays.fill(y,5);var shortPlan=DemandForecast.fit(y,3);var longPlan=DemandForecast.fit(y,21);assertThat(shortPlan.daily()).hasSize(3);assertThat(shortPlan.expectedUnits()).isEqualTo(15);assertThat(shortPlan.horizonDays()).isEqualTo(3);assertThat(shortPlan.legacyFourteenDayTotal()).isNull();assertThat(longPlan.daily()).hasSize(21);assertThat(longPlan.expectedUnits()).isEqualTo(105);}
  @Test void noHistoryIsNotPresentedAsTrainedDemand(){var r=DemandForecast.fit(new double[90]);assertThat(r.method()).isEqualTo("INSUFFICIENT_HISTORY");assertThat(r.daily()).isEmpty();}
  @Test void shortHistoryUsesHonestBaseline(){double[] y=new double[21];java.util.Arrays.fill(y,3);var r=DemandForecast.fit(y);assertThat(r.method()).isEqualTo("MOVING_AVERAGE_7");assertThat(r.units14()).isEqualTo(42);assertThat(r.validationMae()).isNull();}
  @Test void constantHistoryDoesNotClaimMlImprovement(){double[] y=new double[90];java.util.Arrays.fill(y,5);var r=DemandForecast.fit(y);assertThat(r.method()).isEqualTo("MOVING_AVERAGE_7");assertThat(r.units14()).isEqualTo(70);assertThat(r.baselineMae()).isZero();}

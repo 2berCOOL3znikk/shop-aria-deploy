@@ -11,6 +11,9 @@ import java.math.BigDecimal;
 public class ManagerStore {
  private final AiManagerStateRepository states;private final ManagerRunRepository runs;private final ManagerActionRepository actions;private final SmartPricingService smart;private final AuditService audit;
  @org.springframework.beans.factory.annotation.Autowired private SmartPricingSettingsRepository pricingSettings;
+ @org.springframework.beans.factory.annotation.Autowired private ManagerTaskRepository tasks;
+ @org.springframework.beans.factory.annotation.Autowired private ManagerExecutionRepository executions;
+ private void invalidateTasks(boolean resume){var now=LocalDateTime.now();if(resume)tasks.policyChanged(now,List.of(com.aria.enums.ProductStatus.TRANSFERRED,com.aria.enums.ProductStatus.WRITTEN_OFF));else tasks.releaseRunning(now);executions.cancelRunning(now);}
  private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().enable(tools.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
  public ManagerStore(AiManagerStateRepository s,ManagerRunRepository r,ManagerActionRepository a,SmartPricingService p,AuditService log){states=s;runs=r;actions=a;smart=p;audit=log;}
  private AiManagerState lock(){return states.lockState().orElseGet(()->states.saveAndFlush(new AiManagerState()));}
@@ -18,6 +21,7 @@ public class ManagerStore {
  public Claim claim(boolean force){
   var s=lock();var now=LocalDateTime.now();if("OFF".equals(s.mode)||s.leaseUntil!=null&&s.leaseUntil.isAfter(now)||!force&&s.dirtyAt==null&&s.nextRun!=null&&s.nextRun.isAfter(now)||s.lastStarted!=null&&s.lastStarted.isAfter(now.minusMinutes(1)))return null;
   if(s.lease!=null)runs.findByLease(s.lease).filter(r->"RUNNING".equals(r.status)).ifPresent(r->{r.status="INTERRUPTED";r.finishedAt=now;});
+  int resolved=actions.resolveClosed(now,List.of(com.aria.enums.ProductStatus.TRANSFERRED,com.aria.enums.ProductStatus.WRITTEN_OFF));if(resolved>0)audit.record("MANAGER_RISK_RESOLVED","manager","Закрыты сигналы завершённых товаров: "+resolved);
   s.lease=UUID.randomUUID().toString();s.leaseUntil=now.plusMinutes(5);s.lastStarted=now;s.nextRun=now.plusMinutes(s.intervalMinutes);s.dirtyAt=null;s.lastError=null;
   var run=new ManagerRun();run.lease=s.lease;run.mode=s.mode;runs.save(run);audit.record("MANAGER_CYCLE_STARTED","manager",s.mode+" · внутренний цикл, максимум 50 товаров и один AI-запрос");return new Claim(s.lease,s.mode,s.automaticAiConsent,s.socialDrafts,s.purchaseDrafts,s.productCursor);
  }
@@ -39,11 +43,12 @@ public class ManagerStore {
    smart.configure(new SettingsInput((Long)p.get("version"),"AUTOPILOT",((Number)p.get("maximumDiscount")).intValue(),((Number)p.get("cooldownHours")).intValue(),false,Boolean.TRUE.equals(p.get("allowRestore")),(List<String>)p.get("allowedCategories"),true,false,((Number)p.get("aiDailyBudget")).intValue(),null,null));
   }else {smart.stop();if("OFF".equals(mode))disableExternalAi();}
   s.mode=mode;s.automaticAiConsent=ai&&!"OFF".equals(mode);s.socialDrafts=social;s.purchaseDrafts=purchases;s.intervalMinutes=interval;s.dailyDraftBudget=budget;s.configRevision++;s.lease=null;s.leaseUntil=null;s.nextRun=null;
+  invalidateTasks(!"OFF".equals(mode));
   audit.record("MANAGER_CONFIGURED","manager",mode+" · автоматический AI "+s.automaticAiConsent+" · черновики закупок "+purchases+" · лимит "+budget+" ₸/день");
  }
  private void disableExternalAi(){var p=pricingSettings.lockSettings().orElseThrow();p.externalAiEnabled=false;p.scheduledAiEnabled=false;p.publicAssistantAiEnabled=false;p.consentRevision++;p.updatedAt=LocalDateTime.now();pricingSettings.saveAndFlush(p);}
- public void stop(){var s=lock();s.mode="OFF";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();disableExternalAi();audit.record("MANAGER_STOPPED","manager","Будущие циклы, внешний AI и ценовой автопилот отключены. Уже изменённые цены сохранены.");}
- public void stopPricing(){var s=lock();if(!"OFF".equals(s.mode))s.mode="ADVISOR";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();audit.record("MANAGER_PRICING_STOPPED","manager","Автономное изменение цен остановлено; ручные AI-запросы сохраняют прежние разрешения.");}
+ public void stop(){var s=lock();s.mode="OFF";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();disableExternalAi();invalidateTasks(false);audit.record("MANAGER_STOPPED","manager","Будущие циклы, внешний AI и ценовой автопилот отключены. Уже изменённые цены сохранены.");}
+ public void stopPricing(){var s=lock();if(!"OFF".equals(s.mode))s.mode="ADVISOR";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();invalidateTasks(true);audit.record("MANAGER_PRICING_STOPPED","manager","Автономное изменение цен остановлено; ручные AI-запросы сохраняют прежние разрешения.");}
  public void signal(String lease,Long productId,Long decisionId,String type,String severity,String title,String reason,Map<String,Object> facts){
   if(!current(lease))return;String serialized=json.writeValueAsString(facts);String fp;
   try{fp=HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(serialized.getBytes(java.nio.charset.StandardCharsets.UTF_8)));}catch(Exception e){throw new IllegalStateException("SHA-256 unavailable");}

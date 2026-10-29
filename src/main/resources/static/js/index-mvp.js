@@ -3,9 +3,8 @@
     if (!date) return null;
     const days = Math.ceil((new Date(date + "T23:59:59") - new Date()) / 86400000);
     if (days < 0) return { label: "Просрочен", cls: "expiry-expired" };
-    if (days <= 7) return { label: "Срок ≤7 дней", cls: "expiry-critical" };
-    if (days <= 30) return { label: "Срок ≤30 дней", cls: "expiry-warning" };
-    return { label: "Срок в норме", cls: "expiry-good" };
+    const exact=new Date(date+'T12:00:00').toLocaleDateString('ru-KZ',{day:'numeric',month:'short'});
+    return {label:'До '+exact+' · '+days+' дн.',cls:days===0?'expiry-critical':'expiry-good'};
   };
   const escape = value => String(value ?? "").replace(/[&<>"']/g, ch => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[ch]);
   const money = value => window.formatKZT ? formatKZT(value) : (window.ariaMoney ? ariaMoney.format(value) : value + " ₸");
@@ -85,7 +84,7 @@
     const intro = document.querySelector(".catalog-intro");
     if (!intro) return;
     intro.className = "aria-catalog-hero glass-card";
-    intro.innerHTML = '<div class="aria-hero-copy"><span class="product-card-category">ARIA · Казахстан</span><h1>ARIA — магазин, который не выбрасывает еду</h1><p>Помогаем магазинам сокращать списания и направлять подходящие товары людям через проверенные организации.</p><div class="aria-hero-actions"><a class="btn-glow" href="#products">В каталог</a><a class="btn-outline" href="/about.html">Как это работает</a><a class="btn-outline" href="/support.html#feedback-form">Написать нам</a></div></div><div class="aria-hero-illustration" aria-hidden="true"><svg viewBox="0 0 280 220" role="img"><rect x="34" y="36" width="212" height="156" rx="30" fill="var(--bg-elevated)"/><path d="M69 89h142l-13 78H82z" fill="#9a7658"/><path d="M77 99h126l-10 58H87z" fill="#e6c99b"/><circle cx="113" cy="112" r="16" fill="#b86649"/><circle cx="148" cy="122" r="18" fill="#819b6e"/><circle cx="177" cy="109" r="13" fill="#d7a84d"/><path d="M136 97c3-28 33-29 37 0" fill="none" stroke="#758e69" stroke-width="7" stroke-linecap="round"/></svg></div>';
+    intro.innerHTML = '<div class="aria-hero-copy"><span class="product-card-category">ARIA · Казахстан</span><h1>Хорошие товары.<br>Разумный выбор.</h1><p>Ассортимент и реальные остатки в одном месте. Подбирайте товары по цене и срокам.</p><div class="aria-hero-actions"><a class="btn-glow" href="#products">В каталог</a><a class="btn-outline" href="/about.html">О проекте</a><a class="btn-outline" href="#aria-assistant">Помощь с выбором</a></div></div><div class="aria-hero-illustration" aria-hidden="true"><svg viewBox="0 0 280 220" role="img"><rect x="34" y="36" width="212" height="156" rx="30" fill="var(--bg-elevated)"/><path d="M69 89h142l-13 78H82z" fill="#9a7658"/><path d="M77 99h126l-10 58H87z" fill="#e6c99b"/><circle cx="113" cy="112" r="16" fill="#b86649"/><circle cx="148" cy="122" r="18" fill="#819b6e"/><circle cx="177" cy="109" r="13" fill="#d7a84d"/><path d="M136 97c3-28 33-29 37 0" fill="none" stroke="#758e69" stroke-width="7" stroke-linecap="round"/></svg></div>';
   }
 
   function updateImpact() {
@@ -93,16 +92,9 @@
       [["impact-saved", data.savedCount], ["impact-social", data.socialCount], ["impact-active", data.processingCount]].forEach(([id, value]) => {
         const node = document.getElementById(id);
         if (!node) return;
-        const target = Number(value || 0), start = Number(node.textContent) || 0;
-        const duration = 700, began = performance.now();
-        const tick = now => {
-          const progress = Math.min(1, (now - began) / duration);
-          node.textContent = String(Math.round(start + (target - start) * progress));
-          if (progress < 1) requestAnimationFrame(tick);
-        };
-        requestAnimationFrame(tick);
+        node.textContent=Number.isFinite(Number(value))?String(Number(value)):"—";
       });
-    }).catch(() => {});
+    }).catch(() => {for(const id of ["impact-saved","impact-social","impact-active"]){const node=document.getElementById(id);if(node){node.textContent="—";node.title="Не удалось получить фактическое значение";}}});
   }
 
   window.updateImpactStats = updateImpact;
