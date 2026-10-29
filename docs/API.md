@@ -73,6 +73,8 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 
 ## Автономная платформа V17–V18
 
+Дополнение V19: GET `/api/admin/control/organization` (ADMIN) — несекретные metadata/binding текущего silo. Tenant не выбирается заголовком или параметром. В недемонстрационной организации все бизнес-API требуют ADMIN; публичная клиентская регистрация/каталог сохранены только для `demo`. См. [B2B_TRANSITION.md](B2B_TRANSITION.md).
+
 Все пути ниже требуют ADMIN, префикс `/api/admin/control`.
 
 - GET `/manager/center`: реальные показатели, сохранённые исполнения/очередь, исключения и последние решения. Ограниченные списки не считаются полной историей.

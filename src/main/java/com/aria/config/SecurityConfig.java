@@ -20,6 +20,9 @@ public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
 
+    @org.springframework.beans.factory.annotation.Value("${aria.organization.key:demo}")
+    private String organizationKey;
+
     public SecurityConfig(JwtAuthFilter jwtAuthFilter) {
         this.jwtAuthFilter = jwtAuthFilter;
     }
@@ -42,6 +45,12 @@ public class SecurityConfig {
                         .contentSecurityPolicy(c -> c.policyDirectives("frame-ancestors 'self'; object-src 'none'; base-uri 'self'")))
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
+                        // Only the preserved demo exposes customer APIs/registration publicly.
+                        // Silo companies must not expose their imported business catalogue anonymously.
+                        .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
+                                !"demo".equals(organizationKey) && request.getServletPath().startsWith("/api/")
+                                        && !request.getServletPath().equals("/api/auth/login"))
+                        .hasRole("ADMIN")
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/hello",
