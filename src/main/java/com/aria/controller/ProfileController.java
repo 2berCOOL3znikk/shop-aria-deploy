@@ -7,6 +7,8 @@ import org.springframework.security.core.Authentication;
 
 import java.util.HashMap;
 import java.util.Map;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.Size;
 
 @RestController
 @RequestMapping("/api/profile")
@@ -37,13 +39,15 @@ public class ProfileController {
                 .orElse(Map.of("found", false));
     }
 
+    public record ProfileInput(@Size(max=100) String fullName, @Size(max=50) String phone, @Size(max=500) String address) {}
+
     @PostMapping
-    public UserProfile saveProfile(@RequestBody Map<String, String> data, Authentication authentication) {
+    public UserProfile saveProfile(@Valid @RequestBody ProfileInput data, Authentication authentication) {
         return service.createOrUpdate(
                 authentication.getName(),
-                data.getOrDefault("fullName", ""),
-                data.getOrDefault("phone", ""),
-                data.getOrDefault("address", "")
+                data.fullName() == null ? "" : data.fullName().trim(),
+                data.phone() == null ? "" : data.phone().trim(),
+                data.address() == null ? "" : data.address().trim()
         );
     }
 }

@@ -147,7 +147,7 @@
       footer = document.createElement("footer");
       footer.id = "aria-shell-footer";
       footer.className = "aria-shell-footer";
-      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="mailto:support@aria.shop?subject=ARIA%20Shop" data-shell-footer="write"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
+      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="/support.html#feedback-form" data-shell-footer="write"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
       document.body.appendChild(footer);
     }
 

@@ -1255,3 +1255,13 @@ html { scroll-behavior: smooth; }
 }
 /* Keep the mobile storefront focused on products. */
 @media(max-width:600px){.aria-catalog-hero{padding:22px!important;gap:12px!important}.aria-hero-illustration{display:none!important}.aria-catalog-hero h1{font-size:28px!important}.aria-hero-copy p{font-size:14px!important;line-height:1.6!important}.impact-hero{display:flex!important;flex-direction:row!important;gap:8px!important;padding:20px 10px!important;margin-top:18px!important}.impact-stat{flex:1;min-width:0}.impact-stat-value{font-size:25px!important}.impact-stat-label{font-size:10px!important}.aria-hero-actions{gap:8px!important}.aria-hero-actions a{font-size:12px!important;padding:10px!important}}
+/* Keep long product names and a populated cart usable on a narrow screen. */
+.cart-line { display:flex; align-items:center; gap:20px; padding:16px; margin-bottom:15px; flex-wrap:wrap; }
+.cart-line-description { flex:1 1 180px; min-width:0; overflow-wrap:anywhere; }
+.cart-checkout-row { display:flex; justify-content:space-between; align-items:center; gap:16px; flex-wrap:wrap; }
+.cart-line button:disabled, .cart-checkout-row button:disabled { opacity:.55; cursor:wait; }
+@media(max-width:480px) {
+  .cart-line { gap:12px; }
+  .cart-line-description { flex-basis:calc(100% - 104px); }
+  .cart-checkout-row > button { width:100%; }
+}

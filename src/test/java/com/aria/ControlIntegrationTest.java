@@ -68,6 +68,23 @@ class ControlIntegrationTest {
         assertThat(registered.body.get("role")).isEqualTo("USER");
         input.put("email","another-"+email);assertThat(call("POST","/api/auth/register",null,input).status).isEqualTo(400);
     }
+    @Test void profileRejectsOverlongFieldsWithoutChangingAnotherAccount()throws Exception {
+        assertThat(call("POST","/api/profile",user,Map.of("fullName","x".repeat(101))).status).isEqualTo(400);
+        assertThat(call("POST","/api/profile",user,Map.of("phone","x".repeat(51))).status).isEqualTo(400);
+        assertThat(call("POST","/api/profile",user,Map.of("address","x".repeat(501))).status).isEqualTo(400);
+        var saved=call("POST","/api/profile",user,Map.of("email","other@test.local","fullName"," Покупатель ","phone","123","address","Адрес"));
+        assertThat(saved.status).as(saved.raw).isEqualTo(200);
+        assertThat(saved.body.get("email")).isNotEqualTo("other@test.local");
+        assertThat(saved.body.get("fullName")).isEqualTo("Покупатель");
+    }
+    @Test void malformedReviewsAreBadRequestsAndNeverStored()throws Exception {
+        assertThat(call("POST","/api/reviews",user,Map.of()).status).isEqualTo(400);
+        long p=product();lot(p,"REVIEW",2,10);
+        assertThat(call("POST","/api/reviews",user,Map.of("productId",p,"comment","Отзыв","rating",6)).status).isEqualTo(400);
+        assertThat(call("POST","/api/reviews",user,Map.of("productId",p,"comment"," ","rating",5)).status).isEqualTo(400);
+        assertThat(call("GET","/api/reviews/product/"+p,null,null).raw).isEqualTo("[]");
+        assertThat(call("POST","/api/reviews",user,Map.of("productId",p,"comment"," Отзыв ","rating",5)).status).isEqualTo(200);
+    }
     @Test void passwordChangeRevokesAllEarlierTokensAndKeepsNewLoginUsable()throws Exception {
         String email="security-"+UUID.randomUUID()+"@test.local";
         users.save(new AppUser(email,passwords.encode("oldPassword123"),"Security",Role.USER));
@@ -389,8 +406,11 @@ class ControlIntegrationTest {
         approval.put("suitabilityConfirmed",false);assertThat(call("POST",path+"/"+proposal.id()+"/approve",admin,approval).status).isEqualTo(400);approval.put("suitabilityConfirmed",true);
         var approved=call("POST",path+"/"+proposal.id()+"/approve",admin,approval);assertThat(approved.status).as(approved.raw).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.RESERVED);
         assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);long offer=((Number)approved.body.get("offerId")).longValue();
+          assertThat(call("GET","/api/aria/reports/social.csv",admin,null).raw).doesNotContain(products.findById(p).orElseThrow().getSku());
         assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Фактическая выдача подтверждена")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(5);
         assertThat(call("GET",path,admin,null).raw).contains("TRANSFERRED");
+          assertThat(call("GET","/api/aria/reports/social.csv",admin,null).raw).contains(products.findById(p).orElseThrow().getSku()).contains(",5,800.00");
+          assertThat(call("GET","/api/aria/reports/social.csv",user,null).status).isEqualTo(403);
     }
     @Test void socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover()throws Exception {
         long p=product();lot(p,"DONATE",10,2);long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";long proposal=call("POST",path+"/decisions/"+decision,admin,null).id();long organization=verifiedCharity();charityAcceptance(organization);

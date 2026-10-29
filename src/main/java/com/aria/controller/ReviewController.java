@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
+import jakarta.validation.Valid;
+import jakarta.validation.constraints.*;
 
 @RestController
 @RequestMapping("/api/reviews")
@@ -36,12 +38,15 @@ public class ReviewController {
         }).collect(Collectors.toList());
     }
 
+    public record ReviewInput(@NotNull @Positive Long productId, @Size(max=100) String author,
+                              @NotBlank @Size(max=2000) String comment, @Min(1) @Max(5) Integer rating) {}
+
     @PostMapping
-    public Map<String, Object> addReview(@RequestBody Map<String, Object> data) {
-        Long prodId = Long.valueOf(data.get("productId").toString());
-        String author = (String) data.getOrDefault("author", "Аноним");
-        String comment = (String) data.getOrDefault("comment", "");
-        Integer rating = Integer.valueOf(data.getOrDefault("rating", 5).toString());
+    public Map<String, Object> addReview(@Valid @RequestBody ReviewInput data) {
+        Long prodId = data.productId();
+        String author = data.author();
+        String comment = data.comment().trim();
+        Integer rating = data.rating() == null ? 5 : data.rating();
 
         if (author == null || author.isBlank()) author = "Аноним";
         if (author.length() > 100 || comment.isBlank() || comment.length() > 2000 || rating < 1 || rating > 5) {

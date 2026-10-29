@@ -1,5 +1,24 @@
 function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
 let items = [];
+let cartBusy = false;
+let deliveryAddress = '';
+
+    async function cartResponse(response) {
+        const data = await response.json().catch(() => ({}));
+        if (!response.ok) throw new Error(data.message || data.error || 'Сервис временно недоступен. Повторите попытку.');
+        return data;
+    }
+
+    async function cartAction(action) {
+        if (cartBusy) return;
+        cartBusy = true;
+        deliveryAddress = document.getElementById('delivery-address')?.value ?? deliveryAddress;
+        const buttons = [...document.querySelectorAll('#cart-items button, #cart-total button')];
+        buttons.forEach(button => button.disabled = true);
+        try { await action(); }
+        catch (error) { window.showToast(error.message || 'Не удалось связаться с сервером. Проверьте результат перед повтором.', 'error'); }
+        finally { cartBusy = false; buttons.forEach(button => button.disabled = false); }
+    }
 
     async function loadCartCount() {
         if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
@@ -9,12 +28,12 @@ let items = [];
         if (!ariaAuth.requireLogin()) return;
         try {
             const res = await ariaAuth.authFetch('/api/cart');
-            items = await res.json();
+            const data = await cartResponse(res);
+            if (!Array.isArray(data)) throw new Error('Не удалось загрузить корзину');
+            items = data;
             render();
             await loadCartCount();
-        } catch(e) {
-            window.showToast('Ошибка загрузки корзины', 'error');
-        }
+        } catch(e) { window.showToast(e.message || 'Ошибка загрузки корзины', 'error'); }
     }
 
     function render() {
@@ -25,9 +44,9 @@ let items = [];
             return;
         }
         box.innerHTML = items.map(it =>
-            '<div class="glass-card" style="display:flex;align-items:center;gap:20px;padding:16px;margin-bottom:15px;">' +
+            '<div class="glass-card cart-line">' +
             CatalogImages.imageTag({ productName: it.productName, productSku: it.productSku, category: it.category, imageUrl: it.imageUrl }, { className: "cart-item-image", alt: it.productName, style: "width:80px;height:80px;object-fit:cover;border-radius:8px;" }) +
-            '<div style="flex:1;">' +
+            '<div class="cart-line-description">' +
             '<h3 style="margin:0 0 5px 0;">' + ariaEscape(it.productName) + '</h3>' +
             '<div style="color:var(--text-muted);font-size:12px;">SKU: ' + ariaEscape(it.productSku) + '</div>' +
             '<div style="color:var(--accent-blue);font-weight:700;margin-top:5px;">' + ariaMoney.format(it.priceAtAddTime) + '</div>' +
@@ -38,54 +57,50 @@ let items = [];
             '<button class="btn-icon" onclick="changeQty(' + it.id + ',' + (it.quantity + 1) + ')" style="background:var(--bg-surface);border:1px solid var(--border-color);color:var(--text-primary);">+</button>' +
             '</div>' +
             '<div style="font-weight:700;min-width:100px;text-align:right;">' + ariaMoney.format(it.priceAtAddTime * it.quantity) + '</div>' +
-            '<button class="btn-icon" onclick="removeItem(' + it.id + ')" style="background:transparent;border:none;color:var(--accent-red);cursor:pointer;font-size:20px;">✕</button>' +
+            '<button class="btn-icon" aria-label="Удалить товар" onclick="removeItem(' + it.id + ')" style="background:transparent;border:none;color:var(--accent-red);cursor:pointer;font-size:20px;">✕</button>' +
             '</div>'
         ).join('');
 
         const total = items.reduce((sum, it) => sum + it.priceAtAddTime * it.quantity, 0);
         document.getElementById('cart-total').innerHTML =
-            '<label class="cart-address-label" for="delivery-address">Адрес доставки</label><input id="delivery-address" type="text" autocomplete="street-address" value="г. Кызылорда, Казахстан" aria-label="Адрес доставки">' +
-            '<div style="display:flex;justify-content:space-between;align-items:center;">' +
+            '<label class="cart-address-label" for="delivery-address">Адрес доставки</label><input id="delivery-address" type="text" maxlength="500" autocomplete="street-address" value="' + ariaEscape(deliveryAddress) + '" placeholder="Город, улица, дом, квартира" aria-label="Адрес доставки">' +
+            '<div class="cart-checkout-row">' +
             '<div><b style="font-size:20px;"><span data-i18n="cart.total">Итого:</span> ' + ariaMoney.format(total) + '</b></div>' +
             '<button class="btn-glow" onclick="checkout()" data-i18n="cart.checkout">Оформить заказ</button>' +
             '</div>';
     }
 
     async function changeQty(id, newQty) {
-        try {
+        return cartAction(async () => {
             const res = await ariaAuth.authFetch('/api/cart/' + id + '?qty=' + newQty, {method:'PUT'});
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || data.error || 'Не удалось изменить количество');
+            await cartResponse(res);
             await loadCart();
-        } catch(e) { window.showToast(e.message, 'error'); }
+        });
     }
 
     async function removeItem(id) {
-        items = items.filter(i => i.id !== id);
-        render();
-        try {
-            await ariaAuth.authFetch('/api/cart/' + id, { method: 'DELETE' });
-            await loadCartCount();
+        return cartAction(async () => {
+            await cartResponse(await ariaAuth.authFetch('/api/cart/' + id, { method: 'DELETE' }));
+            await loadCart();
             window.showToast('Товар удалён');
-        } catch(e) { window.showToast('Ошибка', 'error'); }
+        });
     }
 
     async function checkout() {
         const address = document.getElementById('delivery-address')?.value || '';
         if (!address.trim()) { window.showToast('Укажите адрес доставки', 'error'); return; }
-        try {
+        return cartAction(async () => {
             const res = await ariaAuth.authFetch('/api/orders/checkout', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({ address: address.trim() })
             });
-            const data = await res.json();
-            if (!res.ok) throw new Error(data.message || 'Не удалось оформить заказ');
+            const data = await cartResponse(res);
             window.showToast('Заказ #' + data.id + ' принят. Статус: ' + data.status);
             items = [];
             render();
             await loadCartCount();
-        } catch(e) { window.showToast('Ошибка оформления', 'error'); }
+        });
     }
 
     ariaTheme.initTheme();

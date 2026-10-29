@@ -33,12 +33,12 @@
     <label for="email" data-i18n="profile.email">Email</label>
     <input type="email" id="email" data-i18n-placeholder="profile.email" placeholder="Email" readonly>
     <label for="fullName" data-i18n="profile.fullName">ФИО</label>
-    <input type="text" id="fullName" data-i18n-placeholder="profile.fullName" placeholder="ФИО">
+    <input type="text" id="fullName" maxlength="100" autocomplete="name" data-i18n-placeholder="profile.fullName" placeholder="ФИО">
     <label for="phone" data-i18n="profile.phone">Телефон</label>
-    <input type="tel" id="phone" data-i18n-placeholder="profile.phone" placeholder="Телефон">
+    <input type="tel" id="phone" maxlength="50" autocomplete="tel" data-i18n-placeholder="profile.phone" placeholder="Телефон">
     <label for="address" data-i18n="profile.address">Адрес</label>
-    <input type="text" id="address" data-i18n-placeholder="profile.address" placeholder="Адрес">
-    <button class="btn-glow" onclick="saveProfile()" data-i18n="profile.save">Сохранить</button>
+    <input type="text" id="address" maxlength="500" autocomplete="street-address" data-i18n-placeholder="profile.address" placeholder="Адрес">
+    <button id="profile-save" class="btn-glow" onclick="saveProfile()" data-i18n="profile.save">Сохранить</button>
   </section>
   <section class="glass-card profile-form">
     <h2>Безопасность аккаунта</h2>

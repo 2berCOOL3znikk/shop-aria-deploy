@@ -33,7 +33,7 @@
         showToast(result.message || "Спасибо за обратную связь!");
         form.reset();
         await loadCaptcha();
-      } catch (error) { showToast(error.message, "error"); }
+      } catch (error) { showToast(error.message, "error"); await loadCaptcha(); }
       finally { button.disabled = false; }
     });
     loadCaptcha();

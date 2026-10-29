@@ -9,6 +9,7 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
             const email = ariaAuth.getUserEmail();
             const res = await ariaAuth.authFetch('/api/profile/' + encodeURIComponent(email));
             const data = await res.json();
+            if (!res.ok) throw new Error(data.message || 'Не удалось загрузить профиль');
             document.getElementById('email').value = data.found ? (data.data.email || email) : email;
             if (data.found) {
                 document.getElementById('email').value = data.data.email || '';
@@ -16,12 +17,15 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                 document.getElementById('phone').value = data.data.phone || '';
                 document.getElementById('address').value = data.data.address || '';
             }
-        } catch(e) {}
+        } catch(e) { window.showToast(e.message || 'Не удалось загрузить профиль', 'error'); }
     }
 
     async function saveProfile() {
+        const button = document.getElementById('profile-save');
+        if (button.disabled) return;
+        button.disabled = true;
         try {
-            await ariaAuth.authFetch('/api/profile', {
+            const response = await ariaAuth.authFetch('/api/profile', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify({
@@ -31,8 +35,11 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                     address: document.getElementById('address').value
                 })
             });
+            const result = await response.json().catch(() => ({}));
+            if (!response.ok) throw new Error(result.message || 'Не удалось сохранить профиль');
             window.showToast('Профиль сохранён');
-        } catch(e) { window.showToast('Ошибка', 'error'); }
+        } catch(e) { window.showToast(e.message || 'Не удалось сохранить профиль', 'error'); }
+        finally { button.disabled = false; }
     }
 
     async function loadFavorites() {

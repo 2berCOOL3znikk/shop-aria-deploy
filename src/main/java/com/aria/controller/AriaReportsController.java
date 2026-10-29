@@ -25,11 +25,28 @@ public class AriaReportsController {
     private final ProductRepository products;
     private final TransferLotRepository lots;
     private final TransferRecordRepository records;
+    private final com.aria.repository.SocialOfferRepository socialOffers;
 
-    public AriaReportsController(ProductRepository products, TransferLotRepository lots, TransferRecordRepository records) {
+    public AriaReportsController(ProductRepository products, TransferLotRepository lots, TransferRecordRepository records, com.aria.repository.SocialOfferRepository socialOffers) {
         this.products = products;
         this.lots = lots;
         this.records = records;
+        this.socialOffers = socialOffers;
+    }
+
+    @GetMapping(value = "/social.csv", produces = "text/csv")
+    @Transactional(readOnly = true)
+    public ResponseEntity<String> socialCsv() {
+        StringBuilder result = new StringBuilder("\uFEFFПредложение,Организация ID,Фактическая выдача,SKU,Наименование,Количество,Себестоимость за единицу KZT\r\n");
+        for (var offer : socialOffers.findAll()) {
+            if (!"TRANSFERRED".equals(offer.getStatus())) continue;
+            result.append(offer.getId()).append(',').append(offer.getOrgId() == null ? "" : offer.getOrgId()).append(',')
+                    .append(csv(offer.getTransferredAt() == null ? "" : offer.getTransferredAt().toString())).append(',')
+                    .append(csv(offer.getSkuSnapshot())).append(',').append(csv(offer.getProductNameSnapshot())).append(',')
+                    .append(offer.getQuantityClaimed() == null ? 0 : offer.getQuantityClaimed()).append(',')
+                    .append(offer.getUnitCostSnapshot() == null ? "" : offer.getUnitCostSnapshot().toPlainString()).append("\r\n");
+        }
+        return csvDownload("aria-social-handover.csv", result.toString());
     }
 
     @GetMapping(value = "/inventory.csv", produces = "text/csv")
@@ -116,7 +133,7 @@ public class AriaReportsController {
 
     private String csv(String value) {
         if (value == null) return "";
-        String safe = value.matches("^[=+@-].*") ? "'" + value : value;
+        String safe = java.util.regex.Pattern.compile("^\\s*[=+@-]").matcher(value).find() ? "'" + value : value;
         return "\"" + safe.replace("\"", "\"\"") + "\"";
     }
 
