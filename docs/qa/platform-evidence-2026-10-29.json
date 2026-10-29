@@ -1,0 +1,119 @@
+{
+  "date": "2026-10-29",
+  "branch": "codex/production-foundation",
+  "scope": "Isolated local preview and synthetic PostgreSQL only; no production changes",
+  "junit": {
+    "suites": 16,
+    "tests": 123,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgres": {
+    "version": "18.6",
+    "integrationScenarios": 53,
+    "migrations": [
+      1,
+      2,
+      3,
+      4,
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "hibernate": "validate",
+    "existingPreviewUpgrade": true
+  },
+  "restore": {
+    "tablesCompared": 39,
+    "contentsEqual": true,
+    "sequencesEqual": true,
+    "syntheticOnly": true
+  },
+  "browsers": {
+    "release": {
+      "passed": true,
+      "checks": [
+        "Owner login, product and lot creation, persistent photo upload through UI",
+        "Actual CSV file imported and matched by SKU, GTIN and unit; no scraped or invented live-market claims",
+        "Real private AI, transparent source/model, server-validated administrator discount confirmation",
+        "Buyer registration/captcha, favourite, real discounted storefront, mobile cart, address preservation, failed removal, single checkout, FEFO stock consumption, shipment/delivery and profile error handling",
+        "Actual social logistics UI: responsible staff, store-local agreed time and sequential scheduled/ready/in-transit without early stock consumption",
+        "Organization login/verification UI, eligibility, proposal without reserve, approved reserve, actual handover, stock and CSV/act downloads",
+        "Genuine public AI, budget constraint, explicit ENGINE comparison without consent, anonymous/buyer API denials"
+      ],
+      "errors": []
+    },
+    "platform": {
+      "passed": true,
+      "checks": [
+        "UI: supplier, product, real lot, verified quote, purchase draft, approval and partial receiving",
+        "UI: barcode POS, single sale on double click, FEFO stock, quarantine return, movements, camera fallback and honest disconnected integrations",
+        "Activity-triggered persisted ADVISOR cycle, real risks, bounded AI and no automatic price/stock changes",
+        "All admin sections at desktop/mobile widths, emergency consent revocation, PWA manifest, public-only cache, offline page and API isolation"
+      ],
+      "errors": []
+    },
+    "maintenance": {
+      "passed": true,
+      "checks": [
+        "Supplier create/edit and linked-delete refusal; product create/edit; receive/edit lot and synchronized stock",
+        "Manual discount/reset, category policy override/reset, Smart Pricing approval/rollback, bounded autopilot settings and emergency stop",
+        "Lot write-off, product archive, isolated section failure and recovery",
+        "Support captcha retry retains message; real submission, admin inbox/resolve; catalogue search/no results/reset/sort, theme and language switches",
+        "All administrative sections plus legacy analyses/history; public routes, product alias/not-found, internal links, images and desktop/mobile widths"
+      ],
+      "errors": []
+    }
+  },
+  "adminWidths": [
+    1440,
+    390
+  ],
+  "adminSections": 20,
+  "ai": {
+    "pricing": {
+      "source": "AI",
+      "strategy": "KEEP",
+      "percent": 0,
+      "model": "xingchen-agi/xing4.0-29b-a4b:free"
+    },
+    "customerSource": "AI",
+    "manager": {
+      "mode": "ADVISOR",
+      "status": "DONE",
+      "result": {
+        "aiAppliedDecisions": 0,
+        "aiAttempts": 1,
+        "aiResults": [
+          {
+            "decisionId": 28,
+            "productId": 16,
+            "source": "AI",
+            "status": "PENDING"
+          }
+        ],
+        "errors": [],
+        "failed": false,
+        "scanned": 5,
+        "socialDraftChecks": 1
+      }
+    },
+    "genuineManagerAi": true,
+    "paidFallback": false,
+    "zeroProviderPriceConstraints": true
+  },
+  "productionDeployExecuted": false,
+  "physicalCameraOrScannerVerified": false,
+  "cloudE2EExecuted": false,
+  "dataExportFromProductionExecuted": false
+}

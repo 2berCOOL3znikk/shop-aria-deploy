@@ -56,3 +56,17 @@ Smart Pricing: [расчёты, RECOMMEND/AUTOPILOT, история, API и пр
 
 
 Приёмка релиза 29.10.2026: `GET /api/aria/reports/social.csv` — ADMIN, только фактические выдачи социальной полки со снимками. Прежний `acts.csv` сохраняется для отдельных актов. `POST /api/profile` проверяет fullName≤100, phone≤50, address≤500; email всегда берётся из токена. `POST /api/reviews` требует положительный productId, непустой comment≤2000, author≤100 и rating 1–5 (по умолчанию 5). Неверный ввод — 400. `/api/admin/control/smart-pricing/ai-status` дополнительно возвращает `scheduledAvailable`: в Free-профиле false.
+
+## Автономная платформа (V12–V16)
+
+Только ADMIN: GET `/api/admin/control/manager`; PUT `/manager/settings` с актуальной revision; POST `/manager/run`, `/manager/stop`, `/manager/actions/{id}/acknowledge`; GET `/manager/analytics/{productId}`.
+
+Закупки: GET/POST `/api/admin/control/purchases`; POST `/purchases/quotes`, `/{id}/approve`, `/{id}/cancel`, `/{id}/receive`. Приёмка требует уникальный requestKey; другой состав с прежним ключом отклоняется. Внешней отправки/оплаты нет.
+
+POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{productId,quantity,expectedPrice}]}; POST `/pos/{id}/return` {reason}. Это внутренние операции, не фискализация. Движения: GET `/api/admin/control/movements?productId=&page=0&size=25`.
+
+Социальная логистика: GET `/api/admin/control/social-proposals/staff`; PUT `/social-proposals/{id}/logistics` {version,assigneeId,plannedAt,status,reason}. plannedAt — местное время магазина Asia/Qyzylorda без смещения; обновление последовательно, только после резерва.
+
+Интеграции: GET `/api/admin/control/integrations`; POST `/integrations/poster/prepare` {sale:{requestKey,lines},productIds:{внутреннийId:PosterId}} → только несохранённый план, sent=false/fiscal=false. Нет внешнего HTTP-запроса или списания.
+
+Политика и проверка функций: [AUTONOMOUS_MANAGER.md](AUTONOMOUS_MANAGER.md).
