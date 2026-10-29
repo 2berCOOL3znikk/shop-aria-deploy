@@ -25,6 +25,7 @@ public class SmartPricingService {
     private final SmartPricingSettingsRepository settings;
     private final CompetitorPriceService competitors;
     private final CharityEligibilityService charities;
+    @org.springframework.beans.factory.annotation.Autowired private AiManagerStateRepository managerStates;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().enable(tools.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
     public SmartPricingService(ProductRepository products,InventoryLotRepository lots,OrderRepository orders,
         PricingDecisionRepository decisions,PriceChangeRepository changes,InventoryService inventory,PricingService pricing,
@@ -45,7 +46,11 @@ public class SmartPricingService {
         return Map.of("analyzed",analyzed,"failed",failed,"mode",settings.findById(1L).map(s->s.mode).orElse("RECOMMEND"));
     }
     @Transactional public Map<String,Object> analyze(Long productId){return view(analyzeLocked(productId));}
+    @Transactional public Map<String,Object> analyzeForManager(Long productId){return view(analyzeLocked(productId,false));}
     private PricingDecision analyzeLocked(Long productId){
+        return analyzeLocked(productId,true);
+    }
+    private PricingDecision analyzeLocked(Long productId,boolean allowAutopilot){
         Product p=inventory.lock(productId);if(!eligible(p))throw new IllegalStateException("Товар недоступен для ценообразования");
         var existingLots=lots.findByProductId(productId);
         if(existingLots.isEmpty()&&p.getQuantityOnHand()>0&&p.getUnitCost()==null)
@@ -56,12 +61,12 @@ public class SmartPricingService {
         inventory.ensureLegacyLot(p);inventory.synchronize(p);
         var report=SmartPricingEngine.evaluate(facts(p));var fingerprint=fingerprint(report);
         var last=decisions.findFirstByProductIdOrderByCreatedAtDescIdDesc(productId);
-        if(last.isPresent()&&last.get().fingerprint.equals(fingerprint)&&last.get().reviewAt.isAfter(LocalDateTime.now())){autopilot(last.get(),report);return last.get();}
+        if(last.isPresent()&&last.get().fingerprint.equals(fingerprint)&&last.get().reviewAt.isAfter(LocalDateTime.now())){if(allowAutopilot)autopilot(last.get(),report);return last.get();}
         for(var old:decisions.findByProductIdAndStatus(productId,"PENDING"))old.status="SUPERSEDED";
         decisions.flush();
         var d=new PricingDecision();d.productId=productId;d.createdAt=LocalDateTime.now();d.reviewAt=d.createdAt.plusHours(report.reviewAfterHours());
         d.fingerprint=fingerprint;d.reportJson=json.writeValueAsString(report);decisions.saveAndFlush(d);
-        audit.record("SMART_PRICING_RECOMMENDED","product:"+productId,report.action()+" · "+report.suggestedPercent()+"% · уверенность "+report.confidence());autopilot(d,report);return d;
+        audit.record("SMART_PRICING_RECOMMENDED","product:"+productId,report.action()+" · "+report.suggestedPercent()+"% · уверенность "+report.confidence());if(allowAutopilot)autopilot(d,report);return d;
     }
     private boolean eligible(Product p){return !p.getArchived()&&Set.of(com.aria.enums.ProductStatus.ACTIVE,com.aria.enums.ProductStatus.CANDIDATE,com.aria.enums.ProductStatus.DISCOUNTED).contains(p.getStatus())&&p.getUnitPrice()!=null&&p.getUnitPrice().signum()>0;}
     private Facts facts(Product p){
@@ -233,6 +238,14 @@ public class SmartPricingService {
         return new AiClaim(d.id,d.aiClaim,config.consentRevision,explanationFacts(d.id));
     }
     @Transactional public Map<String,Object> completeAi(AiClaim claim,Map<String,Object> response,boolean scheduled){
+        return completeAi(claim,response,scheduled,true);
+    }
+    @Transactional public Map<String,Object> completeAiFromManager(String lease,AiClaim claim,Map<String,Object> response,boolean autopilot){
+        var state=managerStates.lockState().orElseThrow();
+        if(!Objects.equals(state.lease,lease)||"OFF".equals(state.mode)||!state.automaticAiConsent||state.leaseUntil==null||!state.leaseUntil.isAfter(LocalDateTime.now()))throw new IllegalStateException("Цикл менеджера остановлен или его разрешение истекло");
+        return completeAi(claim,response,false,autopilot&&"AUTOPILOT".equals(state.mode));
+    }
+    @Transactional public Map<String,Object> completeAi(AiClaim claim,Map<String,Object> response,boolean scheduled,boolean allowAutopilot){
         var d=decision(claim.id());var p=inventory.lock(d.productId);refresh(d);var config=settings.lockSettings().orElseThrow();
         if(!"PENDING".equals(d.status)||!Objects.equals(d.aiClaim,claim.token())||!Objects.equals(config.consentRevision,claim.settingsVersion())||!config.externalAiEnabled||scheduled&&!config.scheduledAiEnabled)throw new IllegalStateException("AI-ответ устарел или разрешение изменилось");
         inventory.synchronize(p);var report=SmartPricingEngine.evaluate(facts(p));
@@ -252,7 +265,7 @@ public class SmartPricingService {
         d.explanationJson=json.writeValueAsString(response);d.aiCompletedAt=LocalDateTime.now();d.aiClaim=null;d.aiLastSkippedAt=null;d.aiLastSkippedNote=null;
         audit.record("SMART_AI_DECISION","decision:"+d.id,d.source+" · "+(d.selectedPercent==null?report.suggestedPercent():d.selectedPercent)+"% · исходные ограничения повторно проверены");
         decisions.saveAndFlush(d); // apply() refreshes the row; keep the validated AI selection in the same atomic transaction.
-        autopilot(d,report);return view(d);
+        if(allowAutopilot)autopilot(d,report);return view(d);
     }
     @Transactional public void recordSkippedAi(Long id,String reason){
         var d=decision(id);inventory.lock(d.productId);refresh(d);var config=settings.lockSettings().orElse(null);

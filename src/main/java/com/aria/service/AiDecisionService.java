@@ -15,11 +15,16 @@ public class AiDecisionService {
     @Value("${aria.smart-pricing.schedule-enabled:true}") private boolean scheduling;
     public AiDecisionService(SmartPricingService smart,IntelligenceService ai,PricingDecisionRepository decisions,SocialProposalService social){this.smart=smart;this.ai=ai;this.decisions=decisions;this.social=social;}
     public Map<String,Object> decide(Long id,boolean scheduled){
+        return decideInternal(id,scheduled,true,null);
+    }
+    public Map<String,Object> decideForManager(Long id,boolean autopilot,String lease){return decideInternal(id,false,autopilot,lease);}
+    private Map<String,Object> decideInternal(Long id,boolean scheduled,boolean allowAutopilot,String lease){
         var claim=smart.claimAi(id,scheduled);var result=ai.decidePricing(claim.facts());Map<String,Object> saved;
-        try{saved=smart.completeAi(claim,result,scheduled);}catch(IllegalStateException invalid){
+        try{saved=lease!=null?smart.completeAiFromManager(lease,claim,result,allowAutopilot&&"AI".equals(result.get("mode"))):smart.completeAi(claim,result,scheduled);}catch(IllegalStateException invalid){
             if(!"AI".equals(result.get("mode")))throw invalid;
             // Rechecks the same claim and consent: stale data or stop still fails, invalid AI strategy falls back.
-            saved=smart.completeAi(claim,Map.of("mode","ENGINE","note","AI-стратегия не прошла проверку. Сохранён расчёт Java."),scheduled);
+            var fallback=Map.<String,Object>of("mode","ENGINE","note","AI-стратегия не прошла проверку. Сохранён расчёт Java.");
+            saved=lease!=null?smart.completeAiFromManager(lease,claim,fallback,false):smart.completeAi(claim,fallback,scheduled);
         }
         if("AI".equals(saved.get("source"))&&"SOCIAL_REVIEW".equals(saved.get("strategy"))){try{saved.put("socialProposal",social.propose(id));}catch(IllegalStateException e){saved.put("socialProposalNote","Черновик не создан: пересчитайте данные и проверьте пригодность");}}
         return saved;

@@ -50,6 +50,19 @@ class IntelligenceServiceTest {
         when(response.body()).thenReturn(json.writeValueAsString(Map.of("model","test/model:free","choices",List.of(Map.of("message",Map.of("content",content))))));
         when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenReturn(response);return client;
     }
+    @Test void decisionSchemaExcludesReviewTimesBeyondJavaDeadline()throws Exception {
+        var facts=Map.<String,Object>of("report",Map.of("scenarios",List.of(Map.of("percent",0)),"reviewAfterHours",6));
+        var client=pricingClient("{\"explanation\":\"Истории мало\",\"risks\":[],\"suggestedPercent\":0,\"reviewAfterHours\":6,\"requiresConfirmation\":true}");
+        assertThat(new IntelligenceService("test-key","openrouter/free",client).decidePricing(facts)).containsEntry("mode","AI");
+        var captor=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(client).send(captor.capture(),any(HttpResponse.BodyHandler.class));
+        var request=tools.jackson.databind.json.JsonMapper.builder().build().readValue(body(captor.getValue()),Map.class);
+        var format=(Map<?,?>)request.get("response_format");var schema=(Map<?,?>)((Map<?,?>)format.get("json_schema")).get("schema");var props=(Map<?,?>)schema.get("properties");assertThat(((Map<?,?>)props.get("reviewAfterHours")).get("enum")).isEqualTo(List.of(6));
+    }
+    @Test void truncatedCompletionIsNeverAcceptedAsAiEvenWithParsableContent()throws Exception {
+        var client=mock(HttpClient.class);HttpResponse<String> response=mock(HttpResponse.class);when(response.statusCode()).thenReturn(200);
+        when(response.body()).thenReturn("{\"choices\":[{\"finish_reason\":\"length\",\"message\":{\"content\":\"{}\"}}]}");when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenReturn(response);
+        var result=new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts());assertThat(result).containsEntry("mode","ENGINE");assertThat((String)result.get("note")).contains("не завершил JSON");
+    }
     @Test void pricingJsonIsValidatedAndNeverSentToMutationTools()throws Exception {
         var client=pricingClient("{\"explanation\":\"Истории мало\",\"risks\":[\"Неизвестна реакция\"],\"suggestedPercent\":5}");
         var service=new IntelligenceService("test-key","openrouter/free",client);

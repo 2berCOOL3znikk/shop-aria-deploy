@@ -55,7 +55,7 @@ public class AdminReadService {
         result.put("briefing",List.of("Просроченных партий: "+expired.size()+". Они исключены из доступного остатка.","Партий с критическим сроком: "+urgent+". Проверьте возможность скидки или передачи.","Товаров на минимуме или ниже: "+low+". Проверьте потребность в пополнении."));return result;
     }
     public PageResult<OrderRow> orderPage(String q,String state,int page,int size,String sort){
-        validate(q,page,size);if(!state.isBlank()&&!Set.of("PENDING","SHIPPED","DELIVERED","CANCELLED").contains(state))throw new IllegalArgumentException("Неизвестный статус заказа");
+        validate(q,page,size);if(!state.isBlank()&&!Set.of("PENDING","SHIPPED","DELIVERED","CANCELLED","RETURNED").contains(state))throw new IllegalArgumentException("Неизвестный статус заказа");
         Sort ordering=switch(sort){case "newest"->Sort.by(Sort.Direction.DESC,"createdAt","id");case "oldest"->Sort.by(Sort.Direction.ASC,"createdAt","id");case "amount"->Sort.by(Sort.Direction.DESC,"totalAmount","id");default->throw new IllegalArgumentException("Неизвестная сортировка");};String pattern=pattern(q);
         Specification<Order> spec=(root,query,cb)->{
             List<Predicate> terms=new ArrayList<>();if(!state.isBlank())terms.add(cb.equal(root.get("status"),state));

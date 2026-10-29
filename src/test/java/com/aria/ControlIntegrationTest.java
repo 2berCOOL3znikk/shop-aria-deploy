@@ -16,8 +16,10 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
+import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
+@org.springframework.test.context.TestPropertySource(properties={"aria.manager.enabled=false","aria.manager.schedule-enabled=false"})
 class ControlIntegrationTest {
     @Autowired Environment env;
     @Autowired AppUserRepository users;
@@ -33,6 +35,15 @@ class ControlIntegrationTest {
     @Autowired com.aria.service.SmartPricingService smartPricing;
     @Autowired PricingDecisionRepository pricingDecisions;
     @Autowired OrganizationVerificationRepository organizationVerifications;
+    @Autowired com.aria.service.ManagerStore managerStore;
+    @Autowired com.aria.service.AiManagerService aiManager;
+    @Autowired AiManagerStateRepository managerStates;
+    @Autowired ManagerActionRepository managerActions;
+    @Autowired ManagerRunRepository managerRuns;
+    @Autowired SocialProposalRepository socialProposals;
+    @Autowired PurchaseRequestRepository purchaseRequests;
+    @Autowired com.aria.service.PurchaseService purchaseService;
+    @Autowired InventoryMovementRepository stockMovements;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
     private String admin,user,org,orgEmail;
@@ -57,6 +68,97 @@ class ControlIntegrationTest {
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
     private Reply lot(long p,String number,int qty,int days)throws Exception {var r=call("POST",base+"/lots",admin,lotBody(p,number,qty,days));assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}
+    @Test void managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock()throws Exception {
+        managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());
+        long p=product();lot(p,"MANAGER",4,2);
+        ReflectionTestUtils.setField(aiManager,"enabled",true);
+        try{
+            var r=aiManager.runCycle(true);assertThat(r).containsKey("scanned");
+            assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();
+            assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(4);
+            var decision=pricingDecisions.findFirstByProductIdOrderByCreatedAtDescIdDesc(p).orElseThrow();
+            assertThat(socialProposals.findByDecisionId(decision.id)).isPresent();
+            long actionId=managerActions.findBySignalKey("SOCIAL:"+p).orElseThrow().id;
+            assertThat(aiManager.runCycle(true)).containsEntry("skipped","OFF_NOT_DUE_OR_LEASED");
+            managerStore.acknowledge(actionId);assertThat(managerActions.findById(actionId).orElseThrow().status).isEqualTo("ACKNOWLEDGED");
+            managerStore.stop();assertThat(managerStore.configuration()).containsEntry("mode","OFF");
+            assertThat(aiManager.runCycle(true)).containsEntry("skipped","OFF_NOT_DUE_OR_LEASED");
+        }finally{ReflectionTestUtils.setField(aiManager,"enabled",false);}
+    }
+    @Test void managerLeaseIsExclusiveAndOwnerMustConfirmAiAndCurrentPricingPolicy()throws Exception {
+        managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());
+        var pool=Executors.newFixedThreadPool(2);try{var first=pool.submit(()->managerStore.claim(true));var second=pool.submit(()->managerStore.claim(true));assertThat(java.util.stream.Stream.of(first.get(),second.get()).filter(Objects::nonNull).count()).isEqualTo(1);}finally{pool.shutdownNow();}
+        var s=managerStates.findById(1L).orElseThrow();s.lease=null;s.leaseUntil=null;managerStates.saveAndFlush(s);
+        assertThat(call("GET",base+"/manager",user,null).status).isEqualTo(403);
+        var denied=call("PUT",base+"/manager/settings",admin,Map.of("revision",0,"mode","AUTOPILOT","automaticAiConsent",false,"intervalMinutes",30,"dailyDraftBudget",0,"socialDrafts",false,"purchaseDrafts",false,"policyConfirmed",false));assertThat(denied.status).as(denied.raw).isEqualTo(409);
+        managerStore.stop();assertThat(managerStore.current("old-lease")).isFalse();
+    }
+    @Test void purchasesRequireVerifiedQuoteAndPartialReceiptIsIdempotent()throws Exception {
+        long p=product();String path=base+"/purchases";
+        long supplier=call("POST",base+"/suppliers",admin,Map.of("name","Поставщик закупки","active",true)).id();
+        var quote=new HashMap<String,Object>(Map.of("productId",p,"supplierId",supplier,"unitCost",800,"minimumQuantity",2,"leadDays",3,"quotedOn",LocalDate.now().toString(),"validUntil",LocalDate.now().plusDays(7).toString(),"informationConfirmed",false));
+        long q=call("POST",path+"/quotes",admin,quote).id();assertThat(call("POST",path,admin,Map.of("quoteId",q,"quantity",4,"reason","Поставка")).status).isEqualTo(409);
+        quote.put("informationConfirmed",true);q=call("POST",path+"/quotes",admin,quote).id();var draft=call("POST",path,admin,Map.of("quoteId",q,"quantity",4,"reason","Реальная проверка склада"));assertThat(draft.status).as(draft.raw).isEqualTo(200);long id=draft.id();
+        var receipt=Map.of("requestKey",UUID.randomUUID().toString(),"quantity",2,"lotNumber","PO-PART-1","receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(14).toString());
+        assertThat(call("POST",path+"/"+id+"/receive",admin,receipt).status).isEqualTo(409);
+        assertThat(call("POST",path+"/"+id+"/approve",admin,Map.of("reason","Сверены условия")).status).isEqualTo(200);
+        long r=call("POST",path+"/"+id+"/receive",admin,receipt).id();assertThat(call("POST",path+"/"+id+"/receive",admin,receipt).id()).isEqualTo(r);
+        assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);assertThat(purchaseRequests.findById(id).orElseThrow().status).isEqualTo("PART_RECEIVED");
+        assertThat(call("POST",path+"/"+id+"/cancel",admin,Map.of("reason","Отмена непринятого остатка")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);
+        assertThat(call("GET",path,user,null).status).isEqualTo(403);
+    }
+    @Test void centralStopRevokesExternalAiWhilePricingStopPreservesManualConsent()throws Exception {
+        enableDecisionAi();var p=smartSettings.findById(1L).orElseThrow();p.publicAssistantAiEnabled=true;smartSettings.saveAndFlush(p);
+        managerStore.stopPricing();assertThat(smartSettings.findById(1L).orElseThrow().externalAiEnabled).isTrue();
+        managerStore.stop();p=smartSettings.findById(1L).orElseThrow();assertThat(p.externalAiEnabled).isFalse();assertThat(p.publicAssistantAiEnabled).isFalse();assertThat(p.scheduledAiEnabled).isFalse();
+    }
+    @Test void supplierPriceChangeRequiresNewPurchaseApproval()throws Exception {
+        long p=product(),supplier=call("POST",base+"/suppliers",admin,Map.of("name","Изменившиеся условия","active",true)).id();
+        var q=purchaseService.quote(p,supplier,new java.math.BigDecimal("800"),1,2,LocalDate.now(),LocalDate.now().plusDays(7),true);
+        var draft=purchaseService.create(q.id,2,"Проверка цены");purchaseService.quote(p,supplier,new java.math.BigDecimal("900"),1,2,LocalDate.now(),LocalDate.now().plusDays(7),true);
+        assertThatThrownBy(()->purchaseService.approve(draft.id,"Подтверждение")).isInstanceOf(IllegalStateException.class);assertThat(purchaseRequests.findById(draft.id).orElseThrow().status).isEqualTo("DRAFT");
+    }
+    @Test void managerPurchaseDraftUsesBudgetAndNeverPlacesExternalOrder()throws Exception {
+        managerStates.deleteAll();var state=new AiManagerState();state.purchaseDrafts=true;state.dailyDraftBudget=new java.math.BigDecimal("1000");managerStates.saveAndFlush(state);
+        long p=product(),supplier=call("POST",base+"/suppliers",admin,Map.of("name","Поставщик менеджера","active",true)).id();
+        call("POST",base+"/purchases/quotes",admin,Map.of("productId",p,"supplierId",supplier,"unitCost",800,"minimumQuantity",1,"leadDays",1,"quotedOn",LocalDate.now().toString(),"validUntil",LocalDate.now().plusDays(7).toString(),"informationConfirmed",true));
+        var claim=managerStore.claim(true);
+        assertThat(claim).isNotNull();
+        // The budget must reject 2 x 800 and allow exactly one internal draft.
+        assertThat(purchaseService.prepare(claim.lease(),p,2)).containsEntry("status","DRAFT_BUDGET");
+        var draft=purchaseService.prepare(claim.lease(),p,1);assertThat(draft).containsEntry("status","DRAFT");assertThat(purchaseService.prepare(claim.lease(),p,1)).containsEntry("status","EXISTS");
+        var row=purchaseRequests.findById(((Number)draft.get("id")).longValue()).orElseThrow();assertThat(row.status).isEqualTo("DRAFT");assertThat(row.receivedQuantity).isZero();assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();purchaseService.cancel(row.id,"Завершение изолированного теста");managerStore.stop();
+    }
+    @Test void posConcurrentRetryCreatesOneSaleAndQuarantineReturnDoesNotRestock()throws Exception {
+        long p=product();lot(p,"POS",4,10);String key=UUID.randomUUID().toString();var body=Map.of("requestKey",key,"lines",List.of(Map.of("productId",p,"quantity",2,"expectedPrice",1000)));
+        var pool=Executors.newFixedThreadPool(2);Reply first,second;try{var a=pool.submit(()->call("POST",base+"/pos/sales",admin,body));var b=pool.submit(()->call("POST",base+"/pos/sales",admin,body));first=a.get();second=b.get();}finally{pool.shutdownNow();}
+        assertThat(first.status).as(first.raw).isEqualTo(200);assertThat(second.status).as(second.raw).isEqualTo(200);
+        var r=(Map<?,?>)first.body.get("receipt");assertThat(((Map<?,?>)second.body.get("receipt")).get("id")).isEqualTo(r.get("id"));assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);
+        long receipt=((Number)r.get("id")).longValue();assertThat(call("POST",base+"/pos/"+receipt+"/return",admin,Map.of("reason","Полный возврат в карантин")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);
+        assertThat(orders.findById(((Number)r.get("orderId")).longValue()).orElseThrow().getStatus()).isEqualTo("RETURNED");
+        assertThat(call("POST",base+"/pos/sales",user,body).status).isEqualTo(403);
+        assertThat(call("POST",base+"/pos/sales",admin,Map.of("requestKey",key,"lines",List.of(Map.of("productId",p,"quantity",1,"expectedPrice",1000)))).status).isEqualTo(409);
+    }
+    @Test void posRejectsStalePricesAndInsufficientStockWithoutPartialConsumption()throws Exception {
+        long p=product();lot(p,"POS-STALE",2,5);var body=Map.of("requestKey",UUID.randomUUID().toString(),"lines",List.of(Map.of("productId",p,"quantity",1,"expectedPrice",950)));
+        assertThat(call("POST",base+"/pos/sales",admin,body).status).isEqualTo(409);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);
+        assertThat(call("POST",base+"/pos/sales",admin,Map.of("requestKey",UUID.randomUUID().toString(),"lines",List.of(Map.of("productId",p,"quantity",3,"expectedPrice",1000)))).status).isEqualTo(409);
+        assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(2);
+    }
+    @Test void structuredMovementLedgerBalancesAndRecordsActualWriteOffCost()throws Exception {
+        long p=product();long l=lot(p,"LEDGER",4,10).id();long o=order(p,1);assertThat(call("PUT",base+"/orders/"+o+"/status",admin,Map.of("status","CANCELLED","reason","Возврат нового заказа")).status).isEqualTo(200);
+        assertThat(call("DELETE",base+"/lots/"+l,admin,Map.of("reason","Фактическое списание")).status).isEqualTo(200);
+        var result=call("GET",base+"/movements?productId="+p,admin,null);assertThat(result.status).as(result.raw).isEqualTo(200);assertThat(((Number)result.body.get("writtenOffUnits30")).intValue()).isEqualTo(4);assertThat(new java.math.BigDecimal(result.body.get("recordedWriteOffCost30").toString())).isEqualByComparingTo("3200");
+        var rows=(List<Map<String,Object>>)((Map<?,?>)result.body.get("movements")).get("content");assertThat(rows.stream().mapToInt(r->((Number)r.get("quantityDelta")).intValue()).sum()).isZero();assertThat(rows).anyMatch(r->"ORDER_RETURN".equals(r.get("type")));
+        assertThat(call("GET",base+"/movements",user,null).status).isEqualTo(403);
+    }
+    @Test void expiredManagerLeaseCannotApplyOtherwiseValidAiChoice()throws Exception {
+        managerStates.deleteAll();var state=new AiManagerState();state.mode="AUTOPILOT";state.automaticAiConsent=true;managerStates.saveAndFlush(state);
+        long p=statisticalPricingProduct(true);long d=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();enableDecisionAi();var settings=smartSettings.findById(1L).orElseThrow();settings.mode="AUTOPILOT";settings.maximumDiscount=10;settings.allowedCategoriesJson="[\"продукты\"]";smartSettings.saveAndFlush(settings);
+        var lease=managerStore.claim(true);var claim=smartPricing.claimAi(d,false);var expired=managerStates.findById(1L).orElseThrow();expired.leaseUntil=java.time.LocalDateTime.now().minusSeconds(1);managerStates.saveAndFlush(expired);
+        var answer=new HashMap<>(aiReply(5));answer.put("requiresConfirmation",false);answer.put("strategy","PRICE");
+        assertThatThrownBy(()->smartPricing.completeAiFromManager(lease.lease(),claim,answer,true)).isInstanceOf(IllegalStateException.class);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();managerStore.stop();
+    }
     @Test void registrationRequiresSingleUseCaptchaAndDoesNotAllowRoleEscalation()throws Exception {
         String email="new-"+UUID.randomUUID()+"@test.local";
         Map<String,Object> input=new HashMap<>(Map.of("email",email,"password","securePassword123","fullName","Покупатель","role","ADMIN"));
@@ -406,6 +508,10 @@ class ControlIntegrationTest {
         approval.put("suitabilityConfirmed",false);assertThat(call("POST",path+"/"+proposal.id()+"/approve",admin,approval).status).isEqualTo(400);approval.put("suitabilityConfirmed",true);
         var approved=call("POST",path+"/"+proposal.id()+"/approve",admin,approval);assertThat(approved.status).as(approved.raw).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.RESERVED);
         assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);long offer=((Number)approved.body.get("offerId")).longValue();
+          long assignee=users.findAll().stream().filter(u->u.getRole()==Role.ADMIN).findFirst().orElseThrow().getId();
+          var plan=new HashMap<String,Object>(Map.of("version",socialProposals.findById(proposal.id()).orElseThrow().version,"assigneeId",assignee,"plannedAt",java.time.LocalDateTime.now().plusHours(1).withSecond(0).withNano(0).toString(),"status","IN_TRANSIT","reason","Проверка логистики"));
+          assertThat(call("PUT",path+"/"+proposal.id()+"/logistics",admin,plan).status).isEqualTo(409);plan.put("status","SCHEDULED");
+          var scheduled=call("PUT",path+"/"+proposal.id()+"/logistics",admin,plan);assertThat(scheduled.status).as(scheduled.raw).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
           assertThat(call("GET","/api/aria/reports/social.csv",admin,null).raw).doesNotContain(products.findById(p).orElseThrow().getSku());
         assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Фактическая выдача подтверждена")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(5);
         assertThat(call("GET",path,admin,null).raw).contains("TRANSFERRED");

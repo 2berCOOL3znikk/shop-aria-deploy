@@ -19,6 +19,8 @@ public interface ProductRepository extends JpaRepository<Product, Long> {
     java.util.Optional<Product> lockById(@Param("id") Long id);
 
     List<Product> findByStatus(ProductStatus status);
+    List<Product> findByArchivedFalseAndStatusInAndIdGreaterThanOrderByIdAsc(
+        java.util.Collection<ProductStatus> statuses,Long cursor,org.springframework.data.domain.Pageable page);
 
     // НОВЫЙ МЕТОД ПОИСКА
     @Query("SELECT p FROM Product p WHERE LOWER(p.name) LIKE LOWER(CONCAT('%', :query, '%')) OR LOWER(p.category) LIKE LOWER(CONCAT('%', :query, '%'))")

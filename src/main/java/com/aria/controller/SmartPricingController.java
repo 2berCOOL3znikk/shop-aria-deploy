@@ -8,8 +8,8 @@ import java.util.*;
 
 @RestController @RequestMapping("/api/admin/control/smart-pricing")
 public class SmartPricingController {
-    private final SmartPricingService smart;private final IntelligenceService intelligence;
-    public SmartPricingController(SmartPricingService smart,IntelligenceService intelligence){this.smart=smart;this.intelligence=intelligence;}
+    private final SmartPricingService smart;private final IntelligenceService intelligence;private final AiManagerService manager;
+    public SmartPricingController(SmartPricingService smart,IntelligenceService intelligence,AiManagerService manager){this.smart=smart;this.intelligence=intelligence;this.manager=manager;}
     public record Approval(@Min(0) @Max(90) Integer percent,@NotBlank @Size(max=900) String reason){}
     public record SettingsInput(Long version,@NotBlank @Pattern(regexp="RECOMMEND|AUTOPILOT") String mode,
         @Min(0) @Max(90) int maximumDiscount,@Min(1) @Max(720) int cooldownHours,
@@ -18,7 +18,7 @@ public class SmartPricingController {
         Boolean publicAssistantAiEnabled,@Min(1) @Max(20) Integer publicAiDailyBudget){}
     @GetMapping("/settings") public Map<String,Object> settings(){return smart.settings();}
     @PutMapping("/settings") public Map<String,Object> configure(@Valid @RequestBody SettingsInput input){return smart.configure(input);}
-    @PostMapping("/stop") public Map<String,Object> stop(){return smart.stop();}
+    @PostMapping("/stop") public Map<String,Object> stop(){manager.stopPricing();return smart.settings();}
     @GetMapping public Map<String,Object> list(@RequestParam(defaultValue="0") int page,@RequestParam(defaultValue="25") int size){return smart.list(page,size);}
     @PostMapping("/analyze") public Map<String,Object> analyze(@RequestParam(defaultValue="false") boolean onlyDue){return smart.analyzeAll(onlyDue);}
     @PostMapping("/products/{id}/analyze") public Map<String,Object> product(@PathVariable Long id){return smart.analyze(id);}

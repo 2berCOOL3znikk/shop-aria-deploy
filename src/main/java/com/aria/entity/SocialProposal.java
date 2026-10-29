@@ -15,5 +15,8 @@ public class SocialProposal {
     public Long organizationId;
     public Long offerId;
     public LocalDateTime approvedAt;
+    public Long assigneeId;
+    public LocalDateTime plannedAt;
+    @Column(nullable=false,length=20,columnDefinition="varchar(20) default 'UNPLANNED'") public String logisticsStatus="UNPLANNED";
     @Column(length=255) public String approvedBy;
 }

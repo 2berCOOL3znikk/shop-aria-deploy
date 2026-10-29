@@ -16,6 +16,12 @@ import org.springframework.http.HttpStatus;
 @Service
 @Transactional
 public class InventoryService {
+    @org.springframework.beans.factory.annotation.Autowired private com.aria.repository.InventoryMovementRepository movements;
+    public void movement(InventoryLot lot,int delta,int quarantine,String type,String reason){
+        var row=new com.aria.entity.InventoryMovement();row.productId=lot.getProduct().getId();row.lotId=lot.getId();row.quantityDelta=delta;row.quarantineUnits=quarantine;row.unitCost=lot.getUnitCost();row.type=type;row.reason=reason.length()>1000?reason.substring(0,1000):reason;
+        if("INITIAL_BALANCE".equals(type)&&lot.getProduct().getUnitCost()==null||lot.getLotNumber().startsWith("INITIAL-")&&movements.findFirstByLotIdAndTypeOrderByIdAsc(lot.getId(),"INITIAL_BALANCE").map(m->m.unitCost==null).orElse(false))row.unitCost=null;
+        var auth=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();row.actor=auth==null?"system":auth.getName();movements.save(row);
+    }
     @jakarta.persistence.PersistenceContext
     private jakarta.persistence.EntityManager entityManager;
     private final ProductRepository products;
@@ -36,7 +42,7 @@ public class InventoryService {
         InventoryLot lot=new InventoryLot(); lot.setProduct(p); lot.setLotNumber("INITIAL-"+p.getId());
         lot.setReceivedAt(p.getReceivedAt()); lot.setExpiryDate(p.getExpiryDate());
         lot.setQuantity(p.getQuantityOnHand()); lot.setInitialQuantity(p.getQuantityOnHand());
-        lot.setUnitCost(p.getUnitCost()==null?BigDecimal.ZERO:p.getUnitCost()); lots.save(lot);
+        lot.setUnitCost(p.getUnitCost()==null?BigDecimal.ZERO:p.getUnitCost()); lots.saveAndFlush(lot);movement(lot,lot.getQuantity(),0,"INITIAL_BALANCE","Начальный остаток при подключении учёта; более ранние движения не восстановлены");
     }
     public boolean usable(InventoryLot lot) {
         return lot.getActive() && lot.getQuantity()>0 && (lot.getExpiryDate()==null || !lot.getExpiryDate().isBefore(LocalDate.now()));
@@ -82,8 +88,9 @@ public class InventoryService {
         lot.setProduct(p); lot.setLotNumber(input.lotNumber().trim()); lot.setReceivedAt(input.receivedAt());
         lot.setManufacturedAt(input.manufacturedAt()); lot.setExpiryDate(input.expiryDate());
         lot.setSupplier(input.supplierId()==null?null:suppliers.findById(input.supplierId()).filter(Supplier::getActive).orElseThrow(()->new IllegalArgumentException("Выберите действующего поставщика")));
+        int oldQuantity=id==null?0:lot.getQuantity();
         lot.setInitialQuantity(input.quantity()); lot.setQuantity(input.quantity()); lot.setUnitCost(input.unitCost());
-        lots.saveAndFlush(lot); synchronize(p);
+        lots.saveAndFlush(lot);movement(lot,input.quantity()-oldQuantity,0,id==null?"RECEIPT":"RECEIPT_CORRECTION",lot.getLotNumber()); synchronize(p);
         if(p.getDiscountPercent()!=null && p.getDiscountPercent()>0) pricing.validate(p,p.getDiscountPercent());
         audit.record(id==null?"LOT_RECEIVED":"LOT_UPDATED","lot:"+lot.getId(),lot.getLotNumber()+" · "+input.quantity()+" ед."); return lot;
     }
@@ -96,13 +103,13 @@ public class InventoryService {
         int remaining=quantity;
         List<Consumption> consumed=new ArrayList<>();
         for (InventoryLot lot:rows) { int used=Math.min(remaining,lot.getQuantity()); if(used==0) continue; lot.setQuantity(lot.getQuantity()-used);remaining-=used;
-            consumed.add(new Consumption(lot,used)); audit.record(operation,"lot:"+lot.getId(),"Товар "+p.getSku()+" · списано "+used+" ед."); }
+            consumed.add(new Consumption(lot,used));movement(lot,-used,0,operation,"Товар "+p.getSku()); audit.record(operation,"lot:"+lot.getId(),"Товар "+p.getSku()+" · списано "+used+" ед."); }
         lots.saveAllAndFlush(rows); synchronize(p);
         return consumed;
     }
     public void restore(InventoryLot lot,int quantity) {
         Product p=lock(lot.getProduct().getId());entityManager.refresh(lot);lot.setQuantity(Math.addExact(lot.getQuantity(),quantity));
-        lots.saveAndFlush(lot);synchronize(p);audit.record("ORDER_STOCK_RETURNED","lot:"+lot.getId(),"Возвращено "+quantity+" ед. Пригодность и архив проверяются отдельно");
+        lots.saveAndFlush(lot);movement(lot,quantity,0,"ORDER_RETURN","Отмена нового заказа; пригодность вычисляется отдельно");synchronize(p);audit.record("ORDER_STOCK_RETURNED","lot:"+lot.getId(),"Возвращено "+quantity+" ед. Пригодность и архив проверяются отдельно");
     }
     public void writeOff(Long id,String reason) {
         InventoryLot lot=lots.findById(id).orElseThrow(()->new ResponseStatusException(HttpStatus.NOT_FOUND,"Партия не найдена"));
@@ -111,11 +118,12 @@ public class InventoryService {
         if (p.getStatus()==ProductStatus.SOCIAL || p.getStatus()==ProductStatus.RESERVED) throw new IllegalStateException("Сначала завершите или отмените социальный резерв");
         if (!lot.getActive() || lot.getQuantity()==0) throw new IllegalStateException("Партия уже закрыта или израсходована");
         audit.record("LOT_WRITTEN_OFF","lot:"+id,"Количество: "+lot.getQuantity()+". Причина: "+reason);
+        movement(lot,-lot.getQuantity(),0,"WRITE_OFF",reason);
         lot.setQuantity(0);lot.setActive(false);lots.saveAndFlush(lot);synchronize(p);
     }
     public void writeOffAll(Product p,String reason) {
         ensureLegacyLot(p);
-        for (InventoryLot lot:lots.findByProductId(p.getId())) {lot.setQuantity(0);lot.setActive(false);}
+        for (InventoryLot lot:lots.findByProductId(p.getId())) {if(lot.getQuantity()>0)movement(lot,-lot.getQuantity(),0,"WRITE_OFF",reason);lot.setQuantity(0);lot.setActive(false);}
         p.setQuantityOnHand(0);audit.record("PRODUCT_WRITTEN_OFF","product:"+p.getId(),reason);
     }
 }
