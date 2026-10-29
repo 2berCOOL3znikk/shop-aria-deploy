@@ -22,7 +22,7 @@ const stamp=Date.now(),expiry=n=>new Date(Date.now()+n*86400000).toLocaleDateStr
   const create=async(sku,name,days,barcode)=>{
    await tab('products');await p.locator('[data-action=product-new]').click();await p.locator('[name=sku]').fill(sku);await p.locator('[name=name]').fill(name);await p.locator('[name=unitPrice]').fill('1000');await p.locator('[name=minimumPrice]').fill('650');await p.locator('[name=barcode]').fill(barcode||'');await save();
    const product=(await api('GET','/api/admin/control/products',null,token)).find(x=>x.sku===sku);assert.ok(product);
-   await p.locator('[data-action=lot-new][data-id="'+product.id+'"]').click();await p.locator('[name=lotNumber]').fill('E2E-'+sku);await p.locator('[name=quantity]').fill('12');await p.locator('[name=unitCost]').fill('600');await p.locator('[name=expiryDate]').fill(expiry(days));await save();return product;
+   await p.locator('[data-action=lot-new][data-id="'+product.id+'"]').click();await p.locator('[name=lotNumber]').fill('E2E-'+sku);await p.locator('[name=quantity]').fill('12');await p.locator('[name=unitCost]').fill('600');if(days<3)await p.locator('[name=receivedAt]').fill(expiry(-10));await p.locator('[name=expiryDate]').fill(expiry(days));await save();return product;
   };
   const coffee=await create('E2E-COFFEE-'+stamp,'Кофе — сквозная проверка '+stamp,20,'4006381333931');
   const yoghurt=await create('E2E-YOGHURT-'+stamp,'Йогурт — социальная проверка '+stamp,2,'');
@@ -35,7 +35,7 @@ const stamp=Date.now(),expiry=n=>new Date(Date.now()+n*86400000).toLocaleDateStr
   fs.mkdirSync('target/e2e',{recursive:true});fs.writeFileSync('target/e2e/competitors.csv',csv);await p.locator('[name=file]').setInputFiles('target/e2e/competitors.csv');await p.locator('[name=identityConfirmed]').check();await save();await p.locator('#competitor-product').selectOption(String(coffee.id));await p.waitForFunction(()=>document.getElementById('competitor-result').textContent.includes('950'));
   assert.equal((await api('GET','/api/admin/control/competitors/products/'+coffee.id,null,token)).comparison.offers.length,1);
   report.checks.push('Actual CSV file imported and matched by SKU, GTIN and unit; no scraped or invented live-market claims');
-  await tab('smart');await p.waitForSelector('.smart-card');await p.locator('[data-smart=settings]').click();await p.locator('[name=externalAiEnabled]').check();await p.locator('[name=publicAssistantAiEnabled]').check();await p.locator('[name=aiDailyBudget]').fill('10');await p.locator('[name=publicAiDailyBudget]').fill('10');await save();
+  await tab('smart');await p.waitForSelector('.smart-card');await p.locator('[data-smart=settings]').click();await p.locator('[name=externalAiEnabled]').check();await p.locator('[name=publicAssistantAiEnabled]').check();await p.locator('[name=aiDailyBudget]').fill(process.env.ARIA_E2E_AI_BUDGET||'10');await p.locator('[name=publicAiDailyBudget]').fill('10');await save();
   let card=p.locator('.smart-card').filter({has:p.locator('h2',{hasText:coffee.name})});
   const aiReply=p.waitForResponse(r=>r.url().endsWith('/ai-decide'));await card.locator('[data-smart=ai-decide]').click();const decision=await (await aiReply).json();
   report.ai.push({kind:'private-pricing',source:decision.source,strategy:decision.strategy,percent:decision.selectedPercent,model:decision.explanation?.model,note:decision.explanation?.note});

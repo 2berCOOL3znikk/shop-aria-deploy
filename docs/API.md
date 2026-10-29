@@ -70,3 +70,16 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 Интеграции: GET `/api/admin/control/integrations`; POST `/integrations/poster/prepare` {sale:{requestKey,lines},productIds:{внутреннийId:PosterId}} → только несохранённый план, sent=false/fiscal=false. Нет внешнего HTTP-запроса или списания.
 
 Политика и проверка функций: [AUTONOMOUS_MANAGER.md](AUTONOMOUS_MANAGER.md).
+
+## Автономная платформа V17–V18
+
+Все пути ниже требуют ADMIN, префикс `/api/admin/control`.
+
+- GET `/manager/center`: реальные показатели, сохранённые исполнения/очередь, исключения и последние решения. Ограниченные списки не считаются полной историей.
+- POST `/manager/tasks/{id}/retry` `{reason}`: повтор после ошибки, с журналом и сохранением политики/лимитов. Самостоятельно не разрешает AI/цену.
+- GET `/smart-pricing/{id}`: конкретное сохранённое решение. UI: `/control.html?decision=ID#smart`.
+- PUT `/lots/{id}/handling`: `{revision,requirements,status,informationConfirmed,reason}`; status UNKNOWN/CONFIRMED/REJECTED. Несовпадение revision → 409, отсутствие подтверждения для CONFIRMED/REJECTED → отказ. REJECTED исключает запас из продажи.
+
+Расчёт Smart Pricing содержит `planning`: observationDays, forecastDays, clearanceDays, nearestExpiryDays, reviewAfterHours, basis. Аналитика прогноза: expectedUnits и horizonDays; старое JSON-поле units14 заполнено только при horizonDays=14. Нельзя интерпретировать срок прогноза как дату годности.
+
+Изменения складских/ценовых данных и запись задачи выполняются одной транзакцией. Ошибка откатывает и данные, и новую задачу. Перезапуск сохраняет dueAt/generation/attempts; истёкшая аренда возвращает работу, устаревший исполнитель не может применить цену.

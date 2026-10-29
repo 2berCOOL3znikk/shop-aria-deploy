@@ -53,8 +53,8 @@ fs.mkdirSync('target/e2e',{recursive:true});
   await api('POST',control+'/purchases/quotes',{productId:autoProduct.id,supplierId:supplier.id,unitCost:800,minimumQuantity:1,leadDays:2,quotedOn:date(0),validUntil:date(7),informationConfirmed:true});
   report.checks.push('UI: barcode POS, single sale on double click, FEFO stock, quarantine return, movements, camera fallback and honest disconnected integrations');
   // Enable private consent through its actual visible form. No key is put in the browser.
-  await tab('smart');await p.locator('[data-smart=settings]').click();await p.locator('[name=externalAiEnabled]').check();await p.locator('[name=aiDailyBudget]').fill('10');await save();
-  await tab('manager');await p.locator('[data-manager=settings]').click();await p.locator('[name=mode]').selectOption('ADVISOR');await p.locator('[name=automaticAiConsent]').check();await p.locator('[name=purchaseDrafts]').check();await p.locator('[name=dailyDraftBudget]').fill('100000');await save();
+  await tab('smart');await p.locator('[data-smart=settings]').click();await p.locator('[name=externalAiEnabled]').check();await p.locator('[name=aiDailyBudget]').fill(process.env.ARIA_E2E_AI_BUDGET||'10');await save();
+  await tab('manager');await p.locator('[data-manager=settings]').first().click();await p.locator('[name=mode]').selectOption('ADVISOR');await p.locator('[name=automaticAiConsent]').check();await p.locator('[name=purchaseDrafts]').check();await p.locator('[name=dailyDraftBudget]').fill('100000');await save();
   // A normal storefront read wakes the activity-driven cycle. No manual /manager/run here.
   await p.goto(base+'/index.html');await p.waitForSelector('#aria-install');
   const started=Date.now();let state,run;

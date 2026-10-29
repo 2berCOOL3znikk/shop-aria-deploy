@@ -5,7 +5,7 @@ $pidFile=Join-Path $preview 'app.pid'
 if(Test-Path -LiteralPath $pidFile){
     $previewPid=[int](Get-Content -LiteralPath $pidFile)
     $process=Get-CimInstance Win32_Process -Filter "ProcessId=$previewPid"
-    if($process){if(!$process.CommandLine.Contains((Join-Path $preview 'app.jar'))){throw 'PID belongs to another process; nothing stopped'};Stop-Process -Id $previewPid;Wait-Process -Id $previewPid -ErrorAction SilentlyContinue}
+    if($process){if(!$process.CommandLine -or !$process.CommandLine.Contains((Join-Path $preview 'app.jar'))){$previewConfig=Get-Content -LiteralPath (Join-Path $preview 'config.json') -Raw|ConvertFrom-Json;if(Get-NetTCPConnection -LocalPort $previewConfig.port -State Listen -ErrorAction SilentlyContinue){throw 'Stale PID and occupied preview port; no process or database stopped'};Write-Output 'Stale preview PID ignored; unrelated process was preserved'}else{Stop-Process -Id $previewPid;Wait-Process -Id $previewPid -ErrorAction SilentlyContinue}}
     Remove-Item -LiteralPath $pidFile
 }
 $cluster=Join-Path $preview 'postgres'

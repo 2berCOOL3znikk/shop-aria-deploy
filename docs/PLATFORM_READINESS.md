@@ -1,5 +1,7 @@
 # Проверенная платформа ARIA — 29.10.2026
 
+Это сохранённый отчёт этапа af2b115. Последующие изменения и проверки автономной платформы: [AUTONOMOUS_READINESS.md](AUTONOMOUS_READINESS.md); текущая архитектура: [AUTONOMOUS_PLATFORM.md](AUTONOMOUS_PLATFORM.md).
+
 Работа продолжена в `codex/production-foundation`. Прежние модули Smart Pricing, AI Decision, Competitor CSV, ARIA Social и Customer Assistant сохранены. Новые операции используют их существующие ограничения, партии, заказы, авторизацию и журнал. Основной Render, Neon и ветка main не переключались.
 
 ## Открыть
