@@ -97,6 +97,7 @@ let deliveryAddress = '';
             });
             const data = await cartResponse(res);
             window.showToast('Заказ #' + data.id + ' принят. Статус: ' + data.status);
+            window.dispatchEvent(new Event('aria:order-recorded'));
             items = [];
             render();
             await loadCartCount();

@@ -61,7 +61,7 @@ window.ariaAuth = {
     requireLogin: function(redirect = true) {
         if (!this.isLoggedIn()) {
             if (redirect) {
-                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search);
+                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
             }
             return false;
         }
@@ -71,7 +71,7 @@ window.ariaAuth = {
     requireAdmin: function(redirect = true) {
         if (this.getRole() !== 'ADMIN') {
             if (redirect && !this.isLoggedIn()) {
-                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search);
+                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
                 return false;
             }
             if (typeof showToast === 'function') {

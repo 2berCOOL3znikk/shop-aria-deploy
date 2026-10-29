@@ -79,7 +79,7 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                 '<div class="glass-card" style="padding:16px;margin-bottom:15px;">' +
                 '<div style="display:flex;justify-content:space-between;margin-bottom:10px;">' +
                 '<strong><span data-i18n="profile.orderNum">Заказ #</span>' + o.id + '</strong>' +
-                '<span style="color:var(--accent-green);">' + ({PENDING:'Новый',SHIPPED:'Отправлен',DELIVERED:'Доставлен',CANCELLED:'Отменён'}[o.status] || o.status) + '</span>' +
+                '<span style="color:var(--accent-green);">' + ({PENDING:'Новый',SHIPPED:'Отправлен',DELIVERED:'Доставлен',RETURNED:'Возврат в карантин',CANCELLED:'Отменён'}[o.status] || o.status) + '</span>' +
                 '</div>' +
                 '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString('ru-RU') + '</div>' +
                 '<div style="margin-bottom:10px;">' + o.items.map(i => ariaEscape(i.productName) + ' × ' + i.quantity).join(', ') + '</div>' +

@@ -1,0 +1,8 @@
+{
+ "id":"/", "name":"ARIA Shop & Control", "short_name":"ARIA", "lang":"ru",
+ "description":"Магазин, управление остатками и ARIA AI Manager",
+ "start_url":"/index.html", "scope":"/", "display":"standalone",
+ "background_color":"#101418", "theme_color":"#101418",
+ "icons":[{"src":"/images/aria-app-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},{"src":"/images/aria-app-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"},{"src":"/images/aria-app.svg","sizes":"any","type":"image/svg+xml","purpose":"any"}],
+ "shortcuts":[{"name":"Каталог","url":"/index.html"},{"name":"Мои заказы","url":"/profile.html"},{"name":"ARIA AI Manager","url":"/control.html#manager"}]
+}
