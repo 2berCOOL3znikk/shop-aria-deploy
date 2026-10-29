@@ -641,6 +641,14 @@ class ControlIntegrationTest {
         assertThat(call("POST",path+"/stop",user,null).status).isEqualTo(403);
         assertThat(call("PUT",path+"/settings",user,config.body).status).isEqualTo(403);
     }
+    @Test void connectedDemoStoreWorksAndDisconnectIsVersionProtected()throws Exception {
+        var made=call("POST",base+"/stores",admin,Map.of("name","Мой демо-магазин","platform","ARIA_DEMO","url",""));assertThat(made.status).as(made.raw).isEqualTo(200);long id=made.id();
+        assertThat(call("GET",base+"/stores",user,null).status).isEqualTo(403);
+        assertThat(call("GET",base+"/stores/"+id+"/catalog",admin,null).status).isEqualTo(200);
+        var synced=call("POST",base+"/stores/"+id+"/sync",admin,Map.of("version",made.body.get("version")));assertThat(synced.body.get("status")).isEqualTo("CONNECTED");
+        var stopped=call("POST",base+"/stores/"+id+"/disconnect",admin,Map.of("version",synced.body.get("version")));assertThat(stopped.body.get("status")).isEqualTo("DISCONNECTED");
+        assertThat(call("POST",base+"/stores/"+id+"/sync",admin,Map.of("version",made.body.get("version"))).status).isEqualTo(409);
+    }
     @Test void soldOutDiscountCanBeClearedWithoutMakingExpiredStockSellable()throws Exception {
         long p=product();lot(p,"EMPTY",1,5);assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",20,"reason","Срок")).status).isEqualTo(200);
         order(p,1);assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();

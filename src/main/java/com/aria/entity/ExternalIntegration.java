@@ -11,4 +11,5 @@ public class ExternalIntegration {
  @Column(nullable=false,length=30) public String status="NOT_CONNECTED";
  @Column(name="credential_reference",length=200) public String credentialReference;
  @Version public long version;
+ @com.fasterxml.jackson.annotation.JsonIgnore @Column(length=4000) public String encryptedCredentials;
 }
