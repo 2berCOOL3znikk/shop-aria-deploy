@@ -1,0 +1,11 @@
+# Промпт для продолжения
+
+Продолжай ARIA в `codex/production-foundation`. Сначала прочитай `docs/B2B_STAGE2.md`, `docs/B2B_TRANSITION.md` и git log/status. Не повторяй готовые silo tenancy V19, SaaS workspace/stores UI и V20. Сохрани витрину и старые модули. Главная: `/control.html#workspace`, магазины: `#stores`.
+
+Уже есть ConnectedStoresService/Controller, IntegrationVault, WooCommerceReader, StoreSnapshot, stores.js/saas.css и scripts/stores-e2e.cjs. WooCommerce сейчас читает только простые продукты, сохраняет их отдельно; внешняя запись/AI пока запрещены. Есть серверный allowlist доменов, шифрование, версии, аудит и отключение. `.env.integrations.local` и `.env.openrouter.local` исключены из Git: не выводи значения и не создавай новые ключи поверх существующих.
+
+Приоритет: завершить read-only коннектор — вариации и заказы без PII, currency, контроль размера/сроков, sync journal с checkpoint/повторами и stale conflicts; подписанная постоянная webhook inbox. Получить/подготовить настоящее тестовое WooCommerce-окружение без платных сервисов. HTTP mocks не считать внешним E2E.
+
+Затем отдельный контролируемый pipeline внешних снимков к Smart Pricing с подтверждаемой себестоимостью/партиями, разрешениями и политиками именно магазина. Не вставляй отсутствующие сроки/закупку как факты и не смешивай внешние остатки с локальным POS/FEFO. Ценовые записи включать лишь после отдельных реальных E2E и согласия владельца. Защиту исходящих запросов дополнить egress/DNS pinning до production.
+
+Проверить UI создания компании через безопасный локальный provisioning, роли OWNER/STAFF и Impact opt-in. Продолжать монохромный B2B UX. Все доступные функции должны иметь работающий интерфейс. Повторить Java-тесты и stores-e2e; поправить прежние E2E для новой скрываемой навигации, затем проверить регрессии. Сохранять коммиты и push только рабочей ветки. Не менять main/production-базу/основной Render и не подключать платные ресурсы.

@@ -73,6 +73,8 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 
 ## Автономная платформа V17–V18
 
+Магазины V20 (ADMIN): GET/POST `/api/admin/control/stores`; PUT `/stores/business` `{name}`; PUT `/stores/{id}/credentials` `{version,key,secret}`; POST `/stores/{id}/check`, `/sync`, `/disconnect` `{version}`; GET `/stores/{id}/catalog`. `stores` — часть того же префикса `/api/admin/control`. Поддержаны ARIA_DEMO и read-only часть WOOCOMMERCE. Ошибка внешней проверки сохраняет статус ERROR и lastError, без ложного CONNECTED. После сохранения доступов клиент использует новую version. Ключи не возвращаются в API. Подробности: [B2B_STAGE2.md](B2B_STAGE2.md).
+
 Дополнение V19: GET `/api/admin/control/organization` (ADMIN) — несекретные metadata/binding текущего silo. Tenant не выбирается заголовком или параметром. В недемонстрационной организации все бизнес-API требуют ADMIN; публичная клиентская регистрация/каталог сохранены только для `demo`. См. [B2B_TRANSITION.md](B2B_TRANSITION.md).
 
 Все пути ниже требуют ADMIN, префикс `/api/admin/control`.
