@@ -1,0 +1,376 @@
+{
+  "date": "2026-10-29",
+  "timezone": "Asia/Qyzylorda",
+  "scope": "isolated local PostgreSQL only; production unchanged",
+  "junit": {
+    "tests": 104,
+    "failures": 0,
+    "errors": 0,
+    "skipped": 0
+  },
+  "postgresIntegrationScenarios": 43,
+  "migrationVersions": [
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9,
+    10,
+    11
+  ],
+  "browser": {
+    "at": "2026-10-29T12:57:23.393Z",
+    "base": "http://127.0.0.1:8084",
+    "checks": [
+      "Owner login, product and lot creation, persistent photo upload through UI",
+      "Actual CSV file imported and matched by SKU, GTIN and unit; no scraped or invented live-market claims",
+      "Real private AI, transparent source/model, server-validated administrator discount confirmation",
+      "Buyer registration/captcha, favourite, real discounted storefront, mobile cart, address preservation, failed removal, single checkout, FEFO stock consumption, shipment/delivery and profile error handling",
+      "Organization login/verification UI, eligibility, proposal without reserve, approved reserve, actual handover, stock and CSV/act downloads",
+      "Genuine public AI, budget constraint, explicit ENGINE comparison without consent, anonymous/buyer API denials"
+    ],
+    "ai": [
+      {
+        "kind": "private-pricing",
+        "source": "AI",
+        "strategy": "KEEP",
+        "percent": 0,
+        "model": "dots-studio/dots-3-note-preview:free",
+        "note": "AI выбрал допустимый сценарий. Ограничения и применение проверяются Java."
+      },
+      {
+        "kind": "customer",
+        "source": "AI",
+        "note": "Модель выбрала товары; цены и доступность проверены сервером по каталогу.",
+        "products": [
+          {
+            "id": 1,
+            "price": 950
+          },
+          {
+            "id": 8,
+            "price": 950
+          },
+          {
+            "id": 3,
+            "price": 1000
+          },
+          {
+            "id": 5,
+            "price": 1000
+          },
+          {
+            "id": 6,
+            "price": 1000
+          }
+        ]
+      }
+    ],
+    "errors": [],
+    "passed": true
+  },
+  "maintenance": {
+    "checks": [
+      "Supplier create/edit and linked-delete refusal; product create/edit; receive/edit lot and synchronized stock",
+      "Manual discount/reset, category policy override/reset, Smart Pricing approval/rollback, bounded autopilot settings and emergency stop",
+      "Lot write-off, product archive, isolated section failure and recovery",
+      "Support captcha retry retains message; real submission, admin inbox/resolve; catalogue search/no results/reset/sort, theme and language switches",
+      "All administrative sections plus legacy analyses/history; public routes, product alias/not-found, internal links, images and desktop/mobile widths"
+    ],
+    "pages": [
+      {
+        "path": "index.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "index.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "home.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "home.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "about.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "about.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "privacy.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "privacy.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "support.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "support.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "social.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "social.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "login.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "login.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "product.html?id=3",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "product.html?id=3",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "product-detail.html?id=3",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "product-detail.html?id=3",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "product.html?id=9999999",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "product.html?id=9999999",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "path": "404.html",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "path": "404.html",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "overview",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "overview",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "products",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "products",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "lots",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "lots",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "smart",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "smart",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "competitors",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "competitors",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "pricing",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "pricing",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "suppliers",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "suppliers",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "orders",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "orders",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "social",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "social",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "socialPlans",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "socialPlans",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "intelligence",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "intelligence",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "audit",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "audit",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "policies",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "policies",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "feedback",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "feedback",
+        "width": 390,
+        "passed": true
+      },
+      {
+        "tab": "guide",
+        "width": 1440,
+        "passed": true
+      },
+      {
+        "tab": "guide",
+        "width": 390,
+        "passed": true
+      }
+    ],
+    "errors": [],
+    "passed": true
+  },
+  "restore": {
+    "passed": true,
+    "tablesVerified": 31,
+    "sequencesMatched": true,
+    "migrationVersions": "1,2,3,4,5,6,7,8,9,10,11"
+  },
+  "render": {
+    "schemaValidated": true,
+    "plan": "free",
+    "paidResourcesCreated": false,
+    "cloudDeployExecuted": false
+  },
+  "limitations": [
+    "Free model responses are nondeterministic and may fail validation or time out; ENGINE fallback is explicitly labeled",
+    "No full production data backup or migration performed",
+    "Local PostgreSQL 18 tested; Neon PostgreSQL 17 main unchanged",
+    "Docker image and actual Render deployment not executed"
+  ],
+  "previewRestart": {
+    "windowsPowerShell5": true,
+    "passed": true,
+    "productsPreserved": 10,
+    "ordersPreserved": 2,
+    "photoPreserved": true,
+    "consentPreserved": true,
+    "freeScheduleDisabled": true
+  }
+}

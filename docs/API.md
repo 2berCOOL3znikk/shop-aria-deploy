@@ -53,3 +53,6 @@ Smart Pricing: [расчёты, RECOMMEND/AUTOPILOT, история, API и пр
 
 
 Продолжение ARIA AI: [активный выбор стратегии, согласие/лимиты, CSV конкурентов, социальные черновики и публичный помощник](SMART_PRICING.md). Миграции V8–V11 добавляют только новые поля/таблицы с безопасными значениями по умолчанию.
+
+
+Приёмка релиза 29.10.2026: `GET /api/aria/reports/social.csv` — ADMIN, только фактические выдачи социальной полки со снимками. Прежний `acts.csv` сохраняется для отдельных актов. `POST /api/profile` проверяет fullName≤100, phone≤50, address≤500; email всегда берётся из токена. `POST /api/reviews` требует положительный productId, непустой comment≤2000, author≤100 и rating 1–5 (по умолчанию 5). Неверный ввод — 400. `/api/admin/control/smart-pricing/ai-status` дополнительно возвращает `scheduledAvailable`: в Free-профиле false.
