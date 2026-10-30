@@ -10,10 +10,13 @@ import java.time.LocalDateTime;
 public class ConnectedStoresService {
  @org.springframework.beans.factory.annotation.Autowired private WooCatalogImporter importer;
  @org.springframework.beans.factory.annotation.Autowired private StoreSyncRunRepository syncRuns;
+ @org.springframework.beans.factory.annotation.Autowired private WooOrderImporter orderImporter;
+ @org.springframework.beans.factory.annotation.Autowired private StoreOrderSnapshotRepository externalOrders;
+ private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
  private final ConnectedStoreRepository stores;private final ExternalIntegrationRepository integrations;private final StoreSnapshotRepository snapshots;private final ProductRepository products;private final IntegrationVault vault;private final WooCommerceReader woo;private final jakarta.persistence.EntityManager em;private final AuditService audit;
  public ConnectedStoresService(ConnectedStoreRepository s,ExternalIntegrationRepository i,StoreSnapshotRepository p,ProductRepository products,IntegrationVault v,WooCommerceReader w,jakarta.persistence.EntityManager em,AuditService a){stores=s;integrations=i;snapshots=p;this.products=products;vault=v;woo=w;this.em=em;audit=a;}
  public Object list(){return Map.of("organization",em.find(Organization.class,1),"stores",stores.findAll(org.springframework.data.domain.Sort.by("id")).stream().map(this::view).toList(),"secureCredentials",vault.available());}
- private Map<String,Object> view(ConnectedStore s){var v=new LinkedHashMap<String,Object>();v.put("id",s.id);v.put("name",s.name);v.put("platform",s.platform);v.put("url",s.baseUrl);v.put("status",s.status);v.put("version",s.version);v.put("lastSync",s.lastSync);v.put("lastError",s.lastError);v.put("products",s.platform.equals("ARIA_DEMO")&&!s.status.equals("DISCONNECTED")?products.count():snapshots.countByStoreId(s.id));v.put("ai",s.platform.equals("ARIA_DEMO")?"Настраивается в ARIA AI":"Нужны данные о закупке и партиях");return v;}
+ private Map<String,Object> view(ConnectedStore s){var v=new LinkedHashMap<String,Object>();v.put("id",s.id);v.put("name",s.name);v.put("platform",s.platform);v.put("url",s.baseUrl);v.put("status",s.status);v.put("version",s.version);v.put("lastSync",s.lastSync);v.put("lastError",s.lastError);v.put("orders",externalOrders.countByStoreId(s.id));v.put("lastOrdersSync",s.lastOrdersSync);v.put("lastOrdersError",s.lastOrdersError);v.put("products",s.platform.equals("ARIA_DEMO")&&!s.status.equals("DISCONNECTED")?products.count():snapshots.countByStoreId(s.id));v.put("ai",s.platform.equals("ARIA_DEMO")?"Настраивается в ARIA AI":"Нужны данные о закупке и партиях");return v;}
  public Object rename(String name){var org=em.find(Organization.class,1);org.name=name.trim();audit.record("BUSINESS_RENAMED","organization:1","Название бизнеса обновлено");return list();}
  public Object create(String name,String platform,String url){
   if(!Set.of("WOOCOMMERCE","ARIA_DEMO").contains(platform))throw new IllegalArgumentException("Эта платформа пока не поддерживается");
@@ -52,6 +55,24 @@ public class ConnectedStoresService {
   run.completedAt=LocalDateTime.now();syncRuns.save(run);em.flush();return view(s);
  }
  public Object history(Long id){store(id);return syncRuns.findTop30ByStoreIdOrderByIdDesc(id);}
+ public Object syncOrders(Long id,long version){
+  var s=store(id);fresh(s,version);
+  if(!s.platform.equals("WOOCOMMERCE")||s.status.equals("DISCONNECTED"))throw new IllegalArgumentException("Для чтения заказов настройте подключение WooCommerce");
+  var run=new StoreSyncRun();run.storeId=id;run.operation="ORDERS";
+  try{
+   var integration=integrations.findByStoreId(id).orElseThrow(()->new IllegalArgumentException("Сначала сохраните ключи чтения"));
+   var credentials=vault.decrypt(integration.encryptedCredentials).split("\n",-1);
+   var incoming=orderImporter.read(s.baseUrl,credentials[0],credentials[1]);
+   for(var item:incoming){var row=externalOrders.findByStoreIdAndExternalId(id,item.externalId()).orElseGet(StoreOrderSnapshot::new);
+    if(row.modifiedAtUtc!=null&&row.modifiedAtUtc.isAfter(item.modifiedAtUtc())){run.skipped++;continue;}
+    row.storeId=id;row.externalId=item.externalId();row.status=item.status();row.currency=item.currency();row.total=item.total();row.refundedTotal=item.refundedTotal();row.createdAtUtc=item.createdAtUtc();row.modifiedAtUtc=item.modifiedAtUtc();row.completedAtUtc=item.completedAtUtc();row.observedAt=LocalDateTime.now();row.linesJson=json.writeValueAsString(item.lines().stream().map(line->{var value=new LinkedHashMap<String,Object>();value.put("productId",line.productId());value.put("quantity",line.quantity());value.put("total",line.total().toPlainString());return value;}).toList());externalOrders.save(row);run.imported++;
+   }
+   s.lastOrdersSync=LocalDateTime.now();s.lastOrdersError=null;run.status="SUCCESS";run.note="Снимки заказов без контактов. Локальные заказы и остатки не изменялись. Устаревших записей пропущено: "+run.skipped;
+   audit.record("STORE_ORDERS_SYNCED","store:"+id,run.note);
+  }catch(IllegalArgumentException|IllegalStateException e){s.lastOrdersError=e.getMessage();run.status="ERROR";run.note=s.lastOrdersError;audit.record("STORE_ORDERS_SYNC_FAILED","store:"+id,run.note);}
+  run.completedAt=LocalDateTime.now();syncRuns.save(run);em.flush();return view(s);
+ }
+ public Object orders(Long id){store(id);return externalOrders.findTop100ByStoreIdOrderByModifiedAtUtcDescIdDesc(id).stream().map(row->{var map=new LinkedHashMap<String,Object>();map.put("id",row.id);map.put("externalId",row.externalId);map.put("status",row.status);map.put("currency",row.currency);map.put("total",row.total.toPlainString());map.put("refundedTotal",row.refundedTotal==null?null:row.refundedTotal.toPlainString());map.put("createdAtUtc",row.createdAtUtc);map.put("modifiedAtUtc",row.modifiedAtUtc);map.put("completedAtUtc",row.completedAtUtc);map.put("observedAt",row.observedAt);map.put("lines",json.readValue(row.linesJson,List.class));return map;}).toList();}
  public Object disconnect(Long id,long version){var s=store(id);fresh(s,version);integrations.findByStoreId(id).ifPresent(i->{i.encryptedCredentials=null;i.status="REVOKED_LOCALLY";});s.status="DISCONNECTED";s.writeEnabled=false;s.lastError=null;audit.record("STORE_DISCONNECTED","store:"+id,"Локальные ключи удалены; ключ WooCommerce также отзовите у провайдера");em.flush();return view(s);}
  public Object catalog(Long id){var s=store(id);if(s.platform.equals("ARIA_DEMO"))return products.findAll().stream().limit(100).map(p->Map.of("name",p.getName(),"sku",p.getSku(),"price",p.getUnitPrice(),"availableQuantity",p.getQuantityOnHand())).toList();return snapshots.findByStoreIdOrderByNameAsc(id);}
  private void fresh(ConnectedStore s,long version){if(s.version!=version)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Данные изменились. Обновите список магазинов");}

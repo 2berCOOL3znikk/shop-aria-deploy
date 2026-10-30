@@ -73,6 +73,8 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 
 ## Автономная платформа V17–V18
 
+V22 (ADMIN): GET `/api/admin/control/stores/{id}/orders` — последние 100 сохранённых снимков; POST `/api/admin/control/stores/{id}/orders/sync` `{version}` — отдельное чтение заказов WooCommerce. Ошибка чтения сохраняется в lastOrdersError, дата успеха в lastOrdersSync. История ORDERS и суммы в валюте источника; total/refundedTotal/суммы позиций в API — десятичные строки. Нет контактов покупателей, записи во внешний магазин или движения местных остатков.
+
 V21: GET `/api/admin/control/stores/{id}/history` (ADMIN) возвращает последние 30 завершённых попыток CHECK/SYNC: status, imported, skipped, note, completedAt. Внешний каталог содержит parentExternalId для вариаций; currency не выдумывается. Повторный импорт сохраняет ID снимков. Это не очередь с восстановлением незавершённых попыток.
 
 Магазины V20 (ADMIN): GET/POST `/api/admin/control/stores`; PUT `/stores/business` `{name}`; PUT `/stores/{id}/credentials` `{version,key,secret}`; POST `/stores/{id}/check`, `/sync`, `/disconnect` `{version}`; GET `/stores/{id}/catalog`. `stores` — часть того же префикса `/api/admin/control`. Поддержаны ARIA_DEMO и read-only часть WOOCOMMERCE. Ошибка внешней проверки сохраняет статус ERROR и lastError, без ложного CONNECTED. После сохранения доступов клиент использует новую version. Ключи не возвращаются в API. Подробности: [B2B_STAGE2.md](B2B_STAGE2.md).

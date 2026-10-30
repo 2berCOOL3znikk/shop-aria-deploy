@@ -14,4 +14,6 @@ public class ConnectedStore {
  @Version public long version;
  public java.time.LocalDateTime lastSync;
  @Column(length=500) public String lastError;
+ public java.time.LocalDateTime lastOrdersSync;
+ @Column(length=500) public String lastOrdersError;
 }

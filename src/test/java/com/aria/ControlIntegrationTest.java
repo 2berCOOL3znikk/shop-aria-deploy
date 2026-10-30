@@ -648,13 +648,14 @@ class ControlIntegrationTest {
     @Test void wooImportKeepsStableIdsAndPreviousCatalogueWhenVariationReadFails()throws Exception {
         Object oldHttp=ReflectionTestUtils.getField(wooReader,"http"),oldHosts=ReflectionTestUtils.getField(wooReader,"hosts"),oldKey=ReflectionTestUtils.getField(integrationVault,"key");
         try{
-            var mocked=mock(HttpClient.class);var fail=new java.util.concurrent.atomic.AtomicBoolean();
+            var mocked=mock(HttpClient.class);var fail=new java.util.concurrent.atomic.AtomicBoolean();var remoteStatus=new java.util.concurrent.atomic.AtomicReference<>("completed");var remoteTime=new java.util.concurrent.atomic.AtomicReference<>("2026-10-30T08:00:00");
             ReflectionTestUtils.setField(wooReader,"http",mocked);ReflectionTestUtils.setField(wooReader,"hosts",Set.of("8.8.8.8"));ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);
             when(mocked.send(ArgumentMatchers.any(HttpRequest.class),ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenAnswer(invocation->{
                 HttpRequest request=invocation.getArgument(0);boolean variant=request.uri().getPath().endsWith("/variations");HttpResponse<byte[]> response=mock(HttpResponse.class);
                 when(response.statusCode()).thenReturn(fail.get()&&variant?503:200);
                 when(response.headers()).thenReturn(HttpHeaders.of(Map.of("X-WP-TotalPages",List.of("1")),(a,b)->true));
                 String body=variant?"[{\"id\":21,\"price\":\"800.00\",\"manage_stock\":false,\"attributes\":[{\"option\":\"Large\"}]}]":"[{\"id\":10,\"name\":\"Tea\",\"type\":\"simple\",\"price\":\"100.00\"},{\"id\":20,\"name\":\"Coffee\",\"type\":\"variable\"}]";
+                if(request.uri().getPath().endsWith("/orders"))body="[{\"id\":91,\"status\":\""+remoteStatus.get()+"\",\"currency\":\"KZT\",\"total\":\"100.00\",\"date_modified_gmt\":\""+remoteTime.get()+"\",\"line_items\":[{\"product_id\":10,\"variation_id\":21,\"quantity\":1,\"total\":\"100.00\"},{\"product_id\":0,\"variation_id\":0,\"quantity\":1,\"total\":\"0.00\"}],\"refunds\":[],\"billing\":{\"email\":\"private-customer@example.test\"}}]";
                 when(response.body()).thenReturn(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));return response;
             });
             var created=call("POST",base+"/stores",admin,Map.of("name","Woo contract store","platform","WOOCOMMERCE","url","https://8.8.8.8"));assertThat(created.status).as(created.raw).isEqualTo(200);long id=created.id();String path=base+"/stores/"+id;
@@ -663,6 +664,15 @@ class ControlIntegrationTest {
             var second=call("POST",path+"/sync",admin,Map.of("version",first.body.get("version")));var repeated=call("GET",path+"/catalog",admin,null);var a=json.readValue(original.raw,List.class);var b=json.readValue(repeated.raw,List.class);assertThat(((Map)a.getFirst()).get("id")).isEqualTo(((Map)b.getFirst()).get("id"));
             fail.set(true);var failure=call("POST",path+"/sync",admin,Map.of("version",second.body.get("version")));assertThat(failure.body.get("status")).isEqualTo("ERROR");assertThat(call("GET",path+"/catalog",admin,null).raw).isEqualTo(repeated.raw);
             var history=call("GET",path+"/history",admin,null);assertThat((List<?>)json.readValue(history.raw,List.class)).hasSize(3);assertThat(history.raw).doesNotContain("ck_","cs_");assertThat(call("GET",path+"/history",user,null).status).isEqualTo(403);
+            long localOrderCount=orders.count(),movementCount=stockMovements.count();
+            var importedOrders=call("POST",path+"/orders/sync",admin,Map.of("version",failure.body.get("version")));assertThat(importedOrders.status).as(importedOrders.raw).isEqualTo(200);assertThat(importedOrders.body.get("orders")).isEqualTo(1);
+            var orderRows=call("GET",path+"/orders",admin,null);assertThat(orderRows.raw).contains("completed","KZT").doesNotContain("private-customer","billing","email");var persisted=json.readValue(orderRows.raw,List.class);Object orderId=((Map)persisted.getFirst()).get("id");
+            remoteStatus.set("cancelled");remoteTime.set("2026-10-30T09:00:00");var changedOrders=call("POST",path+"/orders/sync",admin,Map.of("version",importedOrders.body.get("version")));assertThat(changedOrders.body.get("orders")).isEqualTo(1);var changed=call("GET",path+"/orders",admin,null);assertThat(changed.raw).contains("cancelled");assertThat(((Map)((List)json.readValue(changed.raw,List.class)).getFirst()).get("id")).isEqualTo(orderId);
+            remoteStatus.set("processing");remoteTime.set("2026-10-30T07:00:00");var stale=call("POST",path+"/orders/sync",admin,Map.of("version",changedOrders.body.get("version")));assertThat(stale.status).isEqualTo(200);assertThat(call("GET",path+"/orders",admin,null).raw).isEqualTo(changed.raw);
+            remoteTime.set("invalid");var invalid=call("POST",path+"/orders/sync",admin,Map.of("version",stale.body.get("version")));assertThat(invalid.body.get("lastOrdersError")).isNotNull();assertThat(call("GET",path+"/orders",admin,null).raw).isEqualTo(changed.raw);
+            assertThat(orders.count()).isEqualTo(localOrderCount);assertThat(stockMovements.count()).isEqualTo(movementCount);assertThat(call("GET",path+"/orders",user,null).status).isEqualTo(403);
+            assertThat(call("POST",path+"/orders/sync",user,Map.of("version",invalid.body.get("version"))).status).isEqualTo(403);
+
         }finally{ReflectionTestUtils.setField(wooReader,"http",oldHttp);ReflectionTestUtils.setField(wooReader,"hosts",oldHosts);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
     }
     @Test void connectedDemoStoreWorksAndDisconnectIsVersionProtected()throws Exception {
