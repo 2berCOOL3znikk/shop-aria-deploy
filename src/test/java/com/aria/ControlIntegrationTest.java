@@ -643,6 +643,40 @@ class ControlIntegrationTest {
         assertThat(call("POST",path+"/stop",user,null).status).isEqualTo(403);
         assertThat(call("PUT",path+"/settings",user,config.body).status).isEqualTo(403);
     }
+    @Autowired com.aria.service.StoreWebhookService webhookService;
+    @Autowired StoreWebhookReceiptRepository webhookReceipts;
+    @Autowired ConnectedStoreRepository connectedStores;
+    private Reply webhook(String path,byte[] payload,String signature,String contentType)throws Exception {
+        var request=HttpRequest.newBuilder(URI.create("http://localhost:"+env.getProperty("local.server.port")+path)).timeout(java.time.Duration.ofSeconds(3)).header("Content-Type",contentType);
+        if(signature!=null)request.header("X-WC-Webhook-Signature",signature);
+        var reply=client.send(request.POST(HttpRequest.BodyPublishers.ofByteArray(payload)).build(),HttpResponse.BodyHandlers.ofString());return new Reply(reply.statusCode(),Map.of(),reply.body());
+    }
+    private String webhookSignature(String secret,byte[] payload)throws Exception{var mac=javax.crypto.Mac.getInstance("HmacSHA256");mac.init(new javax.crypto.spec.SecretKeySpec(secret.getBytes(java.nio.charset.StandardCharsets.UTF_8),"HmacSHA256"));return Base64.getEncoder().encodeToString(mac.doFinal(payload));}
+    private Reply webhookStore()throws Exception{var made=call("POST",base+"/stores",admin,Map.of("name","Webhook contract","platform","WOOCOMMERCE","url","https://webhook.example.invalid"));assertThat(made.status).as(made.raw).isEqualTo(200);return call("PUT",base+"/stores/"+made.id()+"/credentials",admin,Map.of("version",made.body.get("version"),"key","ck_"+"a".repeat(40),"secret","cs_"+"b".repeat(40)));}
+    private void cleanWebhook(Long id){webhookReceipts.deleteAll(webhookReceipts.findTop20ByStoreIdOrderByIdDesc(id));webhookService.revoke(id);storeSyncQueue.cancelAll(id);}
+    @Test void signedWebhookInboxRejectsForgeryDeduplicatesAndRevokesOldRoutes()throws Exception {
+        Object oldKey=ReflectionTestUtils.getField(integrationVault,"key");var ids=new ArrayList<Long>();ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);
+        try{
+            var store=webhookStore();long id=store.id();ids.add(id);String prefix=base+"/stores/"+id;
+            assertThat(call("POST",prefix+"/webhooks/enable",user,Map.of("version",store.body.get("version"))).status).isEqualTo(403);
+            var configured=call("POST",prefix+"/webhooks/enable",admin,Map.of("version",store.body.get("version")));assertThat(configured.status).as(configured.raw).isEqualTo(200);String path=(String)configured.body.get("productsPath"),secret=(String)configured.body.get("secret");
+            assertThat(call("GET",prefix+"/webhooks",admin,null).raw.contains(secret)).isFalse();byte[] body=json.writeValueAsBytes(Map.of("id",7,"billing",Map.of("email","private-webhook@example.test")));String signature=webhookSignature(secret,body);
+            assertThat(webhook(path,body,null,"application/json").status).isEqualTo(401);assertThat(webhook(path,"{\"id\":8}".getBytes(),signature,"application/json").status).isEqualTo(401);assertThat(webhookReceipts.countByStoreId(id)).isZero();
+            assertThat(webhook(path,"webhook_id=10".getBytes(),null,"application/x-www-form-urlencoded").status).isEqualTo(204);assertThat(webhookReceipts.countByStoreId(id)).isZero();
+            assertThat(webhook(path,body,signature,"application/json").status).isEqualTo(204);assertThat(webhook(path,body,signature,"application/json").status).isEqualTo(204);assertThat(webhookReceipts.countByStoreId(id)).isEqualTo(1);assertThat(webhookReceipts.findTop20ByStoreIdOrderByIdDesc(id).getFirst().status).isEqualTo("PENDING");
+            var rollbackBody=json.writeValueAsBytes(Map.of("id",9));String rollbackSignature=webhookSignature(secret,rollbackBody);String token=path.split("/")[4];new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{webhookService.receive(token,"products",rollbackSignature,"application/json",rollbackBody);tx.setRollbackOnly();});assertThat(webhookReceipts.countByStoreId(id)).isEqualTo(1);
+            assertThat(webhookService.dispatch()).isTrue();var receipt=webhookReceipts.findTop20ByStoreIdOrderByIdDesc(id).getFirst();assertThat(receipt.status).isEqualTo("QUEUED");long generation=storeSyncTasks.findById(receipt.taskId).orElseThrow().generation;assertThat(webhook(path,body,signature,"application/json").status).isEqualTo(204);assertThat(storeSyncTasks.findById(receipt.taskId).orElseThrow().generation).isEqualTo(generation);
+            assertThat(call("GET",prefix+"/webhooks",admin,null).raw).doesNotContain("private-webhook","billing","bodyHash");
+            var rotated=call("POST",prefix+"/webhooks/enable",admin,Map.of("version",configured.body.get("version")));String nextPath=(String)rotated.body.get("productsPath"),nextSecret=(String)rotated.body.get("secret");assertThat(webhook(path,body,signature,"application/json").status).isEqualTo(404);assertThat(webhook(nextPath,body,signature,"application/json").status).isEqualTo(401);
+            var second=webhookStore();ids.add(second.id());var other=call("POST",base+"/stores/"+second.id()+"/webhooks/enable",admin,Map.of("version",second.body.get("version")));assertThat(webhook((String)other.body.get("productsPath"),body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(401);
+            assertThat(webhook(nextPath,body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(204);assertThat(call("POST",prefix+"/webhooks/disable",admin,Map.of("version",rotated.body.get("version"))).status).isEqualTo(200);assertThat(webhook(nextPath,body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(410);assertThat(webhookService.dispatch()).isTrue();assertThat(webhookReceipts.findTop20ByStoreIdOrderByIdDesc(id).getFirst().status).isEqualTo("CANCELLED");
+        }finally{for(var id:ids)cleanWebhook(id);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
+    }
+    @Test void webhookAdmissionDoesNotWaitForLongStoreImportLock()throws Exception {
+        Object oldKey=ReflectionTestUtils.getField(integrationVault,"key");ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);Long id=null;var release=new CountDownLatch(1);CompletableFuture<Void> held=null;
+        try{var store=webhookStore();id=store.id();var settings=call("POST",base+"/stores/"+id+"/webhooks/enable",admin,Map.of("version",store.body.get("version")));assertThat(settings.status).isEqualTo(200);Long storeId=id;var locked=new CountDownLatch(1);held=CompletableFuture.runAsync(()->new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{connectedStores.lockById(storeId).orElseThrow();locked.countDown();try{release.await(8,TimeUnit.SECONDS);}catch(InterruptedException e){throw new RuntimeException(e);}}));assertThat(locked.await(3,TimeUnit.SECONDS)).isTrue();byte[] body="{\"id\":7}".getBytes();assertThat(webhook((String)settings.body.get("ordersPath"),body,webhookSignature((String)settings.body.get("secret"),body),"application/json").status).isEqualTo(204);
+        }finally{release.countDown();if(held!=null)held.get(10,TimeUnit.SECONDS);if(id!=null)cleanWebhook(id);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
+    }
     @Autowired com.aria.service.StoreSyncQueue storeSyncQueue;
     @Autowired com.aria.service.StoreSyncWorker storeSyncWorker;
     @Autowired StoreSyncTaskRepository storeSyncTasks;

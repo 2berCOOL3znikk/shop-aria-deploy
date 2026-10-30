@@ -11,6 +11,7 @@ public class ConnectedStoresService {
  @org.springframework.beans.factory.annotation.Autowired private WooCatalogImporter importer;
  @org.springframework.beans.factory.annotation.Autowired private StoreSyncRunRepository syncRuns;
  @org.springframework.beans.factory.annotation.Autowired private StoreSyncQueue syncQueue;
+ @org.springframework.beans.factory.annotation.Autowired private StoreWebhookService webhooks;
  @org.springframework.beans.factory.annotation.Autowired private WooOrderImporter orderImporter;
  @org.springframework.beans.factory.annotation.Autowired private StoreOrderSnapshotRepository externalOrders;
  private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
@@ -30,7 +31,7 @@ public class ConnectedStoresService {
  private String normalize(String url){try{var u=java.net.URI.create(url);if(!"https".equals(u.getScheme())||u.getHost()==null||u.getUserInfo()!=null||u.getQuery()!=null||u.getFragment()!=null)throw new Exception();return url.replaceAll("/+$","");}catch(Exception e){throw new IllegalArgumentException("Укажите адрес магазина вида https://shop.example");}}
  private ConnectedStore store(Long id){return stores.lockById(id).orElseThrow(()->new IllegalArgumentException("Магазин не найден"));}
  public Object credentials(Long id,long version,String key,String secret){
-  var s=store(id);fresh(s,version);if(!s.platform.equals("WOOCOMMERCE"))throw new IllegalArgumentException("Ключи нужны только WooCommerce");em.lock(s,jakarta.persistence.LockModeType.PESSIMISTIC_FORCE_INCREMENT);syncQueue.cancelAll(id);
+  var s=store(id);fresh(s,version);if(!s.platform.equals("WOOCOMMERCE"))throw new IllegalArgumentException("Ключи нужны только WooCommerce");em.lock(s,jakarta.persistence.LockModeType.PESSIMISTIC_FORCE_INCREMENT);syncQueue.cancelAll(id);webhooks.revoke(id);
   var i=integrations.findByStoreId(id).orElseGet(ExternalIntegration::new);i.store=s;i.provider="WOOCOMMERCE";i.encryptedCredentials=vault.encrypt(key+"\n"+secret);i.status="NOT_VERIFIED";integrations.save(i);s.status="ACTION_REQUIRED";s.lastError=null;em.flush();audit.record("STORE_CREDENTIALS_SAVED","store:"+id,"Доступы заменены; требуется проверка");return view(s);
  }
  public Object sync(Long id,long version,boolean checkOnly){
@@ -80,7 +81,7 @@ public class ConnectedStoresService {
   run.completedAt=LocalDateTime.now();syncRuns.save(run);em.flush();return view(s);
  }
  public Object orders(Long id){store(id);return externalOrders.findTop100ByStoreIdOrderByModifiedAtUtcDescIdDesc(id).stream().map(row->{var map=new LinkedHashMap<String,Object>();map.put("id",row.id);map.put("externalId",row.externalId);map.put("status",row.status);map.put("currency",row.currency);map.put("total",row.total.toPlainString());map.put("refundedTotal",row.refundedTotal==null?null:row.refundedTotal.toPlainString());map.put("createdAtUtc",row.createdAtUtc);map.put("modifiedAtUtc",row.modifiedAtUtc);map.put("completedAtUtc",row.completedAtUtc);map.put("observedAt",row.observedAt);map.put("lines",json.readValue(row.linesJson,List.class));return map;}).toList();}
- public Object disconnect(Long id,long version){var s=store(id);fresh(s,version);syncQueue.cancelAll(id);integrations.findByStoreId(id).ifPresent(i->{i.encryptedCredentials=null;i.status="REVOKED_LOCALLY";});s.status="DISCONNECTED";s.writeEnabled=false;s.lastError=null;audit.record("STORE_DISCONNECTED","store:"+id,"Локальные ключи удалены; ключ WooCommerce также отзовите у провайдера");em.flush();return view(s);}
+ public Object disconnect(Long id,long version){var s=store(id);fresh(s,version);syncQueue.cancelAll(id);webhooks.revoke(id);integrations.findByStoreId(id).ifPresent(i->{i.encryptedCredentials=null;i.status="REVOKED_LOCALLY";});s.status="DISCONNECTED";s.writeEnabled=false;s.lastError=null;audit.record("STORE_DISCONNECTED","store:"+id,"Локальные ключи удалены; ключ WooCommerce также отзовите у провайдера");em.flush();return view(s);}
  public Object catalog(Long id){var s=store(id);if(s.platform.equals("ARIA_DEMO"))return products.findAll().stream().limit(100).map(p->Map.of("name",p.getName(),"sku",p.getSku(),"price",p.getUnitPrice(),"availableQuantity",p.getQuantityOnHand())).toList();return snapshots.findByStoreIdOrderByNameAsc(id);}
  private void fresh(ConnectedStore s,long version){if(s.version!=version)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Данные изменились. Обновите список магазинов");}
 }

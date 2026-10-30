@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.*;
 public class ConnectedStoresController {
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncQueue queue;
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncWorker worker;
+ @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreWebhookService webhooks;
  private final ConnectedStoresService service;public ConnectedStoresController(ConnectedStoresService s){service=s;}
  public record Create(@NotBlank @Size(max=200) String name,@Pattern(regexp="WOOCOMMERCE|ARIA_DEMO") @NotNull String platform,@Size(max=500) String url){}
  public record Enqueue(@Min(0) long version,@NotNull @Pattern(regexp="CHECK|SYNC|ORDERS") String operation){}
@@ -22,6 +23,9 @@ public class ConnectedStoresController {
  @PostMapping("/{id}/check") public Object check(@PathVariable Long id,@Valid @RequestBody Version v){return service.sync(id,v.version(),true);}
  @PostMapping("/{id}/sync") public Object sync(@PathVariable Long id,@Valid @RequestBody Version v){return service.sync(id,v.version(),false);}
  @PostMapping("/{id}/disconnect") public Object disconnect(@PathVariable Long id,@Valid @RequestBody Version v){return service.disconnect(id,v.version());}
+ @GetMapping("/{id}/webhooks") public Object webhooks(@PathVariable Long id){return webhooks.settings(id);}
+ @PostMapping("/{id}/webhooks/enable") public Object enableWebhooks(@PathVariable Long id,@Valid @RequestBody Version v){return webhooks.enable(id,v.version());}
+ @PostMapping("/{id}/webhooks/disable") public Object disableWebhooks(@PathVariable Long id,@Valid @RequestBody Version v){return webhooks.disable(id,v.version());}
  @GetMapping("/{id}/orders") public Object orders(@PathVariable Long id){return service.orders(id);}
  @PostMapping("/{id}/orders/sync") public Object syncOrders(@PathVariable Long id,@Valid @RequestBody Version v){return service.syncOrders(id,v.version());}
  @GetMapping("/{id}/history") public Object history(@PathVariable Long id){return service.history(id);}

@@ -73,6 +73,8 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 
 ## Автономная платформа V17–V18
 
+V24 (ADMIN): GET `/api/admin/control/stores/{id}/webhooks`; POST `/webhooks/enable` и `/webhooks/disable` с `{version}` под тем же store-префиксом. Enable выдаёт новые productsPath/ordersPath и **secret только в этом ответе**. GET возвращает статус и до 20 метаданных событий без секрета/тела. Публичный POST `/api/webhooks/woocommerce/{token}/{products|orders}` проверяет X-WC-Webhook-Signature по raw bytes. ACK 204 после commit inbox, дубли → 204 без новой работы; 401/404/410/413 для неподтверждённого/старого/отключённого/слишком большого запроса. Формовый activation ping не создаёт событие. Dispatcher переводит PENDING в QUEUED/CANCELLED; QUEUED — приём в очередь, не успех внешнего импорта.
+
 V23 (ADMIN): POST `/api/admin/control/stores/{id}/tasks` `{version,operation}` (CHECK/SYNC/ORDERS) сохраняет запрос и пробуждает исполнителя; GET того же пути — состояние трёх операций. State: QUEUED/RUNNING/RETRY/DONE/FAILED/CANCELLED; attempts ≤3, dueAt/updatedAt/lastError. Lease и claimedGeneration не выдаются клиенту. Повторный POST после FAILED — явный новый запуск; после смены ключей/отключения старые задачи отозваны. Чтение состояния не создаёт работу.
 
 V22 (ADMIN): GET `/api/admin/control/stores/{id}/orders` — последние 100 сохранённых снимков; POST `/api/admin/control/stores/{id}/orders/sync` `{version}` — отдельное чтение заказов WooCommerce. Ошибка чтения сохраняется в lastOrdersError, дата успеха в lastOrdersSync. История ORDERS и суммы в валюте источника; total/refundedTotal/суммы позиций в API — десятичные строки. Нет контактов покупателей, записи во внешний магазин или движения местных остатков.
