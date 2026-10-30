@@ -21,7 +21,7 @@ import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
-@org.springframework.test.context.TestPropertySource(properties={"aria.manager.enabled=false","aria.manager.schedule-enabled=false"})
+@org.springframework.test.context.TestPropertySource(properties={"aria.manager.enabled=false","aria.manager.schedule-enabled=false","aria.store-sync.worker-enabled=false"})
 class ControlIntegrationTest {
     @Autowired Environment env;
     @Autowired AppUserRepository users;
@@ -642,6 +642,28 @@ class ControlIntegrationTest {
         var stale=new HashMap<String,Object>(config.body);stale.put("version",-1);assertThat(call("PUT",path+"/settings",admin,stale).status).isEqualTo(409);
         assertThat(call("POST",path+"/stop",user,null).status).isEqualTo(403);
         assertThat(call("PUT",path+"/settings",user,config.body).status).isEqualTo(403);
+    }
+    @Autowired com.aria.service.StoreSyncQueue storeSyncQueue;
+    @Autowired com.aria.service.StoreSyncWorker storeSyncWorker;
+    @Autowired StoreSyncTaskRepository storeSyncTasks;
+    @Test void queuedStoreSyncIsDeduplicatedAndActuallyExecuted()throws Exception {
+        storeSyncTasks.deleteAll();
+        var created=call("POST",base+"/stores",admin,Map.of("name","Queued demo","platform","ARIA_DEMO","url",""));assertThat(created.status).as(created.raw).isEqualTo(200);long id=created.id();
+        var first=call("POST",base+"/stores/"+id+"/tasks",admin,Map.of("version",created.body.get("version"),"operation","SYNC"));assertThat(first.status).as(first.raw).isEqualTo(200);assertThat(first.body.get("state")).isEqualTo("QUEUED");
+        var duplicate=call("POST",base+"/stores/"+id+"/tasks",admin,Map.of("version",created.body.get("version"),"operation","SYNC"));assertThat(duplicate.id()).isEqualTo(first.id());assertThat(storeSyncTasks.count()).isEqualTo(1);
+        assertThat(call("POST",base+"/stores/"+id+"/tasks",user,Map.of("version",0,"operation","SYNC")).status).isEqualTo(403);
+        assertThat(storeSyncWorker.processOne()).isTrue();assertThat(storeSyncTasks.findById(first.id()).orElseThrow().state).isEqualTo("DONE");assertThat(storeSyncWorker.processOne()).isFalse();
+        var stores=call("GET",base+"/stores",admin,null);var row=((List<Map<String,Object>>)stores.body.get("stores")).stream().filter(x->((Number)x.get("id")).longValue()==id).findFirst().orElseThrow();assertThat(row.get("lastSync")).isNotNull();
+        assertThat(call("POST",base+"/stores/"+id+"/disconnect",admin,Map.of("version",row.get("version"))).status).isEqualTo(200);
+    }
+    @Test void storeQueueRecoversLeaseFencesOldWorkerAndBoundsFailures()throws Exception {
+        storeSyncTasks.deleteAll();var created=call("POST",base+"/stores",admin,Map.of("name","Queue recovery","platform","WOOCOMMERCE","url","https://shop.example.invalid"));assertThat(created.status).isEqualTo(200);long id=created.id();long version=((Number)created.body.get("version")).longValue();
+        var task=storeSyncQueue.enqueue(id,version,"SYNC");var first=storeSyncQueue.claim();assertThat(first).isNotNull();storeSyncQueue.enqueue(id,version,"SYNC");
+        var expired=storeSyncTasks.findById(task.id).orElseThrow();expired.leaseUntil=java.time.LocalDateTime.now().minusMinutes(1);storeSyncTasks.save(expired);var recovered=storeSyncQueue.claim();assertThat(recovered.generation()).isGreaterThan(first.generation());
+        assertThatThrownBy(()->storeSyncQueue.requireActive(first)).isInstanceOf(org.springframework.web.server.ResponseStatusException.class);storeSyncQueue.finish(first,null);assertThat(storeSyncTasks.findById(task.id).orElseThrow().state).isEqualTo("RUNNING");storeSyncQueue.finish(recovered,"Temporary test failure");
+        for(int i=0;i<2;i++){var due=storeSyncTasks.findById(task.id).orElseThrow();due.dueAt=java.time.LocalDateTime.now().minusSeconds(1);storeSyncTasks.save(due);storeSyncQueue.finish(storeSyncQueue.claim(),"Temporary test failure");}
+        assertThat(storeSyncTasks.findById(task.id).orElseThrow().state).isEqualTo("FAILED");assertThat(storeSyncTasks.findById(task.id).orElseThrow().attempts).isEqualTo(3);
+        storeSyncQueue.enqueue(id,version,"SYNC");var cancelled=storeSyncQueue.claim();assertThat(call("POST",base+"/stores/"+id+"/disconnect",admin,Map.of("version",version)).status).isEqualTo(200);storeSyncQueue.finish(cancelled,null);assertThat(storeSyncTasks.findById(task.id).orElseThrow().state).isEqualTo("CANCELLED");assertThat(storeSyncQueue.claim()).isNull();
     }
     @Autowired com.aria.integration.WooCommerceReader wooReader;
     @Autowired com.aria.integration.IntegrationVault integrationVault;

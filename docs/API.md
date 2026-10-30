@@ -73,6 +73,8 @@ POS: GET `/api/admin/control/pos`; POST `/pos/sales` {requestKey,lines:[{product
 
 ## Автономная платформа V17–V18
 
+V23 (ADMIN): POST `/api/admin/control/stores/{id}/tasks` `{version,operation}` (CHECK/SYNC/ORDERS) сохраняет запрос и пробуждает исполнителя; GET того же пути — состояние трёх операций. State: QUEUED/RUNNING/RETRY/DONE/FAILED/CANCELLED; attempts ≤3, dueAt/updatedAt/lastError. Lease и claimedGeneration не выдаются клиенту. Повторный POST после FAILED — явный новый запуск; после смены ключей/отключения старые задачи отозваны. Чтение состояния не создаёт работу.
+
 V22 (ADMIN): GET `/api/admin/control/stores/{id}/orders` — последние 100 сохранённых снимков; POST `/api/admin/control/stores/{id}/orders/sync` `{version}` — отдельное чтение заказов WooCommerce. Ошибка чтения сохраняется в lastOrdersError, дата успеха в lastOrdersSync. История ORDERS и суммы в валюте источника; total/refundedTotal/суммы позиций в API — десятичные строки. Нет контактов покупателей, записи во внешний магазин или движения местных остатков.
 
 V21: GET `/api/admin/control/stores/{id}/history` (ADMIN) возвращает последние 30 завершённых попыток CHECK/SYNC: status, imported, skipped, note, completedAt. Внешний каталог содержит parentExternalId для вариаций; currency не выдумывается. Повторный импорт сохраняет ID снимков. Это не очередь с восстановлением незавершённых попыток.

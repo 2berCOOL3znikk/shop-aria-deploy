@@ -5,8 +5,13 @@ import jakarta.validation.constraints.*;
 import org.springframework.web.bind.annotation.*;
 @RestController @RequestMapping("/api/admin/control/stores")
 public class ConnectedStoresController {
+ @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncQueue queue;
+ @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncWorker worker;
  private final ConnectedStoresService service;public ConnectedStoresController(ConnectedStoresService s){service=s;}
  public record Create(@NotBlank @Size(max=200) String name,@Pattern(regexp="WOOCOMMERCE|ARIA_DEMO") @NotNull String platform,@Size(max=500) String url){}
+ public record Enqueue(@Min(0) long version,@NotNull @Pattern(regexp="CHECK|SYNC|ORDERS") String operation){}
+ @PostMapping("/{id}/tasks") public Object enqueue(@PathVariable Long id,@Valid @RequestBody Enqueue e){var task=queue.enqueue(id,e.version(),e.operation());worker.wake();return task;}
+ @GetMapping("/{id}/tasks") public Object tasks(@PathVariable Long id){return service.tasks(id);}
  public record Version(@Min(0) long version){}
  public record Credentials(@Min(0) long version,@Pattern(regexp="ck_[a-zA-Z0-9]{20,100}") @NotNull String key,@Pattern(regexp="cs_[a-zA-Z0-9]{20,100}") @NotNull String secret){}
  public record Business(@NotBlank @Size(max=200) String name){}
