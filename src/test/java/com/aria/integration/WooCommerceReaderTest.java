@@ -14,5 +14,12 @@ class WooCommerceReaderTest {
   when(response.statusCode()).thenReturn(401);assertThrows(IllegalStateException.class,()->reader.get("https://shop.test","products?per_page=100&page=1","x","y"));
   when(response.statusCode()).thenReturn(302);assertThrows(IllegalStateException.class,()->reader.get("https://shop.test","products?per_page=100&page=1","x","y"));
   when(response.statusCode()).thenReturn(200);when(response.body()).thenReturn("{}".getBytes(StandardCharsets.UTF_8));assertThrows(IllegalStateException.class,()->reader.get("https://shop.test","products?per_page=100&page=1","x","y"));
+  when(response.body()).thenReturn("[]".getBytes(StandardCharsets.UTF_8));when(response.headers()).thenReturn(HttpHeaders.of(java.util.Map.of("X-WP-TotalPages",java.util.List.of("bad-header")),(a,b)->true));assertThrows(IllegalStateException.class,()->reader.get("https://shop.test","products?per_page=100&page=1","x","y"));
+ }
+ @Test void readsOnlyOfficialCurrentCurrencyCode()throws Exception{
+  var http=mock(HttpClient.class);var reader=spy(new WooCommerceReader(""));org.springframework.test.util.ReflectionTestUtils.setField(reader,"http",http);doReturn(URI.create("https://shop.test/wp-json/wc/v3/")).when(reader).validate("https://shop.test");
+  HttpResponse<byte[]> response=mock(HttpResponse.class);when(response.statusCode()).thenReturn(200);when(response.headers()).thenReturn(HttpHeaders.of(java.util.Map.of(),(a,b)->true));when(http.send(any(HttpRequest.class),org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenReturn(response);
+  when(response.body()).thenReturn("{\"code\":\"KZT\",\"symbol\":\"<script>bad</script>\"}".getBytes(StandardCharsets.UTF_8));assertEquals("KZT",reader.currency("https://shop.test","k","s"));var capture=org.mockito.ArgumentCaptor.forClass(HttpRequest.class);verify(http).send(capture.capture(),org.mockito.ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any());assertEquals("/wp-json/wc/v3/data/currencies/current",capture.getValue().uri().getPath());assertEquals("GET",capture.getValue().method());
+  for(String bad:new String[]{"[]","{}","{\"code\":\"kzt\"}","{\"code\":\"KZT<script>\"}"}){when(response.body()).thenReturn(bad.getBytes(StandardCharsets.UTF_8));assertThrows(IllegalStateException.class,()->reader.currency("https://shop.test","k","s"));}when(response.statusCode()).thenReturn(403);assertThrows(IllegalStateException.class,()->reader.currency("https://shop.test","k","s"));
  }
 }

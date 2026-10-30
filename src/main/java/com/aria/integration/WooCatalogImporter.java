@@ -7,18 +7,21 @@ public class WooCatalogImporter {
  private final WooCommerceReader reader;
  public WooCatalogImporter(WooCommerceReader reader){this.reader=reader;}
  public record Item(String externalId,String parentId,String name,String sku,BigDecimal price,Integer quantity){}
- public record Catalog(List<Item> items,int skipped){}
+ public record Catalog(List<Item> items,int skipped,String currency){}
  public Catalog read(String address,String key,String secret){
   var items=new ArrayList<Item>();var seen=new HashSet<String>();int skipped=0;
   long deadline=System.nanoTime()+java.time.Duration.ofSeconds(60).toNanos();int[] requests={0};
+  String currency=currency(address,key,secret,requests,deadline);
   for(var p:all(address,"products",key,secret,requests,deadline)){
    String type=Objects.toString(p.get("type"),"");
    if(type.equals("simple"))add(items,seen,item(p,null,null));
    else if(type.equals("variable"))for(var v:all(address,"products/"+id(p)+"/variations",key,secret,requests,deadline))add(items,seen,item(v,id(p),text(p,"name",500)));
    else skipped++;
   }
-  return new Catalog(List.copyOf(items),skipped);
+  if(!currency.equals(currency(address,key,secret,requests,deadline)))throw new IllegalStateException("Валюта магазина изменилась во время чтения. Предыдущий каталог сохранён");
+  return new Catalog(List.copyOf(items),skipped,currency);
  }
+ private String currency(String address,String key,String secret,int[] requests,long deadline){if(++requests[0]>30||System.nanoTime()>deadline)throw new IllegalStateException("Время проверки валюты превышено. Предыдущий каталог сохранён");String code=reader.currency(address,key,secret);if(code==null||!code.matches("[A-Z]{3}"))throw new IllegalStateException("Валюта каталога не подтверждена");return code;}
  private List<Map<String,Object>> all(String address,String resource,String key,String secret,int[] requests,long deadline){
   var rows=new ArrayList<Map<String,Object>>();
   for(int page=1;page<=11;page++){
