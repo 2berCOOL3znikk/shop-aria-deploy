@@ -11,4 +11,5 @@ public class StoreSnapshot {
  public Integer availableQuantity;
  @Column(length=20) public String currency;
  public java.time.LocalDateTime observedAt;
+ @Column(length=100) public String parentExternalId;
 }

@@ -17,5 +17,6 @@ public class ConnectedStoresController {
  @PostMapping("/{id}/check") public Object check(@PathVariable Long id,@Valid @RequestBody Version v){return service.sync(id,v.version(),true);}
  @PostMapping("/{id}/sync") public Object sync(@PathVariable Long id,@Valid @RequestBody Version v){return service.sync(id,v.version(),false);}
  @PostMapping("/{id}/disconnect") public Object disconnect(@PathVariable Long id,@Valid @RequestBody Version v){return service.disconnect(id,v.version());}
+ @GetMapping("/{id}/history") public Object history(@PathVariable Long id){return service.history(id);}
  @GetMapping("/{id}/catalog") public Object catalog(@PathVariable Long id){return service.catalog(id);}
 }

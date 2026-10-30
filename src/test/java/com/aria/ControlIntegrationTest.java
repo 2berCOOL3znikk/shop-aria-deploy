@@ -16,6 +16,8 @@ import java.time.LocalDate;
 import java.util.*;
 import java.util.concurrent.*;
 import static org.assertj.core.api.Assertions.*;
+import static org.mockito.Mockito.*;
+import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
@@ -640,6 +642,28 @@ class ControlIntegrationTest {
         var stale=new HashMap<String,Object>(config.body);stale.put("version",-1);assertThat(call("PUT",path+"/settings",admin,stale).status).isEqualTo(409);
         assertThat(call("POST",path+"/stop",user,null).status).isEqualTo(403);
         assertThat(call("PUT",path+"/settings",user,config.body).status).isEqualTo(403);
+    }
+    @Autowired com.aria.integration.WooCommerceReader wooReader;
+    @Autowired com.aria.integration.IntegrationVault integrationVault;
+    @Test void wooImportKeepsStableIdsAndPreviousCatalogueWhenVariationReadFails()throws Exception {
+        Object oldHttp=ReflectionTestUtils.getField(wooReader,"http"),oldHosts=ReflectionTestUtils.getField(wooReader,"hosts"),oldKey=ReflectionTestUtils.getField(integrationVault,"key");
+        try{
+            var mocked=mock(HttpClient.class);var fail=new java.util.concurrent.atomic.AtomicBoolean();
+            ReflectionTestUtils.setField(wooReader,"http",mocked);ReflectionTestUtils.setField(wooReader,"hosts",Set.of("8.8.8.8"));ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);
+            when(mocked.send(ArgumentMatchers.any(HttpRequest.class),ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenAnswer(invocation->{
+                HttpRequest request=invocation.getArgument(0);boolean variant=request.uri().getPath().endsWith("/variations");HttpResponse<byte[]> response=mock(HttpResponse.class);
+                when(response.statusCode()).thenReturn(fail.get()&&variant?503:200);
+                when(response.headers()).thenReturn(HttpHeaders.of(Map.of("X-WP-TotalPages",List.of("1")),(a,b)->true));
+                String body=variant?"[{\"id\":21,\"price\":\"800.00\",\"manage_stock\":false,\"attributes\":[{\"option\":\"Large\"}]}]":"[{\"id\":10,\"name\":\"Tea\",\"type\":\"simple\",\"price\":\"100.00\"},{\"id\":20,\"name\":\"Coffee\",\"type\":\"variable\"}]";
+                when(response.body()).thenReturn(body.getBytes(java.nio.charset.StandardCharsets.UTF_8));return response;
+            });
+            var created=call("POST",base+"/stores",admin,Map.of("name","Woo contract store","platform","WOOCOMMERCE","url","https://8.8.8.8"));assertThat(created.status).as(created.raw).isEqualTo(200);long id=created.id();String path=base+"/stores/"+id;
+            var creds=call("PUT",path+"/credentials",admin,Map.of("version",created.body.get("version"),"key","ck_"+"a".repeat(40),"secret","cs_"+"b".repeat(40)));assertThat(creds.status).as(creds.raw).isEqualTo(200);
+            var first=call("POST",path+"/sync",admin,Map.of("version",creds.body.get("version")));assertThat(first.body.get("status")).as(first.raw).isEqualTo("CONNECTED");var original=call("GET",path+"/catalog",admin,null);assertThat((List<?>)json.readValue(original.raw,List.class)).hasSize(2);
+            var second=call("POST",path+"/sync",admin,Map.of("version",first.body.get("version")));var repeated=call("GET",path+"/catalog",admin,null);var a=json.readValue(original.raw,List.class);var b=json.readValue(repeated.raw,List.class);assertThat(((Map)a.getFirst()).get("id")).isEqualTo(((Map)b.getFirst()).get("id"));
+            fail.set(true);var failure=call("POST",path+"/sync",admin,Map.of("version",second.body.get("version")));assertThat(failure.body.get("status")).isEqualTo("ERROR");assertThat(call("GET",path+"/catalog",admin,null).raw).isEqualTo(repeated.raw);
+            var history=call("GET",path+"/history",admin,null);assertThat((List<?>)json.readValue(history.raw,List.class)).hasSize(3);assertThat(history.raw).doesNotContain("ck_","cs_");assertThat(call("GET",path+"/history",user,null).status).isEqualTo(403);
+        }finally{ReflectionTestUtils.setField(wooReader,"http",oldHttp);ReflectionTestUtils.setField(wooReader,"hosts",oldHosts);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
     }
     @Test void connectedDemoStoreWorksAndDisconnectIsVersionProtected()throws Exception {
         var made=call("POST",base+"/stores",admin,Map.of("name","Мой демо-магазин","platform","ARIA_DEMO","url",""));assertThat(made.status).as(made.raw).isEqualTo(200);long id=made.id();
