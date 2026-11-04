@@ -20,11 +20,23 @@ Verification:
 - A real request through the owner UI returned `source=AI`, model `dots-studio/dots-3-note-preview:free`. Its validated KEEP decision was subsequently verified in both Pricing and AI Control Center without sending another request. No consents were enabled, quota reset or price applied by this live check. Evidence: `evidence/pricing-live-proof.json`.
 - Desktop primary content decreased from approximately 12,129 to 2,500 characters and 78 to 25 enabled buttons (includes filters, search and navigation). Details remain available.
 
+## 2. Social / ARIA Impact — completed
+
+Open `/control.html#socialPlans` for the owner, `/social.html` for organizations and the public.
+
+- The owner first sees proposals, current state and a single next action. Organization settings, all six process steps, source calculation and history are in details. Expired proposals lead to cancellation, not a misleading approval action.
+- Drafts do not hold stock. Approval requires a verified eligible organization and explicit goods/storage/transport checks. Responsible staff and time precede handover; the final form separately confirms goods, signed document and actual receipt. Existing Java validity, organization and stock checks remain in force.
+- Public Social Shelf uses keyed RU/EN copy for the whole flow: verification, reservations, documents, loading, empty states, errors and retry. Original merchant names/reasons are not translated. This is **not a claim of completed application-wide localization**; administrative modules still need it.
+- “Сейчас нет доступных предложений” explains how offers appear. All recorded demo activity is explicitly educational; no real charitable handover is claimed.
+- Navigation away from a pricing decision now clears its focus parameter, so returning to Prices opens the current workspace.
+
+`scripts/social-experience-e2e.cjs` passed against real local APIs: ORG verification in the UI, owner approval, acceptance conditions, risk → draft → reserve → logistics → document → actual educational handover (12→9) → CSV report; public reservation ignores a duplicate click and does not prematurely consume stock. Explicit 503/retry, RU/EN and 390/768/1440 in both themes were checked. Test stock was closed and the test organization's acceptance disabled; history was retained. No external AI was called by this test.
+
 ## Audit / remaining work
 
 - WORKS: existing stock/order core, price constraints, persisted real AI decisions, manual approval/rejection/rollback. Previously checked storefront/cart/B2B scope are recorded in `docs/ARIA3.md`.
 - MISLEADING, fixed in Prices: every historical recommendation shown as a separate current card; “AI completed” even when the provider did not decide; zero-sale KEEP presented as awaiting a price change; duplicated refresh action.
-- NEXT: Social/Impact process first, then My Stores cards, connection wizard and safe test-connection archival. No test connections have been deleted.
+- NEXT: My Stores cards, connection wizard and safe test-connection archival. No test connections have been deleted.
 - NOT COMPLETE: full application RU/EN localization, administrative tool-using assistant, category-specific product schemas and an installed external WooCommerce E2E. Existing HTTP fixture tests do not constitute a real WooCommerce connection.
 
 The university self-audit is a separate earlier snapshot in `docs/rubezh2`; no peer-group review is claimed.

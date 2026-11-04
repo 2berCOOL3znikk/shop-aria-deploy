@@ -23,7 +23,7 @@
     @media(max-width:750px){.social-hero{grid-template-columns:1fr}.nav-glass{padding:12px 16px}.nav-links{gap:10px;flex-wrap:wrap}}
   </style>
 
-<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css"></head>
+<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css"><link rel="stylesheet" href="/css/social.css"></head>
 <body>
 <nav class="nav-glass">
   <a href="/index.html" class="logo-new">ARIA · Социальная помощь</a>
@@ -36,23 +36,24 @@
   </div>
 </nav>
 
-<main class="social-wrap">
+<main class="social-wrap" data-i18n-skip>
   <section class="social-hero glass-card">
-    <div><div class="product-card-category">АРИЯ · Казахстан</div><h1>Социальная полка</h1>
-      <p>Здесь магазин размещает проверенные лоты с действующим сроком годности. Фонды и приюты просматривают наличие и резервируют подходящую партию. Срочные позиции показываются первыми.</p>
+    <div><div class="product-card-category">ARIA IMPACT</div><h1 data-social-key="title">Социальная полка</h1>
+      <p data-social-key="intro">Пригодные товары передаются проверенным организациям после подтверждения магазина.</p>
       <p id="partner-message" class="admin-note" style="margin-top:12px;"></p>
     </div>
-    <div class="social-proof">Витрина открыта для просмотра. Чтобы забрать лот, войдите под учётной записью благотворительной организации.</div>
+    <aside class="social-proof"><p id="social-help"></p><a id="social-access-link" class="btn-outline" href="/login.html">Войти как организация</a></aside>
   </section>
-
+  <ol class="social-flow"><li><span>1</span><span data-social-key="step1">Проверка товара</span></li><li><span>2</span><span data-social-key="step2">Резерв организации</span></li><li><span>3</span><span data-social-key="step3">Выдача и акт</span></li></ol>
+  <p id="social-demo-note" class="social-demo-note" data-social-key="demo" hidden>Учебный магазин: цены, остатки и операции используются для проверки сценариев.</p>
   <div style="display:flex;justify-content:space-between;align-items:end;gap:16px;flex-wrap:wrap;margin:28px 0 14px;">
-    <div><h2>Доступные лоты</h2><p class="admin-note">Без оплаты · количество указано по складскому учёту</p></div>
-    <a id="admin-publish-link" class="btn-outline" href="/admin.html" style="text-decoration:none;display:none;">Опубликовать товар</a>
+    <div><h2><span data-social-key="available">Доступные предложения</span> <span id="social-offer-count"></span></h2><p class="admin-note" data-social-key="availableNote">Без оплаты. Сначала предложения с ближайшим сроком.</p></div>
+    <button id="social-refresh" type="button" class="btn-outline" data-social-key="refresh">Обновить</button>
   </div>
   <div id="grid" class="offer-grid"><div class="catalog-loading" role="status">Загружаются предложения…</div></div>
 
-  <section id="claims-section" class="glass-card" style="padding:22px;margin-top:34px;display:none;">
-    <h2>Забронированные вашей организацией лоты</h2><div id="claims-list" style="margin-top:12px;"></div>
+  <section id="claims-section" class="glass-card" style="padding:22px;margin-top:34px;" hidden>
+    <h2 data-social-key="claims">Ваши бронирования и выдачи</h2><div id="claims-list" style="margin-top:12px;"></div>
   </section>
 </main>
 
@@ -68,6 +69,7 @@
   <script src="/js/money.js"></script>
   <script src="/js/i18n.js"></script>
   <script src="/js/catalog-images.js"></script>
+  <script src="/js/social-copy.js"></script>
   <script src="/js/social-mvp.js"></script>
 <script src="/js/pwa.js"></script><script src="/js/assistant.js"></script></body>
 </html>

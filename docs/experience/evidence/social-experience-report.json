@@ -1,0 +1,77 @@
+{
+  "checks": [
+    "Actual ORG verification request in English UI, owner verification and explicit acceptance conditions",
+    "Real risk calculation → draft without reserve → eligible verified organization → approved reserve → staff/time/READY → document → explicit handover → stock 12→9",
+    "Public real offer, unchanged merchant text in English, one reservation on double click, private document access, no premature stock consumption and cancellation",
+    "RU/EN flow and error messages, six viewport/theme combinations for each side, retry after explicit injected 503"
+  ],
+  "errors": [],
+  "screens": [
+    {
+      "page": "owner",
+      "width": 1440,
+      "theme": "light"
+    },
+    {
+      "page": "owner",
+      "width": 1440,
+      "theme": "dark"
+    },
+    {
+      "page": "owner",
+      "width": 768,
+      "theme": "light"
+    },
+    {
+      "page": "owner",
+      "width": 768,
+      "theme": "dark"
+    },
+    {
+      "page": "owner",
+      "width": 390,
+      "theme": "light"
+    },
+    {
+      "page": "owner",
+      "width": 390,
+      "theme": "dark"
+    },
+    {
+      "page": "organization",
+      "width": 1440,
+      "theme": "light"
+    },
+    {
+      "page": "organization",
+      "width": 1440,
+      "theme": "dark"
+    },
+    {
+      "page": "organization",
+      "width": 768,
+      "theme": "light"
+    },
+    {
+      "page": "organization",
+      "width": 768,
+      "theme": "dark"
+    },
+    {
+      "page": "organization",
+      "width": 390,
+      "theme": "light"
+    },
+    {
+      "page": "organization",
+      "width": 390,
+      "theme": "dark"
+    }
+  ],
+  "externalAiCalled": false,
+  "educationalOperations": true,
+  "organizationId": 18,
+  "fixtureProductId": 70,
+  "passed": true,
+  "fixtureClosed": true
+}

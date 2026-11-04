@@ -583,6 +583,8 @@ window.ariaI18n = {
         document.documentElement.lang = code;
         this.applyI18n();
         this.updateLangButton();
+        window.ariaShell?.refreshLanguage();
+        window.dispatchEvent(new CustomEvent('aria:language-changed',{detail:{language:code}}));
     },
 
     cycleLang: function() {
@@ -634,7 +636,7 @@ window.ariaI18n = {
         let node;
         while ((node = walker.nextNode())) {
             const parent = node.parentElement;
-            if (!parent || parent.closest('script,style,textarea,code,[data-i18n],[data-shell-label],[data-shell-footer]')) continue;
+            if (!parent || parent.closest('script,style,textarea,code,[data-i18n],[data-i18n-skip],[data-merchant-content],[data-shell-label],[data-shell-footer]')) continue;
             if (!Object.prototype.hasOwnProperty.call(node, '__ariaOriginalText')) node.__ariaOriginalText = node.nodeValue;
             const original = node.__ariaOriginalText;
             const phrase = original.trim();
@@ -653,6 +655,7 @@ window.ariaI18n = {
             if (node.nodeValue !== value) node.nodeValue = value;
         }
         root.querySelectorAll && root.querySelectorAll('input[placeholder],textarea[placeholder],[aria-label],button[title]').forEach(el => {
+            if(el.closest('[data-i18n-skip],[data-merchant-content]'))return;
             ['placeholder', 'aria-label', 'title'].forEach(name => {
                 if (!el.hasAttribute(name)) return;
                 el.__ariaOriginalAttributes = el.__ariaOriginalAttributes || {};
