@@ -1,0 +1,52 @@
+{
+  "themes": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "controlTextContrast": 17.541588319220615
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "controlTextContrast": 15.453276664057652
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "controlTextContrast": 17.541588319220615
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "controlTextContrast": 15.453276664057652
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "controlTextContrast": 17.541588319220615
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "controlTextContrast": 15.453276664057652
+    }
+  ],
+  "errors": [],
+  "ai": {
+    "decisionId": 257,
+    "source": "AI",
+    "model": "dots-studio/dots-3-note-preview:free"
+  },
+  "dailyFacts": {
+    "productsAnalyzed": 62,
+    "aiDecisions": 2,
+    "productDrafts": 0,
+    "engineDecisions": 74,
+    "priceApplied": 0,
+    "purchaseDrafts": 0,
+    "socialDrafts": 0,
+    "problemsFound": 0
+  },
+  "persistedAiCountersVerified": true,
+  "passed": true
+}
