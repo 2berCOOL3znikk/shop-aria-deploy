@@ -67,9 +67,15 @@ $env:SPRING_DATASOURCE_USERNAME='aria_preview';$env:SPRING_DATASOURCE_PASSWORD=$
 $env:SPRING_PROFILES_ACTIVE='postgres,production,free'
 $env:ARIA_ADMIN_EMAIL=$config.email;$env:ARIA_ADMIN_PASSWORD=$config.password;$env:ARIA_JWT_SECRET=$config.jwt
 $env:ARIA_SEED_DEMO_USERS='false';$env:ARIA_SEED_DEMO_CATALOG='false';$env:ARIA_DEMO_MARKET_ENABLED='false';$env:ARIA_RESET_DATA_ON_START='false'
+$env:ARIA_DEMO_CATALOG_IMPORT_ENABLED='true'
 $jar=Join-Path $preview 'app.jar'
-$args=@('-Duser.timezone=Asia/Qyzylorda','-Xms64m','-Xmx256m','-XX:+UseSerialGC','-XX:ActiveProcessorCount=2','-XX:TieredStopAtLevel=1','-jar',('"'+$jar+'"'),"--server.port=$Port",'--server.address=127.0.0.1',"--spring.datasource.url=jdbc:postgresql://127.0.0.1:$DatabasePort/aria_preview",'--spring.datasource.username=aria_preview','--spring.profiles.active=postgres,production,free','--aria.smart-pricing.schedule-enabled=false')
-$process=Start-Process -FilePath (Join-Path $JavaHome 'bin\java.exe') -ArgumentList $args -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput (Join-Path $preview 'app.log') -RedirectStandardError (Join-Path $preview 'app.err.log') -PassThru
+$previewJavaArgs=@('-Duser.timezone=Asia/Qyzylorda','-Xms64m','-Xmx256m','-XX:+UseSerialGC','-XX:ActiveProcessorCount=2','-XX:TieredStopAtLevel=1','-jar',('"'+$jar+'"'),"--server.port=$Port",'--server.address=127.0.0.1',"--spring.datasource.url=jdbc:postgresql://127.0.0.1:$DatabasePort/aria_preview",'--spring.datasource.username=aria_preview','--spring.profiles.active=postgres,production,free','--aria.smart-pricing.schedule-enabled=false')
+# Serve only the explicit public source directory on this loopback development preview.
+# Backend classes and migrations still come from the checked JAR; production uses classpath assets.
+$previewStaticRoot=(Resolve-Path -LiteralPath (Join-Path $root 'src/main/resources/static')).Path+[System.IO.Path]::DirectorySeparatorChar
+$previewStaticLocation=([Uri]$previewStaticRoot).AbsoluteUri
+$previewJavaArgs+="--spring.web.resources.static-locations=$previewStaticLocation,classpath:/static/"
+$process=Start-Process -FilePath (Join-Path $JavaHome 'bin\java.exe') -ArgumentList $previewJavaArgs -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput (Join-Path $preview 'app.log') -RedirectStandardError (Join-Path $preview 'app.err.log') -PassThru
 $process.Id | Set-Content -LiteralPath $pidFile
 $ready=$false
 for($attempt=0;$attempt -lt 60;$attempt++){

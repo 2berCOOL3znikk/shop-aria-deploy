@@ -8,6 +8,7 @@
     node.setAttribute("aria-label", "Навигация");
     node.innerHTML = '<a href="/index.html">Главная</a><span aria-hidden="true">/</span><a href="/index.html">Каталог</a><span aria-hidden="true">/</span><span aria-current="page">' + escape(name) + '</span>';
     document.getElementById("product").before(node);
+    document.querySelector('main.container > a[href="/index.html"]')?.remove();
   };
   const makeSpecTable = () => {
     const heading = [...document.querySelectorAll("#product h3")].find(el => el.textContent.includes("Характеристики"));
@@ -65,14 +66,17 @@
   }
   const target = document.getElementById("product");
   if (target) new MutationObserver(enhance).observe(target, { childList: true, subtree: true });
-  document.addEventListener("DOMContentLoaded", async () => {
-    const id = new URLSearchParams(location.search).get("id");
-    if (!id) return;
-    try {
-      const response = await fetch("/api/products/" + encodeURIComponent(id));
-      if (!response.ok) return;
-      const current = (await response.json()).product;
-      await loadSimilar(current);
-    } catch (_) {}
-  });
+  function renderEvidence(product){
+    const info=document.querySelector('#product > div:nth-child(2)');if(!info)return;
+    const provenance=product.provenance||{};
+    if(provenance.demonstration){const note=document.createElement('aside');note.className='storefront-demo-label';note.textContent='Учебная карточка · цена, закупка, остаток и даты партии созданы для демонстрации';info.prepend(note);}
+    const section=document.createElement('section');section.className='storefront-source';section.id='product-sources';
+    const safeLink=(url,label)=>{try{const value=new URL(url);return value.protocol==='https:'?'<a href="'+escape(value.href)+'" target="_blank" rel="noopener noreferrer">'+escape(label)+'</a>':escape(label);}catch{return escape(label);}};
+    const facts=Array.isArray(provenance.facts)?provenance.facts:[];
+    if(facts.length){
+      section.innerHTML='<h2>'+ (provenance.verification==='PACKAGE_PHOTO'?'Что подтверждено по фотографии':'Сведения из источников')+'</h2><p class="storefront-fact-note">Проверены только перечисленные сведения. Это не проверка конкретной поставки.</p><dl class="storefront-facts">'+facts.map(f=>'<div><dt>'+escape(f.label)+'</dt><dd>'+escape(f.value)+'<small>'+safeLink(f.sourceUrl,'Источник ↗')+' · '+escape(f.checkedAt)+'</small></dd></div>').join('')+'</dl>'+(provenance.limitations?.length?'<details><summary>Что ещё требует проверки</summary><ul>'+provenance.limitations.map(value=>'<li>'+escape(value)+'</li>').join('')+'</ul></details>':'');
+    }else section.innerHTML='<h2>О сведениях товара</h2><p class="storefront-fact-note">'+(provenance.verification==='OWNER_EDITED'?'Название или характеристики изменены владельцем. Прежнее подтверждение источника к изменённой карточке не применяется.':'Сведения добавлены магазином. Проверенные внешние источники пока не указаны.')+'</p>';
+    info.append(section);
+  }
+  window.addEventListener("aria:product-loaded", event => {renderEvidence(event.detail);loadSimilar(event.detail);});
 })();

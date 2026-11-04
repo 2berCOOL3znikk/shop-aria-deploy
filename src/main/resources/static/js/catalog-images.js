@@ -1,17 +1,18 @@
 (function () {
   "use strict";
 
-  const GENERIC_IMAGE = "/images/product-generic.svg";
+  const GENERIC_IMAGE = "/images/product-placeholder.svg";
   const escapeAttr = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 
   function getSkuImage(product) {
-    const sku = String(product && (product.sku || product.productSku) || "").trim();
-    const bundled = new Set(['SKU-1001','SKU-1002','SKU-1003','SKU-1004','SKU-1005','SKU-2001','SKU-2002','SKU-2003','SKU-2004','SKU-3001','SKU-3002','SKU-3003','SKU-4002','SKU-4003','SKU-5001','SKU-5002']);
-    return bundled.has(sku) ? "/images/products/" + encodeURIComponent(sku) + ".jpg" : "";
+    // An internal SKU is not evidence that a bundled photo depicts this product.
+    // Only the explicitly assigned image may be used; owner uploads are preserved.
+    return "";
   }
 
   function getLocalProductImage(product) {
-    const value = String(product && product.imageUrl || "").trim();
+    let value = String(product && product.imageUrl || "").trim();
+    if (/^\/images\/product-(?:generic|food|home|gifts|electronics)\.svg$/.test(value)) value=GENERIC_IMAGE;
     if (!value || /[\\\s"'<>]/.test(value)) return "";
     try {
       const parsed = new URL(value, window.location.origin);
@@ -46,17 +47,27 @@
     const style = options.style ? ' style="' + escapeAttr(options.style) + '"' : "";
     const creditTarget = options.creditTarget ? ' data-credit-target="' + escapeAttr(options.creditTarget) + '"' : "";
     const alt = options.alt === undefined ? name : options.alt;
-    return '<img data-image-candidates="' + escapeAttr(JSON.stringify(candidates)) + '" data-image-index="0" data-cat="' + escapeAttr(category) + '" data-name="' + escapeAttr(name) + '"' + creditTarget + ' alt="' + escapeAttr(alt) + '" loading="lazy" decoding="async" onload="CatalogImages.attach(this)" onerror="CatalogImages.onError(this)"' + css + style + ' src="' + escapeAttr(candidates[0]) + '">';
+    const creditHtml=options.creditTarget?' data-credit-html="'+escapeAttr(creditFor(product))+'"':'';
+    return '<img data-image-candidates="' + escapeAttr(JSON.stringify(candidates)) + '" data-image-index="0" data-cat="' + escapeAttr(category) + '" data-name="' + escapeAttr(name) + '"' + creditTarget + creditHtml + ' alt="' + escapeAttr(alt) + '" loading="lazy" decoding="async" onload="CatalogImages.attach(this)" onerror="CatalogImages.onError(this)"' + css + style + ' src="' + escapeAttr(candidates[0]) + '">';
   }
 
   function creditFor(product) {
-    const sku = String(product && (product.sku || product.productSku) || "").trim();
-    return sku ? "Локальное фото товара " + escapeAttr(sku) + ".jpg" : "Локальное фото товара";
+    const explicit=getLocalProductImage(product);
+    if (!explicit || explicit.endsWith('.svg')) return "Фото этого товара пока не добавлено. Показана условная иллюстрация.";
+    const photo=product?.provenance?.photo;
+    if(photo&&explicit===photo.path){
+      const link=(value,label)=>{try{const url=new URL(value);return url.protocol==='https:'?'<a href="'+escapeAttr(url.href)+'" target="_blank" rel="noopener noreferrer">'+escapeAttr(label)+'</a>':escapeAttr(label);}catch{return escapeAttr(label);}};
+      return 'Фото: '+escapeAttr(photo.author)+' · '+link(photo.sourceUrl,'источник')+' · '+link(photo.licenseUrl,photo.license)+'. '+escapeAttr(photo.note);
+    }
+    return "Изображение предоставлено магазином. Оформление упаковки может отличаться.";
   }
 
   function toggleCredit(image, visible) {
     const target = image.dataset.creditTarget && document.getElementById(image.dataset.creditTarget);
-    if (target) target.hidden = !visible;
+    if (target) {
+      target.hidden = !visible;
+      if(visible&&image.dataset.creditHtml)target.innerHTML=Number(image.dataset.imageIndex||0)===0?image.dataset.creditHtml:'Фото не загрузилось. Показана условная иллюстрация.';
+    }
   }
 
   function onError(image) {
@@ -79,6 +90,7 @@
 
   function attach(image) {
     if (!image) return;
+    if(image.naturalWidth<2||image.naturalHeight<2){onError(image);return;}
     image.onerror = () => onError(image);
     toggleCredit(image, image.naturalWidth > 0);
   }

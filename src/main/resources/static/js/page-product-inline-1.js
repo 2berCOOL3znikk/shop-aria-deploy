@@ -1,4 +1,5 @@
 let productId = null;
+let reviewBusy = false;
 
     function escapeHtml(value) {
         return String(value ?? '').replace(/[&<>"']/g, ch => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[ch]));
@@ -22,10 +23,12 @@ let productId = null;
             if (!res.ok) throw new Error('Не удалось обновить избранное');
             const data = await res.json();
             if (data.isFavorite) {
-                btn.textContent = '❤️ В избранном';
+                btn.textContent = '♥ В избранном';
+                btn.setAttribute('aria-pressed','true');
                 window.showToast('Добавлено в избранное');
             } else {
-                btn.textContent = '🤍 В избранное';
+                btn.textContent = '♡ В избранное';
+                btn.setAttribute('aria-pressed','false');
                 window.showToast('Удалено из избранного');
             }
         } catch(e) { window.showToast(e.message || 'Ошибка', 'error'); }
@@ -57,11 +60,13 @@ let productId = null;
     }
 
     async function submitReview() {
-        if (!productId || document.getElementById('reviews').hidden || !ariaAuth.requireLogin()) return;
+        if (reviewBusy || !productId || document.getElementById('reviews').hidden || !ariaAuth.requireLogin()) return;
         const author = document.getElementById('review-author').value || 'Аноним';
         const comment = document.getElementById('review-comment').value;
         const rating = parseInt(document.getElementById('review-rating').value);
         if (!comment.trim()) { window.showToast(ariaI18n.t('product.reviewError'), 'error'); return; }
+        reviewBusy=true;
+        const submit=document.getElementById('review-submit');if(submit)submit.disabled=true;
         try {
             const res = await ariaAuth.authFetch('/api/reviews', {
                 method: 'POST',
@@ -73,6 +78,7 @@ let productId = null;
             document.getElementById('review-comment').value = '';
             loadReviews();
         } catch(e) { window.showToast(ariaI18n.t('toast.error'), 'error'); }
+        finally { reviewBusy=false;if(submit)submit.disabled=false; }
     }
 
     async function loadProduct() {
@@ -130,17 +136,19 @@ let productId = null;
                 '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
                 '<h3 style="margin-bottom:12px;font-size:16px;">Информация</h3>' +
                 '<div style="margin-bottom:8px;"><b>В наличии:</b> ' + p.quantityOnHand + ' шт.</div>' +
-                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>Срок годности:</b> ' + new Date(p.expiryDate).toLocaleDateString('ru-RU') + '</div>' : '') +
+                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>' + (p.provenance?.demonstration ? 'Учебный срок партии:' : 'Срок годности:') + '</b> ' + new Date(p.expiryDate + 'T12:00:00').toLocaleDateString('ru-RU') + '</div>' : '') +
                 '<div><b>Статус:</b> ' + statusText + '</div>' +
                 '</div>' +
 
                 // Кнопки
                 '<div style="display:flex;gap:10px;">' +
                 window.ariaCart.control(p) +
-                '<button class="btn-outline" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? '❤️ В избранном' : '🤍 В избранное') + '</button>' +
+                '<button type="button" class="btn-outline" aria-pressed="' + isFav + '" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? '♥ В избранном' : '♡ В избранное') + '</button>' +
                 '</div>' +
                 '</div>';
 
+            document.title = p.name + ' — ARIA Shop';
+            window.dispatchEvent(new CustomEvent('aria:product-loaded', {detail: p}));
             if (reviews) reviews.hidden = false;
             loadReviews();
         } catch(e) {

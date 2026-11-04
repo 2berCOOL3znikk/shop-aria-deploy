@@ -24,9 +24,9 @@ const stamp=Date.now(),expiry=n=>new Date(Date.now()+n*86400000).toLocaleDateStr
    const product=(await api('GET','/api/admin/control/products',null,token)).find(x=>x.sku===sku);assert.ok(product);
    await p.locator('[data-action=lot-new][data-id="'+product.id+'"]').click();await p.locator('[name=lotNumber]').fill('E2E-'+sku);await p.locator('[name=quantity]').fill('12');await p.locator('[name=unitCost]').fill('600');if(days<3)await p.locator('[name=receivedAt]').fill(expiry(-10));await p.locator('[name=expiryDate]').fill(expiry(days));await save();return product;
   };
-  const coffee=await create('E2E-COFFEE-'+stamp,'Кофе — сквозная проверка '+stamp,20,'4006381333931');
-  const yoghurt=await create('E2E-YOGHURT-'+stamp,'Йогурт — социальная проверка '+stamp,2,'');
-  await create('E2E-CHOCOLATE-'+stamp,'Шоколад — сравнение товаров '+stamp,30,'');
+  const coffee=await create('E2E-COFFEE-'+stamp,'Кофе — учебная карточка',20,'4006381333931');
+  const yoghurt=await create('E2E-YOGHURT-'+stamp,'Йогурт — учебная карточка',2,'');
+  await create('E2E-CHOCOLATE-'+stamp,'Шоколад — учебная карточка',30,'');
   // A small real PNG uploaded through the actual multipart form.
   await p.locator('[data-action=product-photo][data-id="'+coffee.id+'"]').click();await p.locator('[name=photo]').setInputFiles({name:'qa.png',mimeType:'image/png',buffer:Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+a6xkAAAAASUVORK5CYII=','base64')});await save();
   report.checks.push('Owner login, product and lot creation, persistent photo upload through UI');

@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Owner UI imports 16 attributed demo products; anonymous import denied; provenance, uncertain facts and CC0 photo shown",
+    "Native price update → mobile product/cart → real demo order → FEFO stock consumption → owner UI shipment; repeat import does not replenish stock"
+  ],
+  "errors": [],
+  "externalAiCalled": false,
+  "createdOnImport": 16,
+  "preservedOnImport": 0,
+  "orderId": 18,
+  "stockBefore": 12,
+  "stockAfter": 11,
+  "passed": true
+}

@@ -66,6 +66,13 @@ public class ProductController {
         return products.stream().filter(p -> !p.getArchived() && p.getUnitPrice()!=null && p.getUnitPrice().signum()>0 && inventory.available(p)>0).toList();
     }
 
+    @jakarta.persistence.PersistenceContext private jakarta.persistence.EntityManager entityManager;
+    @GetMapping("/store-info")
+    public Map<String,Object> storeInfo(){
+        var organization=entityManager.find(com.aria.entity.Organization.class,1);
+        return Map.of("name",organization.name,"demonstration",organization.demonstration);
+    }
+
     @GetMapping("/social")
     public List<Map<String, Object>> social() {
         List<Product> res = new ArrayList<>(repo.findByStatus(ProductStatus.CANDIDATE));

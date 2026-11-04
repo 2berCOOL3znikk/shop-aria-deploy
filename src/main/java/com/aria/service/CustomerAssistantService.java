@@ -13,6 +13,16 @@ public class CustomerAssistantService {
     public CustomerAssistantService(CustomerCatalogueService catalogue,IntelligenceService ai,SmartPricingSettingsRepository settings,PlatformTransactionManager manager){this.catalogue=catalogue;this.ai=ai;this.settings=settings;transaction=new TransactionTemplate(manager);}
     public Map<String,Object> status(){return Map.of("externalAiAvailable",settings.findById(1L).filter(s->s.publicAssistantAiEnabled).isPresent()&&Boolean.TRUE.equals(ai.pricingStatus().get("configured")),"note","Внешний AI получает только ваше сообщение и публичные карточки после вашего согласия. Поиск по каталогу работает и без внешнего AI.");}
     public Map<String,Object> answer(String query,List<Long> compared,boolean consent){
+        String support=AssistantQuery.supportIntent(query);
+        if(!"CATALOGUE".equals(support)){
+            String text=switch(support){
+                case "OUT_OF_SCOPE" -> "Я помогаю с покупками в ARIA: найти товар, сравнить варианты и проверить доступные скидки. Что подберём в каталоге?";
+                case "ORDERS_HELP" -> "Ваши заказы и их статусы доступны в профиле после входа. Я не передаю личные данные заказа внешнему AI.";
+                default -> "Подтверждённые условия доставки и возврата уточняйте в поддержке магазина. Я не буду придумывать сроки или обещать возврат.";
+            };
+            var link=Map.of("href","ORDERS_HELP".equals(support)?"/profile.html":"STORE_HELP".equals(support)?"/support.html":"/index.html","label","ORDERS_HELP".equals(support)?"Открыть профиль":"STORE_HELP".equals(support)?"Поддержка магазина":"Открыть каталог");
+            return Map.of("source","ENGINE","intent",support,"text",text,"note","Ответ по разделам магазина. Внешний AI не вызывался.","products",List.of(),"links",List.of(link));
+        }
         var parsed=AssistantQuery.parse(query);var all=catalogue.available();
         if(!compared.isEmpty()&&all.stream().filter(p->compared.contains(((Number)p.get("id")).longValue())).count()!=new HashSet<>(compared).size())throw new IllegalArgumentException("Один из выбранных товаров недоступен в каталоге");
         var candidates=all.stream().filter(p->compared.isEmpty()||compared.contains(((Number)p.get("id")).longValue()))

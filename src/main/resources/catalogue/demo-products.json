@@ -1,0 +1,767 @@
+{
+  "schemaVersion": 1,
+  "entries": [
+    {
+      "referenceId": "rakhat-kazakhstanskiy-flat-100g",
+      "sku": "ARIA-DEMO-001",
+      "name": "Рахат «Казахстанский», 100 г",
+      "brand": "Рахат",
+      "category": "Шоколад",
+      "size": "100 г",
+      "description": "Рахат «Казахстанский», 100 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Казахстанский",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Рахат",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "100 г",
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Какао, не менее, %",
+          "value": "45",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Энергия, ккал на 100 г",
+          "value": "532",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "сахар, компоненты какао, молочные компоненты, соевый лецитин, экстракт ванили",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "rakhat-ainalayin-160g",
+      "sku": "ARIA-DEMO-002",
+      "name": "Рахат «Айналайын», 160 г",
+      "brand": "Рахат",
+      "category": "Шоколад",
+      "size": "160 г",
+      "description": "Рахат «Айналайын», 160 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Молочный шоколад «Айналайын»",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Рахат",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "160 г",
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Какао, не менее, %",
+          "value": "33",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Энергия, ккал на 100 г",
+          "value": "552",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "сахар, компоненты какао, молочные компоненты, соевый лецитин, соль, экстракт ванили",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Предупреждение источника",
+          "value": "арахис, орехи",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "rakhat-80-cocoa-100g",
+      "sku": "ARIA-DEMO-003",
+      "name": "Rakhat 80% cocoa, 100 г",
+      "brand": "Rakhat",
+      "category": "Шоколад",
+      "size": "100 г",
+      "description": "Rakhat 80% cocoa, 100 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Rakhat 80% cocoa",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Rakhat",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "100 г",
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Какао, не менее, %",
+          "value": "80",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Энергия, ккал на 100 г",
+          "value": "587",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "компоненты какао, сахар, соевый лецитин, соль, экстракт ванили",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "barilla-spaghetti-500g",
+      "sku": "ARIA-DEMO-004",
+      "name": "Barilla Spaghetti, 500 г",
+      "brand": "Barilla",
+      "category": "Макаронные изделия",
+      "size": "500 г",
+      "description": "Barilla Spaghetti, 500 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Spaghetti",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "500 г",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Состав по источнику",
+          "value": "семолина твёрдой пшеницы, вода",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Приготовление, мин",
+          "value": "8",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "barilla-penne-rigate-500g",
+      "sku": "ARIA-DEMO-005",
+      "name": "Barilla Penne Rigate, 500 г",
+      "brand": "Barilla",
+      "category": "Макаронные изделия",
+      "size": "500 г",
+      "description": "Barilla Penne Rigate, 500 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Penne Rigate",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "500 г",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Состав по источнику",
+          "value": "семолина твёрдой пшеницы, вода",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Приготовление, мин",
+          "value": "11",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "barilla-fusilli-500g",
+      "sku": "ARIA-DEMO-006",
+      "name": "Barilla Fusilli, 500 г",
+      "brand": "Barilla",
+      "category": "Макаронные изделия",
+      "size": "500 г",
+      "description": "Barilla Fusilli, 500 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Fusilli",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "500 г",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Состав по источнику",
+          "value": "семолина твёрдой пшеницы, вода",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Приготовление, мин",
+          "value": "11",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "foodmaster-kefir-25-1000g",
+      "sku": "ARIA-DEMO-007",
+      "name": "FoodMaster Кефир 2,5%, 1 кг",
+      "brand": "FoodMaster",
+      "category": "Молочные продукты",
+      "size": "1000 г",
+      "description": "FoodMaster Кефир 2,5%, 1 кг. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "FoodMaster Кефир 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "FoodMaster",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "1000 г",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Упаковка",
+          "value": "«ТетраРекс» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Жирность, %",
+          "value": "2.5",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "foodmaster-ryazhenka-25-900g",
+      "sku": "ARIA-DEMO-008",
+      "name": "FoodMaster Ряженка 2,5%, 900 г",
+      "brand": "FoodMaster",
+      "category": "Молочные продукты",
+      "size": "900 г",
+      "description": "FoodMaster Ряженка 2,5%, 900 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "FoodMaster Ряженка 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "FoodMaster",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "900 г",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Упаковка",
+          "value": "«ТетраРекс» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Жирность, %",
+          "value": "2.5",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "lactel-fm-vitamin-d-25-1000g",
+      "sku": "ARIA-DEMO-009",
+      "name": "Lactel ФМ Молоко с витамином D 2,5%, 1 кг",
+      "brand": "Lactel",
+      "category": "Молочные продукты",
+      "size": "1000 г",
+      "description": "Lactel ФМ Молоко с витамином D 2,5%, 1 кг. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Lactel ФМ Молоко с витамином D 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Lactel",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса нетто",
+          "value": "1000 г",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Упаковка",
+          "value": "«Тетрабрик» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Жирность, %",
+          "value": "2.5",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "frosch-raspberry-dish-gel-500ml",
+      "sku": "ARIA-DEMO-010",
+      "name": "Frosch Гель для мытья посуды Raspberry, 500 мл",
+      "brand": "Frosch",
+      "category": "Бытовые товары",
+      "size": "500 мл",
+      "description": "Frosch Гель для мытья посуды Raspberry, 500 мл. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Dishwashing Gel Raspberry",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Количество в упаковке",
+          "value": "500 мл",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "анионные и амфотерные ПАВ, неионогенные ПАВ, консервант, отдушка, малиновый уксус, красители",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "frosch-lemon-dish-liquid-750ml",
+      "sku": "ARIA-DEMO-011",
+      "name": "Frosch Средство для мытья посуды Lemon, 750 мл",
+      "brand": "Frosch",
+      "category": "Бытовые товары",
+      "size": "750 мл",
+      "description": "Frosch Средство для мытья посуды Lemon, 750 мл. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Dishwashing Liquid Lemon",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Количество в упаковке",
+          "value": "750 мл",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "анионные ПАВ, амфотерные и неионогенные ПАВ, консервант, отдушка, цитрусовое масло, краситель",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "frosch-vinegar-cleaner-1000ml",
+      "sku": "ARIA-DEMO-012",
+      "name": "Frosch Уксусный очиститель, 1 л",
+      "brand": "Frosch",
+      "category": "Бытовые товары",
+      "size": "1000 мл",
+      "description": "Frosch Уксусный очиститель, 1 л. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Vinegar Cleaner",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Количество в упаковке",
+          "value": "1000 мл",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "неионогенные и анионные ПАВ, уксусная кислота, краситель",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "frosch-green-lemon-dish-tabs-50",
+      "sku": "ARIA-DEMO-013",
+      "name": "Frosch Таблетки All-in-1 Green Lemon, 50 шт.",
+      "brand": "Frosch",
+      "category": "Бытовые товары",
+      "size": "50 шт",
+      "description": "Frosch Таблетки All-in-1 Green Lemon, 50 шт.. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Dishwashing tabs All-in-1 Green Lemon",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Количество в упаковке",
+          "value": "50 шт",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "кислородный отбеливатель, неионогенные ПАВ, поликарбоксилаты, ферменты, отдушка, экстракт лимона",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "heinz-tomato-soup-6x400g",
+      "sku": "ARIA-DEMO-014",
+      "name": "Heinz Cream of Tomato Soup, 6 × 400 г",
+      "brand": "Heinz",
+      "category": "Консервы",
+      "size": "6 × 400 г",
+      "description": "Heinz Cream of Tomato Soup, 6 × 400 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Cream of Tomato Soup 6 Pack",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Heinz",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Единиц в комплекте",
+          "value": "6",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса одной единицы",
+          "value": "400 г",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Томаты, %",
+          "value": "89",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Аллергены, указанные источником",
+          "value": "молоко",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Сведения о составе (сокращённо)",
+          "value": "томаты, вода, кукурузный загуститель, сахар, рапсовое масло, молочные компоненты, соль, лимонная кислота, пряности",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "heinz-baked-beans-case-24x415g",
+      "sku": "ARIA-DEMO-015",
+      "name": "Heinz Baked Beans, 24 × 415 г",
+      "brand": "Heinz",
+      "category": "Консервы",
+      "size": "24 × 415 г",
+      "description": "Heinz Baked Beans, 24 × 415 г. Сведения об упаковке и характеристиках приведены ниже со ссылками на источники.",
+      "verification": "PRIMARY_SOURCE",
+      "facts": [
+        {
+          "label": "Наименование",
+          "value": "Baked Beans 24 x 415g",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Бренд",
+          "value": "Heinz",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Единиц в комплекте",
+          "value": "24",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Масса одной единицы",
+          "value": "415 г",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": null,
+      "limitations": [
+        "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.",
+        "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.",
+        "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина."
+      ]
+    },
+    {
+      "referenceId": "heinz-beanz-photographed-can",
+      "sku": "ARIA-DEMO-016",
+      "name": "Heinz Beanz — фасоль в томатном соусе",
+      "brand": "Heinz",
+      "category": "Консервы",
+      "size": null,
+      "description": "Фасоль Heinz Beanz в томатном соусе. Название и вид упаковки сверены по фотографии; масса и состав требуют уточнения.",
+      "verification": "PACKAGE_PHOTO",
+      "facts": [
+        {
+          "label": "Наименование на этикетке",
+          "value": "Heinz Beanz · In a rich tomato sauce",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Heinz_%22Beanz%22_Baked_Beans_In_a_rich_tomato_sauce.jpg",
+          "checkedAt": "2026-11-04"
+        },
+        {
+          "label": "Вид упаковки",
+          "value": "Металлическая банка",
+          "sourceUrl": "https://commons.wikimedia.org/wiki/File:Heinz_%22Beanz%22_Baked_Beans_In_a_rich_tomato_sauce.jpg",
+          "checkedAt": "2026-11-04"
+        }
+      ],
+      "photo": {
+        "path": "/images/demo/heinz-beanz-cc0.jpg",
+        "sourceUrl": "https://commons.wikimedia.org/wiki/File:Heinz_%22Beanz%22_Baked_Beans_In_a_rich_tomato_sauce.jpg",
+        "author": "AhmedMX in",
+        "license": "CC0 1.0",
+        "licenseUrl": "https://creativecommons.org/publicdomain/zero/1.0/",
+        "note": "Оригинал без изменений. Подтверждено изображение этой банки; масса, регион поставки и состав не предполагаются."
+      },
+      "limitations": [
+        "Масса, состав, GTIN и изготовитель конкретной упаковки не подтверждены. Не приравнивается к коробке 24 × 415 г.",
+        "Цена, закупочная стоимость, остаток и даты учебной партии созданы только для демонстрации."
+      ]
+    }
+  ]
+}

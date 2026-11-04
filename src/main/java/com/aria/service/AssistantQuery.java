@@ -3,6 +3,13 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.regex.Pattern;
 public record AssistantQuery(String text,BigDecimal budget,boolean discountsOnly,boolean withoutDiscounts,List<String> terms,String intent){
+    public static String supportIntent(String input){
+        String text=input.toLowerCase(Locale.ROOT).replace('ё','е');
+        if(Pattern.compile("(?:напиши|написать|создай|сгенерируй|реши|сделай|помоги).{0,90}(?:код|скрипт|программ[уы]|python|javascript|java\\b|сочинени|реферат|домашн|уравнен)|(?:код|скрипт).{0,35}(?:python|javascript|java\\b)|(?:домашн.{0,15}задани)").matcher(text).find())return "OUT_OF_SCOPE";
+        if(Pattern.compile("(?:мой|моего|мои|статус|где|история).{0,30}заказ|заказ.{0,25}(?:статус|история)").matcher(text).find())return "ORDERS_HELP";
+        if(Pattern.compile("доставк|возврат|вернуть.{0,15}товар").matcher(text).find())return "STORE_HELP";
+        return "CATALOGUE";
+    }
     public static AssistantQuery parse(String input){
         String text=input.toLowerCase(Locale.ROOT).replace('ё','е');var match=Pattern.compile("(?:до|не\\s+(?:дороже|более))\\s*(\\d+(?:[ \\u00a0]\\d{3})*(?:[.,]\\d{1,2})?)").matcher(text);BigDecimal budget=null;String termText=text;
         if(Pattern.compile("\\b(?:руб|рубл\\p{L}*|usd|eur|доллар\\p{L}*|евро)\\b|[$€₽]").matcher(text).find())throw new IllegalArgumentException("Цены магазина указаны в тенге. Укажите бюджет в ₸: валютный курс не подключён");

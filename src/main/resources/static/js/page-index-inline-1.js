@@ -37,6 +37,8 @@ window.toggleFavorite = async function (productId, button) {
     if (button) {
       button.textContent = isFavorite ? "♥" : "♡";
       button.classList.toggle("is-active", isFavorite);
+      button.setAttribute("aria-pressed", String(isFavorite));
+      button.setAttribute("aria-label", isFavorite ? "Удалить из избранного" : "Добавить в избранное");
       button.classList.add("pop");
       setTimeout(() => button.classList.remove("pop"), 340);
     }
@@ -59,14 +61,17 @@ function updateCategoryChips() {
   const container = document.getElementById("category-chips");
   if (!container) return;
   const categories = [""].concat(Array.from(state.allCategories).sort((a, b) => a.localeCompare(b, "ru")));
+  const selected = new URLSearchParams(location.search).get("category") || "";
+  const active = categories.includes(selected) ? selected : "";
   container.innerHTML = categories.map(category =>
-    '<button class="category-chip' + (category === "" ? " active" : "") + '" data-category="' + escapeHtml(category) + '">' +
-    (category ? escapeHtml(category) : "Все категории") + "</button>"
+    '<button type="button" class="category-chip' + (category === active ? " active" : "") + '" aria-pressed="' + (category === active) + '" data-category="' + escapeHtml(category) + '">' +
+    (category ? escapeHtml(category) : "Все товары") + "</button>"
   ).join("");
   container.querySelectorAll(".category-chip").forEach(chip => {
     chip.addEventListener("click", () => {
-      container.querySelectorAll(".category-chip").forEach(item => item.classList.remove("active"));
+      container.querySelectorAll(".category-chip").forEach(item => { item.classList.remove("active"); item.setAttribute("aria-pressed", "false"); });
       chip.classList.add("active");
+      chip.setAttribute("aria-pressed", "true");
       if (typeof window.filterAndSort === "function") window.filterAndSort();
     });
   });
@@ -77,7 +82,9 @@ async function initCatalogPage() {
   if (window.ariaI18n) ariaI18n.initI18n();
 
   try {
-    await Promise.all([loadFavorites(), loadCartCount()]);
+    // An unavailable optional account feature must not hide the public catalogue.
+    const accountLoads = await Promise.allSettled([loadFavorites(), loadCartCount()]);
+    if (accountLoads.some(result => result.status === "rejected")) window.showToast("Часть данных аккаунта пока недоступна. Каталог можно просматривать.", "error");
     const response = await fetch("/api/products/store");
     if (!response.ok) throw new Error("Не удалось загрузить каталог");
     state.products = await response.json();

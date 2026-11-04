@@ -29,6 +29,17 @@ public class ProductDetail {
     @Column(columnDefinition = "TEXT")
     private String descriptionLong;
 
+    @Column(length = 120)
+    private String catalogueReference;
+
+    @Column(nullable = false, columnDefinition = "boolean default false")
+    private boolean demonstration;
+
+    public String getCatalogueReference() { return catalogueReference; }
+    public void setCatalogueReference(String value) { catalogueReference=value; }
+    public boolean getDemonstration() { return demonstration; }
+    public void setDemonstration(boolean value) { demonstration=value; }
+
     public ProductDetail() {}
 
     public ProductDetail(Product product, String brand, String color, String size,

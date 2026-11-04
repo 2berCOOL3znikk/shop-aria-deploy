@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "After an actual preview restart: product identity, source reference, consumed stock and SHIPPED order retained"
+  ],
+  "errors": [],
+  "externalAiCalled": false,
+  "productId": 46,
+  "quantity": 11,
+  "orderId": 18,
+  "passed": true
+}

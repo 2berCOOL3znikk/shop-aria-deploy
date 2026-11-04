@@ -1,0 +1,14 @@
+{
+  "checks": [
+    "Real catalogue search, category, price range, invalid range, discount filter, sorting and reloadable URLs",
+    "Ratings are reused while filtering instead of being requested for every render",
+    "Floating chat: explicit unchecked external consent, real ENGINE results, comparison, topic guard, private-order link, explicit 503 handling, Escape/focus",
+    "Catalogue, product and chat fit 390/1440 px in light/dark themes; source product title preserved",
+    "A failed optional favourites request does not hide the public catalogue; owner can return to administration"
+  ],
+  "pageErrors": [],
+  "externalAiCalled": false,
+  "productCount": 34,
+  "browser": "156.0.4314.58",
+  "passed": true
+}

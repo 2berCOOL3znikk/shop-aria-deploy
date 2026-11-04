@@ -8,7 +8,7 @@
 
 
 
-<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"></head>
+<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css"></head>
 <body>
 <div class="bg-mesh"></div>
 
@@ -38,16 +38,16 @@
         <div id="reviews-list"></div>
         <div style="margin-top:20px;padding:20px;" class="glass-card">
             <h3 style="margin-bottom:15px;" data-i18n="product.leaveReview">Оставить отзыв</h3>
-            <input type="text" id="review-author" data-i18n-placeholder="product.reviewAuthor" placeholder="Ваше имя" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <textarea id="review-comment" data-i18n-placeholder="product.reviewComment" placeholder="Комментарий" rows="3" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);resize:vertical;"></textarea>
-            <select id="review-rating" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <label for="review-author" class="storefront-review-label">Имя в отзыве</label><input type="text" id="review-author" maxlength="100" autocomplete="name" data-i18n-placeholder="product.reviewAuthor" placeholder="Ваше имя" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <label for="review-comment" class="storefront-review-label">Ваш отзыв</label><textarea id="review-comment" maxlength="2000" required data-i18n-placeholder="product.reviewComment" placeholder="Комментарий" rows="3" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);resize:vertical;"></textarea>
+            <label for="review-rating" class="storefront-review-label">Оценка</label><select id="review-rating" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
                 <option value="5">★★★★★ (5)</option>
                 <option value="4">★★★★ (4)</option>
                 <option value="3">★★★ (3)</option>
                 <option value="2">★★ (2)</option>
                 <option value="1">★ (1)</option>
             </select>
-            <button class="btn-glow" onclick="submitReview()" data-i18n="product.reviewSubmit">Отправить отзыв</button>
+            <button id="review-submit" type="button" class="btn-glow" onclick="submitReview()" data-i18n="product.reviewSubmit">Отправить отзыв</button>
         </div>
     </div>
 </main>
@@ -66,5 +66,5 @@
   <script src="/js/catalog-images.js"></script>
   <script src="/js/page-product-inline-1.js"></script>
   <script src="/js/product-mvp.js"></script>
-<script src="/js/pwa.js"></script></body>
+<script src="/js/pwa.js"></script><script src="/js/assistant.js"></script></body>
 </html>

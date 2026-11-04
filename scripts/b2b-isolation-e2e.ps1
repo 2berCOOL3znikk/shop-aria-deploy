@@ -22,7 +22,7 @@ function StartCompany($c,[string]$binding){
  $env:ARIA_JWT_SECRET=$preview.jwt # Deliberately identical: issuer must still isolate tokens.
  $env:ARIA_ADMIN_EMAIL='same-owner@b2b.test';$env:ARIA_ADMIN_PASSWORD=$preview.password
  $env:ARIA_ORGANIZATION_KEY=$binding
- $arguments=@('-Duser.timezone=Asia/Qyzylorda','-Xms32m','-Xmx192m','-XX:+UseSerialGC','-XX:ActiveProcessorCount=2','-XX:TieredStopAtLevel=1','-jar',('"'+$jar+'"'),"--server.port=$($c.port)",'--server.address=127.0.0.1',"--spring.datasource.url=jdbc:postgresql://127.0.0.1:55434/$($c.database)",'--spring.profiles.active=postgres,production,free','--aria.intelligence.external-enabled=false','--aria.smart-pricing.schedule-enabled=false','--aria.seed-demo-users=false','--aria.seed-demo-catalog=false')
+ $arguments=@('-Duser.timezone=Asia/Qyzylorda','-Xms32m','-Xmx192m','-XX:+UseSerialGC','-XX:ActiveProcessorCount=2','-XX:TieredStopAtLevel=1','-jar',('"'+$jar+'"'),"--server.port=$($c.port)",'--server.address=127.0.0.1',"--spring.datasource.url=jdbc:postgresql://127.0.0.1:55434/$($c.database)",'--spring.profiles.active=postgres,production,free','--aria.intelligence.external-enabled=false','--aria.demo-catalog-import-enabled=true','--aria.smart-pricing.schedule-enabled=false','--aria.seed-demo-users=false','--aria.seed-demo-catalog=false')
  $p=Start-Process -FilePath (Join-Path $JavaHome 'bin/java.exe') -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput (Join-Path $out "$($c.key)-$binding.log") -RedirectStandardError (Join-Path $out "$($c.key)-$binding.err.log") -PassThru
  $script:owned+= $p
  for($attempt=0;$attempt -lt 90;$attempt++){
@@ -60,7 +60,7 @@ try{
   $c.token=$login.token
   $current=Api $c '/api/admin/control/organization' 'GET' $null $c.token
   if($current.binding -ne $c.key){throw 'Incorrect organization metadata'}
-  foreach($privatePath in '/api/products/store','/api/social/impact','/api/admin/control/organization'){
+  foreach($privatePath in '/api/products/store','/api/products/store-info','/api/social/impact','/api/admin/control/organization','/api/admin/control/demo-catalogue'){
    $denied=$false
    try{$null=Api $c $privatePath}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Anonymous request accessed company business data'}
@@ -71,7 +71,7 @@ try{
   $c=$companies[$i];$other=$companies[1-$i]
   $products=@(Api $c '/api/admin/control/products' 'GET' $null $c.token)
   if($products.Count -ne 1 -or $products[0].name -ne $c.key){throw 'Product data crossed boundary'}
-  foreach($path in '/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings'){
+  foreach($path in '/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings','/api/admin/control/demo-catalogue','/api/products/store-info'){
    $denied=$false
    try{$null=Api $c $path 'GET' $null $other.token}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Foreign organization token was accepted'}
@@ -88,8 +88,18 @@ try{
  $null=Api $companies[0] '/api/admin/control/products/ai-settings' 'PUT' @{revision=$aSettings.revision;textConsentEnabled=$true;dailyBudget=5} $companies[0].token
  $bAfter=Api $companies[1] '/api/admin/control/products/ai-settings' 'GET' $null $companies[1].token
  if($bAfter.textConsentEnabled -or $bAfter.revision -ne $bSettings.revision){throw 'AI settings crossed company boundary'}
- foreach($c in $companies){Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='27' AND success=true) THEN RAISE EXCEPTION 'V27 missing'; END IF; END `$`$;"}
- $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V27 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B')
+ # Even the demo flag on a non-demo binding must not open an educational import.
+ Sql $companies[1].database "UPDATE saas_organization SET demonstration=true WHERE id=1"
+ foreach($c in $companies){
+  $state=Api $c '/api/admin/control/demo-catalogue' 'GET' $null $c.token
+  if($state.available){throw 'Demo importer exposed in a company binding'}
+  $denied=$false
+  try{$null=Api $c '/api/admin/control/demo-catalogue' 'POST' @{confirmed=$true} $c.token}catch{if([int]$_.Exception.Response.StatusCode -eq 409){$denied=$true}else{throw}}
+  if(!$denied){throw 'Demo importer changed a company catalogue'}
+  if(@(Api $c '/api/admin/control/products' 'GET' $null $c.token).Count -ne 1){throw 'Demo products leaked into a company catalogue'}
+  Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='28' AND success=true) THEN RAISE EXCEPTION 'V28 missing'; END IF; END `$`$;"
+ }
+ $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V28 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B','Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled')
  $report.passed=$true
  Write-Output 'PASS: two-company database/process/API isolation'
 }finally{

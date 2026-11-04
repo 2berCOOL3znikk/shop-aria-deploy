@@ -1,0 +1,11 @@
+{
+  "liveGenerationRetested": false,
+  "note": "No AI generation or limit reset was performed; earlier live final-contract test was blocked by provider 429.",
+  "textConsentEnabled": false,
+  "dailyBudget": 5,
+  "budgetUsed": 5,
+  "remaining": 0,
+  "configured": true,
+  "model": "openrouter/free",
+  "textOnly": true
+}

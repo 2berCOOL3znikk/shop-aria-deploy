@@ -57,5 +57,18 @@
       root.querySelector('button').onclick=()=>mount({request});
     }
   }
-  window.ariaWorkspace={mount};
+  async function mountDemoCatalogue(ctx){
+    const root=document.getElementById('demo-catalogue-settings');if(!root)return;
+    try{
+      const state=await ctx.request('/demo-catalogue');if(!root.isConnected||!state.available)return;
+      root.hidden=false;
+      root.innerHTML=`<div class="ws-panel-head"><div><h3>Учебный каталог</h3><p>Для демонстрационной компании · ${number(state.references)} справочных карточек</p></div><span class="ws-pill">Демо</span></div><p class="control-help">Проверенные сведения о коммерческих товарах, источники и отдельно обозначенные учебные цены и партии. Уже добавлено: ${number(state.imported)}.</p><button type="button" class="ws-button">Добавить учебный каталог</button>`;
+      root.querySelector('button').onclick=()=>ctx.form('Добавить учебные товары',`<p class="control-help wide">${esc(state.note)}</p><p class="control-help wide">Существующие товары не перезаписываются. Продажи, цены конкурентов и подтверждённые сроки реальных поставок не создаются.</p><label class="control-field wide"><span><input type="checkbox" name="confirmed" required> Понимаю, что цены, закупка, остатки и даты создаются как учебные данные</span></label>`,async f=>{
+        if(!f.has('confirmed'))throw new Error('Подтвердите создание учебных данных');
+        const result=await ctx.request('/demo-catalogue','POST',{confirmed:true});
+        return `Создано ${result.created.length} карточек. Существующих сохранено без изменения: ${result.preserved.length}. Откройте витрину.`;
+      });
+    }catch(error){if(root.isConnected){root.hidden=false;root.innerHTML='<p class="control-help">Не удалось проверить доступность учебного каталога. Обновите страницу.</p>';}}
+  }
+  window.ariaWorkspace={mount,mountDemoCatalogue};
 })();

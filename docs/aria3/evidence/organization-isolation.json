@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Two real PostgreSQL databases, distinct restricted logins, V1-V28 and Hibernate validate",
+    "Two real Spring Boot processes, same owner email and signing key",
+    "Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs",
+    "Database login cannot connect to the other company database; no external AI requests",
+    "New workspace/AI settings reject foreign signed tokens; text consent in A does not change B",
+    "Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled"
+  ],
+  "passed": true
+}
