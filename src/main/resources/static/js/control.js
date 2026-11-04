@@ -132,6 +132,7 @@
   ].map(([title,note,url])=>`<a href="${url}"><h3>${title} ↗</h3><p>${note}</p></a>`).join('')}</section><section class="ws-panel" id="demo-catalogue-settings" hidden style="margin-top:24px"></section>`;}
   function render(){
     $('control-title').textContent=tabs[tab];
+    $('control-refresh').hidden=tab==='smart';
     const group=groups.find(([,keys])=>keys.includes(tab));
     $('control-nav').innerHTML=groups.map(([key,keys,path])=>`<button type="button" data-action="tab" data-id="${key}" ${keys.includes(tab)?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg><span>${tabs[key]}</span></button>`).join('');
     const subnav=group?.[1].length>1?`<nav class="ws-subnav" aria-label="Подразделы">${group[1].map(key=>`<button type="button" data-action="tab" data-id="${key}" ${key===tab?'aria-current="page"':''}>${subLabels[key]||tabs[key]}</button>`).join('')}</nav>`:'';

@@ -1,0 +1,14 @@
+{
+  "passed": true,
+  "actualRequestSentInPreviousAttempt": true,
+  "decisionId": 269,
+  "source": "AI",
+  "model": "dots-studio/dots-3-note-preview:free",
+  "strategy": "KEEP",
+  "aiCompletedAt": "2026-11-05T01:54:10.513019",
+  "visibleInPricing": true,
+  "visibleInControlCenter": true,
+  "pricesUnchanged": true,
+  "note": "Actual free-provider response retained. No new provider request, consent or quota reset in this verification.",
+  "errors": []
+}

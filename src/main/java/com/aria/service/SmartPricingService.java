@@ -141,7 +141,7 @@ public class SmartPricingService {
         d.status="ROLLED_BACK";decide(d,reason);audit.record("SMART_PRICING_ROLLED_BACK","decision:"+id,reason);return view(d);
     }
     private void decide(PricingDecision d,String reason){d.decidedAt=LocalDateTime.now();var auth=SecurityContextHolder.getContext().getAuthentication();d.decidedBy=auth==null?"system":auth.getName();d.decisionReason=reason;}
-    private Map<String,Object> view(PricingDecision d){
+    Map<String,Object> view(PricingDecision d){
         var result=new LinkedHashMap<String,Object>();result.put("id",d.id);result.put("productId",d.productId);result.put("createdAt",d.createdAt);result.put("reviewAt",d.reviewAt);result.put("status",d.status);
         result.put("report",json.readValue(d.reportJson,Map.class));result.put("explanation",d.explanationJson==null?null:json.readValue(d.explanationJson,Map.class));
         result.put("source",d.source);result.put("selectedPercent",d.selectedPercent);result.put("aiRequestedAt",d.aiRequestedAt);result.put("aiCompletedAt",d.aiCompletedAt);

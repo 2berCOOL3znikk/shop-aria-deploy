@@ -1,0 +1,55 @@
+{
+  "checks": [
+    "Read-only opening, one latest row per product, honest KEEP with zero sales and one visible action",
+    "Actual confirmation dialog → safe Java apply → public product price → audit/history → rollback, without stock movement",
+    "Current owner name/current price, stale calculation guard, refresh, filters and actual rejection",
+    "Explicit injected 503 shows a useful error and working Retry; no successful response is simulated"
+  ],
+  "errors": [],
+  "screens": [
+    {
+      "width": 1440,
+      "theme": "light",
+      "buttons": 25,
+      "characters": 2546
+    },
+    {
+      "width": 1440,
+      "theme": "dark",
+      "buttons": 25,
+      "characters": 2546
+    },
+    {
+      "width": 768,
+      "theme": "light",
+      "buttons": 25,
+      "characters": 2440
+    },
+    {
+      "width": 768,
+      "theme": "dark",
+      "buttons": 25,
+      "characters": 2440
+    },
+    {
+      "width": 390,
+      "theme": "light",
+      "buttons": 25,
+      "characters": 2440
+    },
+    {
+      "width": 390,
+      "theme": "dark",
+      "buttons": 25,
+      "characters": 2440
+    }
+  ],
+  "externalAiCalled": false,
+  "fixture": {
+    "id": 67,
+    "sku": "QA-PRICE-C102C7A9-5A1",
+    "lotId": 60
+  },
+  "passed": true,
+  "fixtureArchived": true
+}
