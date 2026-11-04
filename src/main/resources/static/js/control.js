@@ -8,7 +8,7 @@
   const date = n => n ? new Date(n.length === 10 ? n + 'T12:00:00' : n).toLocaleString('ru-KZ', n.length === 10 ? {dateStyle:'medium'} : {dateStyle:'short',timeStyle:'short'}) : 'Без срока';
   const today = () => {const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Qyzylorda',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(p=>[p.type,p.value]));return `${parts.year}-${parts.month}-${parts.day}`;};
   const names = {ACTIVE:'В продаже',CANDIDATE:'Требует решения',DISCOUNTED:'Со скидкой',SOCIAL:'На соцполке',RESERVED:'Зарезервирован',TRANSFERRED:'Передан',WRITTEN_OFF:'Списан',OPEN:'Доступно',CLAIMED:'Зарезервировано',CANCELLED:'Отменено',PENDING:'Новый',SHIPPED:'Отправлен',DELIVERED:'Доставлен',RETURNED:'Возврат в карантин'};
-  const tabs = {workspace:'Главная',stores:'Мои магазины',overview:'Обзор',manager:'ARIA AI',products:'Товары',lots:'Склад и партии',movements:'Движения и потери',smart:'ARIA Smart Pricing',competitors:'Цены и конкуренты',pricing:'Цены и скидки',suppliers:'Поставщики',purchases:'Закупки',pos:'POS · продажи',integrations:'Интеграции',orders:'Заказы',social:'Социальная полка',socialPlans:'ARIA Impact',intelligence:'ARIA Intelligence',audit:'Журнал действий',policies:'Настройки правил',feedback:'Сообщения поддержки',guide:'Как работать'};
+  const tabs = {workspace:'Главная',stores:'Мои магазины',overview:'Аналитика',manager:'ARIA AI',products:'Товары',lots:'Склад',movements:'Движения и потери',smart:'Цены',competitors:'Цены и конкуренты',pricing:'Цены и скидки',suppliers:'Поставщики',purchases:'Закупки',pos:'POS · продажи',integrations:'Интеграции',orders:'Заказы',social:'Социальная полка',socialPlans:'ARIA Impact',intelligence:'ARIA Intelligence',audit:'Журнал действий',policies:'Настройки правил',feedback:'Сообщения поддержки',guide:'Как работать',settings:'Настройки'};
   let tab = Object.hasOwn(tabs,location.hash.slice(1)) ? location.hash.slice(1) : 'workspace';
   let data = {products:[],suppliers:[],lots:[],orders:[],social:[],audit:[],policies:[],overview:{}}, search = '', selectedProduct = '', preview = null, previewRevision=0;
   let filter='', sort='newest', page=0, pageSize=25, totalItems=0, loadRevision=0, dirty=false, saving=false;
@@ -106,14 +106,41 @@
   function integrations(){return '<div id="integrations-root" aria-live="polite">Проверяем подключения…</div>';}
   function pos(){return '<div id="pos-root" aria-live="polite">Загружаем кассовый интерфейс…</div>';}
   function purchases(){return '<div id="purchases-root" aria-live="polite">Загружаем внутренние закупки…</div>';}
-  function workspace(){return '<div id="stores-root" aria-live="polite">Загружаем кабинет…</div>';}
+  function workspace(){return '<div id="workspace-root" aria-live="polite">Загружаем главную…</div>';}
   function stores(){return '<div id="stores-root" aria-live="polite">Загружаем магазины…</div>';}
   function manager(){return '<div id="manager-root" class="control-skeleton" aria-live="polite">Проверяем состояние автономного менеджера…</div>';}
   function socialPlans(){return '<div id="social-proposals-root">Загружаем социальные заявки…</div>';}
   function competitors(){return '<div id="competitors-root">Загружаем источники цен…</div>';}
   function smart(){return '<div id="smart-pricing-root" aria-live="polite">Проверяем рекомендации по данным магазина…</div>';}
   function show(title,html){dirty=false;$('control-dialog-title').textContent=title;$('control-dialog-body').innerHTML=html;$('control-dialog').showModal();}
-  function render(){ $('control-title').textContent=tabs[tab];$('control-nav').innerHTML=['workspace','manager','stores','products','orders','lots','competitors','purchases','smart','socialPlans','policies'].map(key=>`<button type="button" data-action="tab" data-id="${key}" ${tab===key?'aria-current="page"':''}>${tabs[key]}</button>`).join('')+'<details class="control-nav-extra" '+(!['workspace','manager','stores','products','orders','lots','competitors','purchases','smart','socialPlans','policies'].includes(tab)?'open':'')+'><summary>Дополнительные инструменты</summary>'+Object.entries(tabs).filter(([key])=>!['workspace','manager','stores','products','orders','lots','competitors','purchases','smart','socialPlans','policies'].includes(key)).map(([key,label])=>`<button type="button" data-action="tab" data-id="${key}" ${tab===key?'aria-current="page"':''}>${label}</button>`).join('')+'</details>';$('control-content').innerHTML=({workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide}[tab])()+(listTabs.has(tab)?pager():'');if(tab==='workspace'||tab==='stores')ariaStores.mount({request,notify,form,formField,show},tab==='workspace');if(tab==='pricing')loadPreview();if(tab==='movements')ariaOperations.ledger({request,notify});if(tab==='integrations')ariaOperations.integrations({request,notify});if(tab==='pos')ariaPos.mount({request,notify,form,formField,show});if(tab==='purchases')ariaPurchases.mount({request,notify,form,formField,show});if(tab==='manager')ariaManager.mount({request,notify,form,formField,show});if(tab==='smart')ariaSmartPricing.mount({request,notify,form,formField,show});if(tab==='competitors')ariaCompetitors.mount({request,notify,form,formField,show});if(tab==='socialPlans')ariaSocialProposals.mount({request,notify,form,formField,show}); }
+  const groups = [
+    ['workspace',['workspace'],'M3 10 12 3l9 7v10H3z M9 20v-7h6v7'],
+    ['manager',['manager'],'m12 3 2.5 6.5L21 12l-6.5 2.5L12 21l-2.5-6.5L3 12l6.5-2.5z'],
+    ['stores',['stores'],'M3 10h18l-2-6H5z M5 10v10h14V10 M9 20v-6h6v6'],
+    ['products',['products'],'m3 7 9-4 9 4-9 4z M3 7v10l9 4 9-4V7 M12 11v10'],
+    ['orders',['orders'],'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6'],
+    ['lots',['lots','movements','pos'],'M3 9 12 3l9 6v12H3z M7 21v-9h10v9 M7 16h10'],
+    ['smart',['smart','competitors','pricing'],'M20 13 13 20a2 2 0 0 1-3 0l-7-7V3h10l7 7a2 2 0 0 1 0 3Z M7 7h.01'],
+    ['purchases',['purchases','suppliers'],'M3 3h2l3 12h11l2-8H6 M10 20h.01 M18 20h.01'],
+    ['overview',['overview','intelligence'],'M4 20h16 M7 16v-5 M12 16V4 M17 16V8'],
+    ['socialPlans',['socialPlans','social'],'M20 5c-3-3-6 0-8 2-2-2-5-5-8-2-4 4 3 10 8 14 5-4 12-10 8-14Z'],
+    ['settings',['settings','policies','integrations','audit','feedback','guide'],'M4 6h16 M4 12h16 M4 18h16 M8 3v6 M16 9v6 M10 15v6']
+  ];
+  const subLabels={smart:'Рекомендации',competitors:'Конкуренты',pricing:'Ручная скидка',lots:'Партии',movements:'Движения и потери',pos:'Внутренняя касса',purchases:'Закупки',suppliers:'Поставщики',overview:'Показатели',intelligence:'Сводка ARIA',socialPlans:'Предложения',social:'Социальная полка',settings:'Общее',policies:'Правила магазина',integrations:'Подключения',audit:'Журнал',feedback:'Поддержка',guide:'Помощь'};
+  function settings(){return `<div class="ws-page-heading"><div><p class="ws-overline">Рабочее пространство</p><h2>Настройки компании</h2><p>Правила, доступы и история — под вашим контролем.</p></div></div><section class="ws-settings-grid">${[
+    ['Правила магазина','Маржа, категории и сигналы сроков','#policies'],['Автоматизация ARIA','Разрешения AI и границы действий','#manager'],['Подключения','Статус внешних сервисов и кассы','#integrations'],['Журнал действий','Кто и когда изменил данные','#audit'],['Мой аккаунт','Пароль и данные профиля','/profile.html'],['Документы и организации','Проверка организаций и документы выдачи','/admin.html'],['Поддержка','Обращения покупателей','#feedback'],['Как работать','Инструкции по основным операциям','#guide']
+  ].map(([title,note,url])=>`<a href="${url}"><h3>${title} ↗</h3><p>${note}</p></a>`).join('')}</section>`;}
+  function render(){
+    $('control-title').textContent=tabs[tab];
+    const group=groups.find(([,keys])=>keys.includes(tab));
+    $('control-nav').innerHTML=groups.map(([key,keys,path])=>`<button type="button" data-action="tab" data-id="${key}" ${keys.includes(tab)?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg><span>${tabs[key]}</span></button>`).join('');
+    const subnav=group?.[1].length>1?`<nav class="ws-subnav" aria-label="Подразделы">${group[1].map(key=>`<button type="button" data-action="tab" data-id="${key}" ${key===tab?'aria-current="page"':''}>${subLabels[key]||tabs[key]}</button>`).join('')}</nav>`:'';
+    $('control-content').innerHTML=subnav+({workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide,settings}[tab])()+(listTabs.has(tab)?pager():'');
+    const ctx={request,notify,form,formField,show};
+    if(tab==='workspace')ariaWorkspace.mount(ctx);
+    if(tab==='stores')ariaStores.mount(ctx);
+    if(tab==='pricing')loadPreview();if(tab==='movements')ariaOperations.ledger(ctx);if(tab==='integrations')ariaOperations.integrations(ctx);if(tab==='pos')ariaPos.mount(ctx);if(tab==='purchases')ariaPurchases.mount(ctx);if(tab==='manager')ariaManager.mount(ctx);if(tab==='smart')ariaSmartPricing.mount(ctx);if(tab==='competitors')ariaCompetitors.mount(ctx);if(tab==='socialPlans')ariaSocialProposals.mount(ctx);
+  }
   function go(key,newFilter='',fromHistory=false){if(!Object.hasOwn(tabs,key)||!closeDialog())return;clearTimeout(searchTimer);++previewRevision;tab=key;search='';filter=newFilter;page=0;sort='newest';if(!fromHistory)history.pushState(null,'','#'+key);document.querySelector('.control-sidebar').classList.remove('saas-menu-open');$('workspace-menu').setAttribute('aria-expanded','false');load();}
   async function loadPreview(){const revision=++previewRevision;preview=null;$('pricing-result')?.querySelector('[data-action=discount-apply]')?.setAttribute('disabled','');const id=$('pricing-product')?.value,percent=Number($('pricing-percent')?.value);if(!id){if($('pricing-result'))$('pricing-result').textContent='Выберите товар для расчёта';return;}if(!Number.isInteger(percent)||percent<0||percent>90){if($('pricing-result'))$('pricing-result').textContent='Укажите целый процент от 0 до 90';return;}
     try{const result=await request(`/pricing/${id}?percent=${percent}`);if(revision!==previewRevision||!$('pricing-result'))return;preview={...result,productId:String(id)};const c=result.current,r=result.recommendation;
@@ -157,6 +184,6 @@
   $('control-dialog').addEventListener('cancel',event=>{event.preventDefault();closeDialog();});
   window.addEventListener('beforeunload',event=>{if(dirty){event.preventDefault();event.returnValue='';}});
   window.addEventListener('hashchange',()=>{const key=location.hash.slice(1);if(Object.hasOwn(tabs,key)){if($('control-dialog').open&&!closeDialog()){history.replaceState(null,'','#'+tab);return;}go(key,'',true);}});
-  $('workspace-menu').onclick=()=>{const open=document.querySelector('.control-sidebar').classList.toggle('saas-menu-open');$('workspace-menu').setAttribute('aria-expanded',String(open));};$('control-close').onclick=closeDialog;$('control-theme').onclick=()=>ariaTheme.toggleTheme();$('control-logout').onclick=()=>{if(closeDialog())ariaAuth.logout();};$('control-refresh').onclick=load;
-  $('control-user').textContent=ariaAuth.getUserEmail();load();
+  $('workspace-menu').onclick=()=>{const open=document.querySelector('.control-sidebar').classList.toggle('saas-menu-open');$('workspace-menu').setAttribute('aria-expanded',String(open));};$('control-close').onclick=closeDialog;const themeLabel=()=>{$('control-theme').textContent=ariaTheme.getTheme()==='dark'?'Светлая тема':'Тёмная тема';};themeLabel();$('control-theme').onclick=()=>{ariaTheme.toggleTheme();themeLabel();};$('control-logout').onclick=()=>{if(closeDialog())ariaAuth.logout();};$('control-refresh').onclick=load;
+  $('control-user').textContent=ariaAuth.getUserEmail();request('/stores').then(d=>{$('workspace-company').textContent=d.organization.name;$('workspace-kind').textContent=d.organization.demonstration?'Демонстрационная компания':'Кабинет компании';}).catch(()=>{});load();
 })();
