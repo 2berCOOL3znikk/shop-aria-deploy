@@ -38,7 +38,7 @@
         '<div class="product-card-stock">В наличии: ' + Number(p.quantityOnHand || 0) + ' шт.</div>' +
         (expiry ? '<span class="expiry-pill ' + expiry.cls + '">' + expiry.label + '</span>' : '') +
         '<div class="product-card-price">' + money(price) + oldPrice + '</div>' +
-        '<div class="product-card-actions"><button class="btn-add-cart" onclick="addToCart(' + Number(p.id) + ')">В корзину</button>' +
+        '<div class="product-card-actions">' + window.ariaCart.control(p) +
         '<button class="aria-favorite-button" aria-label="Избранное" onclick="toggleFavorite(' + Number(p.id) + ',this)">' + (favorite ? "♥" : "♡") + '</button></div></div></article>';
     }).join("");
     visible.forEach(product => fetch("/api/reviews/product/" + encodeURIComponent(product.id)).then(r => r.ok ? r.json() : []).then(reviews => {

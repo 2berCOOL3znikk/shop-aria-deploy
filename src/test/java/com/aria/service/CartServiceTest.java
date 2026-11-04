@@ -2,9 +2,12 @@ package com.aria.service;
 
 import com.aria.entity.CartItem;
 import com.aria.entity.Product;
+import com.aria.entity.AppUser;
 import com.aria.enums.ProductStatus;
 import com.aria.repository.CartItemRepository;
 import com.aria.repository.ProductRepository;
+import com.aria.repository.AppUserRepository;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -30,9 +33,12 @@ class CartServiceTest {
     private ProductRepository productRepository;
     @Mock
     private InventoryService inventory;
+    @Mock
+    private AppUserRepository owners;
 
     @InjectMocks
     private CartService cartService;
+    @BeforeEach void existingOwner(){lenient().when(owners.lockByEmail("demo@aria.shop")).thenReturn(Optional.of(new AppUser()));}
 
     @Test
     void addToCart_storesPriceAtAddTimeEqualToUnitPrice() {
@@ -44,7 +50,7 @@ class CartServiceTest {
         product.setQuantityOnHand(2);
         product.setStatus(ProductStatus.ACTIVE);
 
-        when(productRepository.findById(1L)).thenReturn(Optional.of(product));
+        when(inventory.lock(1L)).thenReturn(product);
         when(inventory.available(product)).thenReturn(2);
         when(cartItemRepository.save(any(CartItem.class))).thenAnswer(invocation -> invocation.getArgument(0));
 
@@ -54,6 +60,7 @@ class CartServiceTest {
         // then
         assertThat(cartItem.getPriceAtAddTime()).isEqualByComparingTo("99.99");
         assertThat(cartItem.getQuantity()).isEqualTo(2);
+        var order=inOrder(owners,inventory,cartItemRepository);order.verify(owners).lockByEmail("demo@aria.shop");order.verify(inventory).lock(1L);order.verify(cartItemRepository).findByOwnerEmailAndProductId("demo@aria.shop",1L);
     }
 
     @Test
@@ -65,7 +72,7 @@ class CartServiceTest {
         inactiveProduct.setUnitPrice(new BigDecimal("50"));
         inactiveProduct.setStatus(ProductStatus.CANDIDATE);
 
-        when(productRepository.findById(2L)).thenReturn(Optional.of(inactiveProduct));
+        when(inventory.lock(2L)).thenReturn(inactiveProduct);
 
         // when + then
         assertThatThrownBy(() -> cartService.addToCart(2L, 1))
@@ -99,6 +106,10 @@ class CartServiceTest {
         cartService.checkout();
 
         // then
-        verify(cartItemRepository, times(1)).deleteAll();
+        verify(owners).lockByEmail("demo@aria.shop");verify(cartItemRepository, times(1)).deleteAllByOwnerEmail("demo@aria.shop");verify(cartItemRepository,never()).deleteAll();
+    }
+    @Test void zeroQuantityReportsRemovalInsteadOfReturningTheOldCount(){
+        var item=new CartItem(new Product(),2,new BigDecimal("100"),"demo@aria.shop");when(cartItemRepository.findByIdAndOwnerEmail(1L,"demo@aria.shop")).thenReturn(Optional.of(item));
+        assertThat(cartService.changeQuantity(1L,0,"demo@aria.shop").getQuantity()).isZero();verify(cartItemRepository).delete(item);verify(inventory,never()).lock(any());
     }
 }

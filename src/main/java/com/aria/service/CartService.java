@@ -5,6 +5,7 @@ import com.aria.entity.Product;
 import com.aria.enums.ProductStatus;
 import com.aria.repository.CartItemRepository;
 import com.aria.repository.ProductRepository;
+import com.aria.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -18,11 +19,13 @@ public class CartService {
     private final CartItemRepository cartRepo;
     private final ProductRepository productRepo;
     private final InventoryService inventory;
+    private final AppUserRepository owners;
 
-    public CartService(CartItemRepository cartRepo, ProductRepository productRepo, InventoryService inventory) {
+    public CartService(CartItemRepository cartRepo, ProductRepository productRepo, InventoryService inventory, AppUserRepository owners) {
         this.cartRepo = cartRepo;
         this.productRepo = productRepo;
         this.inventory = inventory;
+        this.owners = owners;
     }
 
     @Transactional
@@ -33,8 +36,8 @@ public class CartService {
     @Transactional
     public CartItem addToCart(Long productId, int quantity, String ownerEmail) {
         if (quantity < 1) throw new IllegalArgumentException("Количество должно быть больше нуля");
-        Product product = productRepo.findById(productId)
-                .orElseThrow(() -> new IllegalArgumentException("Товар не найден"));
+        lockOwner(ownerEmail);
+        Product product = inventory.lock(productId);
         if (product.getArchived()) throw new IllegalStateException("Товар недоступен для покупки");
         if (product.getStatus() != null && product.getStatus() != ProductStatus.ACTIVE
                 && product.getStatus() != ProductStatus.DISCOUNTED) {
@@ -43,11 +46,12 @@ public class CartService {
 
         CartItem item = cartRepo.findByOwnerEmailAndProductId(ownerEmail, productId)
                 .orElse(new CartItem(product, 0, priceFor(product), ownerEmail));
-        int newQuantity = item.getQuantity() + quantity;
-        if (newQuantity > inventory.available(product)) {
-            throw new IllegalArgumentException("На складе доступно только " + product.getQuantityOnHand() + " шт.");
+        long newQuantity = (long)item.getQuantity() + quantity;
+        int available=inventory.available(product);
+        if (newQuantity > available) {
+            throw new IllegalArgumentException("На складе доступно только " + available + " шт.");
         }
-        item.setQuantity(newQuantity);
+        item.setQuantity((int)newQuantity);
         item.setPriceAtAddTime(priceFor(product));
         item.setOwnerEmail(ownerEmail);
         return cartRepo.save(item);
@@ -70,21 +74,25 @@ public class CartService {
     public List<CartItem> getCartItems(String ownerEmail) { return cartRepo.findAllByOwnerEmailOrderByAddedAtDesc(ownerEmail); }
 
     @Transactional
-    public void removeFromCart(Long itemId) { cartRepo.deleteById(itemId); }
+    public void removeFromCart(Long itemId) { removeFromCart(itemId,LEGACY_OWNER); }
 
     @Transactional
-    public void removeFromCart(Long itemId, String ownerEmail) { cartRepo.deleteByIdAndOwnerEmail(itemId, ownerEmail); }
+    public void removeFromCart(Long itemId, String ownerEmail) { lockOwner(ownerEmail);cartRepo.deleteByIdAndOwnerEmail(itemId, ownerEmail); }
 
     @Transactional
     public CartItem changeQuantity(Long itemId, int quantity, String ownerEmail) {
+        lockOwner(ownerEmail);
         CartItem item = cartRepo.findByIdAndOwnerEmail(itemId, ownerEmail)
                 .orElseThrow(() -> new IllegalArgumentException("Позиция корзины не найдена"));
         if (quantity < 1) {
             cartRepo.delete(item);
+            item.setQuantity(0);
             return item;
         }
-        if (quantity > inventory.available(item.getProduct())) {
-            throw new IllegalArgumentException("На складе доступно только " + item.getProduct().getQuantityOnHand() + " шт.");
+        Product product=inventory.lock(item.getProduct().getId());
+        int available=inventory.available(product);
+        if (quantity > available) {
+            throw new IllegalArgumentException("На складе доступно только " + available + " шт.");
         }
         item.setQuantity(quantity);
         return cartRepo.save(item);
@@ -102,10 +110,15 @@ public class CartService {
     }
 
     @Transactional
-    public void checkout() { cartRepo.deleteAll(); }
+    public void checkout() { checkout(LEGACY_OWNER); }
 
     @Transactional
-    public void checkout(String ownerEmail) { cartRepo.deleteAllByOwnerEmail(ownerEmail); }
+    public void checkout(String ownerEmail) { lockOwner(ownerEmail);cartRepo.deleteAllByOwnerEmail(ownerEmail); }
+
+    private void lockOwner(String email){
+        // Serialize even when the cart is empty: there is no cart row to lock before the first addition.
+        owners.lockByEmail(email).orElseThrow(()->new IllegalStateException("Учётная запись недоступна. Войдите снова."));
+    }
 
     public long countItems(String ownerEmail) { return cartRepo.countByOwnerEmail(ownerEmail); }
 }

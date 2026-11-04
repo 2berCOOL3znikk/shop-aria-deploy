@@ -13,7 +13,7 @@ public class ControlCenterService {
  public ControlCenterService(OrderRepository o,InventoryLotRepository l,InventoryLedgerService i,PricingDecisionRepository d,SmartPricingService s,ManagerActionRepository a,ProductRepository p){orders=o;lots=l;ledger=i;decisions=d;smart=s;actions=a;products=p;}
  public Map<String,Object> center(){
   var revenue=orders.recordedRevenue(LocalDate.now().atStartOfDay()).getFirst();var held=lots.heldValue().getFirst();
-  var recent=decisions.findAllByOrderByCreatedAtDescIdDesc(org.springframework.data.domain.PageRequest.of(0,8)).getContent();
+  var recent=decisions.findRecentActivity(org.springframework.data.domain.PageRequest.of(0,8));
   var cards=new ArrayList<Map<String,Object>>();var outcomes=new ArrayList<Map<String,Object>>();var seen=new HashSet<Long>();
   for(var d:recent){var report=json.readValue(d.reportJson,Map.class);var facts=(Map<?,?>)report.get("facts");var card=new LinkedHashMap<String,Object>();card.put("id",d.id);card.put("productId",d.productId);card.put("name",facts.get("name"));card.put("status",d.status);card.put("source",d.source);card.put("strategy",d.strategy);card.put("selectedPercent",d.selectedPercent==null?report.get("suggestedPercent"):d.selectedPercent);card.put("reason",report.get("reason"));card.put("confidence",report.get("confidence"));card.put("reviewAt",d.reviewAt);card.put("planning",report.get("planning"));card.put("explanation",d.explanationJson==null?null:json.readValue(d.explanationJson,Map.class));cards.add(card);
    if(seen.add(d.productId)){var history=smart.history(d.productId);history.stream().limit(1).forEach(outcomes::add);}

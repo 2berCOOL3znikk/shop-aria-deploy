@@ -71,7 +71,7 @@ try{
   $c=$companies[$i];$other=$companies[1-$i]
   $products=@(Api $c '/api/admin/control/products' 'GET' $null $c.token)
   if($products.Count -ne 1 -or $products[0].name -ne $c.key){throw 'Product data crossed boundary'}
-  foreach($path in '/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization'){
+  foreach($path in '/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings'){
    $denied=$false
    try{$null=Api $c $path 'GET' $null $other.token}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Foreign organization token was accepted'}
@@ -81,7 +81,15 @@ try{
   $probe=Start-Process -FilePath (Join-Path $PostgresBin 'psql.exe') -ArgumentList @('-X','-d',$other.database,'-c','"select 1"') -WindowStyle Hidden -Wait -PassThru -RedirectStandardOutput (Join-Path $out "cross-db-$i.log") -RedirectStandardError $denialLog
   if($probe.ExitCode -eq 0 -or (Get-Content -LiteralPath $denialLog -Raw) -notmatch 'permission denied for database'){throw 'Database isolation not established'}
  }
- $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V19 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests')
+ # Newly added settings must stay scoped to the same isolated company database.
+ $aSettings=Api $companies[0] '/api/admin/control/products/ai-settings' 'GET' $null $companies[0].token
+ $bSettings=Api $companies[1] '/api/admin/control/products/ai-settings' 'GET' $null $companies[1].token
+ if($aSettings.textConsentEnabled -or $bSettings.textConsentEnabled){throw 'Fresh test company unexpectedly has consent'}
+ $null=Api $companies[0] '/api/admin/control/products/ai-settings' 'PUT' @{revision=$aSettings.revision;textConsentEnabled=$true;dailyBudget=5} $companies[0].token
+ $bAfter=Api $companies[1] '/api/admin/control/products/ai-settings' 'GET' $null $companies[1].token
+ if($bAfter.textConsentEnabled -or $bAfter.revision -ne $bSettings.revision){throw 'AI settings crossed company boundary'}
+ foreach($c in $companies){Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='27' AND success=true) THEN RAISE EXCEPTION 'V27 missing'; END IF; END `$`$;"}
+ $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V27 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B')
  $report.passed=$true
  Write-Output 'PASS: two-company database/process/API isolation'
 }finally{

@@ -11,10 +11,7 @@ let productId = null;
     async function addToCart(id) {
         if (!ariaAuth.requireLogin()) return;
         try {
-            const response = await ariaAuth.authFetch('/api/cart/add?productId=' + encodeURIComponent(id) + '&qty=1', { method: 'POST' });
-            if (!response.ok) throw new Error('Не удалось добавить товар в корзину');
-            await loadCartCount();
-            window.showToast('Товар добавлен в корзину');
+            if (await window.ariaCart.add(id)) window.showToast('Товар в корзине');
         } catch(e) { window.showToast(e.message || 'Ошибка добавления', 'error'); }
     }
 
@@ -92,6 +89,7 @@ let productId = null;
             const p = data.product;
             const d = data.details;
             if (!p || !p.id) throw Object.assign(new Error('Товар не найден'), { status: 404 });
+            window.ariaCart.register([p]);
 
             let isFav = false;
             if (ariaAuth.isLoggedIn()) {
@@ -138,7 +136,7 @@ let productId = null;
 
                 // Кнопки
                 '<div style="display:flex;gap:10px;">' +
-                '<button class="btn-add-cart" onclick="addToCart(' + p.id + ')" style="flex:1;">Добавить в корзину</button>' +
+                window.ariaCart.control(p) +
                 '<button class="btn-outline" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? '❤️ В избранном' : '🤍 В избранное') + '</button>' +
                 '</div>' +
                 '</div>';

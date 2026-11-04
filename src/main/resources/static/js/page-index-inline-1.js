@@ -49,10 +49,7 @@ window.toggleFavorite = async function (productId, button) {
 window.addToCart = async function (productId) {
   if (!ariaAuth.requireLogin()) return;
   try {
-    const response = await ariaAuth.authFetch("/api/cart/add?productId=" + encodeURIComponent(productId) + "&qty=1", { method: "POST" });
-    if (!response.ok) throw new Error("Не удалось добавить товар в корзину");
-    await loadCartCount();
-    window.showToast("Товар добавлен в корзину");
+    if (await window.ariaCart.add(productId)) window.showToast("Товар в корзине");
   } catch (error) {
     window.showToast(error.message || "Ошибка добавления", "error");
   }
@@ -84,6 +81,7 @@ async function initCatalogPage() {
     const response = await fetch("/api/products/store");
     if (!response.ok) throw new Error("Не удалось загрузить каталог");
     state.products = await response.json();
+    window.ariaCart.register(state.products, true);
     state.products.forEach(product => {
       if (product.category) state.allCategories.add(product.category);
     });

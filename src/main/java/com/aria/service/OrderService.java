@@ -7,6 +7,7 @@ import com.aria.entity.Product;
 import com.aria.repository.CartItemRepository;
 import com.aria.repository.OrderRepository;
 import com.aria.repository.ProductRepository;
+import com.aria.repository.AppUserRepository;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,13 +27,15 @@ public class OrderService {
     private final PricingService pricing;
     private final AuditService audit;
     private final com.aria.repository.OrderAllocationRepository allocations;
+    private final AppUserRepository owners;
 
-    public OrderService(OrderRepository orderRepo, CartItemRepository cartRepo, ProductRepository productRepo, InventoryService inventory, PricingService pricing, AuditService audit, com.aria.repository.OrderAllocationRepository allocations) {
+    public OrderService(OrderRepository orderRepo, CartItemRepository cartRepo, ProductRepository productRepo, InventoryService inventory, PricingService pricing, AuditService audit, com.aria.repository.OrderAllocationRepository allocations, AppUserRepository owners) {
         this.orderRepo = orderRepo;
         this.cartRepo = cartRepo;
         this.productRepo = productRepo;
         this.inventory=inventory; this.pricing=pricing;this.audit=audit;
         this.allocations=allocations;
+        this.owners=owners;
     }
 
     @Transactional(readOnly = true)
@@ -53,6 +56,8 @@ public class OrderService {
     @Transactional
     public Order createOrderFromCart(String ownerEmail, String address) {
         if(address==null || address.isBlank() || address.length()>500) throw new IllegalArgumentException("Укажите адрес доставки (до 500 символов)");
+        // Same owner-first order as every cart mutation; lockForCheckout then locks products in ascending ID order.
+        owners.lockByEmail(ownerEmail).orElseThrow(()->new IllegalStateException("Учётная запись недоступна. Войдите снова."));
         List<CartItem> cartItems = cartRepo.lockForCheckout(ownerEmail);
 
         if (cartItems.isEmpty()) {

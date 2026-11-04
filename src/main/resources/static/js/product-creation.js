@@ -1,0 +1,44 @@
+(() => {
+  'use strict';
+  const esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+  async function settings(ctx) {
+    const s=await ctx.request('/products/ai-settings');
+    ctx.form('AI для карточек товаров',`<p class="control-help wide">ARIA предлагает только текст и категорию. Фото не анализируется. Цена, состав, изготовитель, вес и сроки требуют ваших подтверждённых данных.</p><label class="pc-consent wide"><input name="textConsentEnabled" type="checkbox" ${s.textConsentEnabled?'checked':''}><span>Разрешаю отправлять введённое название товара в OpenRouter для подготовки текста. Фотографии, себестоимость, остатки и контакты не передаются.</span></label>${ctx.formField('Не более попыток в день','dailyBudget','number',s.dailyBudget,{required:true,attrs:'min="1" max="20" step="1"'})}<p class="control-help">Сегодня использовано ${s.budgetUsed} из ${s.dailyBudget}. Только бесплатные модели. Настройка не включает управление ценами.</p>`,f=>ctx.request('/products/ai-settings','PUT',{revision:s.revision,textConsentEnabled:f.has('textConsentEnabled'),dailyBudget:Number(f.get('dailyBudget'))}));
+  }
+  async function open(ctx) {
+    const s=await ctx.request('/products/ai-settings');
+    ctx.show('Добавить товар',`<form id="product-start" class="pc-start"><div class="pc-step"><span>1</span>Название <i></i><span>2</span>Проверка и цена</div><div class="pc-intro"><span class="pc-ai-icon" aria-hidden="true">✳</span><h3>Начните с названия</h3><p>ARIA поможет с текстом. Артикул создастся автоматически.</p></div><label class="control-field"><span>Что добавляем?</span><input name="name" required maxlength="300" placeholder="Например, молочный шоколад" autocomplete="off"></label><div class="pc-assurance"><strong>Что делает AI</strong><p>Предлагает название, категорию и короткое описание. Характеристики производителя, вес, состав и срок партии не придумываются.</p></div>${!s.textConsentEnabled?`<label class="pc-consent"><input name="consent" type="checkbox"><span>Разрешаю передать введённое название в OpenRouter для подготовки текста. Фото, контакты и данные магазина не передаются. Разрешение можно отозвать в настройках.</span></label>`:'<p class="pc-allowed">Подготовка текста разрешена владельцем · фото не отправляется</p>'}<p id="product-start-error" class="control-form-error" role="alert"></p><div class="pc-start-actions"><button type="button" class="btn-outline" id="product-manual">Заполнить самому</button><button type="submit" class="btn-glow" ${!s.configured||s.remaining<1?'disabled':''}>✳ Подготовить с ARIA AI</button></div><div class="pc-start-footer"><small>${s.configured?(s.remaining<1?'Дневной лимит исчерпан. Можно заполнить карточку самостоятельно.':'Бесплатный AI · осталось попыток сегодня: '+s.remaining):'AI пока не настроен. Можно создать товар самостоятельно.'}</small><button type="button" id="product-ai-settings">Настройки AI</button></div></form>`);
+    const root=document.getElementById('product-start');
+    root.addEventListener('input',()=>ctx.markDirty?.());
+    root.querySelector('input[name=name]').focus();
+    root.querySelector('#product-ai-settings').onclick=()=>settings(ctx).catch(e=>ctx.notify(e.message,true));
+    const review=(draft,ai)=>{
+      ctx.clearDirty?.();
+      const category=draft.category||'Продукты';
+      const content=`<div class="pc-step wide"><span class="is-done">✓</span>Название <i></i><span>2</span>Проверка и цена</div>${ai?`<section class="pc-source wide"><span class="ws-pill">Решение ARIA AI</span><p>ARIA предложила нейтральный текст. Проверьте перед сохранением.</p><small>Это предложение текста, а не проверенные характеристики продукта.</small><details class="pc-model"><summary>Источник и модель</summary><small>${esc(draft.model)}</small></details></section>`:'<p class="control-help wide">Вы заполняете карточку самостоятельно. Артикул создастся при сохранении.</p>'}${ctx.formField('Название товара','name','text',draft.name,{required:true,wide:true,attrs:'maxlength="300"'})}${ctx.formField('Категория','category','text',category,{required:true,wide:true,attrs:'maxlength="120" list="product-ai-categories"'})}<datalist id="product-ai-categories">${(s.categories||['Продукты','Дом/текстиль','Электроника','Промо']).map(v=>`<option value="${esc(v)}"></option>`).join('')}</datalist><label class="control-field wide"><span>${ai?'Предложенное описание — проверьте':'Описание'}</span><textarea name="description" maxlength="10000">${esc(draft.description||'')}</textarea></label>${draft.questions?.length?`<details class="pc-questions wide"><summary>Что стоит уточнить (${draft.questions.length})</summary><ul>${draft.questions.map(q=>`<li>${esc(q)}</li>`).join('')}</ul></details>`:''}<div class="pc-section-title wide">Данные магазина · укажите сами</div>${ctx.formField('Цена продажи, ₸','unitPrice','number','',{required:true,attrs:'min="0.01" max="9999999999.99" step="0.01"'})}${ctx.formField('Единица учёта','unit','text','шт',{required:true,attrs:'maxlength="20"'})}<details class="pc-optional wide"><summary>Дополнительные сведения и фото</summary><div>${ctx.formField('Минимальная цена, ₸','minimumPrice','number','',{attrs:'min="0.01" max="9999999999.99" step="0.01"'})}${ctx.formField('Минимальный остаток','lowStockThreshold','number',5,{attrs:'min="0" max="1000000" step="1"'})}${ctx.formField('Подтверждённый бренд','brand','text','',{attrs:'maxlength="100"',help:'Только сведения с упаковки или проверенного источника.'})}${ctx.formField('Штрихкод с упаковки','barcode','text','',{attrs:'maxlength="64"',help:'Не генерируется AI.'})}${ctx.formField('Фото товара','photo','file','',{wide:true,attrs:'accept="image/jpeg,image/png"',help:'Ваше фото или изображение с правом использования. JPEG/PNG до 5 МБ. Сохранится в карточке; AI его не получает.'})}</div></details><p class="pc-stock-note wide">Остаток, закупочная стоимость и срок годности вносятся при приёмке партии. До этого товар не поступит в продажу.</p>${ai?'<label class="pc-consent wide"><input type="checkbox" name="confirmed" required><span>Проверил название и описание. Подтверждаю текст; достоверность состава, производителя и партии этим не устанавливается.</span></label>':''}`;
+      ctx.form('Проверьте карточку',content,async f=>{
+        const photo=f.get('photo');
+        if(photo?.size>5*1024*1024)throw new Error('Размер фотографии больше 5 МБ. Выберите файл поменьше.');
+        if(photo?.size&&!['image/jpeg','image/png'].includes(photo.type))throw new Error('Выберите фотографию JPEG или PNG.');
+        const product={name:f.get('name'),category:f.get('category'),description:f.get('description'),unitPrice:f.get('unitPrice'),unit:f.get('unit'),minimumPrice:f.get('minimumPrice')||null,lowStockThreshold:Number(f.get('lowStockThreshold')||5),brand:f.get('brand')||null,barcode:f.get('barcode')||null,imageUrl:null};
+        const saved=await ctx.request(ai?'/products/ai-drafts/'+draft.id+'/confirm':'/products','POST',ai?{confirmed:f.has('confirmed'),product}:product);
+        let photoNote='';
+        if(photo?.size){try{const body=new FormData();body.append('photo',photo);const r=await ariaAuth.authFetch('/api/admin/products/'+saved.id+'/photo',{method:'POST',body});if(!r.ok)throw new Error();}catch{photoNote=' Фото не загрузилось — добавьте его через кнопку «Фото» в списке товаров.';}}
+        return 'Товар «'+saved.name+'» создан. Артикул: '+saved.sku+'. Примите партию, чтобы начать продажи.'+photoNote;
+      });
+      const submit=document.querySelector('#control-dialog [type=submit]');if(submit)submit.textContent='Создать товар';
+      ctx.markDirty?.();
+    };
+    root.querySelector('#product-manual').onclick=()=>{if(root.reportValidity())review({name:root.elements.name.value.trim()},false);};
+    root.onsubmit=async e=>{
+      e.preventDefault();if(!s.textConsentEnabled&&!root.elements.consent.checked){root.querySelector('[role=alert]').textContent='Разрешите передачу названия или выберите «Заполнить самому».';return;}
+      const submit=root.querySelector('[type=submit]');submit.disabled=true;root.querySelector('#product-manual').disabled=true;root.querySelector('[role=alert]').textContent='';submit.textContent='ARIA готовит текст…';
+      try {
+        if(!s.textConsentEnabled){const updated=await ctx.request('/products/ai-settings','PUT',{revision:s.revision,textConsentEnabled:true,dailyBudget:s.dailyBudget});Object.assign(s,updated);}
+        const draft=await ctx.request('/products/ai-drafts','POST',{name:root.elements.name.value.trim()});
+        if(root.isConnected&&document.getElementById('control-dialog').open)review(draft,true);
+      } catch(error) {if(root.isConnected){root.querySelector('[role=alert]').textContent=error.message;submit.disabled=false;root.querySelector('#product-manual').disabled=false;submit.textContent='✳ Подготовить с ARIA AI';}}
+    };
+  }
+  window.ariaProductCreation={open,settings};
+})();

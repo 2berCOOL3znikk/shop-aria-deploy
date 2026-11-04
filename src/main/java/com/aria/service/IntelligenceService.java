@@ -59,7 +59,13 @@ public class IntelligenceService {
             var response=client.send(req,HttpResponse.BodyHandlers.ofString());
             if(response.statusCode()!=200)return pricingFallback(response.statusCode()==429?"Лимит бесплатного AI исчерпан. Расчёт Java сохранён.":"AI недоступен или отклонил запрос. Расчёт Java сохранён.");
             if(response.body().length()>100000)throw new IllegalArgumentException();
-            var parsed=json.readValue(response.body(),Map.class);Object modelName=parsed.get("model");lastPricingAttemptModel=modelName instanceof String value&&value.matches("[A-Za-z0-9/._:+-]{1,200}")?value:model;var choice=(Map<?,?>)((List<?>)parsed.get("choices")).getFirst();
+            var parsed=json.readValue(response.body(),Map.class);
+            if(parsed.containsKey("error")){
+                Object error=parsed.get("error"),code=error instanceof Map<?,?> map?map.get("code"):null;
+                boolean quota=code instanceof Number n&&n.doubleValue()==429&&n.intValue()==429;
+                return pricingFallback(quota?"Лимит бесплатного AI исчерпан. Расчёт Java сохранён.":"AI временно недоступен. Расчёт Java сохранён.");
+            }
+            Object modelName=parsed.get("model");lastPricingAttemptModel=modelName instanceof String value&&value.matches("[A-Za-z0-9/._:+-]{1,200}")?value:model;var choice=(Map<?,?>)((List<?>)parsed.get("choices")).getFirst();
             if("length".equals(choice.get("finish_reason")))return pricingFallback("AI не завершил JSON в пределах лимита ответа. Расчёт Java сохранён; неполный ответ не применяется.");
             var text=(String)((Map<?,?>)choice.get("message")).get("content");var output=json.readValue(text,Map.class);
             validationStage="набор полей";

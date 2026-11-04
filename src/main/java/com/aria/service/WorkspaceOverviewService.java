@@ -66,6 +66,7 @@ public class WorkspaceOverviewService {
         var actions = new LinkedHashMap<String, Object>();
         actions.put("productsAnalyzed", during("select count(p) from Product p where p.id in (select d.productId from PricingDecision d where (d.createdAt>=:from and d.createdAt<:until) or (d.aiCompletedAt>=:from and d.aiCompletedAt<:until)) or p.id in (select e.productId from ManagerExecution e where e.status='DONE' and e.finishedAt>=:from and e.finishedAt<:until)", from, until));
         actions.put("aiDecisions", during("select count(d) from PricingDecision d where d.source='AI' and d.aiCompletedAt>=:from and d.aiCompletedAt<:until", from, until));
+        actions.put("productDrafts", during("select count(d) from ProductAiDraft d where d.source='AI' and d.status in ('DRAFT','CONFIRMED') and d.completedAt>=:from and d.completedAt<:until", from, until));
         actions.put("engineDecisions", during("select count(d) from PricingDecision d where d.source='ENGINE' and d.createdAt>=:from and d.createdAt<:until", from, until));
         actions.put("priceApplied", during("select count(e) from AuditEvent e where e.action='SMART_AUTOPILOT_APPLIED' and e.createdAt>=:from and e.createdAt<:until", from, until));
         actions.put("purchaseDrafts", during("select count(p) from PurchaseRequest p where p.managerCreated=true and p.createdAt>=:from and p.createdAt<:until", from, until));

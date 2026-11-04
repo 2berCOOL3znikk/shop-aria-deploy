@@ -94,6 +94,10 @@ class IntelligenceServiceTest {
         var client=mock(HttpClient.class);when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenThrow(new HttpTimeoutException("timeout"));
         var result=new IntelligenceService("test-key","openrouter/free",client).explainPricing(pricingFacts());assertThat(result).containsEntry("mode","ENGINE");assertThat((String)result.get("note")).contains("25 секунд").doesNotContain("структуры");
     }
+    @Test void pricingHttp200QuotaEnvelopeIsAnHonestEngineResultWithoutModelOrProviderBody()throws Exception{
+        var client=mock(HttpClient.class);HttpResponse<String> response=mock(HttpResponse.class);when(response.statusCode()).thenReturn(200);when(response.body()).thenReturn("{\"error\":{\"code\":429,\"message\":\"PRIVATE-PROVIDER-MESSAGE\",\"metadata\":{\"raw\":\"PRIVATE-RAW-BODY\"}}}");when(client.send(any(HttpRequest.class),any(HttpResponse.BodyHandler.class))).thenReturn(response);
+        var service=new IntelligenceService("test-key","openrouter/free",client);var result=service.explainPricing(pricingFacts());assertThat(result).containsEntry("mode","ENGINE").doesNotContainKeys("model","attemptedModel");assertThat((String)result.get("note")).contains("Лимит бесплатного AI исчерпан").doesNotContain("JSON","PRIVATE");assertThat(service.pricingStatus()).containsEntry("attemptedModel","").containsEntry("status","UNAVAILABLE");
+    }
     @Test void activeDecisionRequiresBoundedReviewAndConfirmationFlag()throws Exception {
         var facts=Map.<String,Object>of("report",Map.of("scenarios",List.of(Map.of("percent",0),Map.of("percent",5)),"reviewAfterHours",12));
         var good=pricingClient("{\"explanation\":\"Проверить эксперимент\",\"risks\":[],\"suggestedPercent\":5,\"reviewAfterHours\":6,\"requiresConfirmation\":true}");

@@ -50,6 +50,8 @@ class ControlIntegrationTest {
     @Autowired ManagerTaskRepository taskRows;
     @Autowired ManagerExecutionRepository executionRows;
     @Autowired com.aria.config.ManagerDomainEvents domainEvents;
+    @Autowired CartItemRepository carts;
+    @Autowired com.aria.service.CartService cartService;
     @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().build();
     private final HttpClient client=HttpClient.newHttpClient();
@@ -350,12 +352,28 @@ class ControlIntegrationTest {
         assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(5);
     }
     @Test void duplicateConcurrentCheckoutOnlyCreatesOneOrder()throws Exception {
-        long p=product();lot(p,"STOCK",5,10);assertThat(call("POST","/api/cart/add?productId="+p+"&qty=2",user,null).status).isEqualTo(200);
+        long p=product();lot(p,"STOCK",5,10);long previousOrders=orders.count();assertThat(call("POST","/api/cart/add?productId="+p+"&qty=2",user,null).status).isEqualTo(200);
         try(var executor=Executors.newVirtualThreadPerTaskExecutor()) {
             var jobs=executor.invokeAll(List.<Callable<Integer>>of(()->call("POST","/api/orders/checkout",user,Map.of("address","Адрес")).status,()->call("POST","/api/orders/checkout",user,Map.of("address","Адрес")).status));
             assertThat(jobs.stream().map(j->{try{return j.get();}catch(Exception e){throw new RuntimeException(e);}}).toList()).containsExactlyInAnyOrder(200,409);
         }
         assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(3);
+        assertThat(orders.count()).isEqualTo(previousOrders+1);assertThat((List<?>)json.readValue(call("GET","/api/cart",user,null).raw,List.class)).isEmpty();
+    }
+    @Test void simultaneousFirstAddsCreateOneOwnedCartRowWithTheCombinedQuantity()throws Exception{
+        long p=product();lot(p,"CART-RACE",20,10);var start=new CountDownLatch(1);
+        try(var executor=Executors.newVirtualThreadPerTaskExecutor()){
+            var first=executor.submit(()->{start.await();return call("POST","/api/cart/add?productId="+p+"&qty=2",user,null);});var second=executor.submit(()->{start.await();return call("POST","/api/cart/add?productId="+p+"&qty=3",user,null);});start.countDown();
+            assertThat(first.get(10,TimeUnit.SECONDS).status).isEqualTo(200);assertThat(second.get(10,TimeUnit.SECONDS).status).isEqualTo(200);
+        }
+        var rows=(List<Map<String,Object>>)json.readValue(call("GET","/api/cart",user,null).raw,List.class);assertThat(rows).hasSize(1);assertThat(rows.getFirst()).containsEntry("quantity",5);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(20);
+    }
+    @Test void legacyCartClearCannotDeleteAnotherOwnersCartOrUnknownLegacyRows()throws Exception{
+        long p=product();lot(p,"CART-SCOPE",10,10);assertThat(call("POST","/api/cart/add?productId="+p,user,null).status).isEqualTo(200);
+        users.findByEmail("demo@aria.shop").orElseGet(()->users.saveAndFlush(new AppUser("demo@aria.shop",passwords.encode("legacyTestPassword123"),"Legacy test",Role.USER)));
+        cartService.addToCart(p,1,"demo@aria.shop");var unknown=carts.saveAndFlush(new CartItem(products.findById(p).orElseThrow(),1,new java.math.BigDecimal("1000")));
+        cartService.checkout();var rows=(List<Map<String,Object>>)json.readValue(call("GET","/api/cart",user,null).raw,List.class);assertThat(rows).hasSize(1);assertThat(rows.getFirst()).containsEntry("quantity",1);assertThat(carts.findById(unknown.getId())).isPresent();assertThat(carts.countByOwnerEmail("demo@aria.shop")).isZero();
+        assertThat(call("POST","/api/cart/checkout",user,null).status).isEqualTo(200);assertThat(carts.findById(unknown.getId())).isPresent();
     }
     @Test void socialReservationRequiresVerificationAndTransferNeedsSeparateConfirmation()throws Exception {
         long p=product();lot(p,"SOCIAL",5,7);var offer=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",2,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offer.status).as(offer.raw).isEqualTo(200);

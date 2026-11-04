@@ -20,7 +20,7 @@ const directory='target/e2e/aria3';
     assert.deepEqual(await p.locator('#control-nav>button span').allTextContents(),['Главная','ARIA AI','Мои магазины','Товары','Заказы','Склад','Цены','Закупки','Аналитика','ARIA Impact','Настройки']);
     assert.match(await p.locator('.ws-ai-card').innerText(),/Что ARIA сделала сегодня/);
     const actual=await p.locator('.ws-ai-stats strong').allTextContents();
-    assert.deepEqual(actual.map(n=>Number(n.replace(/\s/g,''))),[d.today.productsAnalyzed,d.today.aiDecisions,d.today.priceApplied,d.today.purchaseDrafts,d.today.socialDrafts]);
+    assert.deepEqual(actual.map(n=>Number(n.replace(/\s/g,''))),[d.today.productsAnalyzed,d.today.aiDecisions,d.today.productDrafts,d.today.priceApplied,d.today.purchaseDrafts,d.today.socialDrafts]);
     assert.match(await p.locator('.ws-ai-footer').innerText(),new RegExp(String(d.today.engineDecisions)));
     assert.equal(d.sales.daily.length,14);assert.equal(d.sales.currency,'KZT');
     if(d.sales.daily.every(x=>Number(x.revenue)===0))assert.match(await p.locator('.ws-sales').innerText(),/Пока нет отгрузок/);

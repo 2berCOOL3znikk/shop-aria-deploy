@@ -62,9 +62,12 @@ class WorkspaceOverviewIntegrationTest {
             var external = new StoreOrderSnapshot(); external.storeId = store.id; external.externalId = marker; external.status = "completed"; external.currency = "USD"; external.total = new BigDecimal("888888.88"); external.modifiedAtUtc = now; external.createdAtUtc = now; external.completedAtUtc = now; external.observedAt = now; external.linesJson = "[]"; em.persist(external);
 
             var ai = decision(p.getId(), now.minusDays(1), "AI"); ai.aiCompletedAt = now; ai.strategy = "KEEP"; em.persist(ai);
-            var engine = decision(p.getId(), now, "ENGINE"); engine.aiCompletedAt = now; engine.explanationJson = "{\"mode\":\"ENGINE\"}"; em.persist(engine);
+            var engine = decision(p.getId(), now, "ENGINE"); engine.status = "PENDING"; engine.aiCompletedAt = now; engine.explanationJson = "{\"mode\":\"ENGINE\"}"; em.persist(engine);
             em.persist(decision(p.getId(), now.minusDays(1), "ENGINE"));
             em.persist(decision(p.getId(), now.plusDays(1), "ENGINE"));
+            var textDraft = new ProductAiDraft(); textDraft.inputName = marker; textDraft.status = "DRAFT"; textDraft.name = "Текст для проверки"; textDraft.model = "test/model:free"; textDraft.completedAt = now; em.persist(textDraft);
+            var failedText = new ProductAiDraft(); failedText.inputName = marker; failedText.status = "FAILED"; failedText.completedAt = now; em.persist(failedText);
+            var futureText = new ProductAiDraft(); futureText.inputName = marker; futureText.status = "DRAFT"; futureText.completedAt = now.plusDays(1); em.persist(futureText);
             var signal = new ManagerAction(); signal.productId = p.getId(); signal.signalKey = marker; signal.type = "LOW_STOCK"; signal.severity = "WARNING"; signal.title = "Мало товара"; signal.reason = "Недостаточный остаток"; signal.fingerprint = marker; signal.firstSeen = now; signal.lastSeen = now; em.persist(signal);
             var proposal = new SocialProposal(); proposal.decisionId = ai.id; proposal.productId = p.getId(); proposal.quantity = 1; proposal.validUntil = now.toLocalDate().plusDays(2); proposal.reason = "Учебный черновик без резерва"; proposal.createdAt = now; em.persist(proposal);
             var manualProposal = new SocialProposal(); manualProposal.decisionId = engine.id; manualProposal.productId = p.getId(); manualProposal.quantity = 1; manualProposal.validUntil = now.toLocalDate().plusDays(2); manualProposal.reason = "Учебный ручной черновик без резерва"; manualProposal.createdAt = now; em.persist(manualProposal);
@@ -82,6 +85,7 @@ class WorkspaceOverviewIntegrationTest {
         var previousToday = map(before, "today"); var today = map(after, "today");
         assertThat(number(today, "productsAnalyzed") - number(previousToday, "productsAnalyzed")).isEqualTo(1);
         assertThat(number(today, "aiDecisions") - number(previousToday, "aiDecisions")).isEqualTo(1);
+        assertThat(number(today, "productDrafts") - number(previousToday, "productDrafts")).isEqualTo(1);
         assertThat(number(today, "engineDecisions") - number(previousToday, "engineDecisions")).isEqualTo(1);
         assertThat(number(today, "priceApplied") - number(previousToday, "priceApplied")).isEqualTo(1);
         assertThat(number(today, "socialDrafts") - number(previousToday, "socialDrafts")).isEqualTo(1);
@@ -96,7 +100,8 @@ class WorkspaceOverviewIntegrationTest {
         var order = new Order(); order.setTotalAmount(new BigDecimal(total)); order.setStatus(status); order.setShippedAt(at); em.persist(order);
     }
     private PricingDecision decision(Long product, LocalDateTime at, String source) {
-        var d = new PricingDecision(); d.productId = product; d.createdAt = at; d.reviewAt = at.plusHours(48); d.source = source; d.fingerprint = UUID.randomUUID().toString(); d.reportJson = "{}"; return d;
+        // Historical rows are closed: PostgreSQL permits only one PENDING decision per product.
+        var d = new PricingDecision(); d.status = "SUPERSEDED"; d.productId = product; d.createdAt = at; d.reviewAt = at.plusHours(48); d.source = source; d.fingerprint = UUID.randomUUID().toString(); d.reportJson = "{}"; return d;
     }
     private void event(LocalDateTime at, String action, String resource, String details) {
         var event = new AuditEvent(); event.setCreatedAt(at); event.setActor("workspace-test"); event.setAction(action); event.setResource(resource); event.setDetails(details); em.persist(event);

@@ -1,0 +1,1480 @@
+{
+  "schemaVersion": 1,
+  "checkedDate": "2026-11-04",
+  "purpose": "PRIMARY_SOURCE_MANIFEST_ONLY_NOT_STORE_DATA",
+  "productCount": 15,
+  "verificationMeaning": "Only fields in verifiedFacts were checked against an opened official product/catalogue page. This is not certification of a received package, ingredient safety, Kazakhstan availability, owner inventory or a batch expiry.",
+  "photoPolicy": "All photo fields are null: a public manufacturer packshot is not a reuse licence. Do not hotlink or download it for ARIA without an explicit licence/permission; use labelled placeholders or owner-authorised photos.",
+  "storeDataPolicy": "No price, stock, unit cost, sales history or lot date is supplied. Any later educational price/lot fixture must be created separately and labelled DEMONSTRATION, never described as market observation or real inventory.",
+  "identityPolicy": "referenceId is an ARIA documentation identifier, not a manufacturer SKU or GTIN. EANs are not inferred from URL numbers. Multi-packs remain distinct from single units.",
+  "manufacturerPolicy": "sourcePublisher identifies the official information publisher, not necessarily the legal manufacturer of a specific regional package. manufacturer remains null until exact pack evidence is available.",
+  "excludedCandidates": [
+    {
+      "name": "FoodMaster Молоко 2,5%",
+      "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-moloko-25-7",
+      "reason": "Opened official page states packaging as 1000 кг. This ambiguous apparent error is not silently corrected to 1kg/1L."
+    },
+    {
+      "name": "Coca-Cola Kazakhstan brand pages",
+      "sourceUrl": "https://www.coca-cola.com/kz/ru/brands",
+      "reason": "Primary page returned HTTP403; snippets alone are not accepted as product evidence."
+    },
+    {
+      "name": "Heinz Tomato Ketchup 570 variant",
+      "sourceUrl": "https://www.heinz.com/en-GB/products/05000157140241-tomato-ketchup",
+      "reason": "Official selector uses 570ml while other familiar packs use grams. No conversion or cross-market assumption made; selected other unambiguous products."
+    }
+  ],
+  "products": [
+    {
+      "referenceId": "rakhat-kazakhstanskiy-flat-100g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Казахстанский",
+      "suggestedDisplayNameRu": "Рахат «Казахстанский», 100 г",
+      "brand": "Рахат",
+      "categoryForDemo": "Шоколад",
+      "manufacturer": null,
+      "sourcePublisher": "АО «ЛОТТЕ Рахат»",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+        "https://www.rakhat.kz/product-category/shokolad/"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Казахстанский",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Рахат",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "manufacturerCatalogueNumber": {
+          "value": "1203",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Catalogue item number",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 100,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "section": "Catalogue card №1203: flat package, 100g",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cocoaMinimumPercent": {
+          "value": 45,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Description",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "energyKcalPer100g": {
+          "value": 532,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "сахар",
+            "компоненты какао",
+            "молочные компоненты",
+            "соевый лецитин",
+            "экстракт ванили"
+          ],
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-temnyj/kazahstanskij-22/",
+          "section": "Composition; grouped summary, not a complete allergen label",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "fullCompositionAndAllergenLabel",
+          "reason": "A grouped summary is recorded; verify exact current package composition and cross-contact warnings before displaying a complete ingredient label."
+        }
+      ],
+      "limitations": [
+        "The official category places this variant under dark chocolate. Do not relabel it as milk chocolate based on third-party shop listings.",
+        "Mass is confirmed by catalogue item №1203, matched to the product page; general storage life is not a lot expiry."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "rakhat-ainalayin-160g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Молочный шоколад «Айналайын»",
+      "suggestedDisplayNameRu": "Рахат «Айналайын», 160 г",
+      "brand": "Рахат",
+      "categoryForDemo": "Шоколад",
+      "manufacturer": null,
+      "sourcePublisher": "АО «ЛОТТЕ Рахат»",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+        "https://www.rakhat.kz/product-category/shokolad/"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Молочный шоколад «Айналайын»",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Рахат",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "manufacturerCatalogueNumber": {
+          "value": "11209",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Catalogue item number",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 160,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "section": "Catalogue card №11209",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cocoaMinimumPercent": {
+          "value": 33,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Composition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "energyKcalPer100g": {
+          "value": 552,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "сахар",
+            "компоненты какао",
+            "молочные компоненты",
+            "соевый лецитин",
+            "соль",
+            "экстракт ванили"
+          ],
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Composition; grouped summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "crossContactWarning": {
+          "value": [
+            "арахис",
+            "орехи"
+          ],
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-molochnyj/molochnyj-shokolad-ajnalajyn-2/",
+          "section": "Composition warning",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "fullCompositionLabel",
+          "reason": "Grouped summary only; exact package wording and current formula still require confirmation."
+        }
+      ],
+      "limitations": [
+        "Use catalogue №11209 (160g); the similar 20g variant is a separate commercial package.",
+        "This is a factual source record, not evidence of storage, suitability or expiry of a particular ARIA lot."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "rakhat-80-cocoa-100g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Rakhat 80% cocoa",
+      "suggestedDisplayNameRu": "Rakhat 80% cocoa, 100 г",
+      "brand": "Rakhat",
+      "categoryForDemo": "Шоколад",
+      "manufacturer": null,
+      "sourcePublisher": "АО «ЛОТТЕ Рахат»",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+        "https://www.rakhat.kz/product-category/shokolad/"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Rakhat 80% cocoa",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Rakhat",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "manufacturerCatalogueNumber": {
+          "value": "1249",
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Catalogue item number",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 100,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.rakhat.kz/product-category/shokolad/",
+          "section": "Catalogue card №1249",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cocoaMinimumPercent": {
+          "value": 80,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Composition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "energyKcalPer100g": {
+          "value": 587,
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "компоненты какао",
+            "сахар",
+            "соевый лецитин",
+            "соль",
+            "экстракт ванили"
+          ],
+          "sourceUrl": "https://www.rakhat.kz/products/shokolad/shokolad-chernyj/rakhat-80-6/",
+          "section": "Composition; grouped summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "fullCompositionAndCrossContactLabel",
+          "reason": "Grouped ingredient summary only; current exact package warnings are not independently checked."
+        }
+      ],
+      "limitations": [
+        "Do not infer that absence of listed milk means suitability for milk allergy; no complete cross-contact statement has been confirmed."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "barilla-spaghetti-500g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Spaghetti",
+      "suggestedDisplayNameRu": "Barilla Spaghetti, 500 г",
+      "brand": "Barilla",
+      "categoryForDemo": "Макаронные изделия",
+      "manufacturer": null,
+      "sourcePublisher": "Barilla G. e R. F.lli S.p.A.",
+      "sourceLocale": "es-ES",
+      "sourceURLs": [
+        "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Spaghetti",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 500,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "section": "Package size",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredients": {
+          "value": [
+            "семолина твёрдой пшеницы",
+            "вода"
+          ],
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "section": "Ingredientes; translated from Spanish",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cookingMinutes": {
+          "value": 8,
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/spaghetti",
+          "section": "Product header",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        }
+      ],
+      "limitations": [
+        "Spanish regional manufacturer page. Formula/package are not automatically evidence for a Kazakhstan import; compare the actual label.",
+        "Do not derive an EAN from a different country or package size."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "barilla-penne-rigate-500g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Penne Rigate",
+      "suggestedDisplayNameRu": "Barilla Penne Rigate, 500 г",
+      "brand": "Barilla",
+      "categoryForDemo": "Макаронные изделия",
+      "manufacturer": null,
+      "sourcePublisher": "Barilla G. e R. F.lli S.p.A.",
+      "sourceLocale": "es-ES",
+      "sourceURLs": [
+        "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Penne Rigate",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 500,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "section": "Package size",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredients": {
+          "value": [
+            "семолина твёрдой пшеницы",
+            "вода"
+          ],
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "section": "Ingredientes; translated from Spanish",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cookingMinutes": {
+          "value": 11,
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/penne-rigate",
+          "section": "Product header",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        }
+      ],
+      "limitations": [
+        "Spanish regional manufacturer page. Formula/package are not automatically evidence for a Kazakhstan import; compare the actual label.",
+        "Do not derive an EAN from a different country or package size."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "barilla-fusilli-500g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Fusilli",
+      "suggestedDisplayNameRu": "Barilla Fusilli, 500 г",
+      "brand": "Barilla",
+      "categoryForDemo": "Макаронные изделия",
+      "manufacturer": null,
+      "sourcePublisher": "Barilla G. e R. F.lli S.p.A.",
+      "sourceLocale": "es-ES",
+      "sourceURLs": [
+        "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Fusilli",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Barilla",
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 500,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "section": "Package size",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredients": {
+          "value": [
+            "семолина твёрдой пшеницы",
+            "вода"
+          ],
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "section": "Ingredientes; translated from Spanish",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "cookingMinutes": {
+          "value": 11,
+          "sourceUrl": "https://www.barilla.com/es-es/productos/pasta/clasica/fusilli",
+          "section": "Product header",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        }
+      ],
+      "limitations": [
+        "Spanish regional manufacturer page. Formula/package are not automatically evidence for a Kazakhstan import; compare the actual label.",
+        "Do not derive an EAN from a different country or package size."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "foodmaster-kefir-25-1000g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "FoodMaster Кефир 2,5%",
+      "suggestedDisplayNameRu": "FoodMaster Кефир 2,5%, 1 кг",
+      "brand": "FoodMaster",
+      "categoryForDemo": "Молочные продукты",
+      "manufacturer": null,
+      "sourcePublisher": "FoodMaster",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "FoodMaster Кефир 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "FoodMaster",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 1000,
+            "unit": "g"
+          },
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "section": "Упаковка; decimal comma kg converted exactly to g",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageType": {
+          "value": "«ТетраРекс» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "section": "Упаковка",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "fatPercent": {
+          "value": 2.5,
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-kefir-25-1",
+          "section": "Product title and nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "ingredients",
+          "reason": "The opened primary page does not provide an unambiguous full ingredient list for transcription; do not infer it from category or a different regional variant."
+        }
+      ],
+      "limitations": [
+        "Mass is recorded in grams because the primary source uses kilograms. It is not converted to litres.",
+        "General shelf life and refrigeration guidance do not establish manufacture/expiry dates or handling evidence for any specific lot."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "foodmaster-ryazhenka-25-900g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "FoodMaster Ряженка 2,5%",
+      "suggestedDisplayNameRu": "FoodMaster Ряженка 2,5%, 900 г",
+      "brand": "FoodMaster",
+      "categoryForDemo": "Молочные продукты",
+      "manufacturer": null,
+      "sourcePublisher": "FoodMaster",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "FoodMaster Ряженка 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "FoodMaster",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 900,
+            "unit": "g"
+          },
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "section": "Упаковка; decimal comma kg converted exactly to g",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageType": {
+          "value": "«ТетраРекс» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "section": "Упаковка",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "fatPercent": {
+          "value": 2.5,
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/foodmaster-riazhenka-25-3",
+          "section": "Product title and nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "ingredients",
+          "reason": "The opened primary page does not provide an unambiguous full ingredient list for transcription; do not infer it from category or a different regional variant."
+        }
+      ],
+      "limitations": [
+        "Mass is recorded in grams because the primary source uses kilograms. It is not converted to litres.",
+        "General shelf life and refrigeration guidance do not establish manufacture/expiry dates or handling evidence for any specific lot."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "lactel-fm-vitamin-d-25-1000g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Lactel ФМ Молоко с витамином D 2,5%",
+      "suggestedDisplayNameRu": "Lactel ФМ Молоко с витамином D 2,5%, 1 кг",
+      "brand": "Lactel",
+      "categoryForDemo": "Молочные продукты",
+      "manufacturer": null,
+      "sourcePublisher": "FoodMaster",
+      "sourceLocale": "ru-KZ",
+      "sourceURLs": [
+        "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Lactel ФМ Молоко с витамином D 2,5%",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Lactel",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "netMass": {
+          "value": {
+            "value": 1000,
+            "unit": "g"
+          },
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "section": "Упаковка; decimal comma kg converted exactly to g",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageType": {
+          "value": "«Тетрабрик» с крышкой",
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "section": "Упаковка",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "fatPercent": {
+          "value": 2.5,
+          "sourceUrl": "https://foodmaster.kz/ru/catalog/lactel-fm-moloko-s-vitaminom-d-25-27",
+          "section": "Product title and nutrition",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "ingredients",
+          "reason": "The opened primary page does not provide an unambiguous full ingredient list for transcription; do not infer it from category or a different regional variant."
+        }
+      ],
+      "limitations": [
+        "Mass is recorded in grams because the primary source uses kilograms. It is not converted to litres.",
+        "General shelf life and refrigeration guidance do not establish manufacture/expiry dates or handling evidence for any specific lot."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "frosch-raspberry-dish-gel-500ml",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Dishwashing Gel Raspberry",
+      "suggestedDisplayNameRu": "Frosch Гель для мытья посуды Raspberry, 500 мл",
+      "brand": "Frosch",
+      "categoryForDemo": "Бытовые товары",
+      "manufacturer": null,
+      "sourcePublisher": "Werner & Mertz GmbH",
+      "sourceLocale": "en",
+      "sourceURLs": [
+        "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Dishwashing Gel Raspberry",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageQuantity": {
+          "value": {
+            "value": 500,
+            "unit": "ml"
+          },
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "section": "Package selector",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "анионные и амфотерные ПАВ",
+            "неионогенные ПАВ",
+            "консервант",
+            "отдушка",
+            "малиновый уксус",
+            "красители"
+          ],
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-gel-raspberry.html",
+          "section": "Ingredients; grouped translated summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "completeSafetyAndCompositionLabel",
+          "reason": "The summary is not a substitute for the current detergent label, hazards or complete component disclosure."
+        }
+      ],
+      "limitations": [
+        "No medical, environmental, hypoallergenic or safety guarantees are inferred for ARIA. Follow the actual package safety instructions.",
+        "The listed company is the official website publisher; exact manufacturing legal entity/plant for the received pack remains unconfirmed."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "frosch-lemon-dish-liquid-750ml",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Dishwashing Liquid Lemon",
+      "suggestedDisplayNameRu": "Frosch Средство для мытья посуды Lemon, 750 мл",
+      "brand": "Frosch",
+      "categoryForDemo": "Бытовые товары",
+      "manufacturer": null,
+      "sourcePublisher": "Werner & Mertz GmbH",
+      "sourceLocale": "en",
+      "sourceURLs": [
+        "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Dishwashing Liquid Lemon",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageQuantity": {
+          "value": {
+            "value": 750,
+            "unit": "ml"
+          },
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "section": "Package selector",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "анионные ПАВ",
+            "амфотерные и неионогенные ПАВ",
+            "консервант",
+            "отдушка",
+            "цитрусовое масло",
+            "краситель"
+          ],
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-liquid-lemon.html",
+          "section": "Ingredients; grouped translated summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "completeSafetyAndCompositionLabel",
+          "reason": "The summary is not a substitute for the current detergent label, hazards or complete component disclosure."
+        }
+      ],
+      "limitations": [
+        "No medical, environmental, hypoallergenic or safety guarantees are inferred for ARIA. Follow the actual package safety instructions.",
+        "The listed company is the official website publisher; exact manufacturing legal entity/plant for the received pack remains unconfirmed."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "frosch-vinegar-cleaner-1000ml",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Vinegar Cleaner",
+      "suggestedDisplayNameRu": "Frosch Уксусный очиститель, 1 л",
+      "brand": "Frosch",
+      "categoryForDemo": "Бытовые товары",
+      "manufacturer": null,
+      "sourcePublisher": "Werner & Mertz GmbH",
+      "sourceLocale": "en",
+      "sourceURLs": [
+        "https://frosch.de/en/products-and-tips/vinegar-cleaner.html"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Vinegar Cleaner",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageQuantity": {
+          "value": {
+            "value": 1000,
+            "unit": "ml"
+          },
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "section": "Package selector",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "неионогенные и анионные ПАВ",
+            "уксусная кислота",
+            "краситель"
+          ],
+          "sourceUrl": "https://frosch.de/en/products-and-tips/vinegar-cleaner.html",
+          "section": "Ingredients; grouped translated summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "completeSafetyAndCompositionLabel",
+          "reason": "The summary is not a substitute for the current detergent label, hazards or complete component disclosure."
+        }
+      ],
+      "limitations": [
+        "No medical, environmental, hypoallergenic or safety guarantees are inferred for ARIA. Follow the actual package safety instructions.",
+        "The listed company is the official website publisher; exact manufacturing legal entity/plant for the received pack remains unconfirmed."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "frosch-green-lemon-dish-tabs-50",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Dishwashing tabs All-in-1 Green Lemon",
+      "suggestedDisplayNameRu": "Frosch Таблетки All-in-1 Green Lemon, 50 шт.",
+      "brand": "Frosch",
+      "categoryForDemo": "Бытовые товары",
+      "manufacturer": null,
+      "sourcePublisher": "Werner & Mertz GmbH",
+      "sourceLocale": "en",
+      "sourceURLs": [
+        "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Dishwashing tabs All-in-1 Green Lemon",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Frosch",
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packageQuantity": {
+          "value": {
+            "value": 50,
+            "unit": "count"
+          },
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "section": "Package selector",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "кислородный отбеливатель",
+            "неионогенные ПАВ",
+            "поликарбоксилаты",
+            "ферменты",
+            "отдушка",
+            "экстракт лимона"
+          ],
+          "sourceUrl": "https://frosch.de/en/products-and-tips/dishwashing-tabs-all-in-1-green-lemon.html",
+          "section": "Ingredients; grouped translated summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "completeSafetyAndCompositionLabel",
+          "reason": "The summary is not a substitute for the current detergent label, hazards or complete component disclosure."
+        }
+      ],
+      "limitations": [
+        "No medical, environmental, hypoallergenic or safety guarantees are inferred for ARIA. Follow the actual package safety instructions.",
+        "The listed company is the official website publisher; exact manufacturing legal entity/plant for the received pack remains unconfirmed."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "heinz-tomato-soup-6x400g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Cream of Tomato Soup 6 Pack",
+      "suggestedDisplayNameRu": "Heinz Cream of Tomato Soup, 6 × 400 г",
+      "brand": "Heinz",
+      "categoryForDemo": "Консервы",
+      "manufacturer": null,
+      "sourcePublisher": "Kraft Heinz, Inc.",
+      "sourceLocale": "en-GB",
+      "sourceURLs": [
+        "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Cream of Tomato Soup 6 Pack",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Heinz",
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packCount": {
+          "value": 6,
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "unitNetMass": {
+          "value": {
+            "value": 400,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Sizes available; mass of one can in the named multipack",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "tomatoPercent": {
+          "value": 89,
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Ingredients",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "declaredAllergens": {
+          "value": [
+            "молоко"
+          ],
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Allergen Information",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "ingredientSummary": {
+          "value": [
+            "томаты",
+            "вода",
+            "кукурузный загуститель",
+            "сахар",
+            "рапсовое масло",
+            "молочные компоненты",
+            "соль",
+            "лимонная кислота",
+            "пряности"
+          ],
+          "sourceUrl": "https://www.heinz.com/en-GB/products/05000157075017-cream-of-tomato-soup-6-pack",
+          "section": "Ingredients; grouped summary",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "fullCompositionLabel",
+          "reason": "Grouped summary only; exact current UK package and any Kazakhstan import label should be checked."
+        }
+      ],
+      "limitations": [
+        "This is the UK six-can multipack, not a single-can SKU. Do not silently sell a different package under the same identity."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    },
+    {
+      "referenceId": "heinz-baked-beans-case-24x415g",
+      "verificationStatus": "PARTIALLY_VERIFIED_PRIMARY_SOURCE",
+      "checkedDate": "2026-11-04",
+      "commercialName": "Baked Beans 24 x 415g",
+      "suggestedDisplayNameRu": "Heinz Baked Beans, 24 × 415 г",
+      "brand": "Heinz",
+      "categoryForDemo": "Консервы",
+      "manufacturer": null,
+      "sourcePublisher": "Kraft Heinz, Inc.",
+      "sourceLocale": "en-GB",
+      "sourceURLs": [
+        "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g"
+      ],
+      "primaryPageOpened": true,
+      "verifiedFacts": {
+        "commercialName": {
+          "value": "Baked Beans 24 x 415g",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "section": "Product title",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "brand": {
+          "value": "Heinz",
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "section": "Official brand/product catalogue context",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "packCount": {
+          "value": 24,
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "section": "Product title and case-size description",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        },
+        "unitNetMass": {
+          "value": {
+            "value": 415,
+            "unit": "g"
+          },
+          "sourceUrl": "https://www.kraftheinzawayfromhome.com/en-GB/products/05000157054838-baked-beans-24-x-415-g",
+          "section": "Title and case-size description",
+          "status": "VERIFIED_PRIMARY_SOURCE",
+          "checkedDate": "2026-11-04"
+        }
+      },
+      "missingFacts": [
+        {
+          "field": "manufacturerLegalEntity",
+          "reason": "Exact legal manufacturer/plant for this regional package is not stated explicitly in the opened product page; website publisher is recorded separately."
+        },
+        {
+          "field": "gtin",
+          "reason": "No GTIN/EAN transcribed or inferred from URL/catalogue identifiers."
+        },
+        {
+          "field": "photoReusePermission",
+          "reason": "No explicit licence permitting reuse in ARIA was confirmed; use a labelled placeholder or an owner-authorised photograph."
+        },
+        {
+          "field": "storePriceStockAndBatchDates",
+          "reason": "Product specifications do not establish ARIA prices, stock, cost, receipt dates, lot expiry or sales."
+        },
+        {
+          "field": "ingredients",
+          "reason": "The opened primary page does not provide an unambiguous full ingredient list for transcription; do not infer it from category or a different regional variant."
+        }
+      ],
+      "limitations": [
+        "Foodservice case of 24 cans; this source does not establish a separately identified retail single-can SKU.",
+        "Ingredients and allergen sections were empty in the opened page. No formula is copied from another site or product."
+      ],
+      "photo": null,
+      "photoStatus": "NO_REUSE_LICENCE_CONFIRMED",
+      "kazakhstanRetailAvailability": null,
+      "prices": null,
+      "unitCost": null,
+      "stock": null,
+      "batchExpiry": null,
+      "salesHistory": null,
+      "demoStoreValuesCreated": false
+    }
+  ]
+}

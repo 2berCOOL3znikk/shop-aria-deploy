@@ -23,19 +23,23 @@ public class ControlService {
     private final PricingService pricing;
     private final AuditService audit;
     private final PriceHistoryService priceHistory;
-    public ControlService(ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,InventoryLotRepository lots,InventoryService inventory,PricingService pricing,AuditService audit,PriceHistoryService priceHistory){
+    private final ProductSkuAllocationRepository skuAllocations;
+    public ControlService(ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,InventoryLotRepository lots,InventoryService inventory,PricingService pricing,AuditService audit,PriceHistoryService priceHistory,ProductSkuAllocationRepository skuAllocations){
         this.products=products;this.details=details;this.suppliers=suppliers;this.lots=lots;this.inventory=inventory;this.pricing=pricing;this.audit=audit;
         this.priceHistory=priceHistory;
+        this.skuAllocations=skuAllocations;
     }
     public Product saveProduct(Long id,ProductInput input){
         Product p=id==null?new Product():inventory.lock(id);
         var oldPrice=p.getUnitPrice();int oldPercent=p.getDiscountPercent()==null?0:p.getDiscountPercent();
         p.setMinimumPrice(input.minimumPrice());
         if(input.minimumPrice()!=null && input.unitPrice().compareTo(input.minimumPrice())<0)throw new IllegalArgumentException("Базовая цена ниже минимальной");
-        if ((id==null || !input.sku().trim().equalsIgnoreCase(p.getSku())) && products.existsBySkuIgnoreCase(input.sku().trim())) throw new IllegalStateException("SKU уже занят другим товаром");
+        String sku=input.sku()==null||input.sku().isBlank()?(id==null?allocateSku():p.getSku()):input.sku().trim().toUpperCase(java.util.Locale.ROOT);
+        if(input.sku()!=null&&!input.sku().isBlank()&&sku.startsWith("ARIA-AUTO-")&&(id==null||!sku.equalsIgnoreCase(p.getSku())))throw new IllegalArgumentException("Этот диапазон кодов выделяется автоматически. Оставьте код пустым или задайте свой артикул.");
+        if ((id==null || !sku.equalsIgnoreCase(p.getSku())) && products.existsBySkuIgnoreCase(sku)) throw new IllegalStateException("SKU уже занят другим товаром");
         if(id!=null && p.getArchived()) throw new IllegalStateException("Товар архивирован");
         if(input.imageUrl()!=null && !input.imageUrl().isBlank() && !input.imageUrl().startsWith("/images/") && !input.imageUrl().matches("/api/products/\\d+/photo") && !input.imageUrl().matches("https://[^\\s]+")) throw new IllegalArgumentException("Фото: загруженное изображение, путь /images/… или ссылка https://…");
-        p.setSku(input.sku().trim().toUpperCase(java.util.Locale.ROOT));p.setName(input.name().trim());p.setCategory(input.category().trim());p.setUnitPrice(input.unitPrice());
+        p.setSku(sku);p.setName(input.name().trim());p.setCategory(input.category().trim());p.setUnitPrice(input.unitPrice());
         p.setBarcode(input.barcode());p.setUnit(input.unit().trim());p.setLowStockThreshold(input.lowStockThreshold());
         p.setImageUrl(input.imageUrl()==null||input.imageUrl().isBlank()?"/images/product-generic.svg":input.imageUrl().trim());
         if(id==null){p.setReceivedAt(LocalDate.now());p.setUnitCost(java.math.BigDecimal.ZERO);}
@@ -44,6 +48,11 @@ public class ControlService {
         if(oldPrice!=null)priceHistory.record(p,oldPrice,oldPercent,oldPercent,"Изменение карточки товара");
         ProductDetail detail=details.findByProductId(p.getId()).orElseGet(ProductDetail::new);detail.setProduct(p);detail.setBrand(input.brand());detail.setDescriptionLong(input.description());details.save(detail);
         events.publishEvent(new StoreChanged(p.getId(),"PRODUCT_CHANGED"));audit.record(id==null?"PRODUCT_CREATED":"PRODUCT_UPDATED","product:"+p.getId(),p.getSku()+" · "+p.getName()+" · цена "+p.getUnitPrice()+" ₸");return p;
+    }
+    private String allocateSku(){
+        // Old manually named products are preserved; sequence and reserved prefix prevent new writers colliding.
+        for(int attempt=0;attempt<1000;attempt++){String code="ARIA-AUTO-"+skuAllocations.saveAndFlush(new ProductSkuAllocation()).id;if(!products.existsBySkuIgnoreCase(code))return code;}
+        throw new IllegalStateException("Не удалось выделить код товара. Обратитесь к администратору.");
     }
     public void archiveProduct(Long id){
         Product p=inventory.lock(id);

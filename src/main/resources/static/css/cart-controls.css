@@ -1,0 +1,18 @@
+.cart-quantity-control{display:flex;flex:1;align-items:center;gap:8px;min-width:0;flex-wrap:wrap}
+.cart-quantity-control>.btn-add-cart{width:100%;min-height:42px}
+.cart-stepper{display:flex;align-items:center;justify-content:space-between;min-width:128px;min-height:42px;border:1px solid var(--border-color);border-radius:8px;background:var(--bg-surface);overflow:hidden}
+.cart-stepper .btn-icon{display:grid;place-items:center;min-width:40px;min-height:40px;border:0!important;border-radius:0!important;background:transparent!important;color:var(--text-primary);font:inherit;font-size:19px;padding:5px;cursor:pointer;box-shadow:none!important;transition:background-color .18s,color .18s}
+.cart-stepper .btn-icon:hover:not(:disabled){background:var(--bg-elevated)!important}
+.cart-stepper .btn-icon:disabled,.cart-quantity-control>.btn-add-cart:disabled{opacity:.45;cursor:default}
+.cart-stepper output{display:block;min-width:32px;text-align:center;font-size:13px;font-weight:600;font-variant-numeric:tabular-nums;color:var(--text-primary)}
+.cart-control-note,.cart-stock-note{font-size:10px;line-height:1.5;color:var(--text-secondary)}
+.cart-stock-note{flex-basis:100%}
+.product-card-actions>.cart-quantity-control{min-width:0}
+.cart-line .cart-quantity-control{flex:0 0 auto;max-width:210px}
+.cart-line-title{color:var(--text-primary);text-decoration:none}
+.cart-line-title:hover{text-decoration:underline}
+.cart-line .cart-line-total{font-weight:650;min-width:95px;text-align:right;font-variant-numeric:tabular-nums}
+.cart-line-remove{min-width:40px;min-height:40px;border:1px solid var(--border-color)!important;border-radius:7px;background:var(--bg-surface)!important;color:var(--text-secondary)!important;font-size:16px!important}
+.cart-line-remove:hover{background:var(--bg-elevated)!important}
+@media(max-width:600px){.cart-line .cart-quantity-control{max-width:none}.cart-line .cart-line-total{min-width:0}.cart-line .cart-control-note{display:none}.cart-stepper{min-width:132px}.cart-stepper .btn-icon{min-height:42px;min-width:42px}.cart-line-remove{min-height:42px;min-width:42px}}
+@media(prefers-reduced-motion:reduce){.cart-stepper .btn-icon{transition:none}}
