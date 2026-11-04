@@ -1,0 +1,52 @@
+{
+  "row": {
+    "id": "BE08",
+    "section": "Backend",
+    "function": "Несуществующий ресурс",
+    "precondition": "ID отсутствует в стенде",
+    "actions": "GET, PUT и DELETE product по отсутствующему ID",
+    "expected": "Все операции возвращают 404",
+    "actual": "GET, PUT, DELETE: HTTP 404, «Товар не найден».",
+    "status": "Пройден",
+    "evidence": "BE08.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products/9000000000000",
+      "authorization": "[скрыто]",
+      "status": 404,
+      "response": {
+        "message": "Товар не найден"
+      }
+    },
+    {
+      "method": "PUT",
+      "path": "/api/admin/control/products/9000000000000",
+      "authorization": "[скрыто]",
+      "request": {
+        "sku": "R2-bdf73442-6c5d-45",
+        "name": "Учебный товар аудита",
+        "category": "Внутренние проверки",
+        "unit": "шт",
+        "unitPrice": 1000,
+        "minimumPrice": 1000,
+        "lowStockThreshold": 0
+      },
+      "status": 404,
+      "response": {
+        "message": "Товар не найден"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/control/products/9000000000000",
+      "authorization": "[скрыто]",
+      "status": 404,
+      "response": {
+        "message": "Товар не найден"
+      }
+    }
+  ]
+}

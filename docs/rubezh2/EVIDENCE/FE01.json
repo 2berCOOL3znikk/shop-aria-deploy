@@ -1,0 +1,15 @@
+{
+  "row": {
+    "id": "FE01",
+    "section": "Frontend",
+    "function": "Некорректный email",
+    "precondition": "Открыта регистрация",
+    "actions": "Ввести неверный email и нажать регистрацию",
+    "expected": "Форма блокируется до отправки",
+    "actual": "Email отклонён встроенной валидацией; POST не отправлен. Скриншот FE01.png.",
+    "status": "Пройден",
+    "evidence": "FE01.json",
+    "proposal": "Сохранять тип email и серверную проверку"
+  },
+  "requests": []
+}

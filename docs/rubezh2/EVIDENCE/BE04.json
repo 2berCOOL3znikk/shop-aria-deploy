@@ -1,0 +1,32 @@
+{
+  "row": {
+    "id": "BE04",
+    "section": "Backend",
+    "function": "Неверный формат цены",
+    "precondition": "Владелец авторизован",
+    "actions": "POST с текстом вместо цены",
+    "expected": "HTTP 400 без stack trace",
+    "actual": "HTTP 400, «Неверный формат значения или даты»; стек не раскрыт.",
+    "status": "Пройден",
+    "evidence": "BE04.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/control/products",
+      "authorization": "[скрыто]",
+      "request": {
+        "name": "Учебный товар",
+        "category": "Проверки",
+        "unit": "шт",
+        "unitPrice": "incorrect",
+        "lowStockThreshold": 0
+      },
+      "status": 400,
+      "response": {
+        "message": "Неверный формат значения или даты"
+      }
+    }
+  ]
+}

@@ -1,0 +1,173 @@
+{
+  "row": {
+    "id": "BE13",
+    "section": "Backend",
+    "function": "Удаление с сохранением истории",
+    "precondition": "Есть учебная партия товара",
+    "actions": "Архивировать с запасом; списать партию; повторить архивирование",
+    "expected": "409 до списания; 200 после, история остаётся",
+    "actual": "Защита 409 с запасом; списание и архивирование 200. История партии доступна, товар archived=true.",
+    "status": "Пройден",
+    "evidence": "BE13.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "DELETE",
+      "path": "/api/admin/control/products/43",
+      "authorization": "[скрыто]",
+      "status": 409,
+      "response": {
+        "message": "Перед архивированием продайте или спишите все партии товара",
+        "status": "conflict"
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/control/lots/37",
+      "authorization": "[скрыто]",
+      "request": {
+        "reason": "Завершение учебного аудита R2"
+      },
+      "status": 200,
+      "response": {
+        "message": "Партия списана с записью причины"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/control/lots/37",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "active": false,
+        "expiryDate": null,
+        "handlingCheckedAt": null,
+        "handlingCheckedBy": null,
+        "handlingRevision": 0,
+        "handlingStatus": "UNKNOWN",
+        "id": 37,
+        "initialQuantity": 2,
+        "lotNumber": "R2 партия после изменения",
+        "manufacturedAt": null,
+        "product": {
+          "sku": "R2-BDF73442-6C5D-45",
+          "name": "Учебный товар аудита",
+          "category": "Внутренние проверки",
+          "receivedAt": "2026-11-04",
+          "archived": false,
+          "ariaReason": null,
+          "barcode": null,
+          "dimensions": null,
+          "discountPercent": 0,
+          "expiryDate": null,
+          "id": 43,
+          "imageUrl": "/images/product-generic.svg",
+          "lastAnalyzedAt": null,
+          "lowStockThreshold": 0,
+          "marketAvgPrice": null,
+          "minimumPrice": 1000,
+          "notes": null,
+          "quantityOnHand": 0,
+          "salesLast30Days": 0,
+          "status": "ACTIVE",
+          "subcategory": null,
+          "supplier": null,
+          "tags": null,
+          "unit": "шт",
+          "unitCost": 800,
+          "unitPrice": 1100,
+          "vatPercent": 20
+        },
+        "quantity": 0,
+        "receivedAt": "2026-11-04",
+        "storageRequirements": null,
+        "supplier": null,
+        "unitCost": 800
+      }
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/admin/control/products/43",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "message": "Товар архивирован, история сохранена"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products/43",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "product": {
+          "sku": "R2-BDF73442-6C5D-45",
+          "name": "Учебный товар аудита",
+          "category": "Внутренние проверки",
+          "receivedAt": "2026-11-04",
+          "archived": true,
+          "ariaReason": null,
+          "barcode": null,
+          "dimensions": null,
+          "discountPercent": 0,
+          "expiryDate": null,
+          "id": 43,
+          "imageUrl": "/images/product-generic.svg",
+          "lastAnalyzedAt": null,
+          "lowStockThreshold": 0,
+          "marketAvgPrice": null,
+          "minimumPrice": 1000,
+          "notes": null,
+          "quantityOnHand": 0,
+          "salesLast30Days": 0,
+          "status": "ACTIVE",
+          "subcategory": null,
+          "supplier": null,
+          "tags": null,
+          "unit": "шт",
+          "unitCost": 800,
+          "unitPrice": 1100,
+          "vatPercent": 20
+        },
+        "details": {
+          "product": {
+            "sku": "R2-BDF73442-6C5D-45",
+            "name": "Учебный товар аудита",
+            "category": "Внутренние проверки",
+            "receivedAt": "2026-11-04",
+            "archived": true,
+            "ariaReason": null,
+            "barcode": null,
+            "dimensions": null,
+            "discountPercent": 0,
+            "expiryDate": null,
+            "id": 43,
+            "imageUrl": "/images/product-generic.svg",
+            "lastAnalyzedAt": null,
+            "lowStockThreshold": 0,
+            "marketAvgPrice": null,
+            "minimumPrice": 1000,
+            "notes": null,
+            "quantityOnHand": 0,
+            "salesLast30Days": 0,
+            "status": "ACTIVE",
+            "subcategory": null,
+            "supplier": null,
+            "tags": null,
+            "unit": "шт",
+            "unitCost": 800,
+            "unitPrice": 1100,
+            "vatPercent": 20
+          },
+          "brand": null,
+          "color": null,
+          "size": null,
+          "weightKg": null,
+          "descriptionLong": null,
+          "id": 43
+        }
+      }
+    }
+  ]
+}

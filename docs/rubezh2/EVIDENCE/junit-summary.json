@@ -1,0 +1,1425 @@
+{
+  "tests": 182,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "com.aria.config.DatabaseUrlConfigurationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.183,
+      "source": "TEST-com.aria.config.DatabaseUrlConfigurationTest.xml",
+      "sha256": "b98418a0e2332d428a91a978b493223c92220e67ea152aed9ce9e74a19ba46fc",
+      "cases": [
+        {
+          "name": "parsingFailureDoesNotExposeConnectionSecret",
+          "classname": "com.aria.config.DatabaseUrlConfigurationTest",
+          "seconds": 0.121,
+          "passed": true
+        },
+        {
+          "name": "extractsRenderCredentialsWithoutIncludingThemInJdbcUrl",
+          "classname": "com.aria.config.DatabaseUrlConfigurationTest",
+          "seconds": 0.018,
+          "passed": true
+        },
+        {
+          "name": "acceptsJdbcUrlWithoutUserinfoAndPostgresAlias",
+          "classname": "com.aria.config.DatabaseUrlConfigurationTest",
+          "seconds": 0.006,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.config.FreeHostingTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.943,
+      "source": "TEST-com.aria.config.FreeHostingTest.xml",
+      "sha256": "ddbcd04cdfe3ff91f1ccba634bedf7d4025198aa495a785f0605d9082975c34e",
+      "cases": [
+        {
+          "name": "unavailableDatabaseProducesRetryableResponseWithoutLeakingConnectionDetails",
+          "classname": "com.aria.config.FreeHostingTest",
+          "seconds": 0.035,
+          "passed": true
+        },
+        {
+          "name": "disabledAiScheduleDoesNotWakeDatabase",
+          "classname": "com.aria.config.FreeHostingTest",
+          "seconds": 2.037,
+          "passed": true
+        },
+        {
+          "name": "freeProfileReleasesConnectionsAndDoesNotProbeSleepingDatabase",
+          "classname": "com.aria.config.FreeHostingTest",
+          "seconds": 0.033,
+          "passed": true
+        },
+        {
+          "name": "freeBackgroundTasksDoNotOpenDatabaseConnections",
+          "classname": "com.aria.config.FreeHostingTest",
+          "seconds": 0.134,
+          "passed": true
+        },
+        {
+          "name": "freeIntelligenceUsesFactsEvenWhenAnExternalApiKeyExists",
+          "classname": "com.aria.config.FreeHostingTest",
+          "seconds": 0.693,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.config.OrganizationBoundaryTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.421,
+      "source": "TEST-com.aria.config.OrganizationBoundaryTest.xml",
+      "sha256": "95e47273413a06c8c2fc6fd1a24c7c0702ef108593b7234d1727ad3420bce3c5",
+      "cases": [
+        {
+          "name": "nonDemoRequiresExplicitProvisioningAndSecondOrganizationIsRejected",
+          "classname": "com.aria.config.OrganizationBoundaryTest",
+          "seconds": 0.352,
+          "passed": true
+        },
+        {
+          "name": "bindsExistingDemoWithoutMovingBusinessData",
+          "classname": "com.aria.config.OrganizationBoundaryTest",
+          "seconds": 0.054,
+          "passed": true
+        },
+        {
+          "name": "copiedDemoCannotSilentlyBecomeAnotherCompany",
+          "classname": "com.aria.config.OrganizationBoundaryTest",
+          "seconds": 0.01,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.config.ProductionConfigurationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.026,
+      "source": "TEST-com.aria.config.ProductionConfigurationTest.xml",
+      "sha256": "2712ed5e4ea6d8b1532dbe44f1aa7b2a2c1140c2a52e7c100780a691fa254fd0",
+      "cases": [
+        {
+          "name": "refusesH2BeforeDatabaseCreation",
+          "classname": "com.aria.config.ProductionConfigurationTest",
+          "seconds": 0.013,
+          "passed": true
+        },
+        {
+          "name": "refusesWeakSecretsAndAutomaticSchemaUpdates",
+          "classname": "com.aria.config.ProductionConfigurationTest",
+          "seconds": 0.005,
+          "passed": true
+        },
+        {
+          "name": "refusesEveryDestructiveOrDemoOverride",
+          "classname": "com.aria.config.ProductionConfigurationTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "acceptsExplicitPostgresAndStrongSecrets",
+          "classname": "com.aria.config.ProductionConfigurationTest",
+          "seconds": 0.002,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.ControlCenterActivityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 15.057,
+      "source": "TEST-com.aria.ControlCenterActivityTest.xml",
+      "sha256": "3272b6f36a43b965643093e54e7bed497765fdeaec519e8341e65c2b7813012a",
+      "cases": [
+        {
+          "name": "centerUsesRecentActivityWindowAndPreservesVerifiedAiSource",
+          "classname": "com.aria.ControlCenterActivityTest",
+          "seconds": 0.629,
+          "passed": true
+        },
+        {
+          "name": "newlyCompletedAiAnswerSortsAheadOfEightNewerReportsAndUsesLatestTimestampWithStableTies",
+          "classname": "com.aria.ControlCenterActivityTest",
+          "seconds": 0.059,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.ControlIntegrationTest",
+      "tests": 67,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 49.39,
+      "source": "TEST-com.aria.ControlIntegrationTest.xml",
+      "sha256": "baaf22365d24ca25633d7a4052e40c5eac90e940436c6803786d90a2a9f33f59",
+      "cases": [
+        {
+          "name": "queuedStoreSyncIsDeduplicatedAndActuallyExecuted",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.482,
+          "passed": true
+        },
+        {
+          "name": "connectedDemoStoreWorksAndDisconnectIsVersionProtected",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.68,
+          "passed": true
+        },
+        {
+          "name": "socialProposalDoesNotReserveBeforeExplicitVerifiedApprovalAndUsesExistingHandover",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.203,
+          "passed": true
+        },
+        {
+          "name": "smartPricingHonorsFloorAndRollbackWritesActualHistory",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.76,
+          "passed": true
+        },
+        {
+          "name": "webhookAdmissionDoesNotWaitForLongStoreImportLock",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.709,
+          "passed": true
+        },
+        {
+          "name": "stockEventsAreQueuedAfterCommitAndNeverAfterRollback",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.634,
+          "passed": true
+        },
+        {
+          "name": "aiStrategyNeedsConsentThenPersistsSourceAndUsesSelectedScenario",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.771,
+          "passed": true
+        },
+        {
+          "name": "profileRejectsOverlongFieldsWithoutChangingAnotherAccount",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.647,
+          "passed": true
+        },
+        {
+          "name": "malformedReviewsAreBadRequestsAndNeverStored",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.647,
+          "passed": true
+        },
+        {
+          "name": "soldOutDiscountCanBeClearedWithoutMakingExpiredStockSellable",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.719,
+          "passed": true
+        },
+        {
+          "name": "managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.011,
+          "passed": true
+        },
+        {
+          "name": "publicAssistantWorksWithoutLoginAndOnlyReturnsAvailablePublicCatalog",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.738,
+          "passed": true
+        },
+        {
+          "name": "centralStopRevokesExternalAiWhilePricingStopPreservesManualConsent",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.605,
+          "passed": true
+        },
+        {
+          "name": "socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.686,
+          "passed": true
+        },
+        {
+          "name": "purchasesRequireVerifiedQuoteAndPartialReceiptIsIdempotent",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.739,
+          "passed": true
+        },
+        {
+          "name": "adminBoundaryValidationAndStaticStyles",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.573,
+          "passed": true
+        },
+        {
+          "name": "managerComparesMinimumOrderCostAndUsesAnAffordableSupplier",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.612,
+          "passed": true
+        },
+        {
+          "name": "smartPricingUsesShippedHistoryAndActualPromotionOutcomes",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.763,
+          "passed": true
+        },
+        {
+          "name": "emergencyStopInvalidatesAiInFlightAndAiCannotSelectOutsideEngineScenarios",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.667,
+          "passed": true
+        },
+        {
+          "name": "fefoSaleAndCancellationRestoreOriginalLotsExactlyOnce",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.677,
+          "passed": true
+        },
+        {
+          "name": "repeatedBadPasswordsAreLimitedWithoutExposingInternalErrors",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.12,
+          "passed": true
+        },
+        {
+          "name": "threeRelatedResourcesSupportCreateReadUpdateAndSafeDelete",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.681,
+          "passed": true
+        },
+        {
+          "name": "smartPricingRequiresAdminAndAnalysisDoesNotChangePrices",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.651,
+          "passed": true
+        },
+        {
+          "name": "managerPurchaseDraftUsesBudgetAndNeverPlacesExternalOrder",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.646,
+          "passed": true
+        },
+        {
+          "name": "storeQueueRecoversLeaseFencesOldWorkerAndBoundsFailures",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.629,
+          "passed": true
+        },
+        {
+          "name": "smartPricingDoesNotTreatUnknownLegacyCostAsZero",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.569,
+          "passed": true
+        },
+        {
+          "name": "adminStockReadExcludesExpiredLotsWithoutChangingStoredProduct",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.619,
+          "passed": true
+        },
+        {
+          "name": "managerLeaseIsExclusiveAndOwnerMustConfirmAiAndCurrentPricingPolicy",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.583,
+          "passed": true
+        },
+        {
+          "name": "discountIsBoundedAndCheckoutRejectsStalePrice",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.595,
+          "passed": true
+        },
+        {
+          "name": "socialReservationRequiresVerificationAndTransferNeedsSeparateConfirmation",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.626,
+          "passed": true
+        },
+        {
+          "name": "unprocessableAiDecisionDoesNotStarveTheScheduledQueue",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.598,
+          "passed": true
+        },
+        {
+          "name": "legacyCartClearCannotDeleteAnotherOwnersCartOrUnknownLegacyRows",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.699,
+          "passed": true
+        },
+        {
+          "name": "signedWebhookInboxRejectsForgeryDeduplicatesAndRevokesOldRoutes",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.719,
+          "passed": true
+        },
+        {
+          "name": "structuredMovementLedgerBalancesAndRecordsActualWriteOffCost",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.63,
+          "passed": true
+        },
+        {
+          "name": "orderPagesSearchSnapshotsAndKeepStableStatusFilteredPages",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.675,
+          "passed": true
+        },
+        {
+          "name": "duplicateConcurrentCheckoutOnlyCreatesOneOrder",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.605,
+          "passed": true
+        },
+        {
+          "name": "smartPricingRejectsStaleInventoryAndSupersedesOldDecision",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.619,
+          "passed": true
+        },
+        {
+          "name": "publicAssistantRespectsDiscountFiltersAndDoesNotInventCurrencyRates",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.664,
+          "passed": true
+        },
+        {
+          "name": "wooImportKeepsStableIdsAndPreviousCatalogueWhenVariationReadFails",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.049,
+          "passed": true
+        },
+        {
+          "name": "smartPricingConfirmationIsAtomicAndOnlyAppliesOnce",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.618,
+          "passed": true
+        },
+        {
+          "name": "discountConfirmationCannotUseAnOutdatedPrice",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.585,
+          "passed": true
+        },
+        {
+          "name": "durableQueueDeduplicatesAndProtectsNewGenerationAndExpiredLease",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.588,
+          "passed": true
+        },
+        {
+          "name": "passwordChangeRevokesAllEarlierTokensAndKeepsNewLoginUsable",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.361,
+          "passed": true
+        },
+        {
+          "name": "autopilotCooldownPreventsFrequentChangesAndSettingsCannotBeOverwrittenStale",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.625,
+          "passed": true
+        },
+        {
+          "name": "supplierPriceChangeRequiresNewPurchaseApproval",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.572,
+          "passed": true
+        },
+        {
+          "name": "autopilotRequiresExplicitBoundsAndHonorsCategoryConfidenceAndDiscountLimits",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.812,
+          "passed": true
+        },
+        {
+          "name": "expiredLotCannotBeReceivedOrConsumedEvenWithFreshLot",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.612,
+          "passed": true
+        },
+        {
+          "name": "shippedSalesAndOrderNamesReflectActualConfirmedOperations",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.648,
+          "passed": true
+        },
+        {
+          "name": "smartRollbackCannotOverwriteLaterManualPriceChange",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.614,
+          "passed": true
+        },
+        {
+          "name": "posRejectsStalePricesAndInsufficientStockWithoutPartialConsumption",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.588,
+          "passed": true
+        },
+        {
+          "name": "adminPagedListsRejectInvalidQueriesAndEscapeSearchWildcards",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.585,
+          "passed": true
+        },
+        {
+          "name": "posConcurrentRetryCreatesOneSaleAndQuarantineReturnDoesNotRestock",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.592,
+          "passed": true
+        },
+        {
+          "name": "competitorImportIsAtomicAndRejectsWrongCurrencyPackageAndSource",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.653,
+          "passed": true
+        },
+        {
+          "name": "queueStopsAutomaticRetriesAfterThreeFailuresAndManualRetryIsAudited",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.616,
+          "passed": true
+        },
+        {
+          "name": "sufficientlySupportedAiChoiceCanAutoApplyAndKeepsItsActualSource",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.665,
+          "passed": true
+        },
+        {
+          "name": "invalidPolicyThresholdsAreRejected",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.589,
+          "passed": true
+        },
+        {
+          "name": "smartPricingBlocksExpiredLotsAndDoesNotCallExternalAiWhenDisabled",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.602,
+          "passed": true
+        },
+        {
+          "name": "registrationRequiresSingleUseCaptchaAndDoesNotAllowRoleEscalation",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.65,
+          "passed": true
+        },
+        {
+          "name": "categoryPolicyCapsMarginAndCanBeResetWithoutChangingPrice",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.617,
+          "passed": true
+        },
+        {
+          "name": "competitorImportUsesVerifiedIdentityAndInvalidatesStalePricingDecision",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 1.094,
+          "passed": true
+        },
+        {
+          "name": "expiredManagerLeaseCannotApplyOtherwiseValidAiChoice",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.643,
+          "passed": true
+        },
+        {
+          "name": "rejectedHandlingBlocksSaleAndStaleConfirmationCannotOverrideIt",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.601,
+          "passed": true
+        },
+        {
+          "name": "aiUnavailableKeepsEngineAndLowConfidenceAiNeverAutoApplies",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.643,
+          "passed": true
+        },
+        {
+          "name": "simultaneousFirstAddsCreateOneOwnedCartRowWithTheCombinedQuantity",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.577,
+          "passed": true
+        },
+        {
+          "name": "ownerPolicyChangeRevokesRunningTaskAndQueuesAFreshGeneration",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.564,
+          "passed": true
+        },
+        {
+          "name": "favoritesDoNotExposePurchaseCostsOrAuditData",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.572,
+          "passed": true
+        },
+        {
+          "name": "imageUploadPersistsAndCardRemainsEditable",
+          "classname": "com.aria.ControlIntegrationTest",
+          "seconds": 0.661,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.integration.IntegrationVaultTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.007,
+      "source": "TEST-com.aria.integration.IntegrationVaultTest.xml",
+      "sha256": "a231f774233fc0d1c0276e83f841ff9a6738b2b8a2d0302e0cc417ad50531bcb",
+      "cases": [
+        {
+          "name": "refusesStorageWithoutServerKey",
+          "classname": "com.aria.integration.IntegrationVaultTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "rejectsUnapprovedAndUnsafeDestinations",
+          "classname": "com.aria.integration.IntegrationVaultTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "authenticatesEncryptionAndUsesFreshNonce",
+          "classname": "com.aria.integration.IntegrationVaultTest",
+          "seconds": 0.003,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.integration.WooCatalogImporterTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.165,
+      "source": "TEST-com.aria.integration.WooCatalogImporterTest.xml",
+      "sha256": "5f203614b41408cb805d70f16ae0403122cd6e676b50a2e3fbc69d2441be56d4",
+      "cases": [
+        {
+          "name": "boundsNeverEndingPagination",
+          "classname": "com.aria.integration.WooCatalogImporterTest",
+          "seconds": 0.155,
+          "passed": true
+        },
+        {
+          "name": "followsPagesAndLoadsVariationsWithoutInventingInheritedStock",
+          "classname": "com.aria.integration.WooCatalogImporterTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "rejectsDuplicateIdsAndInvalidPrices",
+          "classname": "com.aria.integration.WooCatalogImporterTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "rejectsUnknownCurrencyAndCurrencyChangeDuringRead",
+          "classname": "com.aria.integration.WooCatalogImporterTest",
+          "seconds": 0.003,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.integration.WooCommerceReaderTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.033,
+      "source": "TEST-com.aria.integration.WooCommerceReaderTest.xml",
+      "sha256": "8d6f05c77adcf5cdcf41ef3c3a2b7e39db2cc3397463a0b9db00f2ea7eadc7a4",
+      "cases": [
+        {
+          "name": "readsOnlyOfficialCurrentCurrencyCode",
+          "classname": "com.aria.integration.WooCommerceReaderTest",
+          "seconds": 0.02,
+          "passed": true
+        },
+        {
+          "name": "readsOfficialProductShapeUsingGetAndNeverPlacesCredentialsInUrl",
+          "classname": "com.aria.integration.WooCommerceReaderTest",
+          "seconds": 0.013,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.integration.WooOrderImporterTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.013,
+      "source": "TEST-com.aria.integration.WooOrderImporterTest.xml",
+      "sha256": "064cce48dc568ddfb4327f351471858730e25c72f8049220d5ff290dac9e4e44",
+      "cases": [
+        {
+          "name": "rejectsInvalidAndMissingFacts",
+          "classname": "com.aria.integration.WooOrderImporterTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "rejectsDuplicatesAndBoundsPagination",
+          "classname": "com.aria.integration.WooOrderImporterTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "deletedProductDoesNotInventAProductId",
+          "classname": "com.aria.integration.WooOrderImporterTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "extractsOnlyOrderFactsAndVariationId",
+          "classname": "com.aria.integration.WooOrderImporterTest",
+          "seconds": 0.004,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.ProductCreationIntegrationTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 4.942,
+      "source": "TEST-com.aria.ProductCreationIntegrationTest.xml",
+      "sha256": "c59d8e1db6247ec2c77ea674cadd1efa1e624eb5d522969945752259c712aafc",
+      "cases": [
+        {
+          "name": "unsafeAdapterTextIsRejectedAndLegacyDraftCannotCreateProductButRemainsForAudit",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.572,
+          "passed": true
+        },
+        {
+          "name": "draftRequiresConfirmationAndCreatesOneProductWithAutomaticSkuAndProvenance",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.452,
+          "passed": true
+        },
+        {
+          "name": "quotaAndCooldownPersistAcrossServiceCallsAndFailedAttemptsAreCounted",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.417,
+          "passed": true
+        },
+        {
+          "name": "manualCodesRemainSupportedAndAutomaticCodesAreUniqueUnderConcurrentCreation",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.406,
+          "passed": true
+        },
+        {
+          "name": "consentRevokedDuringInferencePreventsSavingAnswerWithoutHoldingDatabaseLocks",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.417,
+          "passed": true
+        },
+        {
+          "name": "defaultsAreOffAndSettingsAndDraftsRequireAdmin",
+          "classname": "com.aria.ProductCreationIntegrationTest",
+          "seconds": 0.385,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.security.OrganizationTokenTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.174,
+      "source": "TEST-com.aria.security.OrganizationTokenTest.xml",
+      "sha256": "bbf110470ce173d19a175b2ed50b2874051ca6f0ceb9553e7f17a9311a00bd09",
+      "cases": [
+        {
+          "name": "rejectsLegacyUnscopedToken",
+          "classname": "com.aria.security.OrganizationTokenTest",
+          "seconds": 0.171,
+          "passed": true
+        },
+        {
+          "name": "rejectsOtherCompanyEvenWithSameEmailAndSigningKey",
+          "classname": "com.aria.security.OrganizationTokenTest",
+          "seconds": 0.003,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.AiDecisionServiceTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.008,
+      "source": "TEST-com.aria.service.AiDecisionServiceTest.xml",
+      "sha256": "90ff0dd0da5351d04d9d0b7f400798c7b0c4dc872819e26ed0f6c9ba2f8ccc6b",
+      "cases": [
+        {
+          "name": "managerAiSocialChoiceUsesOwnerPolicyFenceAndNeverBypassesIt",
+          "classname": "com.aria.service.AiDecisionServiceTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "staleConsentCannotBeHiddenByFallback",
+          "classname": "com.aria.service.AiDecisionServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "invalidAiUsesSameClaimForEngineFallbackWithoutAnotherNetworkRequest",
+          "classname": "com.aria.service.AiDecisionServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.analytics.DemandForecastTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.02,
+      "source": "TEST-com.aria.service.analytics.DemandForecastTest.xml",
+      "sha256": "ccb0030e242f4913c7eb9d0b009dbab203239b7d6adcfc84e43310a6a812e622",
+      "cases": [
+        {
+          "name": "shortHistoryUsesHonestBaseline",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "constantHistoryDoesNotClaimMlImprovement",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.005,
+          "passed": true
+        },
+        {
+          "name": "invalidObservationsFailInsteadOfInventingData",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "noHistoryIsNotPresentedAsTrainedDemand",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "regularWeeklyPatternCanValidateAgainstMovingAverage",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.007,
+          "passed": true
+        },
+        {
+          "name": "forecastUsesRequestedHorizonAndNeverLabelsAnotherWindowAsFourteenDays",
+          "classname": "com.aria.service.analytics.DemandForecastTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.AriaServiceTest",
+      "tests": 6,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.669,
+      "source": "TEST-com.aria.service.AriaServiceTest.xml",
+      "sha256": "4dcb0a51b29dca55e825e91a250e1a8b1d0f313bf1c4ee96e86c140df99a2efc",
+      "cases": [
+        {
+          "name": "analyze_marksDeadStockAsCandidate",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.652,
+          "passed": true
+        },
+        {
+          "name": "analysisReport_countersAreCorrect",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "analyze_marksFifteenDayExpiryAsCandidateWithoutUrgency",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "analyze_returnsCleanCandidateToActive",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "analyze_marksExpiringProductAsCandidateAndUrgent",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "analyze_detectsNegativeMargin",
+          "classname": "com.aria.service.AriaServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.AssistantQueryTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.006,
+      "source": "TEST-com.aria.service.AssistantQueryTest.xml",
+      "sha256": "629e4c485de88f5a3850c1b269ef9190fd8d5ff368efb5476b2e5448808799f8",
+      "cases": [
+        {
+          "name": "discountNegationIsPreserved",
+          "classname": "com.aria.service.AssistantQueryTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "rubleOrTengeBudgetDoesNotInventExchangeRate",
+          "classname": "com.aria.service.AssistantQueryTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "foreignCurrencyIsNotSilentlyTreatedAsTenge",
+          "classname": "com.aria.service.AssistantQueryTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "compactBudgetAndIsoCurrencyDoNotBecomeSearchTerms",
+          "classname": "com.aria.service.AssistantQueryTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "comparisonAndCategoryRequestsAreRecognized",
+          "classname": "com.aria.service.AssistantQueryTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.CaptchaServiceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.002,
+      "source": "TEST-com.aria.service.CaptchaServiceTest.xml",
+      "sha256": "2ed8e2414f236baf461a27cee6ab8252e676a29e3e7e4e1270e5b8fb42a96108",
+      "cases": [
+        {
+          "name": "wrongAnswerConsumesChallengeAndCannotBeRetried",
+          "classname": "com.aria.service.CaptchaServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "concurrentReplayOnlySucceedsOnce",
+          "classname": "com.aria.service.CaptchaServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.CartServiceTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.193,
+      "source": "TEST-com.aria.service.CartServiceTest.xml",
+      "sha256": "b84be1c50d10165a9624f4dbde5cfcac800cf5c1ae7c221e2ca4a11d03a635f6",
+      "cases": [
+        {
+          "name": "addToCart_throwsIllegalStateException_whenStatusNotActive",
+          "classname": "com.aria.service.CartServiceTest",
+          "seconds": 0.173,
+          "passed": true
+        },
+        {
+          "name": "calculateTotal_multipliesPriceByQuantity",
+          "classname": "com.aria.service.CartServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "addToCart_storesPriceAtAddTimeEqualToUnitPrice",
+          "classname": "com.aria.service.CartServiceTest",
+          "seconds": 0.011,
+          "passed": true
+        },
+        {
+          "name": "zeroQuantityReportsRemovalInsteadOfReturningTheOldCount",
+          "classname": "com.aria.service.CartServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "checkout_emptiesTheCart",
+          "classname": "com.aria.service.CartServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.IntelligenceServiceTest",
+      "tests": 14,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.076,
+      "source": "TEST-com.aria.service.IntelligenceServiceTest.xml",
+      "sha256": "4aa7bb8e966f523d024c7aada08e64fd951b00476ed3eae7a6f7d947b94977a4",
+      "cases": [
+        {
+          "name": "pricingJsonIsValidatedAndNeverSentToMutationTools",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.008,
+          "passed": true
+        },
+        {
+          "name": "rateLimitKeepsLocalFactsAndNeverRetriesPaidModels",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "pricingHttp200QuotaEnvelopeIsAnHonestEngineResultWithoutModelOrProviderBody",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "publicAssistantCanOnlyChooseRealIdsAndNeverSendsPurchaseCosts",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.012,
+          "passed": true
+        },
+        {
+          "name": "decisionSchemaExcludesReviewTimesBeyondJavaDeadline",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.005,
+          "passed": true
+        },
+        {
+          "name": "noKeyDoesNotSendAnyNetworkRequest",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "pricingTimeoutIsNotMisreportedAsInvalidJson",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "pricingNoKeyOrPaidModelNeverContactsProvider",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "pricingRejectsInvalidJsonExtraFieldsAndMalformedRisks",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.01,
+          "passed": true
+        },
+        {
+          "name": "truncatedCompletionIsNeverAcceptedAsAiEvenWithParsableContent",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "paidModelIsBlockedBeforeNetworkAccess",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "pricingRejectsHallucinatedPercentAndFractionalPercent",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.013,
+          "passed": true
+        },
+        {
+          "name": "freeRouterUsesZeroPriceLimitsAndNoPaidFallback",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "activeDecisionRequiresBoundedReviewAndConfirmationFlag",
+          "classname": "com.aria.service.IntelligenceServiceTest",
+          "seconds": 0.007,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.LoginAttemptServiceTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.008,
+      "source": "TEST-com.aria.service.LoginAttemptServiceTest.xml",
+      "sha256": "5517499d09106ae7dc0ee3d9a72470c4d555babb3f104e155e98dadda6a752c7",
+      "cases": [
+        {
+          "name": "blockedAccountCannotBypassWindowButOtherAccountWorksAndWindowExpires",
+          "classname": "com.aria.service.LoginAttemptServiceTest",
+          "seconds": 0.007,
+          "passed": true
+        },
+        {
+          "name": "successfulLoginClearsEarlierFailures",
+          "classname": "com.aria.service.LoginAttemptServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.PosterAdapterTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.002,
+      "source": "TEST-com.aria.service.PosterAdapterTest.xml",
+      "sha256": "69de73ef24760478385746ce946ea253dfc10255c3ad3d239dd56bc87e0186c7",
+      "cases": [
+        {
+          "name": "missingMappingFailsBeforeAnyExternalAction",
+          "classname": "com.aria.service.PosterAdapterTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "mappedDraftIsNeverReportedAsSentOrFiscal",
+          "classname": "com.aria.service.PosterAdapterTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.pricing.CompetitorCsvTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.003,
+      "source": "TEST-com.aria.service.pricing.CompetitorCsvTest.xml",
+      "sha256": "e8b9b7e783058780e73030269546f3826df34403b1450a663aa79b2991aef94a",
+      "cases": [
+        {
+          "name": "quotedFieldsBomSemicolonAndCrLfAreHandled",
+          "classname": "com.aria.service.pricing.CompetitorCsvTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "malformedInputIsRejected",
+          "classname": "com.aria.service.pricing.CompetitorCsvTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "gtinCheckDigitMustMatch",
+          "classname": "com.aria.service.pricing.CompetitorCsvTest",
+          "seconds": 0.0,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.pricing.PlanningWindowTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.008,
+      "source": "TEST-com.aria.service.pricing.PlanningWindowTest.xml",
+      "sha256": "b2accbc52ef94f5170cf8435e66cd1d3104c06ac81e9e61fb56093517cb1ccd7",
+      "cases": [
+        {
+          "name": "changingCategoryCannotInventOrChangeActualExpiry",
+          "classname": "com.aria.service.pricing.PlanningWindowTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "allAllowedIntegerDiscountsAreEvaluatedInsteadOfFivePercentTable",
+          "classname": "com.aria.service.pricing.PlanningWindowTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "expiryCoverageForecastAndReviewAreSeparateDataDrivenValues",
+          "classname": "com.aria.service.pricing.PlanningWindowTest",
+          "seconds": 0.002,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.pricing.SmartPricingEngineTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.009,
+      "source": "TEST-com.aria.service.pricing.SmartPricingEngineTest.xml",
+      "sha256": "644f96f510b4eb9db621e62adfba9cb948653486e93d4ee44ff31b26790f3c37",
+      "cases": [
+        {
+          "name": "stableSufficientObservationalHistoryHasModerateNotHighConfidence",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "noSalesDoesNotInventDemandOrClaimMachineLearning",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "calendarWindowsExcludeOldAndFutureShipments",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "insufficientOrUnstablePriceHistoryUsesExplicitHeuristic",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "fefoKeepsSeparateDeadlinesAndCostFloor",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "nonPerishableResidualIsNotCalledExpiryLoss",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "consistentObservedPriceResponseCanChooseDiscountWithoutDayThresholds",
+          "classname": "com.aria.service.pricing.SmartPricingEngineTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.PricingServiceTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.287,
+      "source": "TEST-com.aria.service.PricingServiceTest.xml",
+      "sha256": "159f93182f1c11be181f81d373a0f6e7d354cd7718afb6b67d10c878d72aa130",
+      "cases": [
+        {
+          "name": "percentageIsRoundedDownWithoutAllowingLoss",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "badPercentAndZeroPriceAreRejected",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.0,
+          "passed": true
+        },
+        {
+          "name": "manualCalculatorDoesNotInventRecommendationsFromDayThresholds",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "expiredProductHasNoDiscountAndCannotBeSold",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.002,
+          "passed": true
+        },
+        {
+          "name": "subKopeckRoundedPriceCannotBecomeZeroOrDivideByZero",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "capsDiscountAtCostAndShowsProfit",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "explicitMinimumPriceCapsEveryDiscount",
+          "classname": "com.aria.service.PricingServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.service.ProductDraftModelServiceTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 0.348,
+      "source": "TEST-com.aria.service.ProductDraftModelServiceTest.xml",
+      "sha256": "88400220715d9f48eabb180e412262432d9a9cd679f2fb58a4a97438856eafd1",
+      "cases": [
+        {
+          "name": "strictTextOnlyRequestRequiresFreeProviderAndDoesNotIncludeStoreDataOrTools",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.009,
+          "passed": true
+        },
+        {
+          "name": "titleMayOnlyNormalizeOwnerWordsAndCannotIntroduceFacts",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "javaRejectsDuplicateQuestionsAlthoughRequestAvoidsUnsupportedUniqueItemsKeyword",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.003,
+          "passed": true
+        },
+        {
+          "name": "diagnosticsIdentifySafeValidationFailureWithoutRetainingInputOrRawOutput",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "inventedCompositionBrandAndWeightAreRejectedEvenInsideOtherwiseValidJson",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.01,
+          "passed": true
+        },
+        {
+          "name": "extraFactsAndInvalidValuesAreRejectedRatherThanReturnedAsGeneratedText",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.011,
+          "passed": true
+        },
+        {
+          "name": "http200ProviderErrorIsClassifiedBeforeModelWithoutExposingTheErrorBody",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.004,
+          "passed": true
+        },
+        {
+          "name": "rateLimitAndTimeoutAreHonestFailuresWithoutFallbackText",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.006,
+          "passed": true
+        },
+        {
+          "name": "noKeyAndPaidModelNeverContactNetwork",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.001,
+          "passed": true
+        },
+        {
+          "name": "oversizedResponseCancelsTheBodySubscription",
+          "classname": "com.aria.service.ProductDraftModelServiceTest",
+          "seconds": 0.293,
+          "passed": true
+        }
+      ]
+    },
+    {
+      "name": "com.aria.WorkspaceOverviewIntegrationTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "seconds": 2.859,
+      "source": "TEST-com.aria.WorkspaceOverviewIntegrationTest.xml",
+      "sha256": "d33d6fc1f136f6c50160cdea568b24a3535d65a3d1db45dde07b208f5b386fa6",
+      "cases": [
+        {
+          "name": "overviewRequiresAdminAndDoesNotExposeSecrets",
+          "classname": "com.aria.WorkspaceOverviewIntegrationTest",
+          "seconds": 0.6,
+          "passed": true
+        },
+        {
+          "name": "dashboardCountsCommittedShippingAndDistinctAiEvidenceWithoutExternalOrdersOrDoubleCounting",
+          "classname": "com.aria.WorkspaceOverviewIntegrationTest",
+          "seconds": 0.277,
+          "passed": true
+        }
+      ]
+    }
+  ],
+  "note": "Sanitized export of actual saved Surefire XML. Properties and console output are excluded to protect configuration. Full PostgreSQL run reused, not rerun without code changes."
+}

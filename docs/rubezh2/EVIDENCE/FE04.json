@@ -1,0 +1,197 @@
+{
+  "row": {
+    "id": "FE04",
+    "section": "Frontend",
+    "function": "Меню и данные главной",
+    "precondition": "Владелец авторизован",
+    "actions": "Открыть главную и настройки",
+    "expected": "11 разделов; счётчики совпадают с API",
+    "actual": "11 разделов, 8 переходов настроек, фактические счётчики API совпали. FE04.png.",
+    "status": "Пройден",
+    "evidence": "FE04.json",
+    "proposal": "Сохранять единую навигацию и реальные показатели"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/admin/control/workspace/overview",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "asOf": "2026-11-04T19:43:07.6445054",
+        "date": "2026-11-04",
+        "timeZone": "Asia/Qyzylorda",
+        "organization": {
+          "name": "ARIA Demo",
+          "demonstration": true
+        },
+        "overview": {
+          "products": 36,
+          "availableUnits": 137,
+          "lowStock": 25,
+          "pendingOrders": 0,
+          "expiredLots": 6,
+          "urgentLots": 0
+        },
+        "stores": {
+          "total": 1,
+          "attention": 0,
+          "connected": 1,
+          "catalogCards": 36
+        },
+        "sales": {
+          "ordersToday": 0,
+          "revenueToday": "0.00",
+          "scope": "native",
+          "daily": [
+            {
+              "orders": 0,
+              "date": "2026-10-22",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-23",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-24",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-25",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-26",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-27",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-28",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 10,
+              "date": "2026-10-29",
+              "revenue": "16600.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-30",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-10-31",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-11-01",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-11-02",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-11-03",
+              "revenue": "0.00"
+            },
+            {
+              "orders": 0,
+              "date": "2026-11-04",
+              "revenue": "0.00"
+            }
+          ],
+          "currency": "KZT"
+        },
+        "today": {
+          "productsAnalyzed": 35,
+          "aiDecisions": 0,
+          "productDrafts": 1,
+          "engineDecisions": 35,
+          "priceApplied": 0,
+          "purchaseDrafts": 0,
+          "socialDrafts": 0,
+          "problemsFound": 0
+        },
+        "risks": {
+          "openSignals": 20,
+          "pendingDecisions": 35,
+          "failedTasks": 0
+        },
+        "manager": {
+          "mode": "OFF",
+          "enabled": false,
+          "scheduledAvailable": false,
+          "activityAvailable": true,
+          "automaticAiConsent": false,
+          "externalAiConsent": false,
+          "scheduledAiConsent": false,
+          "lastFinished": "2026-10-29T23:34:22.986605",
+          "lastError": null,
+          "provider": {
+            "configured": true,
+            "status": "UNTESTED",
+            "lastAttempt": null,
+            "lastSuccess": null
+          }
+        },
+        "recent": [
+          {
+            "at": "2026-11-04T19:35:09.839771",
+            "title": "Товар архивирован",
+            "section": "products"
+          },
+          {
+            "at": "2026-11-04T19:35:09.82276",
+            "title": "Обновлены складские данные",
+            "section": "lots"
+          },
+          {
+            "at": "2026-11-04T19:34:55.071063",
+            "title": "Обновлены складские данные",
+            "section": "lots"
+          },
+          {
+            "at": "2026-11-04T19:34:55.016094",
+            "title": "Создан товар",
+            "section": "products"
+          },
+          {
+            "at": "2026-11-04T19:28:41.704618",
+            "title": "Обновлены складские данные",
+            "section": "lots"
+          },
+          {
+            "at": "2026-11-04T19:28:41.605674",
+            "title": "Создан товар",
+            "section": "products"
+          },
+          {
+            "at": "2026-11-04T19:28:35.002887",
+            "title": "Подготовлена рекомендация по цене",
+            "section": "smart"
+          },
+          {
+            "at": "2026-11-04T19:28:34.990895",
+            "title": "Подготовлена рекомендация по цене",
+            "section": "smart"
+          }
+        ]
+      }
+    }
+  ]
+}

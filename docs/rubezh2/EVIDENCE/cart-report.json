@@ -1,0 +1,13 @@
+{
+  "checks": [
+    "Eight rapid add clicks create one server cart row; the add button becomes a quantity control in both open pages",
+    "Concurrent initial adds from two tabs converge to one item without a second blind increment",
+    "Quantity is synchronized and capped at the actual available stock, including direct repeated action calls",
+    "Cart totals follow server state; editing quantity preserves the address; a separately simulated failed update never shows a false increment",
+    "The server cart survives page reload without storing cart contents in localStorage",
+    "Removal updates all open pages; 390px and 1440px fit; no checkout or inventory consumption occurred"
+  ],
+  "errors": [],
+  "checkoutRequests": 0,
+  "passed": true
+}

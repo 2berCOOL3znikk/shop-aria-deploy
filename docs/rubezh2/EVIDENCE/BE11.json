@@ -1,0 +1,84 @@
+{
+  "row": {
+    "id": "BE11",
+    "section": "Backend",
+    "function": "Регистрация и роли",
+    "precondition": "Получены одноразовые задания капчи",
+    "actions": "Зарегистрировать двух QA покупателей; запросить admin API",
+    "expected": "Регистрация 200 с ролью USER; admin API 403",
+    "actual": "Две регистрации 200, роли USER. Покупателю admin API вернул 403.",
+    "status": "Пройден",
+    "evidence": "BE11.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/auth/captcha",
+      "authorization": "нет",
+      "status": 200,
+      "response": {
+        "question": "Сколько будет 10 + 2?",
+        "id": "c6f3bd7f-2ddb-4ae1-80a2-628b6a38d1dc"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "authorization": "нет",
+      "request": {
+        "email": "[скрыто]",
+        "password": "[скрыто]",
+        "fullName": "Проверка доступа А",
+        "website": "",
+        "captchaId": "[скрыто]",
+        "captchaAnswer": "[скрыто]"
+      },
+      "status": 200,
+      "response": {
+        "role": "USER",
+        "email": "[скрыто]",
+        "token": "[скрыто]"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/auth/captcha",
+      "authorization": "нет",
+      "status": 200,
+      "response": {
+        "question": "Сколько будет 8 + 6?",
+        "id": "c57fe5a0-e3b0-4c0e-bea9-d09f5e3acd96"
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/auth/register",
+      "authorization": "нет",
+      "request": {
+        "email": "[скрыто]",
+        "password": "[скрыто]",
+        "fullName": "Проверка доступа Б",
+        "website": "",
+        "captchaId": "[скрыто]",
+        "captchaAnswer": "[скрыто]"
+      },
+      "status": 200,
+      "response": {
+        "role": "USER",
+        "email": "[скрыто]",
+        "token": "[скрыто]"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products",
+      "authorization": "[скрыто]",
+      "status": 403,
+      "response": {
+        "status": "error",
+        "message": "Недостаточно прав для этого действия"
+      }
+    }
+  ]
+}

@@ -1,0 +1,26 @@
+{
+  "row": {
+    "id": "BE02",
+    "section": "Backend",
+    "function": "Недействительный токен",
+    "precondition": "Подпись токена недействительна",
+    "actions": "GET с поддельным Bearer",
+    "expected": "HTTP 401",
+    "actual": "HTTP 401; доступ отклонён.",
+    "status": "Пройден",
+    "evidence": "BE02.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products",
+      "authorization": "[скрыто]",
+      "status": 401,
+      "response": {
+        "status": "error",
+        "message": "Требуется авторизация (Bearer токен)"
+      }
+    }
+  ]
+}

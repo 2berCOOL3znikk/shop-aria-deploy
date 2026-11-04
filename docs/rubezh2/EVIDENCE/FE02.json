@@ -1,0 +1,15 @@
+{
+  "row": {
+    "id": "FE02",
+    "section": "Frontend",
+    "function": "Обязательное поле",
+    "precondition": "Открыта регистрация",
+    "actions": "Оставить ФИО пустым и нажать регистрацию",
+    "expected": "Пустое поле отклоняется",
+    "actual": "Форма не отправлена; поле ФИО имеет valueMissing. FE02.png.",
+    "status": "Пройден",
+    "evidence": "FE02.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": []
+}

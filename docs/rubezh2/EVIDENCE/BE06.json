@@ -1,0 +1,35 @@
+{
+  "row": {
+    "id": "BE06",
+    "section": "Backend",
+    "function": "Дублирующийся SKU",
+    "precondition": "Товар BE05 существует",
+    "actions": "Повторить POST с тем же SKU",
+    "expected": "HTTP 409 без второй записи",
+    "actual": "HTTP 409: SKU уже занят другим товаром",
+    "status": "Пройден",
+    "evidence": "BE06.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/control/products",
+      "authorization": "[скрыто]",
+      "request": {
+        "sku": "R2-bdf73442-6c5d-45",
+        "name": "Учебный товар аудита",
+        "category": "Внутренние проверки",
+        "unit": "шт",
+        "unitPrice": 1000,
+        "minimumPrice": 1000,
+        "lowStockThreshold": 0
+      },
+      "status": 409,
+      "response": {
+        "message": "SKU уже занят другим товаром",
+        "status": "conflict"
+      }
+    }
+  ]
+}

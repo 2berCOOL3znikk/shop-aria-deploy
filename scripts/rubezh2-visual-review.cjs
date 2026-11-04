@@ -1,0 +1,14 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.ARIA_PLAYWRIGHT_MODULE||'playwright');
+(async()=>{const cfg=JSON.parse(fs.readFileSync('data/preview/config.json','utf8')),base='http://127.0.0.1:'+cfg.port,b=await chromium.launch({channel:'msedge',headless:true});const report={samples:[],links:[],errors:[]};try{
+ const c=await b.newContext({viewport:{width:1440,height:1000}});const login=await c.request.post(base+'/api/auth/login',{data:{email:cfg.email,password:cfg.password}});assert.equal(login.status(),200);const{token}=await login.json();await c.addInitScript(({token,base})=>{if(location.origin!==base)return;localStorage.setItem('aria_token',token);localStorage.setItem('aria_role','ADMIN');},{token,base});
+ const p=await c.newPage();await p.emulateMedia({reducedMotion:'reduce'});report.note='Steady-state contrast; transition animations disabled for deterministic sampling, not a full WCAG audit';p.on('pageerror',e=>report.errors.push(e.message));await p.goto(base+'/control.html#workspace');await p.waitForSelector('.ws-ai-card');
+ for(const theme of ['light','dark']){await p.evaluate(t=>ariaTheme.applyTheme(t),theme);const samples=await p.evaluate(()=>{
+  const rgb=s=>(s.match(/[\d.]+/g)||[]).map(Number);
+  const lum=v=>{const c=v.slice(0,3).map(x=>x/255).map(x=>x<=.04045?x/12.92:((x+.055)/1.055)**2.4);return c[0]*.2126+c[1]*.7152+c[2]*.0722;};
+  return ['#control-title','.ws-overline','.ws-metric>span','.ws-metric>small','.ws-panel-head p'].map(selector=>{const el=document.querySelector(selector),fg=getComputedStyle(el).color;let node=el,bg;while(node){bg=getComputedStyle(node).backgroundColor;const a=rgb(bg);if(a.length===3||a[3]>0)break;node=node.parentElement;}const a=lum(rgb(fg)),z=lum(rgb(bg));return{selector,foreground:fg,background:bg,ratio:Math.round((Math.max(a,z)+.05)/(Math.min(a,z)+.05)*100)/100};});
+ });samples.forEach(x=>{report.samples.push({theme,...x});assert.ok(x.ratio>=4.5,theme+' '+x.selector+' ratio '+x.ratio);});await p.screenshot({path:'docs/rubezh2/EVIDENCE/FE12-'+theme+'.png'});}
+ await p.goto(base+'/index.html');await p.waitForSelector('.product-card');const links=await p.locator('a[href]').evaluateAll((links,base)=>[...new Set(links.map(a=>new URL(a.href,base)).filter(u=>u.origin===base&&u.pathname.endsWith('.html')).map(u=>u.pathname))],base);for(const path of links){const r=await c.request.get(base+path);report.links.push({path,status:r.status()});assert.equal(r.status(),200,path);}
+ assert.deepEqual(report.errors,[]);report.passed=true;
+}catch(e){report.failure=e.message;throw e;}finally{fs.writeFileSync('docs/rubezh2/EVIDENCE/visual-review.json',JSON.stringify(report,null,2));await b.close();}})().catch(e=>{console.error(e.message);process.exitCode=1;});

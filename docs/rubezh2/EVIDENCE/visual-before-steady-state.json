@@ -1,0 +1,63 @@
+{
+  "samples": [
+    {
+      "theme": "light",
+      "selector": "#control-title",
+      "foreground": "rgb(25, 25, 28)",
+      "background": "rgb(247, 247, 248)",
+      "ratio": 16.38
+    },
+    {
+      "theme": "light",
+      "selector": ".ws-overline",
+      "foreground": "rgb(113, 113, 122)",
+      "background": "rgb(247, 247, 248)",
+      "ratio": 4.51
+    },
+    {
+      "theme": "light",
+      "selector": ".ws-metric>span",
+      "foreground": "rgb(98, 98, 106)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 6.04
+    },
+    {
+      "theme": "light",
+      "selector": ".ws-metric>small",
+      "foreground": "rgb(113, 113, 122)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 4.83
+    },
+    {
+      "theme": "light",
+      "selector": ".ws-panel-head p",
+      "foreground": "rgb(113, 113, 122)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 4.83
+    },
+    {
+      "theme": "dark",
+      "selector": "#control-title",
+      "foreground": "rgb(244, 244, 245)",
+      "background": "rgb(20, 20, 22)",
+      "ratio": 16.74
+    },
+    {
+      "theme": "dark",
+      "selector": ".ws-overline",
+      "foreground": "rgb(161, 161, 170)",
+      "background": "rgb(20, 20, 22)",
+      "ratio": 7.18
+    },
+    {
+      "theme": "dark",
+      "selector": ".ws-metric>span",
+      "foreground": "rgb(182, 182, 191)",
+      "background": "rgb(255, 255, 255)",
+      "ratio": 2.01
+    }
+  ],
+  "links": [],
+  "errors": [],
+  "failure": "dark .ws-metric>span ratio 2.01"
+}

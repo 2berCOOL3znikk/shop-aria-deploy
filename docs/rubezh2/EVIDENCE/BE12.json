@@ -1,0 +1,91 @@
+{
+  "row": {
+    "id": "BE12",
+    "section": "Backend",
+    "function": "Конкурентная корзина и чужие данные",
+    "precondition": "Два QA покупателя и 2 единицы",
+    "actions": "Два одновременных добавления; чужой PUT по ID позиции",
+    "expected": "Одна строка qty 2; чужое изменение отклонено",
+    "actual": "Два POST 200 → одна строка qty 2. Чужой PUT 400; исходная корзина не изменена.",
+    "status": "Пройден",
+    "evidence": "BE12.json",
+    "proposal": "Сохранять блокировку владельца перед изменениями"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/cart/add?productId=43&qty=1",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "quantity": 1,
+        "priceAtAddTime": 1100,
+        "id": 12
+      }
+    },
+    {
+      "method": "POST",
+      "path": "/api/cart/add?productId=43&qty=1",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "quantity": 2,
+        "priceAtAddTime": 1100,
+        "id": 12
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": [
+        {
+          "priceAtAddTime": 1100,
+          "productSku": "R2-BDF73442-6C5D-45",
+          "quantity": 2,
+          "productId": 43,
+          "imageUrl": "/images/product-generic.svg",
+          "id": 12,
+          "productName": "Учебный товар аудита",
+          "productPrice": 1100
+        }
+      ]
+    },
+    {
+      "method": "PUT",
+      "path": "/api/cart/12?qty=1",
+      "authorization": "[скрыто]",
+      "status": 400,
+      "response": {
+        "message": "Позиция корзины не найдена",
+        "status": "error"
+      }
+    },
+    {
+      "method": "GET",
+      "path": "/api/cart",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": [
+        {
+          "priceAtAddTime": 1100,
+          "productSku": "R2-BDF73442-6C5D-45",
+          "quantity": 2,
+          "productId": 43,
+          "imageUrl": "/images/product-generic.svg",
+          "id": 12,
+          "productName": "Учебный товар аудита",
+          "productPrice": 1100
+        }
+      ]
+    },
+    {
+      "method": "DELETE",
+      "path": "/api/cart/12",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": ""
+    }
+  ]
+}

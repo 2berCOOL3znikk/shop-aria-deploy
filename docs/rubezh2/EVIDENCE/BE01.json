@@ -1,0 +1,26 @@
+{
+  "row": {
+    "id": "BE01",
+    "section": "Backend",
+    "function": "Защищённый API без токена",
+    "precondition": "Запрос без авторизации",
+    "actions": "GET /api/admin/control/products",
+    "expected": "HTTP 401",
+    "actual": "HTTP 401; список товаров администратора не выдан.",
+    "status": "Пройден",
+    "evidence": "BE01.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products",
+      "authorization": "нет",
+      "status": 401,
+      "response": {
+        "status": "error",
+        "message": "Требуется авторизация (Bearer токен)"
+      }
+    }
+  ]
+}

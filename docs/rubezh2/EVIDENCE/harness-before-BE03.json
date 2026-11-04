@@ -1,0 +1,26 @@
+{
+  "row": {
+    "id": "BE03",
+    "section": "Backend",
+    "function": "Отсутствующие поля",
+    "precondition": "Владелец авторизован",
+    "actions": "POST products с пустым объектом",
+    "expected": "HTTP 400 с ошибками полей",
+    "actual": "Cannot read properties of undefined (reading 'name')",
+    "status": "Не пройден",
+    "evidence": "BE03.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "POST",
+      "path": "/api/admin/control/products",
+      "authorization": "[скрыто]",
+      "request": {},
+      "status": 400,
+      "response": {
+        "message": "Неверный формат значения или даты"
+      }
+    }
+  ]
+}

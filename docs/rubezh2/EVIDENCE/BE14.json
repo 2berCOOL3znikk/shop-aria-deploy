@@ -1,0 +1,49 @@
+{
+  "row": {
+    "id": "BE14",
+    "section": "Backend",
+    "function": "Конфиденциальность AI",
+    "precondition": "Владелец читает настройки",
+    "actions": "GET настроек; проверить отсутствие ключей и токенов",
+    "expected": "В ответе только безопасные метаданные",
+    "actual": "HTTP 200; key/apiKey/пароли не выдаются; textOnly=true, лимит 5. Внешний AI не вызывался.",
+    "status": "Пройден",
+    "evidence": "BE14.json",
+    "proposal": "Сохранить регрессионную проверку"
+  },
+  "requests": [
+    {
+      "method": "GET",
+      "path": "/api/admin/control/products/ai-settings",
+      "authorization": "[скрыто]",
+      "status": 200,
+      "response": {
+        "timeZone": "Asia/Qyzylorda",
+        "dailyBudget": 5,
+        "budgetUsed": 5,
+        "textConsentEnabled": false,
+        "remaining": 0,
+        "updatedAt": "2026-11-04T14:54:38.561609",
+        "revision": 15,
+        "configured": true,
+        "model": "openrouter/free",
+        "textOnly": true,
+        "categories": [
+          "Продукты",
+          "Напитки",
+          "Бытовые товары",
+          "Товары для дома",
+          "Другое"
+        ],
+        "lastAttempt": null,
+        "lastHttpStatus": null,
+        "lastProviderErrorCode": null,
+        "lastActualModel": "",
+        "lastFinishReason": "",
+        "lastStage": "UNTESTED",
+        "lastState": "UNTESTED",
+        "lastFailureCode": ""
+      }
+    }
+  ]
+}

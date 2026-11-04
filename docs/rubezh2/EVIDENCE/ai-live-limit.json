@@ -1,0 +1,7 @@
+{
+  "date": "2026-11-04",
+  "realOpenRouter": true,
+  "passed": false,
+  "reason": "ИИ временно не смог подготовить безопасный текст. Текст не создан; попробуйте позже.",
+  "note": "Final bounded text live E2E not passed. Real provider returned429; local5 attempts exhausted. Earlier response predates strengthened safety contract and is not reused as proof."
+}
