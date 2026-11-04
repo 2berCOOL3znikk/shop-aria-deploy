@@ -1,0 +1,21 @@
+{
+  "actualRequestSent": false,
+  "errors": [],
+  "reusedPersistedDecision": true,
+  "decision": {
+    "id": 257,
+    "productId": 61,
+    "sku": "ARIA-DEMO-016",
+    "source": "AI",
+    "strategy": "KEEP",
+    "percent": 0,
+    "model": "dots-studio/dots-3-note-preview:free",
+    "completedAt": "2026-11-05T03:01:45.832874",
+    "note": "AI выбрал допустимый сценарий. Ограничения и применение проверяются Java."
+  },
+  "realAiDecisionVerified": true,
+  "priceAndStockUnchanged": true,
+  "visibleInPricing": true,
+  "visibleInCenter": true,
+  "passed": true
+}

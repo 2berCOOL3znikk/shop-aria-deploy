@@ -1,0 +1,17 @@
+{
+  "checks": [
+    "Demo connect/sync/open and visible sync history use actual persisted records",
+    "Real six-step wizard saves protected access; unapproved destination visibly fails at step 4, never marked as connected or imported",
+    "Orders dialog, honest empty state, blocked-domain error and mobile view; no external request or local stock movement",
+    "Webhook setup in UI, one-time secret cleared on close, signed local delivery, deduplication, no contacts retained, mobile view and disable",
+    "Disconnect persists; external writes remain disabled",
+    "Actual archive/restore, active queue cancellation, archived work denied, webhook stays revoked, dependencies prevent destructive removal",
+    "Empty archived test deleted only after explicit UI confirmation; dependent and business connections retained",
+    "Eleven primary sections at desktop/mobile widths, themes, no browser errors and anonymous access denied"
+  ],
+  "errors": [],
+  "installedWooCommerceE2E": false,
+  "fixtureId": 13,
+  "passed": true,
+  "fixturesArchived": true
+}

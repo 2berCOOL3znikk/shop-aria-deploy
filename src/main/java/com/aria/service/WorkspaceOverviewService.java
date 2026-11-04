@@ -45,11 +45,11 @@ public class WorkspaceOverviewService {
         result.put("overview", compact);
 
         result.put("stores", Map.of(
-                "total", count("ConnectedStore s", "s.status<>'DISCONNECTED'"),
-                "connected", count("ConnectedStore s", "s.status='CONNECTED'"),
-                "attention", count("ConnectedStore s", "s.status not in ('CONNECTED','DISCONNECTED')"),
-                "catalogCards", count("StoreSnapshot s", "s.storeId in (select c.id from ConnectedStore c where c.status<>'DISCONNECTED')")
-                        + (count("ConnectedStore s", "s.platform='ARIA_DEMO' and s.status<>'DISCONNECTED'") > 0 ? ((Number) inventory.get("products")).longValue() : 0L)));
+                "total", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status<>'DISCONNECTED'"),
+                "connected", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status='CONNECTED'"),
+                "attention", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status not in ('CONNECTED','DISCONNECTED')"),
+                "catalogCards", count("StoreSnapshot s", "s.storeId in (select c.id from ConnectedStore c where c.archived=false and c.testConnection=false and c.status<>'DISCONNECTED')")
+                        + (count("ConnectedStore s", "s.archived=false and s.platform='ARIA_DEMO' and s.status<>'DISCONNECTED'") > 0 ? ((Number) inventory.get("products")).longValue() : 0L)));
 
         var series = new LinkedHashMap<LocalDate, Map<String, Object>>();
         for (int day = 13; day >= 0; day--) series.put(today.minusDays(day), new LinkedHashMap<>(Map.of("date", today.minusDays(day), "revenue", "0.00", "orders", 0L)));

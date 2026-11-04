@@ -1,0 +1,19 @@
+﻿{
+    "passed":  true,
+    "source":  "owned loopback preview",
+    "restoredDatabase":  "aria_restore_72bdd55e2d59",
+    "productionChanged":  false,
+    "snapshotSha256":  "22C1A98D08D880AF97788C0442B953408576C853DBE0E7941A64A10437F863FC",
+    "completedAt":  "2026-11-04T22:14:22.5496580Z",
+    "counts":  {
+                   "migrationVersion":  29,
+                   "products":  71,
+                   "orders":  18,
+                   "stores":  12,
+                   "archivedStores":  11,
+                   "currentStores":  1,
+                   "aiDecisions":  10,
+                   "demoProductQuantity":  11,
+                   "activeJobsForArchivedStores":  0
+               }
+}

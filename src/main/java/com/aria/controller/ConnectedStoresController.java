@@ -9,7 +9,10 @@ public class ConnectedStoresController {
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncWorker worker;
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreWebhookService webhooks;
  private final ConnectedStoresService service;public ConnectedStoresController(ConnectedStoresService s){service=s;}
- public record Create(@NotBlank @Size(max=200) String name,@Pattern(regexp="WOOCOMMERCE|ARIA_DEMO") @NotNull String platform,@Size(max=500) String url){}
+ public record Create(@NotBlank @Size(max=200) String name,@Pattern(regexp="WOOCOMMERCE|ARIA_DEMO") @NotNull String platform,@Size(max=500) String url,Boolean testConnection){}
+ public record Lifecycle(@Min(0) long version,@NotBlank @Size(max=900) String reason){}
+ public record Presentation(@Min(0) long version,@NotBlank @Size(max=200) String name,boolean testConnection,@AssertTrue boolean informationConfirmed,@NotBlank @Size(max=900) String reason){}
+ public record Removal(@Min(0) long version,@NotNull @Pattern(regexp="DELETE_EMPTY_TEST_STORE") String confirmation,@NotBlank @Size(max=900) String reason){}
  public record Enqueue(@Min(0) long version,@NotNull @Pattern(regexp="CHECK|SYNC|ORDERS") String operation){}
  @PostMapping("/{id}/tasks") public Object enqueue(@PathVariable Long id,@Valid @RequestBody Enqueue e){var task=queue.enqueue(id,e.version(),e.operation());worker.wake();return task;}
  @GetMapping("/{id}/tasks") public Object tasks(@PathVariable Long id){return service.tasks(id);}
@@ -17,7 +20,12 @@ public class ConnectedStoresController {
  public record Credentials(@Min(0) long version,@Pattern(regexp="ck_[a-zA-Z0-9]{20,100}") @NotNull String key,@Pattern(regexp="cs_[a-zA-Z0-9]{20,100}") @NotNull String secret){}
  public record Business(@NotBlank @Size(max=200) String name){}
  @GetMapping public Object list(){return service.list();}
- @PostMapping public Object create(@Valid @RequestBody Create c){return service.create(c.name(),c.platform(),c.url());}
+ @PostMapping public Object create(@Valid @RequestBody Create c){return service.create(c.name(),c.platform(),c.url(),Boolean.TRUE.equals(c.testConnection()));}
+ @PutMapping("/{id}/presentation") public Object presentation(@PathVariable Long id,@Valid @RequestBody Presentation p){return service.presentation(id,p.version(),p.name(),p.testConnection(),p.reason());}
+ @PostMapping("/{id}/archive") public Object archive(@PathVariable Long id,@Valid @RequestBody Lifecycle v){return service.archive(id,v.version(),v.reason());}
+ @PostMapping("/{id}/restore") public Object restore(@PathVariable Long id,@Valid @RequestBody Lifecycle v){return service.restore(id,v.version(),v.reason());}
+ @GetMapping("/{id}/removal") public Object removal(@PathVariable Long id){return service.removalReadiness(id);}
+ @DeleteMapping("/{id}") public Object remove(@PathVariable Long id,@Valid @RequestBody Removal v){return service.removeEmptyTest(id,v.version(),v.confirmation(),v.reason());}
  @PutMapping("/business") public Object business(@Valid @RequestBody Business b){return service.rename(b.name());}
  @PutMapping("/{id}/credentials") public Object credentials(@PathVariable Long id,@Valid @RequestBody Credentials c){return service.credentials(id,c.version(),c.key(),c.secret());}
  @PostMapping("/{id}/check") public Object check(@PathVariable Long id,@Valid @RequestBody Version v){return service.sync(id,v.version(),true);}

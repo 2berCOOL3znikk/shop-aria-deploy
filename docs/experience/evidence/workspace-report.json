@@ -1,0 +1,22 @@
+{
+  "checks": [
+    "Dashboard counters equal persisted API facts; AI/engine provenance, demo label and native sales scope are explicit; zero-sales chart has an honest empty state",
+    "All 23 preserved sections reachable through primary navigation and contextual tabs at 1440/390px; settings, themes, dialogs and no horizontal page overflow",
+    "Explicitly simulated API outage shows an error and real retry recovers; reduced motion is respected",
+    "Storefront/admin return path works; anonymous overview denied; no browser exceptions"
+  ],
+  "errors": [],
+  "screenshots": [
+    "target/e2e/aria3/after-dashboard-light-1440.png",
+    "target/e2e/aria3/after-dashboard-light-390.png",
+    "target/e2e/aria3/after-dashboard-dark-1440.png",
+    "target/e2e/aria3/after-dashboard-dark-390.png",
+    "target/e2e/aria3/after-settings-1440.png",
+    "target/e2e/aria3/after-products-1440.png",
+    "target/e2e/aria3/after-ai-1440.png",
+    "target/e2e/aria3/after-settings-390.png",
+    "target/e2e/aria3/after-products-390.png",
+    "target/e2e/aria3/after-ai-390.png"
+  ],
+  "passed": true
+}

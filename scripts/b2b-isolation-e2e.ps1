@@ -1,4 +1,4 @@
-param([string]$PostgresBin='D:\PostgreSQL\bin',[string]$JavaHome=(Join-Path $env:USERPROFILE '.jdks/ms-21.0.12.1'))
+﻿param([string]$PostgresBin='D:\PostgreSQL\bin',[string]$JavaHome=(Join-Path $env:USERPROFILE '.jdks/ms-21.0.12.1'))
 $ErrorActionPreference='Stop'
 $root=Split-Path $PSScriptRoot -Parent
 Set-Location -LiteralPath $root
@@ -60,7 +60,7 @@ try{
   $c.token=$login.token
   $current=Api $c '/api/admin/control/organization' 'GET' $null $c.token
   if($current.binding -ne $c.key){throw 'Incorrect organization metadata'}
-  foreach($privatePath in '/api/products/store','/api/products/store-info','/api/social/impact','/api/admin/control/organization','/api/admin/control/demo-catalogue'){
+  foreach($privatePath in '/api/products/store','/api/products/store-info','/api/social/impact','/api/admin/control/organization','/api/admin/control/stores','/api/admin/control/demo-catalogue'){
    $denied=$false
    try{$null=Api $c $privatePath}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Anonymous request accessed company business data'}
@@ -71,11 +71,14 @@ try{
   $c=$companies[$i];$other=$companies[1-$i]
   $products=@(Api $c '/api/admin/control/products' 'GET' $null $c.token)
   if($products.Count -ne 1 -or $products[0].name -ne $c.key){throw 'Product data crossed boundary'}
-  foreach($path in '/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings','/api/admin/control/demo-catalogue','/api/products/store-info'){
+  foreach($path in '/api/admin/control/stores','/api/admin/control/stores/1/removal','/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings','/api/admin/control/demo-catalogue','/api/products/store-info'){
    $denied=$false
    try{$null=Api $c $path 'GET' $null $other.token}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Foreign organization token was accepted'}
   }
+  $denied=$false
+  try{$null=Api $c '/api/admin/control/stores/1/archive' 'POST' @{version=0;reason='Foreign-token rejection test'} $other.token}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
+  if(!$denied){throw 'Foreign organization token reached store archival'}
   $env:PGUSER=$c.database;$env:PGPASSWORD=$c.password
   $denialLog=Join-Path $out "cross-db-$i.err.log"
   $probe=Start-Process -FilePath (Join-Path $PostgresBin 'psql.exe') -ArgumentList @('-X','-d',$other.database,'-c','"select 1"') -WindowStyle Hidden -Wait -PassThru -RedirectStandardOutput (Join-Path $out "cross-db-$i.log") -RedirectStandardError $denialLog
@@ -97,9 +100,9 @@ try{
   try{$null=Api $c '/api/admin/control/demo-catalogue' 'POST' @{confirmed=$true} $c.token}catch{if([int]$_.Exception.Response.StatusCode -eq 409){$denied=$true}else{throw}}
   if(!$denied){throw 'Demo importer changed a company catalogue'}
   if(@(Api $c '/api/admin/control/products' 'GET' $null $c.token).Count -ne 1){throw 'Demo products leaked into a company catalogue'}
-  Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='28' AND success=true) THEN RAISE EXCEPTION 'V28 missing'; END IF; END `$`$;"
+  Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='29' AND success=true) THEN RAISE EXCEPTION 'V29 missing'; END IF; END `$`$;"
  }
- $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V28 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B','Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled')
+ $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V29 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B','Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled')
  $report.passed=$true
  Write-Output 'PASS: two-company database/process/API isolation'
 }finally{

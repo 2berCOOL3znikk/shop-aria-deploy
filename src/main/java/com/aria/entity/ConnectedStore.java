@@ -12,6 +12,9 @@ public class ConnectedStore {
  @Column(nullable=false,length=30) public String status="NOT_CONNECTED";
  @Column(name="write_enabled",nullable=false) public boolean writeEnabled=false;
  @Version public long version;
+ @Column(nullable=false) public boolean archived=false;
+ public java.time.LocalDateTime archivedAt;
+ @Column(nullable=false) public boolean testConnection=false;
  @Column(length=3) public String catalogCurrency;
  public java.time.LocalDateTime currencyConfirmedAt;
  public java.time.LocalDateTime lastSync;

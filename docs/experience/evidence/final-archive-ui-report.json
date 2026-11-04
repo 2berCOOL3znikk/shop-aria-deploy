@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "restoredThenArchived": true,
+  "status": "DISCONNECTED",
+  "historyPreserved": true,
+  "archivedWebhookHistoryReadable": true,
+  "receiverCannotBeEnabled": true,
+  "errors": []
+}

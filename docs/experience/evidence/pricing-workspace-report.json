@@ -10,45 +10,45 @@
     {
       "width": 1440,
       "theme": "light",
-      "buttons": 25,
-      "characters": 2546
+      "buttons": 24,
+      "characters": 2591
     },
     {
       "width": 1440,
       "theme": "dark",
-      "buttons": 25,
-      "characters": 2546
+      "buttons": 24,
+      "characters": 2591
     },
     {
       "width": 768,
       "theme": "light",
-      "buttons": 25,
-      "characters": 2440
+      "buttons": 24,
+      "characters": 2485
     },
     {
       "width": 768,
       "theme": "dark",
-      "buttons": 25,
-      "characters": 2440
+      "buttons": 24,
+      "characters": 2485
     },
     {
       "width": 390,
       "theme": "light",
-      "buttons": 25,
-      "characters": 2440
+      "buttons": 24,
+      "characters": 2485
     },
     {
       "width": 390,
       "theme": "dark",
-      "buttons": 25,
-      "characters": 2440
+      "buttons": 24,
+      "characters": 2485
     }
   ],
   "externalAiCalled": false,
   "fixture": {
-    "id": 67,
-    "sku": "QA-PRICE-C102C7A9-5A1",
-    "lotId": 60
+    "id": 71,
+    "sku": "QA-PRICE-FD4B297C-CFC",
+    "lotId": 64
   },
   "passed": true,
   "fixtureArchived": true

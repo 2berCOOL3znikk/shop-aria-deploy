@@ -1,0 +1,81 @@
+{
+  "applied": true,
+  "scope": "http://127.0.0.1:8084",
+  "records": [
+    {
+      "id": 2,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 3,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 4,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 5,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 6,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 7,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 8,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 9,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": false,
+      "archived": true,
+      "testConnection": true
+    },
+    {
+      "id": 10,
+      "productsRetained": 0,
+      "ordersRetained": 0,
+      "accessRetained": true,
+      "archived": true,
+      "testConnection": true
+    }
+  ],
+  "productionChanged": false,
+  "connectionCount": 12,
+  "currentCount": 1
+}

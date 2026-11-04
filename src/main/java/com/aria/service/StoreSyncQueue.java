@@ -14,7 +14,7 @@ public class StoreSyncQueue {
   if(!Set.of("CHECK","SYNC","ORDERS").contains(operation))throw new IllegalArgumentException("Неверный тип обновления");
   var s=stores.lockById(id).orElseThrow(()->new IllegalArgumentException("Магазин не найден"));
   if(s.version!=version)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Данные изменились. Обновите магазины");
-  if(s.status.equals("DISCONNECTED")||(operation.equals("ORDERS")&&!s.platform.equals("WOOCOMMERCE")))throw new IllegalArgumentException("Настройте подключение магазина");
+  if(s.archived||s.status.equals("DISCONNECTED")||(operation.equals("ORDERS")&&!s.platform.equals("WOOCOMMERCE")))throw new IllegalArgumentException("Настройте подключение магазина");
   var task=tasks.findByStoreIdAndOperation(id,operation).orElseGet(StoreSyncTask::new);
   if(task.id!=null)task=tasks.lockById(task.id).orElseThrow();
   var now=LocalDateTime.now();
@@ -25,7 +25,7 @@ public class StoreSyncQueue {
  }
  public List<StoreSyncTask> list(Long id){return tasks.findByStoreIdOrderByIdAsc(id);}
  public void requireActive(Claim claim){
-  stores.lockById(claim.storeId()).orElseThrow();var task=tasks.lockById(claim.id()).orElseThrow();
+  var store=stores.lockById(claim.storeId()).orElseThrow();if(store.archived)throw new IllegalStateException("Подключение в архиве");var task=tasks.lockById(claim.id()).orElseThrow();
   if(!task.state.equals("RUNNING")||!Objects.equals(task.lease,claim.lease())||task.generation!=claim.generation()||task.leaseUntil==null||!task.leaseUntil.isAfter(LocalDateTime.now()))
    throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Запрос обновления отменён или заменён");
  }
@@ -36,7 +36,7 @@ public class StoreSyncQueue {
    if(!due(candidate,now))continue;
    var store=stores.lockById(candidate.storeId).orElseThrow();var t=tasks.lockById(candidate.id).orElseThrow();
    if(!due(t,now))return null;
-   if(store.status.equals("DISCONNECTED")){cancel(t);return null;}
+   if(store.archived||store.status.equals("DISCONNECTED")){cancel(t);return null;}
    if(t.state.equals("RUNNING")&&t.generation!=t.claimedGeneration)t.attempts=0;
    if(t.attempts>=3){t.state="FAILED";t.lastError="Обновление прервано трижды. Запустите его повторно";t.lease=null;t.leaseUntil=null;return null;}
    t.attempts++;t.claimedGeneration=t.generation;t.state="RUNNING";t.lease=UUID.randomUUID().toString();t.leaseUntil=now.plusMinutes(5);t.updatedAt=now;

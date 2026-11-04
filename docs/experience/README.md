@@ -36,7 +36,29 @@ Open `/control.html#socialPlans` for the owner, `/social.html` for organizations
 
 - WORKS: existing stock/order core, price constraints, persisted real AI decisions, manual approval/rejection/rollback. Previously checked storefront/cart/B2B scope are recorded in `docs/ARIA3.md`.
 - MISLEADING, fixed in Prices: every historical recommendation shown as a separate current card; “AI completed” even when the provider did not decide; zero-sale KEEP presented as awaiting a price change; duplicated refresh action.
-- NEXT: My Stores cards, connection wizard and safe test-connection archival. No test connections have been deleted.
-- NOT COMPLETE: full application RU/EN localization, administrative tool-using assistant, category-specific product schemas and an installed external WooCommerce E2E. Existing HTTP fixture tests do not constitute a real WooCommerce connection.
+- NOT COMPLETE: full application RU/EN localization, administrative tool-using assistant, category-specific product schemas, self-service company provisioning and an installed external WooCommerce E2E with external-catalogue AI/writeback. Existing HTTP fixture tests do not constitute a real WooCommerce connection.
 
 The university self-audit is a separate earlier snapshot in `docs/rubezh2`; no peer-group review is claimed.
+
+## 3. My Stores — completed owner workflow
+
+Open **http://127.0.0.1:8084/control.html#stores**.
+
+- One Open action per card; catalogue, orders, history, connection repair, access and notifications are inside the store. The duplicate heading is gone. Current / Test / Archive views and search separate the owner's working list from training connections.
+- The six-step wizard persists each completed step and resumes from the saved connection state. Access errors stop the process visibly. External-catalogue AI remains explicitly unavailable at step 6; it is not a fictional connected AI feature.
+- V29 adds explicit `test_connection`, `archived` and `archived_at` only. Existing connections default to their original classification. Older three-field Create requests still work (the new flag is nullable/optional).
+- Archive cancels queued/claimed work, revokes webhook admission and sets a backward-compatible disconnected state. Encrypted read access, catalogue/order snapshots and history remain. Restore requires another access check and enables neither writes nor webhooks.
+- Permanent removal requires an explicitly marked archived empty WooCommerce test connection, confirmation, current version and no products/orders/sync history/tasks/receipts/access. Dependencies are rechecked under the store lock. The deletion audit remains.
+- Only nine strictly recognized historical loopback QA connections were renamed/marked/archived by an opt-in script; none were deleted. A separate newly created empty test connection was removed in the browser to verify the guarded flow. Other test fixtures remain archived with their history.
+- `stores-e2e.cjs` retains the previous real demo sync, catalogue, order failure, signed local webhook/deduplication/secret-clearing and role checks, adapted to the new UI; it adds actual archive/restore and guarded removal. `stores-readonly-e2e.cjs` verifies stable 390/768/1440 light/dark views, wizard resume to the real AI center and explicit 503/retry without connection writes.
+
+## Final verification
+
+- **208 Java tests passed**, zero failures/errors/skips, against a new local PostgreSQL database with Flyway V1–V29 and Hibernate validate. `scripts/test-postgres.ps1` always creates a fresh database: HTTP integration fixtures persist their requests, so reusing an old test database is invalid. Windows PowerShell warnings on native stderr are logged; Maven's exit code decides the result.
+- V28→V29 was also tested on the earlier isolated database. Two separate app/database pairs with restricted logins, identical owner email/signing secret and different company bindings passed isolation, including foreign-token store reads/removal checks/archive denial.
+- All **23 existing sections** remain reachable at desktop/mobile widths. The storefront's previously saved real product/order/stock persisted through the new application restart.
+- A second actual free OpenRouter request was made through the UI on active educational SKU **ARIA-DEMO-016**, decision **257**: validated **KEEP**, model `dots-studio/dots-3-note-preview:free`. It remains visible in the main Prices list and Control Center. Verification reused that persisted result; no further model call or consent/quota reset was needed. Price/stock and owner permissions stayed unchanged. Request/verification evidence is separate.
+- `scripts/verify-preview-restore.ps1` restored a restricted local dump into a fresh database in one transaction. V29, product/order/store/AI counts, demo stock and inactive archived queues matched. This verifies the local preview, not a production backup.
+- Public staging was not provisioned. No main/production/paid-resource changes were made. Secrets and backups remain outside Git.
+
+Owner instructions with screenshots: **`OWNER_GUIDE_RU.md`**. Publication steps requiring later explicit authorization: **`PRODUCTION_PLAN_RU.md`**. Next concrete development step: **`NEXT_STEPS_RU.md`**.
