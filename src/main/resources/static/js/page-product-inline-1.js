@@ -81,6 +81,19 @@ let reviewBusy = false;
         finally { reviewBusy=false;if(submit)submit.disabled=false; }
     }
 
+    function renderProductAttributes(details, category) {
+        if (!details) return '';
+        const food = /молоч|шокол|макарон|круп|консерв|продукт|напит|хлеб|food|dairy|chocol|pasta|grocer|beverage|bakery/i.test(String(category || ''));
+        const measuredPack = /\d\s*(?:кг|мг|мл|г|л|kg|mg|ml|g|l)(?:$|[\s.,/])/i.test(String(details.size || ''));
+        const rows = [
+            [ariaCopy.text("text.8c3761153abda8"), details.brand], [ariaCopy.text("text.92ab62ad6f3c1e"), details.color],
+            [food || measuredPack ? ariaCopy.text("text.aed083277bdcc2") : ariaCopy.text("text.572095d4a78792"), details.size],
+            [ariaCopy.text("text.e4b270e5a0a255"), Number(details.weightKg) > 0 && Number.isFinite(Number(details.weightKg)) ? new Intl.NumberFormat(ariaCopy.locale(), {maximumFractionDigits:2}).format(Number(details.weightKg)) : null]
+        ].filter(([,value]) => value != null && String(value).trim() !== '');
+        if (!rows.length) return '';
+        return '<section id="product-attributes" class="product-attributes"><h2>' + ariaCopy.text("text.daeb4dc4c155bd") + '</h2><table class="product-spec-table"><tbody>' + rows.map(([label,value]) => '<tr><th scope="row">' + escapeHtml(label) + '</th><td data-merchant-content>' + escapeHtml(value) + '</td></tr>').join('') + '</tbody></table><p class="storefront-fact-note">' + ariaCopy.text("text.04b0cb00d51087") + '</p></section>';
+    }
+
     async function loadProduct() {
         const params = new URLSearchParams(location.search);
         productId = params.get('id');
@@ -122,20 +135,13 @@ let reviewBusy = false;
                 ariaCopy.text("text.3b25cfb6a3146a") + escapeHtml(d && d.descriptionLong ? d.descriptionLong : ariaCopy.text("text.6cfd4fc43a52c3")) + '</p></section>' +
                 '<div class="product-detail-price">' + ariaMoney.format(displayPrice) + oldPrice + '</div>' +
 
-                // Характеристики
-                (d ? '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
-                    ariaCopy.text("text.d501d021acfd29") +
-                    (d.brand ? ariaCopy.text("text.0a621b4cbdc085") + escapeHtml(d.brand) + '</div>' : '') +
-                    (d.color ? ariaCopy.text("text.2e16adf792c02f") + escapeHtml(d.color) + '</div>' : '') +
-                    (d.size ? ariaCopy.text("text.dfe2277e3ad111") + escapeHtml(d.size) + '</div>' : '') +
-                    (d.weightKg ? ariaCopy.text("text.9bdfba85e185a9") + d.weightKg + ariaCopy.text("text.7dc6e399f30608") : '') +
-                    '</div>' : '') +
+                renderProductAttributes(d, p.category) +
 
                 // Информация о товаре
                 '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
                 ariaCopy.text("text.bf4654328c1093") +
-                ariaCopy.text("text.a7a915c4e3eb1d") + p.quantityOnHand + ariaCopy.text("text.b467c5a9493076") +
-                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>' + (p.provenance?.demonstration ? ariaCopy.text("text.d779ade0b65a43") : ariaCopy.text("text.1b706a30d3f8dd")) + '</b> ' + new Date(p.expiryDate + 'T12:00:00').toLocaleDateString(ariaCopy.locale()) + '</div>' : '') +
+                '<div style="margin-bottom:8px;"><b>' + ariaCopy.text("text.97023b38ead4cb") + ':</b> ' + p.quantityOnHand + ' ' + escapeHtml(p.unit || '') + '</div>' +
+                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>' + (p.provenance?.demonstration ? ariaCopy.text("text.d779ade0b65a43") : ariaCopy.text("text.1b706a30d3f8dd")) + '</b> ' + new Date(p.expiryDate + 'T12:00:00').toLocaleDateString(ariaCopy.locale(), {day:'numeric',month:'short',year:'numeric'}) + '</div>' : '') +
                 ariaCopy.text("text.10e12b90ee1701") + statusText + '</div>' +
                 '</div>' +
 

@@ -37,6 +37,7 @@ if(refresh){
  for(const [source,en] of Object.entries(JSON.parse(fs.readFileSync(path.join(__dirname,'system.en.json'),'utf8'))))dictionary['system.'+crypto.createHash('sha256').update(source).digest('hex').slice(0,14)]=[source,en];
  if(unresolved.size)throw new Error('Translations missing for '+unresolved.size+' source phrases');
  fs.writeFileSync(bundle,'// Explicit source-copy dictionary. No shop data.\nwindow.ARIA_COPY_DICTIONARY='+JSON.stringify(dictionary)+';\n');
+ const manifestPath=path.join(__dirname,'manifest.json');if(fs.existsSync(manifestPath)){const metadata=JSON.parse(fs.readFileSync(manifestPath,'utf8'));metadata.keyCount=Object.keys(dictionary).length;fs.writeFileSync(manifestPath,JSON.stringify(metadata,null,2)+'\n');}
  console.log(JSON.stringify({keys:Object.keys(dictionary).length,refreshedOnly:true}));process.exit(0);
 }
 parser=require(path.join(root,'target/localization-tools/parser/package/lib/index.js'));

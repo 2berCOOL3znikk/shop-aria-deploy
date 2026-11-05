@@ -10,22 +10,6 @@
     document.getElementById("product").before(node);
     document.querySelector('main.container > a[href="/index.html"]')?.remove();
   };
-  const makeSpecTable = () => {
-    const heading = [...document.querySelectorAll("#product h3")].find(el => el.textContent.includes("Характеристики"));
-    if (!heading || heading.parentElement.querySelector("table")) return;
-    const box = heading.parentElement;
-    const rows = [...box.querySelectorAll(":scope > div")].map(row => {
-      const label = row.querySelector("b")?.textContent.replace(":", "").trim();
-      const value = row.textContent.replace(row.querySelector("b")?.textContent || "", "").trim();
-      return label && value ? [label, value] : null;
-    }).filter(Boolean);
-    if (!rows.length) return;
-    const table = document.createElement("table");
-    table.className = "product-spec-table";
-    ariaCopy.setProperty(table,"innerHTML",rows.map(([label, value]) => "<tr><th>" + escape(label) + "</th><td>" + escape(value) + "</td></tr>").join(""));
-    box.querySelectorAll(":scope > div").forEach(row => row.remove());
-    box.appendChild(table);
-  };
   const addShare = () => {
     const info = document.querySelector("#product > div:nth-child(2)");
     if (!info || info.querySelector(".telegram-share")) return;
@@ -61,7 +45,6 @@
     const title = product?.querySelector("h1");
     if (!title) return;
     addBreadcrumbs(title.textContent);
-    makeSpecTable();
     addShare();
   }
   const target = document.getElementById("product");
@@ -74,7 +57,7 @@
     const safeLink=(url,label)=>{try{const value=new URL(url);return value.protocol==='https:'?'<a href="'+escape(value.href)+'" target="_blank" rel="noopener noreferrer">'+escape(label)+'</a>':escape(label);}catch{return escape(label);}};
     const facts=Array.isArray(provenance.facts)?provenance.facts:[];
     if(facts.length){
-      ariaCopy.setProperty(section,"innerHTML",'<h2>'+ (provenance.verification==='PACKAGE_PHOTO'?ariaCopy.text("text.8927030ab92286"):ariaCopy.text("text.260bca7afc39c1"))+ariaCopy.text("text.addb27b104b888")+facts.map(f=>'<div><dt>'+escape(f.label)+'</dt><dd>'+escape(f.value)+'<small>'+safeLink(f.sourceUrl,ariaCopy.text("text.ef1f448895e3b8"))+' · '+escape(f.checkedAt)+'</small></dd></div>').join('')+'</dl>'+(provenance.limitations?.length?ariaCopy.text("text.0192fa10af8f56")+provenance.limitations.map(value=>'<li>'+escape(value)+'</li>').join('')+'</ul></details>':''));
+      ariaCopy.setProperty(section,"innerHTML",'<h2>'+ (provenance.verification==='PACKAGE_PHOTO'?ariaCopy.text("text.8927030ab92286"):ariaCopy.text("text.260bca7afc39c1"))+ariaCopy.text("text.addb27b104b888")+facts.map(f=>'<div><dt>'+escape(ariaCopy.systemMessage(f.label))+'</dt><dd>'+escape(f.value)+'<small>'+safeLink(f.sourceUrl,ariaCopy.text("text.ef1f448895e3b8"))+' · '+escape(f.checkedAt)+'</small></dd></div>').join('')+'</dl>'+(provenance.limitations?.length?ariaCopy.text("text.0192fa10af8f56")+provenance.limitations.map(value=>'<li>'+escape(value)+'</li>').join('')+'</ul></details>':''));
     }else ariaCopy.setProperty(section,"innerHTML",ariaCopy.text("text.45b275b61d2cbb")+(provenance.verification==='OWNER_EDITED'?ariaCopy.text("text.0a8b50f06b0576"):ariaCopy.text("text.9cb6ffd377abfc"))+'</p>');
     info.append(section);
   }

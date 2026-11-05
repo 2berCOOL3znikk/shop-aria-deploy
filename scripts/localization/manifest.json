@@ -210,5 +210,6 @@
       "keys": 57
     }
   ],
-  "keyCount": 1761
+  "keyCount": 1786,
+  "maintenance": "Explicit keys; after the one-time migration, edit current source and refresh the dictionary only."
 }

@@ -1,0 +1,111 @@
+{
+  "pages": [
+    {
+      "language": "ru",
+      "width": 1440,
+      "category": "food",
+      "id": 4,
+      "storeAttributes": 2,
+      "referenceFacts": 5
+    },
+    {
+      "language": "ru",
+      "width": 1440,
+      "category": "household",
+      "id": 10,
+      "storeAttributes": 2,
+      "referenceFacts": 4
+    },
+    {
+      "language": "ru",
+      "width": 1440,
+      "category": "textile",
+      "id": 17,
+      "storeAttributes": 0,
+      "referenceFacts": 0
+    },
+    {
+      "language": "ru",
+      "width": 390,
+      "category": "food",
+      "id": 4,
+      "storeAttributes": 2,
+      "referenceFacts": 5
+    },
+    {
+      "language": "ru",
+      "width": 390,
+      "category": "household",
+      "id": 10,
+      "storeAttributes": 2,
+      "referenceFacts": 4
+    },
+    {
+      "language": "ru",
+      "width": 390,
+      "category": "textile",
+      "id": 17,
+      "storeAttributes": 0,
+      "referenceFacts": 0
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "category": "food",
+      "id": 4,
+      "storeAttributes": 2,
+      "referenceFacts": 5
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "category": "household",
+      "id": 10,
+      "storeAttributes": 2,
+      "referenceFacts": 4
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "category": "textile",
+      "id": 17,
+      "storeAttributes": 0,
+      "referenceFacts": 0
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "category": "food",
+      "id": 4,
+      "storeAttributes": 2,
+      "referenceFacts": 5
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "category": "household",
+      "id": 10,
+      "storeAttributes": 2,
+      "referenceFacts": 4
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "category": "textile",
+      "id": 17,
+      "storeAttributes": 0,
+      "referenceFacts": 0
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "theme": "dark",
+      "category": "food",
+      "id": 4
+    }
+  ],
+  "errors": [],
+  "writesPerformed": false,
+  "aiRequested": false,
+  "passed": true
+}
