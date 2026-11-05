@@ -10,6 +10,10 @@ public final class ControlRequests {
   @Size(max=64) String barcode,@NotBlank @Size(max=20) String unit,@Min(0) @Max(1000000) int lowStockThreshold,
   @DecimalMin("0.01") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal minimumPrice) {}
  public record SupplierInput(@NotBlank @Size(max=160) String name,@Size(max=160) String contact,@Size(max=1000) String notes,boolean active) {}
+ public record ProductAttributesInput(@NotBlank @Pattern(regexp="[a-f0-9]{64}") String revision,
+  @Size(max=50) String color,@Size(max=50) String size,
+  @DecimalMin("0.01") @DecimalMax("999999.99") @Digits(integer=6,fraction=2) BigDecimal weightKg,
+  @AssertTrue boolean confirmed,@NotBlank @Size(max=700) String reason) {}
  public record LotInput(@NotNull Long productId,Long supplierId,@NotBlank @Size(max=80) String lotNumber,
   @NotNull @PastOrPresent LocalDate receivedAt,@PastOrPresent LocalDate manufacturedAt,LocalDate expiryDate,
   @Min(1) @Max(1000000) int quantity,@NotNull @DecimalMin("0.00") @DecimalMax("9999999999.99") @Digits(integer=10,fraction=2) BigDecimal unitCost) {}

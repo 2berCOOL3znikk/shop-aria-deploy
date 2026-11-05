@@ -49,6 +49,36 @@ public class ControlService {
         ProductDetail detail=details.findByProductId(p.getId()).orElseGet(ProductDetail::new);detail.setProduct(p);detail.setBrand(input.brand());detail.setDescriptionLong(input.description());details.save(detail);
         events.publishEvent(new StoreChanged(p.getId(),"PRODUCT_CHANGED"));audit.record(id==null?"PRODUCT_CREATED":"PRODUCT_UPDATED","product:"+p.getId(),p.getSku()+" · "+p.getName()+" · цена "+p.getUnitPrice()+" ₸");return p;
     }
+    public Map<String,Object> productAttributes(Long id){var p=inventory.lock(id);return attributesView(p,details.findByProductId(id).orElse(null));}
+    public Map<String,Object> saveAttributes(Long id,ProductAttributesInput input){
+        if(!input.confirmed())throw new IllegalArgumentException("Подтвердите проверку характеристик");
+        var p=inventory.lock(id);if(p.getArchived())throw new IllegalStateException("Товар архивирован");
+        var d=details.findByProductId(id).orElse(null);
+        if(!Objects.equals(attributesRevision(p,d),input.revision()))throw new IllegalStateException("Характеристики изменились. Откройте форму заново и проверьте значения.");
+        var color=blankToNull(input.color());var size=blankToNull(input.size());
+        if(Objects.equals(color,d==null?null:d.getColor())&&Objects.equals(size,d==null?null:d.getSize())&&Objects.equals(decimal(input.weightKg()),decimal(d==null?null:d.getWeightKg())))return attributesView(p,d);
+        if(d!=null&&!Objects.equals(size,d.getSize())&&d.getCatalogueReference()!=null&&p.getImageUrl()!=null&&p.getImageUrl().startsWith("/images/demo/"))p.setImageUrl("/images/product-placeholder.svg");
+        if(d==null){d=new ProductDetail();d.setProduct(p);}
+        d.setColor(color);d.setSize(size);d.setWeightKg(input.weightKg());details.saveAndFlush(d);
+        // Owner input is never promoted to manufacturer verification or an AI-generated fact.
+        events.publishEvent(new StoreChanged(id,"PRODUCT_CHANGED"));audit.record("PRODUCT_ATTRIBUTES_UPDATED","product:"+id,"Сведения магазина; подтверждены владельцем · "+input.reason().trim());
+        return attributesView(p,d);
+    }
+    private String blankToNull(String value){return value==null||value.isBlank()?null:value.trim();}
+    private String decimal(java.math.BigDecimal value){return value==null?null:value.stripTrailingZeros().toPlainString();}
+    private Map<String,Object> attributesView(Product p,ProductDetail d){
+        var out=new LinkedHashMap<String,Object>();out.put("productId",p.getId());out.put("name",p.getName());out.put("category",p.getCategory());out.put("revision",attributesRevision(p,d));
+        out.put("color",d==null?null:d.getColor());out.put("size",d==null?null:d.getSize());out.put("weightKg",d==null?null:d.getWeightKg());return out;
+    }
+    private String attributesRevision(Product p,ProductDetail d){
+        try{
+            var bytes=new java.io.ByteArrayOutputStream();var values=new java.io.DataOutputStream(bytes);
+            for(String value:new String[]{p.getCategory(),d==null?null:d.getColor(),d==null?null:d.getSize(),decimal(d==null?null:d.getWeightKg())}){
+                if(value==null){values.writeInt(-1);}else{var encoded=value.getBytes(java.nio.charset.StandardCharsets.UTF_8);values.writeInt(encoded.length);values.write(encoded);}
+            }
+            return java.util.HexFormat.of().formatHex(java.security.MessageDigest.getInstance("SHA-256").digest(bytes.toByteArray()));
+        }catch(java.io.IOException|java.security.NoSuchAlgorithmException impossible){throw new IllegalStateException("Не удалось проверить версию характеристик",impossible);}
+    }
     private String allocateSku(){
         // Old manually named products are preserved; sequence and reserved prefix prevent new writers colliding.
         for(int attempt=0;attempt<1000;attempt++){String code="ARIA-AUTO-"+skuAllocations.saveAndFlush(new ProductSkuAllocation()).id;if(!products.existsBySkuIgnoreCase(code))return code;}

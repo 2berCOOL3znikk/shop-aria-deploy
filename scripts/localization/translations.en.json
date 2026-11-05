@@ -2184,5 +2184,18 @@
   "Сведения магазина": "Store-provided details",
   "Указаны магазином. Сверяйте сведения с упаковкой и источниками ниже.": "Provided by the store. Check the packaging and sources below.",
   "Упаковка": "Pack size",
-  "Масса, кг": "Weight, kg"
+  "Масса, кг": "Weight, kg",
+  "Характеристики товара": "Product attributes",
+  "Укажите только известные значения. Поле можно оставить пустым. Состав, изготовитель и срок партии здесь не создаются.": "Enter only known values, or leave a field empty. Ingredients, manufacturer and batch expiry are not created here.",
+  "Цвет (если применимо)": "Color (if applicable)",
+  "Размер / упаковка": "Size / pack",
+  "Основание изменения": "Reason for this update",
+  "Например, сверка с упаковкой или сведениями поставщика.": "For example, a check against packaging or supplier information.",
+  "Проверил введённые сведения. Это данные магазина; они не получают статус проверенных производителем.": "I reviewed these values. They are store-provided details, not manufacturer-verified facts.",
+  "Характеристики сохранены": "Product attributes saved",
+  "Изменение упаковки может снять отметку справочных характеристик: они больше не подтверждают изменённый товар.": "Changing the pack size may remove reference verification and its bundled photo because they no longer match the edited product. Your own uploaded image is kept.",
+  "Характеристики изменились. Откройте форму заново и проверьте значения.": "The attributes changed. Reopen the form and review the current values.",
+  "Подтвердите проверку характеристик": "Confirm that you reviewed the attributes",
+  "Изменены характеристики товара": "Product attributes updated",
+  "Изменение упаковки может снять справочные сведения и справочное фото. Ваше собственное загруженное изображение сохранится.": "Changing the pack size may remove reference details and their photo. Your own uploaded image is kept."
 }

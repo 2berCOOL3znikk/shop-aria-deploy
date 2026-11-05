@@ -1,0 +1,30 @@
+{
+  "scopes": [
+    {
+      "binding": "woo-e2e",
+      "language": "ru",
+      "productId": 1,
+      "ownerReviewRequired": true,
+      "staleUiRejected": true,
+      "stockAndPriceUnchanged": true,
+      "color": "Серый (учебный)",
+      "size": "30 × 50 см (учебный)",
+      "weightKg": 0.3
+    },
+    {
+      "binding": "demo",
+      "language": "en",
+      "productId": 17,
+      "ownerReviewRequired": true,
+      "staleUiRejected": true,
+      "stockAndPriceUnchanged": true,
+      "color": "Серый (учебный)",
+      "size": "30 × 50 см (учебный)",
+      "weightKg": 0.3
+    }
+  ],
+  "errors": [],
+  "externalAiRequests": 0,
+  "productionChanged": false,
+  "passed": true
+}

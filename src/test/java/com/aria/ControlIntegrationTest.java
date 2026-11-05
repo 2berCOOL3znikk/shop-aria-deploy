@@ -29,6 +29,8 @@ class ControlIntegrationTest {
     @Autowired InventoryLotRepository lots;
     @Autowired InventoryService inventory;
     @Autowired ProductRepository products;
+    @Autowired ProductDetailRepository productDetails;
+    @Autowired com.aria.service.CatalogueEvidenceService catalogueEvidence;
     @Autowired OrderRepository orders;
     @Autowired com.aria.service.AriaService analysis;
     @Autowired AuditEventRepository auditEvents;
@@ -205,6 +207,40 @@ class ControlIntegrationTest {
         var answer=new HashMap<>(aiReply(5));answer.put("requiresConfirmation",false);answer.put("strategy","PRICE");
         assertThatThrownBy(()->smartPricing.completeAiFromManager(lease.lease(),claim,answer,true)).isInstanceOf(IllegalStateException.class);assertThat(products.findById(p).orElseThrow().getDiscountPercent()).isZero();managerStore.stop();
     }
+    @Test void attributeUpdateIsExplicitScopedAuditedAndDoesNotChangeStockOrPrices()throws Exception {
+        var initial=new HashMap<String,Object>(productBody("ATTR-"+UUID.randomUUID()));initial.put("imageUrl","https://owner-images.example.test/photo.png");long p=call("POST",base+"/products",admin,initial).id();lot(p,"ATTRIBUTES",4,10);var before=products.findById(p).orElseThrow();var revision=call("GET",base+"/products/"+p+"/attributes",admin,null);
+        var body=new HashMap<String,Object>(Map.of("revision",revision.body.get("revision"),"color"," Серый ","size","500 г","weightKg","0.50","confirmed",true,"reason","Сверка учебной упаковки"));body.put("unitPrice",1);body.put("quantityOnHand",999);body.put("expiryDate","2000-01-01");
+        var saved=call("PUT",base+"/products/"+p+"/attributes",admin,body);assertThat(saved.status).as(saved.raw).isEqualTo(200);assertThat(saved.body).containsEntry("color","Серый").containsEntry("size","500 г");assertThat(saved.raw).doesNotContain("unitCost","quantityOnHand","expiryDate");
+        var after=products.findById(p).orElseThrow();assertThat(after.getUnitPrice()).isEqualByComparingTo(before.getUnitPrice());assertThat(after.getUnitCost()).isEqualByComparingTo(before.getUnitCost());assertThat(after.getImageUrl()).isEqualTo(before.getImageUrl());assertThat(inventory.available(after)).isEqualTo(4);
+        assertThat(auditEvents.findAll().stream().filter(e->e.getAction().equals("PRODUCT_ATTRIBUTES_UPDATED")&&e.getResource().equals("product:"+p))).hasSize(1);
+        body.put("revision",saved.body.get("revision"));assertThat(call("PUT",base+"/products/"+p+"/attributes",admin,body).status).isEqualTo(200);
+        assertThat(auditEvents.findAll().stream().filter(e->e.getAction().equals("PRODUCT_ATTRIBUTES_UPDATED")&&e.getResource().equals("product:"+p))).hasSize(1);
+    }
+    @Test void attributesRequireOwnerRoleAndValidConfirmedValues()throws Exception {
+        long p=product();String path=base+"/products/"+p+"/attributes";var revision=call("GET",path,admin,null).body.get("revision");var body=new HashMap<String,Object>(Map.of("revision",revision,"size","M","confirmed",true,"reason","Учебная проверка"));
+        assertThat(call("GET",path,null,null).status).isEqualTo(401);assertThat(call("GET",path,user,null).status).isEqualTo(403);assertThat(call("PUT",path,user,body).status).isEqualTo(403);
+        body.put("confirmed",false);assertThat(call("PUT",path,admin,body).status).isEqualTo(400);body.put("confirmed",true);
+        for(Object weight:List.of("0","-1","1000000","0.001")){body.put("weightKg",weight);assertThat(call("PUT",path,admin,body).status).isEqualTo(400);}body.remove("weightKg");
+        body.put("size","x".repeat(51));assertThat(call("PUT",path,admin,body).status).isEqualTo(400);assertThat(call("GET",path,admin,null).body.get("revision")).isEqualTo(revision);
+    }
+    @Test void concurrentAttributeEditsAreRejectedAndOptionalFieldsCanBeCleared()throws Exception {
+        long p=product();String path=base+"/products/"+p+"/attributes";var revision=call("GET",path,admin,null).body.get("revision");
+        var first=call("PUT",path,admin,Map.of("revision",revision,"size","M","color","Серый","confirmed",true,"reason","Первая учебная правка"));assertThat(first.status).isEqualTo(200);
+        assertThat(call("PUT",path,admin,Map.of("revision",revision,"size","L","confirmed",true,"reason","Устаревшая форма")).status).isEqualTo(409);assertThat(call("GET",path,admin,null).body.get("size")).isEqualTo("M");
+        var clear=call("PUT",path,admin,Map.of("revision",first.body.get("revision"),"size"," ","confirmed",true,"reason","Удалены неподтверждённые сведения"));assertThat(clear.status).isEqualTo(200);assertThat(clear.body).containsEntry("size",null).containsEntry("color",null).containsEntry("weightKg",null);
+    }
+    @Test void attributePackChangeRemovesMismatchedReferenceVerification()throws Exception {
+        var entry=catalogueEvidence.entries().stream().filter(e->e.photo()!=null).findFirst().orElseThrow();var body=new HashMap<String,Object>(productBody("ATTR-REFERENCE-"+UUID.randomUUID()));body.put("name",entry.name());body.put("category",entry.category());body.put("brand",entry.brand());body.put("imageUrl",entry.photo().path());
+        long p=call("POST",base+"/products",admin,body).id();lot(p,"REFERENCE",2,10);var detail=productDetails.findByProductId(p).orElseThrow();detail.setCatalogueReference(entry.referenceId());detail.setDemonstration(true);detail.setSize(entry.size());productDetails.saveAndFlush(detail);
+        var initial=(Map<?,?>)((Map<?,?>)call("GET","/api/products/"+p,null,null).body.get("product")).get("provenance");assertThat((List<?>)initial.get("facts")).isNotEmpty();
+        String path=base+"/products/"+p+"/attributes";var revision=call("GET",path,admin,null).body.get("revision");assertThat(call("PUT",path,admin,Map.of("revision",revision,"size","Изменённая учебная упаковка","confirmed",true,"reason","Проверка несоответствия справочнику")).status).isEqualTo(200);
+        var changed=(Map<?,?>)((Map<?,?>)call("GET","/api/products/"+p,null,null).body.get("product")).get("provenance");assertThat(changed.get("verification")).isEqualTo("OWNER_EDITED");assertThat(changed.containsKey("facts")).isFalse();assertThat(products.findById(p).orElseThrow().getImageUrl()).isEqualTo("/images/product-placeholder.svg");
+    }
+    @Test void archivedProductAttributesRemainReadOnly()throws Exception {
+        long p=product();String path=base+"/products/"+p+"/attributes";var revision=call("GET",path,admin,null).body.get("revision");assertThat(call("DELETE",base+"/products/"+p,admin,null).status).isEqualTo(200);
+        assertThat(call("PUT",path,admin,Map.of("revision",revision,"size","M","confirmed",true,"reason","Недопустимая правка архива")).status).isEqualTo(409);
+    }
+
     @Test void registrationRequiresSingleUseCaptchaAndDoesNotAllowRoleEscalation()throws Exception {
         String email="new-"+UUID.randomUUID()+"@test.local";
         Map<String,Object> input=new HashMap<>(Map.of("email",email,"password","securePassword123","fullName","Покупатель","role","ADMIN"));

@@ -1,12 +1,12 @@
 {
   "totals": {
-    "tests": 240,
+    "tests": 245,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
-  "scope": "All tests in one full fresh PostgreSQL V1-V32 run. No external AI calls in automated tests.",
-  "completedAt": "2026-11-05T09:37:55.0306752Z",
+  "scope": "Full fresh PostgreSQL V1-V32 run after all attribute and reference-photo guards. No external AI calls in automated tests.",
+  "completedAt": "2026-11-05T12:01:47.7117102Z",
   "exitCode": 0,
   "classes": [
     {
@@ -53,7 +53,7 @@
     },
     {
       "name": "com.aria.ControlIntegrationTest",
-      "tests": "67",
+      "tests": "72",
       "failures": "0",
       "errors": "0",
       "skipped": "0"

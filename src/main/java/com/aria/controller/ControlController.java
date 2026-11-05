@@ -36,6 +36,8 @@ public class ControlController {
     @GetMapping("/products/{id}") public Map<String,Object> product(@PathVariable Long id){var result=new HashMap<String,Object>();result.put("product",inventory.lock(id));result.put("details",details.findByProductId(id).orElse(null));return result;}
     @PostMapping("/products") public Product create(@Valid @RequestBody ProductInput input){return control.saveProduct(null,input);}
     @PutMapping("/products/{id}") public Product update(@PathVariable Long id,@Valid @RequestBody ProductInput input){return control.saveProduct(id,input);}
+    @GetMapping("/products/{id}/attributes") public Map<String,Object> attributes(@PathVariable Long id){return control.productAttributes(id);}
+    @PutMapping("/products/{id}/attributes") public Map<String,Object> attributes(@PathVariable Long id,@Valid @RequestBody ProductAttributesInput input){return control.saveAttributes(id,input);}
     @DeleteMapping("/products/{id}") public Map<String,String> archive(@PathVariable Long id){control.archiveProduct(id);return Map.of("message","Товар архивирован, история сохранена");}
     @GetMapping("/suppliers") public List<Supplier> suppliers(){return suppliers.findAll();}
     @GetMapping("/suppliers/{id}") public Supplier supplier(@PathVariable Long id){return suppliers.findById(id).orElseThrow(()->new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Поставщик не найден"));}

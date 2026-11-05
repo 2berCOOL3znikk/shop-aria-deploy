@@ -208,8 +208,13 @@
     {
       "file": "support.html",
       "keys": 57
+    },
+    {
+      "file": "js/product-attributes.js",
+      "keys": 11,
+      "stage": "owner attribute editor"
     }
   ],
-  "keyCount": 1786,
+  "keyCount": 1799,
   "maintenance": "Explicit keys; after the one-time migration, edit current source and refresh the dictionary only."
 }
