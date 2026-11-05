@@ -1,0 +1,29 @@
+{
+  "environment": "fresh isolated PostgreSQL; Flyway V1-V31; Hibernate validate",
+  "tests": 22,
+  "failures": 0,
+  "errors": 0,
+  "suites": [
+    {
+      "name": "com.aria.integration.WooCommerceReaderTest",
+      "tests": "4",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.aria.StoreLifecycleIntegrationTest",
+      "tests": "7",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.aria.StorePriceIntegrationTest",
+      "tests": "11",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ]
+}

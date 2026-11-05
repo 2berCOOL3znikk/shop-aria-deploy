@@ -1,0 +1,39 @@
+{
+  "installedWooCommerceE2E": true,
+  "environment": "isolated local WordPress + WooCommerce + MariaDB + separate ARIA PostgreSQL",
+  "productionChanged": false,
+  "checks": [
+    "Browser wizard + actual read-only WooCommerce API: simple product, two variations, KZT, known stocks, actual completed order; stable IDs/no duplicates on repeat imports; no customer contacts imported",
+    "A real read-only WooCommerce key rejects an explicitly approved price write; no false success, price unchanged",
+    "Actual WooCommerce product and order webhooks delivered and verified; duplicate delivery via installed WC_Webhook does not create another receipt",
+    "Owner approved actual price update; GET from WooCommerce confirms price and unchanged stock; repeated request returns the same operation; dropped real PUT response reconciled without resending",
+    "Actual WordPress outage retains last catalogue, persists retry and recovers on explicit resync without duplicates",
+    "Connected pricing forms and actual API at 1440/768/390px without JavaScript errors"
+  ],
+  "browserErrors": [],
+  "initialPrice": "1350.00",
+  "initialStock": 18,
+  "wooVersion": "installed wc/v3 confirmed",
+  "storeId": 3,
+  "webhooks": {
+    "products": 3,
+    "orders": 4
+  },
+  "priceChange": {
+    "id": 5,
+    "source": "MANUAL",
+    "before": "1350.00",
+    "after": "1215.00",
+    "currency": "KZT",
+    "stockBefore": 18,
+    "stockAfter": 18
+  },
+  "uncertainWrite": {
+    "id": 6,
+    "status": "APPLIED",
+    "actualPutCount": 1,
+    "neverResent": true
+  },
+  "passed": true,
+  "completedAt": "2026-11-05T06:57:18.805Z"
+}
