@@ -16,10 +16,13 @@ import static org.assertj.core.api.Assertions.*;
 @Transactional
 class StoreLifecycleIntegrationTest {
  @Autowired ConnectedStoresService service;@Autowired ConnectedStoreRepository stores;@Autowired StoreSyncQueue queue;@Autowired StoreWebhookService webhooks;@Autowired ExternalIntegrationRepository integrations;@Autowired EntityManager em;
+ @Autowired org.springframework.transaction.PlatformTransactionManager transactionManager;
  @SuppressWarnings("unchecked") private Map<String,Object> map(Object value){return (Map<String,Object>)value;}
  private long id(Map<String,Object> s){return ((Number)s.get("id")).longValue();}private long version(Map<String,Object> s){return ((Number)s.get("version")).longValue();}
  private Map<String,Object> create(boolean test){return map(service.create("Магазин для проверки архива","WOOCOMMERCE","https://lifecycle.example.invalid",test));}
- private StoreSnapshot snapshot(long id){var s=new StoreSnapshot();s.storeId=id;s.externalId="1";s.name="Сохранённый товар";s.price=BigDecimal.TEN;s.currency="KZT";em.persist(s);em.flush();return s;}
+ private StoreSnapshot snapshot(long id){return new org.springframework.transaction.support.TransactionTemplate(transactionManager).execute(tx->{var s=new StoreSnapshot();s.storeId=id;s.externalId="1";s.name="Сохранённый товар";s.price=BigDecimal.TEN;s.currency="KZT";em.persist(s);em.flush();return s;});}
+ // Import deliberately suspends database work around HTTP; test committed lifecycle changes as HTTP callers do.
+ @org.springframework.transaction.annotation.Transactional(propagation=org.springframework.transaction.annotation.Propagation.NOT_SUPPORTED)
  @Test void archiveCancelsClaimAndWebhookButRetainsEncryptedAccessAndCatalogue(){
   var s=create(true);long id=id(s);s=map(service.credentials(id,version(s),"ck_"+"a".repeat(32),"cs_"+"b".repeat(32)));webhooks.enable(id,version(s));var current=stores.findById(id).orElseThrow();snapshot(id);queue.enqueue(id,current.version,"CHECK");var claim=queue.claim();assertThat(claim).isNotNull();assertThat(claim.storeId()).isEqualTo(id);
   var archived=map(service.archive(id,current.version,"Архивирование учебного подключения"));assertThat(archived).containsEntry("archived",true).containsEntry("status","DISCONNECTED");assertThat(archived.get("archivedAt")).isNotNull();assertThat(queue.list(id).getFirst().state).isEqualTo("CANCELLED");assertThat(map(webhooks.settings(id))).containsEntry("enabled",false);assertThat(integrations.findByStoreId(id).orElseThrow().encryptedCredentials).isNotBlank();assertThat(((List<?>)service.catalog(id))).hasSize(1);

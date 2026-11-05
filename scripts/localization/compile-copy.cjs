@@ -8,7 +8,7 @@ const translations=JSON.parse(fs.readFileSync(path.join(__dirname,'translations.
 const systemTranslations=JSON.parse(fs.readFileSync(path.join(__dirname,'system.en.json'),'utf8'));
 const refresh=process.argv.includes('--refresh-dictionary'),reapply=process.argv.includes('--reapply-from-snapshot'),dictionary={},manifest=[],unresolved=new Set(),pendingWrites=new Map();
 const ru=/[А-Яа-яЁё]/,protectedValues=new Set(['продукт','продукты','Продукты питания','Дом/текстиль','дней','ru','en']);
-const staticAttrs=/\b(aria-label|placeholder|title|alt|data-query)=(['"])(.*?)\2/gs;
+const staticAttrs=/\b(aria-label|placeholder|title|alt|data-query|data-label)=(['"])(.*?)\2/gs;
 function english(text){
  if(!ru.test(text))return text;
  if(Object.hasOwn(translations,text))return translations[text];

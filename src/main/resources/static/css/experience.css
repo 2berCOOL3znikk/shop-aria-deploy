@@ -15,3 +15,16 @@
 
 .cc-hero.cc-hero-compact{margin:0 0 20px;align-items:center}.ai-center .cc-hero.cc-hero-compact h2{font-size:22px;line-height:1.35;margin:0 0 8px;letter-spacing:-.025em}.cc-hero.cc-hero-compact p{font-size:12px;margin:0;max-width:500px}.cc-hero.cc-hero-compact .cc-hero-actions{justify-content:flex-end}@media(max-width:700px){.cc-hero.cc-hero-compact{gap:16px}.ai-center .cc-hero.cc-hero-compact h2{font-size:20px}.cc-hero.cc-hero-compact .cc-hero-actions{justify-content:flex-start}}
  .connected-ai-panel{margin:20px 0;padding:20px}.connected-ai-list{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,240px),1fr));gap:14px;margin-top:16px}.connected-ai-item{border:1px solid var(--ws-border,#dedede);border-radius:12px;padding:16px;min-width:0}.connected-ai-item h4{margin:12px 0 8px;font-size:15px;overflow-wrap:anywhere}.connected-ai-item .control-actions{margin-top:12px}.connected-ai-item .cc-line{font-size:12px;gap:8px;flex-wrap:wrap}
+/* Keep the outcome and its explanation visible in a narrow store-history dialog. */
+@media(max-width:700px){
+ .store-sync-history.control-table-wrap{overflow:visible;border:0}
+ .store-sync-history.control-table-wrap::before{display:none}
+ .store-sync-history .control-table{display:block;min-width:0;width:100%}
+ .store-sync-history thead{position:absolute;width:1px;height:1px;overflow:hidden;clip-path:inset(50%)}
+ .store-sync-history tbody{display:grid;gap:12px}
+ .store-sync-history tr{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:0 14px;border:1px solid var(--border-color);border-radius:8px;padding:8px 12px;background:var(--bg-surface)}
+ .store-sync-history .control-table td{display:block;border:0;padding:8px 0;min-width:0;white-space:normal;overflow-wrap:anywhere}
+ .store-sync-history td::before{content:attr(data-label);display:block;color:var(--text-secondary);font-size:10px;font-weight:500;margin-bottom:5px}
+ .store-sync-history td:nth-child(3),.store-sync-history td:nth-child(4){grid-column:1/-1;border-top:1px solid var(--border-color)}
+ .store-sync-history td small{line-height:1.6;margin-top:5px}
+}

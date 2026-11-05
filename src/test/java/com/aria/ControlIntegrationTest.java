@@ -19,6 +19,7 @@ import static org.assertj.core.api.Assertions.*;
 import static org.mockito.Mockito.*;
 import org.mockito.ArgumentMatchers;
 import org.springframework.test.util.ReflectionTestUtils;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 @SpringBootTest(webEnvironment=SpringBootTest.WebEnvironment.RANDOM_PORT,properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:controltest;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
 @org.springframework.test.context.TestPropertySource(properties={"aria.manager.enabled=false","aria.manager.schedule-enabled=false","aria.store-sync.worker-enabled=false"})
@@ -725,6 +726,46 @@ class ControlIntegrationTest {
             var second=webhookStore();ids.add(second.id());var other=call("POST",base+"/stores/"+second.id()+"/webhooks/enable",admin,Map.of("version",second.body.get("version")));assertThat(webhook((String)other.body.get("productsPath"),body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(401);
             assertThat(webhook(nextPath,body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(204);assertThat(call("POST",prefix+"/webhooks/disable",admin,Map.of("version",rotated.body.get("version"))).status).isEqualTo(200);assertThat(webhook(nextPath,body,webhookSignature(nextSecret,body),"application/json").status).isEqualTo(410);assertThat(webhookService.dispatch()).isTrue();assertThat(webhookReceipts.findTop20ByStoreIdOrderByIdDesc(id).getFirst().status).isEqualTo("CANCELLED");
         }finally{for(var id:ids)cleanWebhook(id);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
+    }
+    @Autowired StoreSnapshotRepository importedSnapshots;
+    @Test void slowCatalogReadCanBeDisconnectedBeforeTheProviderReturns()throws Exception {guardSlowImport("disconnect");}
+    @Test void slowCatalogReadCannotRestoreRotatedCredentials()throws Exception {guardSlowImport("credentials");}
+    @Test void slowCatalogReadCannotOverwriteNewerConfirmedPrice()throws Exception {guardSlowImport("price");}
+    @Test void slowQueuedCatalogReadDiscardsReplacedGenerationAndRetries()throws Exception {guardSlowImport("generation");}
+    private void guardSlowImport(String change)throws Exception {
+        Object oldHttp=ReflectionTestUtils.getField(wooReader,"http"),oldHosts=ReflectionTestUtils.getField(wooReader,"hosts"),oldKey=ReflectionTestUtils.getField(integrationVault,"key");
+        var entered=new CountDownLatch(1);var release=new CountDownLatch(1);var insideTransaction=new java.util.concurrent.atomic.AtomicBoolean();CompletableFuture<Reply> syncing=null;CompletableFuture<Boolean> working=null;Long id=null;
+        try{
+            var remote=mock(HttpClient.class);ReflectionTestUtils.setField(wooReader,"http",remote);ReflectionTestUtils.setField(wooReader,"hosts",Set.of("8.8.8.8"));ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);
+            when(remote.send(ArgumentMatchers.any(HttpRequest.class),ArgumentMatchers.<HttpResponse.BodyHandler<byte[]>>any())).thenAnswer(invocation->{
+                HttpRequest request=invocation.getArgument(0);insideTransaction.set(insideTransaction.get()||TransactionSynchronizationManager.isActualTransactionActive());boolean currency=request.uri().getPath().endsWith("/data/currencies/current");
+                if(!currency){entered.countDown();if(!release.await(12,TimeUnit.SECONDS))throw new IllegalStateException("Test provider wait expired");}
+                HttpResponse<byte[]> response=mock(HttpResponse.class);when(response.statusCode()).thenReturn(200);when(response.headers()).thenReturn(HttpHeaders.of(Map.of("X-WP-TotalPages",List.of("1")),(a,b)->true));when(response.body()).thenReturn((currency?"{\"code\":\"KZT\"}":"[{\"id\":1,\"name\":\"Slow educational import\",\"type\":\"simple\",\"price\":\"1000.00\"}]").getBytes(java.nio.charset.StandardCharsets.UTF_8));return response;
+            });
+            var made=call("POST",base+"/stores",admin,Map.of("name","Slow response concurrency test","platform","WOOCOMMERCE","url","https://8.8.8.8"));id=made.id();String prefix=base+"/stores/"+id;var configured=call("PUT",prefix+"/credentials",admin,Map.of("version",made.body.get("version"),"key","ck_"+"a".repeat(40),"secret","cs_"+"b".repeat(40)));String owner=admin;Object version=configured.body.get("version");
+            if(change.equals("price")){var row=new StoreSnapshot();row.storeId=id;row.externalId="1";row.name="Existing confirmed product";row.sku="CONFIRMED";row.currency="KZT";row.price=new java.math.BigDecimal("1000.00");row.availableQuantity=18;row.observedAt=java.time.LocalDateTime.now();importedSnapshots.saveAndFlush(row);}
+            if(change.equals("generation")){
+                storeSyncTasks.deleteAll();assertThat(call("POST",prefix+"/tasks",owner,Map.of("version",version,"operation","SYNC")).status).isEqualTo(200);
+                working=CompletableFuture.supplyAsync(storeSyncWorker::processOne);
+            }else syncing=CompletableFuture.supplyAsync(()->{try{return call("POST",prefix+"/sync",owner,Map.of("version",version));}catch(Exception e){throw new CompletionException(e);}});
+            assertThat(entered.await(5,TimeUnit.SECONDS)).isTrue();assertThat(call("POST",prefix+"/sync",owner,Map.of("version",version)).status).as("Overlapping reads must not issue another provider request").isEqualTo(409);
+            if(change.equals("price")){
+                Long storeId=id;CompletableFuture.runAsync(()->new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{connectedStores.lockById(storeId).orElseThrow();var row=importedSnapshots.findByStoreIdAndExternalId(storeId,"1").orElseThrow();row.price=new java.math.BigDecimal("900.00");row.observedAt=java.time.LocalDateTime.now();})).get(2,TimeUnit.SECONDS);
+            }else{
+                String route=change.equals("generation")?"tasks":change;String method=change.equals("credentials")?"PUT":"POST";Map<String,Object> body=new LinkedHashMap<>();body.put("version",version);
+                if(change.equals("credentials")){body.put("key","ck_"+"c".repeat(40));body.put("secret","cs_"+"d".repeat(40));}if(change.equals("generation"))body.put("operation","SYNC");
+                var changed=CompletableFuture.supplyAsync(()->{try{return call(method,prefix+"/"+route,owner,body);}catch(Exception e){throw new CompletionException(e);}}).get(2,TimeUnit.SECONDS);assertThat(changed.status).as(changed.raw).isEqualTo(200);
+            }
+            release.countDown();if(syncing!=null)assertThat(syncing.get(8,TimeUnit.SECONDS).status).isEqualTo(409);if(working!=null)assertThat(working.get(8,TimeUnit.SECONDS)).isTrue();assertThat(insideTransaction.get()).as("External HTTP must not hold a database transaction").isFalse();
+            var saved=importedSnapshots.findByStoreIdOrderByNameAsc(id);if(change.equals("price")){assertThat(saved).hasSize(1);assertThat(saved.getFirst().price).isEqualByComparingTo("900.00");assertThat(saved.getFirst().name).isEqualTo("Existing confirmed product");}else assertThat(saved).isEmpty();
+            var history=call("GET",prefix+"/history",owner,null);assertThat(history.status).as(history.raw).isEqualTo(200);assertThat(history.raw).contains("STALE");
+            if(change.equals("disconnect"))assertThat(connectedStores.findById(id).orElseThrow().status).isEqualTo("DISCONNECTED");
+            if(change.equals("credentials")){assertThat(connectedStores.findById(id).orElseThrow().status).isEqualTo("ACTION_REQUIRED");assertThat(call("GET",base+"/stores",owner,null).raw).doesNotContain("ck_"+"a".repeat(40),"ck_"+"c".repeat(40));}
+            if(change.equals("generation")){assertThat(storeSyncTasks.findByStoreIdOrderByIdAsc(id).getFirst().state).isEqualTo("QUEUED");assertThat(storeSyncWorker.processOne()).isTrue();assertThat(storeSyncTasks.findByStoreIdOrderByIdAsc(id).getFirst().state).isEqualTo("DONE");assertThat(importedSnapshots.countByStoreId(id)).isEqualTo(1);}
+        }finally{
+            release.countDown();try{if(syncing!=null)syncing.get(15,TimeUnit.SECONDS);if(working!=null)working.get(15,TimeUnit.SECONDS);if(id!=null){var row=connectedStores.findById(id).orElseThrow();if(!row.archived)call("POST",base+"/stores/"+id+"/archive",admin,Map.of("version",row.version,"reason","Isolated concurrency test cleanup"));}}
+            finally{ReflectionTestUtils.setField(wooReader,"http",oldHttp);ReflectionTestUtils.setField(wooReader,"hosts",oldHosts);ReflectionTestUtils.setField(integrationVault,"key",oldKey);}
+        }
     }
     @Test void webhookAdmissionDoesNotWaitForLongStoreImportLock()throws Exception {
         Object oldKey=ReflectionTestUtils.getField(integrationVault,"key");ReflectionTestUtils.setField(integrationVault,"key",new byte[32]);Long id=null;var release=new CountDownLatch(1);CompletableFuture<Void> held=null;

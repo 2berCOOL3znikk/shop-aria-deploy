@@ -8,6 +8,7 @@ for(const [key,entry] of Object.entries(dictionary)){
  assert.equal(entry.length,2,key);assert.ok(entry.every(v=>typeof v==='string'),key);
  assert.equal(key.split('.')[1],crypto.createHash('sha256').update(entry[0]).digest('hex').slice(0,14),'Source key changed: '+key);
  assert.deepEqual(slots(entry[1]),slots(entry[0]),'Template parameters changed: '+key);
+ for(const label of entry[1].matchAll(/\bdata-label=["']([^"']*)["']/g))assert.ok(!/[А-Яа-яЁё]/.test(label[1]),'Untranslated mobile label: '+key);
 }
 let scripts=0,references=0;
 for(const relative of [...fs.readdirSync(path.join(base,'js')).filter(f=>f.endsWith('.js')).map(f=>'js/'+f),'sw.js',...fs.readdirSync(base).filter(f=>f.endsWith('.html'))]){

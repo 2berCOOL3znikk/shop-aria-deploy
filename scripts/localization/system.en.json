@@ -55,5 +55,12 @@
   "Состав по источнику": "Ingredients listed by source",
   "Томаты, %": "Tomatoes, %",
   "Упаковка": "Pack size",
-  "Энергия, ккал на 100 г": "Energy, kcal per 100 g"
+  "Энергия, ккал на 100 г": "Energy, kcal per 100 g",
+  "Обновление уже выполняется. Дождитесь завершения чтения магазина.": "An update is already running. Wait for the store read to finish.",
+  "Чтение завершено после изменения подключения или данных. Ответ не применён.": "The connection or data changed while the store was being read. The response was discarded.",
+  "Поздний ответ не применён; актуальные данные и разрешения сохранены": "Late response discarded; current data and permissions were preserved.",
+  "Подключение или данные изменились во время чтения. Поздний ответ не применён.": "The connection or data changed during the read. The late response was discarded.",
+  "Дождитесь завершения текущего чтения магазина": "Wait for the current store read to finish.",
+  "Не удалось прочитать магазин. Предыдущие данные сохранены": "The store could not be read. Previous data was preserved.",
+  "Не удалось проверить версию каталога": "The catalogue revision could not be checked."
 }

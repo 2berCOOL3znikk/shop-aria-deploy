@@ -1564,7 +1564,7 @@
   "Продукты": "Products",
   "Проект": "Draft",
   "Промо": "Promo",
-  "Пропущено: §5§": "Missing: §5§",
+  "Пропущено: §5§": "Skipped: §5§",
   "Просканировано товаров": "Products scanned",
   "Просканировано товаров:": "Scanned goods:",
   "Просматривать предложения могут все. Бронировать их могут только организации после проверки администратором.": "Anybody can look at the proposals, only organizations can book them after being checked by the administrator.",
@@ -2199,5 +2199,9 @@
   "Изменены характеристики товара": "Product attributes updated",
   "Изменение упаковки может снять справочные сведения и справочное фото. Ваше собственное загруженное изображение сохранится.": "Changing the pack size may remove reference details and their photo. Your own uploaded image is kept.",
   "Не удалось загрузить раздел. Проверьте связь и попробуйте снова.": "Could not load this section. Check your connection and try again.",
-  "Повторить загрузку": "Retry loading"
+  "Повторить загрузку": "Retry loading",
+  "Ответ не применён": "Response discarded",
+  "Читаем магазин…": "Reading the store…",
+  "<div class=\"control-table-wrap store-sync-history\"><table class=\"control-table\"><thead><tr><th>Когда</th><th>Операция</th><th>Результат</th><th>Записей</th></tr></thead><tbody>§0§</tbody></table></div>": "<div class=\"control-table-wrap store-sync-history\"><table class=\"control-table\"><thead><tr><th>When</th><th>Operation</th><th>Result</th><th>Records</th></tr></thead><tbody>§0§</tbody></table></div>",
+  "<tr><td data-label=\"Когда\">§0§</td><td data-label=\"Операция\">§1§</td><td data-label=\"Результат\"><strong>§2§</strong><small>§3§</small></td><td data-label=\"Записей\">§4§<small>Пропущено: §5§</small></td></tr>": "<tr><td data-label=\"When\">§0§</td><td data-label=\"Operation\">§1§</td><td data-label=\"Result\"><strong>§2§</strong><small>§3§</small></td><td data-label=\"Records\">§4§<small>Skipped: §5§</small></td></tr>"
 }

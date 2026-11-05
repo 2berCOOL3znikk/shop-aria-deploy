@@ -1,0 +1,47 @@
+{
+  "environment": "isolated woo-e2e + installed local WordPress/WooCommerce",
+  "realWooCommerceReads": true,
+  "productionChanged": false,
+  "externalWrites": false,
+  "aiRequested": false,
+  "consentsChanged": false,
+  "checks": [
+    "Real UI catalog refresh + second import retain product and variation IDs; current prices/currency/stock match actual WooCommerce GETs",
+    "Two real order imports retain order IDs and do not copy customer contacts",
+    "Existing AI decisions, permissions, budgets and external prices were preserved",
+    "Discarded response is explained in both languages; mobile history shows the outcome without horizontal scrolling; generic English table hints are translated; saved real AI remains visible in the connected store"
+  ],
+  "errors": [],
+  "catalog": [
+    {
+      "externalId": "10",
+      "id": 6,
+      "price": "1215.00",
+      "currency": "KZT",
+      "availableQuantity": 18
+    },
+    {
+      "externalId": "12",
+      "id": 5,
+      "price": "2888.00",
+      "currency": "KZT",
+      "availableQuantity": 8
+    },
+    {
+      "externalId": "13",
+      "id": 4,
+      "price": "3500.00",
+      "currency": "KZT",
+      "availableQuantity": 4
+    }
+  ],
+  "persistedAi": {
+    "id": 6,
+    "source": "AI",
+    "currentPrice": 1215,
+    "suggestedPrice": 1215
+  },
+  "historyStatusUi": "Controlled response, RU/EN, 360/390/768/1440px; actual server races verified separately in ControlIntegrationTest",
+  "passed": true,
+  "completedAt": "2026-11-05T13:48:45.266Z"
+}

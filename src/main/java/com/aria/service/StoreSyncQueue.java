@@ -25,9 +25,12 @@ public class StoreSyncQueue {
  }
  public List<StoreSyncTask> list(Long id){return tasks.findByStoreIdOrderByIdAsc(id);}
  public void requireActive(Claim claim){
-  var store=stores.lockById(claim.storeId()).orElseThrow();if(store.archived)throw new IllegalStateException("Подключение в архиве");var task=tasks.lockById(claim.id()).orElseThrow();
-  if(!task.state.equals("RUNNING")||!Objects.equals(task.lease,claim.lease())||task.generation!=claim.generation()||task.leaseUntil==null||!task.leaseUntil.isAfter(LocalDateTime.now()))
-   throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Запрос обновления отменён или заменён");
+  var store=stores.lockById(claim.storeId()).orElseThrow();if(store.archived)throw new IllegalStateException("Подключение в архиве");
+  if(!isActive(claim))throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.CONFLICT,"Запрос обновления отменён или заменён");
+ }
+ public boolean isActive(Claim claim){
+  var store=stores.lockById(claim.storeId()).orElse(null);if(store==null||store.archived||store.status.equals("DISCONNECTED"))return false;var task=tasks.lockById(claim.id()).orElse(null);
+  return task!=null&&Objects.equals(task.storeId,claim.storeId())&&Objects.equals(task.operation,claim.operation())&&task.state.equals("RUNNING")&&Objects.equals(task.lease,claim.lease())&&task.generation==claim.generation()&&task.leaseUntil!=null&&task.leaseUntil.isAfter(LocalDateTime.now());
  }
  private boolean due(StoreSyncTask t,LocalDateTime now){return (Set.of("QUEUED","RETRY").contains(t.state)&&!t.dueAt.isAfter(now))||(t.state.equals("RUNNING")&&(t.leaseUntil==null||!t.leaseUntil.isAfter(now)));}
  public Claim claim(){

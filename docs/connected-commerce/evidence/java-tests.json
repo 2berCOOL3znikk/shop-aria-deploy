@@ -1,14 +1,13 @@
 {
-  "totals": {
-    "tests": 245,
-    "failures": 0,
-    "errors": 0,
-    "skipped": 0
-  },
-  "scope": "Full fresh PostgreSQL V1-V32 run after all attribute and reference-photo guards. No external AI calls in automated tests.",
-  "completedAt": "2026-11-05T12:01:47.7117102Z",
-  "exitCode": 0,
-  "classes": [
+  "passed": true,
+  "environment": "fresh isolated PostgreSQL; Flyway V1-V32 and schema validation enabled",
+  "startedAt": "2026-11-05T13:34:42.3243993Z",
+  "completedAt": "2026-11-05T13:36:25.9659103Z",
+  "tests": 249,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
     {
       "name": "com.aria.config.DatabaseUrlConfigurationTest",
       "tests": "3",
@@ -53,7 +52,7 @@
     },
     {
       "name": "com.aria.ControlIntegrationTest",
-      "tests": "72",
+      "tests": "76",
       "failures": "0",
       "errors": "0",
       "skipped": "0"

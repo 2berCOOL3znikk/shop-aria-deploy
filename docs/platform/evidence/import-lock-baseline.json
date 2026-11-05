@@ -1,0 +1,8 @@
+{
+  "baselineExpectedFailure": true,
+  "test": "slowCatalogReadCanBeDisconnectedBeforeTheProviderReturns",
+  "providerResponseHeldByTest": true,
+  "disconnectTimedOutBeforeProviderReleased": true,
+  "environment": "fresh isolated PostgreSQL + controlled HTTP response, not external WooCommerce E2E",
+  "productionChanged": false
+}

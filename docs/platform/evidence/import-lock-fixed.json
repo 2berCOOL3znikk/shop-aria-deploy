@@ -1,0 +1,31 @@
+{
+  "passed": true,
+  "environment": "fresh isolated PostgreSQL + controlled provider response, not external WooCommerce E2E",
+  "cases": [
+    {
+      "name": "slowCatalogReadCanBeDisconnectedBeforeTheProviderReturns",
+      "seconds": 0.903,
+      "passed": true
+    },
+    {
+      "name": "slowQueuedCatalogReadDiscardsReplacedGenerationAndRetries",
+      "seconds": 0.678,
+      "passed": true
+    },
+    {
+      "name": "slowCatalogReadCannotOverwriteNewerConfirmedPrice",
+      "seconds": 0.602,
+      "passed": true
+    },
+    {
+      "name": "slowCatalogReadCannotRestoreRotatedCredentials",
+      "seconds": 0.643,
+      "passed": true
+    }
+  ],
+  "allHttpOutsideDatabaseTransaction": true,
+  "duplicateReadRejected": true,
+  "lateResponsesDiscarded": true,
+  "productionChanged": false,
+  "completedAt": "2026-11-05T13:36:25.9659103Z"
+}
