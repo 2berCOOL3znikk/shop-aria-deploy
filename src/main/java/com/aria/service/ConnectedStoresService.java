@@ -103,7 +103,7 @@ public class ConnectedStoresService {
  }
  private List<String> removalBlockers(ConnectedStore s){
   var blockers=new ArrayList<String>();if(!s.testConnection||!s.platform.equals("WOOCOMMERCE"))blockers.add("Удалять можно только явно отмеченные тестовые WooCommerce-подключения");if(!s.archived)blockers.add("Сначала перенесите подключение в архив");
-  var relations=Map.of("StoreSnapshot","В каталоге есть сохранённые товары","StoreOrderSnapshot","Есть сохранённые заказы","StoreSyncRun","Есть история обновлений","StoreSyncTask","Есть сохранённые задания обновления","StoreWebhookReceipt","Есть история уведомлений","StorePricingPolicy","Есть сохранённые разрешения цен","StoreProductPolicy","Есть подтверждённые данные товаров","StorePriceChange","Есть журнал внешних изменений цен");
+  var relations=Map.of("StoreSnapshot","В каталоге есть сохранённые товары","StoreOrderSnapshot","Есть сохранённые заказы","StoreSyncRun","Есть история обновлений","StoreSyncTask","Есть сохранённые задания обновления","StoreWebhookReceipt","Есть история уведомлений","StorePricingPolicy","Есть сохранённые разрешения цен","StoreProductPolicy","Есть подтверждённые данные товаров","StorePriceChange","Есть журнал внешних изменений цен","StorePricingDecision","Есть история анализа подключённого каталога");
   for(var relation:relations.entrySet())if(em.createQuery("select count(r) from "+relation.getKey()+" r where r.storeId=:id",Long.class).setParameter("id",s.id).getSingleResult()>0)blockers.add(relation.getValue());
   integrations.findByStoreId(s.id).ifPresent(i->{if(i.encryptedCredentials!=null||i.credentialReference!=null)blockers.add("Сначала отзовите локальный доступ");});return blockers;
  }

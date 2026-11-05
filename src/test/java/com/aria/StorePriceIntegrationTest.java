@@ -31,7 +31,7 @@ class StorePriceIntegrationTest {
   when(woo.product(anyString(),nullable(String.class),eq("10"),anyString(),anyString())).thenAnswer(call->live());
   when(woo.setRegularPrice(anyString(),nullable(String.class),eq("10"),any(),anyString(),anyString())).thenAnswer(call->{remote.set(((BigDecimal)call.getArgument(3)).setScale(2).toPlainString());return live();});
  }
- private Map<String,Object> live(){var row=new LinkedHashMap<String,Object>();row.put("id",10);row.put("price",remote.get());row.put("regular_price",remote.get());row.put("sale_price","");row.put("date_on_sale_from_gmt",null);row.put("date_on_sale_to_gmt",null);row.put("stock_quantity",18);return row;}
+ private Map<String,Object> live(){var row=new LinkedHashMap<String,Object>();row.put("id",10);row.put("price",remote.get());row.put("regular_price",remote.get());row.put("sale_price","");row.put("date_on_sale_from_gmt",null);row.put("date_on_sale_to_gmt",null);row.put("manage_stock",true);row.put("stock_quantity",18);return row;}
  private void facts(){prices.confirmProduct(store.id,"10",0,money("750"),money("1000"),"Текстиль",true,"Подтверждено владельцем для теста");}
  private void permissions(){var p=prices.settings(store.id);prices.configure(store.id,store.version,((Number)p.get("version")).longValue(),"RECOMMEND",false,false,true,false,20,1,List.of());}
  private StorePriceChange change(String key,String target){return prices.request(store.id,store.version,"10",item.price,money(target),key,"Подтверждённое учебное изменение");}

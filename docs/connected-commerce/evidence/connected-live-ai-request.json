@@ -1,0 +1,24 @@
+{
+  "realProviderRequired": true,
+  "environment": "isolated ARIA company + installed local WooCommerce",
+  "productionChanged": false,
+  "ownerApprovedIsolatedCompany": true,
+  "errors": [],
+  "decisionId": 6,
+  "currentPrice": 1215,
+  "beforeStock": 18,
+  "actualAiEndpointRequest": true,
+  "source": "AI",
+  "model": "nvidia/nemotron-3.5-super-vl:free",
+  "strategy": "KEEP",
+  "suggestedPrice": 1215,
+  "aiCompletedAt": "2026-11-05T12:45:46.409876",
+  "requiresConfirmation": true,
+  "remainingMissingData": [
+    {
+      "externalId": "13",
+      "status": "NEEDS_DATA"
+    }
+  ],
+  "passed": true
+}

@@ -71,7 +71,7 @@ try{
   $c=$companies[$i];$other=$companies[1-$i]
   $products=@(Api $c '/api/admin/control/products' 'GET' $null $c.token)
   if($products.Count -ne 1 -or $products[0].name -ne $c.key){throw 'Product data crossed boundary'}
-  foreach($path in '/api/admin/control/stores','/api/admin/control/stores/1/removal','/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings','/api/admin/control/demo-catalogue','/api/products/store-info'){
+  foreach($path in '/api/admin/control/stores','/api/admin/control/stores/1/removal','/api/admin/control/stores/1/pricing/settings','/api/admin/control/stores/1/pricing/facts','/api/admin/control/stores/1/pricing/changes','/api/admin/control/stores/1/pricing/decisions','/api/admin/control/products','/api/admin/control/manager','/api/admin/control/organization','/api/admin/control/workspace/overview','/api/admin/control/products/ai-settings','/api/admin/control/demo-catalogue','/api/products/store-info'){
    $denied=$false
    try{$null=Api $c $path 'GET' $null $other.token}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Foreign organization token was accepted'}
@@ -88,9 +88,9 @@ try{
  $aSettings=Api $companies[0] '/api/admin/control/products/ai-settings' 'GET' $null $companies[0].token
  $bSettings=Api $companies[1] '/api/admin/control/products/ai-settings' 'GET' $null $companies[1].token
  if($aSettings.textConsentEnabled -or $bSettings.textConsentEnabled){throw 'Fresh test company unexpectedly has consent'}
- $null=Api $companies[0] '/api/admin/control/products/ai-settings' 'PUT' @{revision=$aSettings.revision;textConsentEnabled=$true;dailyBudget=5} $companies[0].token
+ # Permissions remain disabled; this isolation run never enables external AI.
  $bAfter=Api $companies[1] '/api/admin/control/products/ai-settings' 'GET' $null $companies[1].token
- if($bAfter.textConsentEnabled -or $bAfter.revision -ne $bSettings.revision){throw 'AI settings crossed company boundary'}
+ if($bAfter.textConsentEnabled -or $bAfter.revision -ne $bSettings.revision){throw 'AI permissions unexpectedly changed'}
  # Even the demo flag on a non-demo binding must not open an educational import.
  Sql $companies[1].database "UPDATE saas_organization SET demonstration=true WHERE id=1"
  foreach($c in $companies){
@@ -100,9 +100,9 @@ try{
   try{$null=Api $c '/api/admin/control/demo-catalogue' 'POST' @{confirmed=$true} $c.token}catch{if([int]$_.Exception.Response.StatusCode -eq 409){$denied=$true}else{throw}}
   if(!$denied){throw 'Demo importer changed a company catalogue'}
   if(@(Api $c '/api/admin/control/products' 'GET' $null $c.token).Count -ne 1){throw 'Demo products leaked into a company catalogue'}
-  Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='29' AND success=true) THEN RAISE EXCEPTION 'V29 missing'; END IF; END `$`$;"
+  Sql $c.database "DO `$`$ BEGIN IF NOT EXISTS(SELECT 1 FROM flyway_schema_history WHERE version='32' AND success=true) THEN RAISE EXCEPTION 'V32 missing'; END IF; END `$`$;"
  }
- $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V29 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; text consent in A does not change B','Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled')
+ $report.checks=@('Two real PostgreSQL databases, distinct restricted logins, V1-V32 and Hibernate validate','Two real Spring Boot processes, same owner email and signing key','Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs','Database login cannot connect to the other company database; no external AI requests','New workspace/AI settings reject foreign signed tokens; permissions remain disabled in both test companies','Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled')
  $report.passed=$true
  Write-Output 'PASS: two-company database/process/API isolation'
 }finally{

@@ -72,8 +72,13 @@ public class WorkspaceOverviewService {
         actions.put("purchaseDrafts", during("select count(p) from PurchaseRequest p where p.managerCreated=true and p.createdAt>=:from and p.createdAt<:until", from, until));
         actions.put("socialDrafts", during("select count(e) from ManagerExecution e where e.status='DONE' and e.socialDraft=true and e.finishedAt>=:from and e.finishedAt<:until", from, until));
         actions.put("problemsFound", during("select count(a) from ManagerAction a where a.firstSeen>=:from and a.firstSeen<:until", from, until));
+        long connectedAnalyzed=em.createQuery("select distinct d.storeId,d.externalId from StorePricingDecision d where d.createdAt>=:from and d.createdAt<:until or d.aiCompletedAt>=:from and d.aiCompletedAt<:until",Object[].class).setParameter("from",from).setParameter("until",until).getResultList().size();
+        actions.put("productsAnalyzed",((Number)actions.get("productsAnalyzed")).longValue()+connectedAnalyzed);
+        actions.put("aiDecisions",((Number)actions.get("aiDecisions")).longValue()+during("select count(d) from StorePricingDecision d where d.source='AI' and d.aiCompletedAt>=:from and d.aiCompletedAt<:until",from,until));
+        actions.put("engineDecisions",((Number)actions.get("engineDecisions")).longValue()+during("select count(d) from StorePricingDecision d where d.source='ENGINE' and d.createdAt>=:from and d.createdAt<:until",from,until));
+        actions.put("priceApplied",((Number)actions.get("priceApplied")).longValue()+during("select count(c) from StorePriceChange c where c.automatic=true and c.status='APPLIED' and c.completedAt>=:from and c.completedAt<:until",from,until));
         result.put("today", actions);
-        result.put("risks", Map.of("openSignals", count("ManagerAction a", "a.status='OPEN'"),
+        result.put("risks", Map.of("openSignals", count("ManagerAction a", "a.status='OPEN'")+ConnectedPricingService.attentionCount(em),
                 "pendingDecisions", em.createQuery("select count(d) from PricingDecision d where d.status='PENDING' and d.reviewAt>:now", Long.class).setParameter("now", now).getSingleResult(),
                 "failedTasks", count("ManagerTask t", "t.status='FAILED'")));
 

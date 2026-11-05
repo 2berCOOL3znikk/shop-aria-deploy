@@ -26,6 +26,7 @@ public class SmartPricingService {
     private final CompetitorPriceService competitors;
     private final CharityEligibilityService charities;
     @org.springframework.beans.factory.annotation.Autowired private AiManagerStateRepository managerStates;
+    @org.springframework.beans.factory.annotation.Autowired private StorePriceService connectedPrices;
     private final tools.jackson.databind.ObjectMapper json=tools.jackson.databind.json.JsonMapper.builder().enable(tools.jackson.databind.SerializationFeature.ORDER_MAP_ENTRIES_BY_KEYS).build();
     public SmartPricingService(ProductRepository products,InventoryLotRepository lots,OrderRepository orders,
         PricingDecisionRepository decisions,PriceChangeRepository changes,InventoryService inventory,PricingService pricing,
@@ -223,6 +224,7 @@ public class SmartPricingService {
     }
     @Transactional public Map<String,Object> stop(){
         var s=settings.lockSettings().orElseGet(SmartPricingSettings::new);s.mode="RECOMMEND";s.scheduledAiEnabled=false;s.consentRevision++;s.updatedAt=LocalDateTime.now();settings.saveAndFlush(s);
+        if(connectedPrices!=null)connectedPrices.stopAll();
         audit.record("SMART_AUTOPILOT_STOPPED","smart-pricing","Экстренное отключение; новые автоматические изменения запрещены. Уже применённые цены можно откатить отдельно.");return settingsView(s);
     }
     public record AiClaim(Long id,String token,Long settingsVersion,Map<String,Object> facts){}

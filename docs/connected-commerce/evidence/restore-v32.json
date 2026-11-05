@@ -1,0 +1,26 @@
+﻿{
+    "source":  "isolated local WooCommerce company",
+    "snapshotSha256":  "A3D38DDB6DA1883AEDDFAD56C0056F86A7B55118A4B00D5E19575F076EA064EF",
+    "completedAt":  "2026-11-05T08:05:57.9989425Z",
+    "historyReadFromApi":  true,
+    "passed":  true,
+    "applicationStarted":  true,
+    "productionChanged":  false,
+    "target":  "aria_woo_restore_e32f519665d0",
+    "externalAiCalled":  false,
+    "ownerLoginVerified":  true,
+    "counts":  {
+                   "migrationVersion":  32,
+                   "binding":  "woo-e2e",
+                   "stores":  3,
+                   "products":  6,
+                   "orders":  4,
+                   "ownerFacts":  4,
+                   "decisions":  6,
+                   "aiDecisions":  1,
+                   "verifiedPriceChanges":  4,
+                   "retainedEncryptedKeys":  3,
+                   "pendingSyncs":  0,
+                   "webhookReceipts":  6
+               }
+}

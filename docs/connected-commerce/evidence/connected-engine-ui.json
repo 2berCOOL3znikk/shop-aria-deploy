@@ -1,0 +1,36 @@
+{
+  "externalAiCalled": false,
+  "consentsChanged": false,
+  "checks": [
+    "Real imported products analysed using Java engine; missing costs remain explicit; no model calls or permission changes",
+    "Actual connected decisions visible in Control Center; 1440/768/390px, both themes"
+  ],
+  "errors": [],
+  "decisions": [
+    {
+      "id": 3,
+      "externalId": "10",
+      "source": "ENGINE",
+      "status": "KEEP",
+      "currentPrice": 1215,
+      "suggestedPrice": 1215
+    },
+    {
+      "id": 2,
+      "externalId": "12",
+      "source": "ENGINE",
+      "status": "KEEP",
+      "currentPrice": 2888,
+      "suggestedPrice": 2888
+    },
+    {
+      "id": 1,
+      "externalId": "13",
+      "source": "ENGINE",
+      "status": "NEEDS_DATA",
+      "currentPrice": 3500,
+      "suggestedPrice": 3500
+    }
+  ],
+  "passed": true
+}

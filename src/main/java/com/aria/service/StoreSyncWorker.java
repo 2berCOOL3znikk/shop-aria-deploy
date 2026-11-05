@@ -9,6 +9,7 @@ import java.time.*;
 @Service
 public class StoreSyncWorker {
  @org.springframework.beans.factory.annotation.Autowired private StoreWebhookService webhooks;
+ @org.springframework.beans.factory.annotation.Autowired private ConnectedPricingService connectedPricing;
  private final StoreSyncQueue queue;private final ConnectedStoresService stores;private final boolean enabled;
  private final ScheduledExecutorService executor=Executors.newSingleThreadScheduledExecutor(r->{var t=new Thread(r,"aria-store-sync");t.setDaemon(true);return t;});
  private ScheduledFuture<?> next;private long nextAt=Long.MAX_VALUE;
@@ -22,7 +23,9 @@ public class StoreSyncWorker {
   try{Object result=stores.executeQueued(claim);var map=(Map<?,?>)result;Object failure=map.get(claim.operation().equals("ORDERS")?"lastOrdersError":"lastError");if(failure!=null)error=failure.toString();}
   catch(org.springframework.web.server.ResponseStatusException e){error="Настройки магазина изменились. Обновление будет проверено заново";}
   catch(RuntimeException e){error="Обновление не завершилось. Предыдущие данные сохранены";}
-  queue.finish(claim,error);return true;
+  queue.finish(claim,error);
+  if(error==null&&!claim.operation().equals("CHECK"))try{connectedPricing.backgroundOne(claim.storeId());}catch(RuntimeException ignored){org.slf4j.LoggerFactory.getLogger(getClass()).info("Connected analysis deferred after sync");}
+  return true;
  }
  @jakarta.annotation.PreDestroy public void stop(){executor.shutdownNow();}
 }

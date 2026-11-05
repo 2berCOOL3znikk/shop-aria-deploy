@@ -59,6 +59,7 @@ class ControlCenterActivityTest {
         when(repository.findRecentActivity(any(Pageable.class))).thenReturn(List.of(d));
         when(smart.history(1L)).thenReturn(List.of());
         var center=new ControlCenterService(orderRows,stock,ledger,repository,smart,actions,mock(ProductRepository.class));
+        org.springframework.test.util.ReflectionTestUtils.setField(center,"em",em);
         var result=center.center();
         var cards=(List<Map<String,Object>>)result.get("decisions");
         assertThat(cards).hasSize(1);
