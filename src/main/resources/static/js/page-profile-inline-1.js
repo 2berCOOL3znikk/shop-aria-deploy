@@ -1,4 +1,4 @@
-function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','\"':'&quot;',"'":'&#39;'}[c]));}
+function ariaEscape(value){return String(value??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));}
     async function loadCartCount() {
         if (typeof window.refreshCartBadge === 'function') await window.refreshCartBadge();
     }
@@ -42,11 +42,20 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
         finally { button.disabled = false; }
     }
 
+    function showAccountLoadError(box, retry) {
+        if (!box) return;
+        box.replaceChildren();
+        const message=document.createElement('p');message.setAttribute('role','alert');message.textContent=ariaCopy.text("text.f046f38ce168a2");
+        const button=document.createElement('button');button.type='button';button.className='btn-outline';button.textContent=ariaCopy.text("text.298e41327feeb6");button.onclick=()=>{button.disabled=true;retry();};
+        box.append(message,button);
+    }
+
     async function loadFavorites() {
         if (!ariaAuth.requireLogin()) return;
         try {
             const res = await ariaAuth.authFetch('/api/favorites');
             const items = await res.json();
+            if (!res.ok || !Array.isArray(items)) throw new Error();
             const box = document.getElementById('favorites-list');
             if (items.length === 0) {
                 ariaCopy.setProperty(box,"innerHTML",ariaCopy.text("text.8f42a2c6d26960"));
@@ -62,7 +71,7 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                 '<a href="/product.html?id=' + p.id + ariaCopy.text("text.393ce2ee5c7916") +
                 '</div>'
             ).join(''));
-        } catch(e) {}
+        } catch(e) {showAccountLoadError(document.getElementById('favorites-list'),loadFavorites);}
     }
 
     async function loadOrders() {
@@ -70,6 +79,7 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
         try {
             const res = await ariaAuth.authFetch('/api/orders');
             const orders = await res.json();
+            if (!res.ok || !Array.isArray(orders)) throw new Error();
             const box = document.getElementById('orders');
             if (orders.length === 0) {
                 ariaCopy.setProperty(box,"innerHTML",ariaCopy.text("text.b8498add958c23"));
@@ -79,14 +89,14 @@ function ariaEscape(value){return String(value??'').replace(/[&<>\"']/g,c=>({'&'
                 '<div class="glass-card" style="padding:16px;margin-bottom:15px;">' +
                 '<div style="display:flex;justify-content:space-between;margin-bottom:10px;">' +
                 ariaCopy.text("text.41aadaf378d125") + o.id + '</strong>' +
-                '<span style="color:var(--accent-green);">' + ({PENDING:ariaCopy.text("text.f9a506077fa0d9"),SHIPPED:ariaCopy.text("text.0729a720f892d3"),DELIVERED:ariaCopy.text("text.ffb780a5ced6e9"),RETURNED:ariaCopy.text("text.ce05bd1e0d1ee5"),CANCELLED:ariaCopy.text("text.12e2261247cb0a")}[o.status] || o.status) + '</span>' +
+                '<span style="color:var(--accent-green);">' + ({PENDING:ariaCopy.text("text.f9a506077fa0d9"),SHIPPED:ariaCopy.text("text.0729a720f892d3"),DELIVERED:ariaCopy.text("text.ffb780a5ced6e9"),RETURNED:ariaCopy.text("text.ce05bd1e0d1ee5"),CANCELLED:ariaCopy.text("text.12e2261247cb0a")}[o.status] || ariaEscape(o.status)) + '</span>' +
                 '</div>' +
                 '<div style="color:var(--text-muted);font-size:13px;margin-bottom:10px;">' + new Date(o.createdAt).toLocaleString(ariaCopy.locale()) + '</div>' +
                 '<div style="margin-bottom:10px;">' + o.items.map(i => ariaEscape(i.productName) + ' × ' + i.quantity).join(', ') + '</div>' +
                 ariaCopy.text("text.651d9fbe702069") + ariaMoney.format(o.totalAmount) + '</div>' +
                 '</div>'
             ).join(''));
-        } catch(e) {}
+        } catch(e) {showAccountLoadError(document.getElementById('orders'),loadOrders);}
     }
 
     ariaTheme.initTheme();

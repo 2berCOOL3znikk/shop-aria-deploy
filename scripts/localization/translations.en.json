@@ -2197,5 +2197,7 @@
   "Характеристики изменились. Откройте форму заново и проверьте значения.": "The attributes changed. Reopen the form and review the current values.",
   "Подтвердите проверку характеристик": "Confirm that you reviewed the attributes",
   "Изменены характеристики товара": "Product attributes updated",
-  "Изменение упаковки может снять справочные сведения и справочное фото. Ваше собственное загруженное изображение сохранится.": "Changing the pack size may remove reference details and their photo. Your own uploaded image is kept."
+  "Изменение упаковки может снять справочные сведения и справочное фото. Ваше собственное загруженное изображение сохранится.": "Changing the pack size may remove reference details and their photo. Your own uploaded image is kept.",
+  "Не удалось загрузить раздел. Проверьте связь и попробуйте снова.": "Could not load this section. Check your connection and try again.",
+  "Повторить загрузку": "Retry loading"
 }

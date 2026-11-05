@@ -1,0 +1,15 @@
+'use strict';
+// Simulated GET failure followed by an actual successful read. No order, cart or profile writes.
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');const {chromium}=require(process.env.ARIA_PLAYWRIGHT_MODULE||'playwright');
+const base='http://127.0.0.1:8087',out='docs/platform/evidence',cfg=JSON.parse(fs.readFileSync('data/localization-preview/config.json','utf8').replace(/^\uFEFF/,''));
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true}),report={checks:[],errors:[],businessWrites:0};try{
+ for(const lang of ['ru','en']){
+  const context=await browser.newContext({viewport:{width:390,height:900}});await context.addInitScript(l=>localStorage.setItem('aria_lang',l),lang);const p=await context.newPage();p.on('pageerror',e=>report.errors.push(e.message));p.on('request',r=>{if(['POST','PUT','DELETE'].includes(r.method())&&!r.url().endsWith('/auth/login'))report.businessWrites++;});
+  await p.goto(base+'/login.html');await p.locator('#login-email').fill(cfg.email);await p.locator('#login-password').fill(cfg.password);await p.locator('#login-form [type=submit]').click();await p.waitForURL('**/control.html');
+  await p.route('**/api/orders',r=>r.fulfill({status:503,contentType:'application/json',body:JSON.stringify({message:'Explicit simulated read failure'})}));await p.goto(base+'/profile.html');await p.waitForSelector('#orders [role=alert]');assert.match(await p.locator('#orders [role=alert]').innerText(),lang==='en'?/Could not load/:/Не удалось загрузить/);
+  assert.equal(await p.evaluate(()=>{const original='A" B\' C \\ <img src=x onerror=alert(1)>',node=document.createElement('div');node.innerHTML=ariaEscape(original);return node.textContent===original&&node.querySelectorAll('img').length===0;}),true);
+  await p.screenshot({path:path.join(out,'profile-read-error-'+lang+'-390.png')});await p.unroute('**/api/orders');const reply=p.waitForResponse(r=>r.url().endsWith('/api/orders')&&r.request().method()==='GET');await p.locator('#orders button').click();assert.equal((await reply).status(),200);await p.waitForFunction(()=>!document.querySelector('#orders [role=alert]'));assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1));
+  await p.goto(base+'/cart.html');await p.waitForFunction(()=>window.ariaCart?.isLoaded());assert.equal(await p.evaluate(()=>{const original='A" B\' C \\ <svg onload=alert(1)>',node=document.createElement('div');node.innerHTML=ariaEscape(original);return node.textContent===original&&node.querySelectorAll('svg').length===0;}),true);
+  report.checks.push({language:lang,simulated503Displayed:true,actual200Retry:true,quoteAndBackslashPreserved:true});await context.close();
+ }assert.deepEqual(report.errors,[]);assert.equal(report.businessWrites,0);report.passed=true;
+}catch(error){report.failure=error.stack;throw error;}finally{fs.writeFileSync(path.join(out,'account-errors.json'),JSON.stringify(report,null,2));await browser.close();}})().catch(e=>{console.error(e.stack);process.exitCode=1;});

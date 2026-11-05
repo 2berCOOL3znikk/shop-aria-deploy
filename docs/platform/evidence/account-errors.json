@@ -1,0 +1,19 @@
+{
+  "checks": [
+    {
+      "language": "ru",
+      "simulated503Displayed": true,
+      "actual200Retry": true,
+      "quoteAndBackslashPreserved": true
+    },
+    {
+      "language": "en",
+      "simulated503Displayed": true,
+      "actual200Retry": true,
+      "quoteAndBackslashPreserved": true
+    }
+  ],
+  "errors": [],
+  "businessWrites": 0,
+  "passed": true
+}
