@@ -1,11 +1,11 @@
 ﻿{
     "productWritesPerformed":  false,
-    "newProcess":  5220,
+    "newProcess":  3252,
     "passed":  true,
     "externalAiEnabled":  false,
     "productId":  17,
     "priceAndStockPreserved":  true,
     "attributesPersisted":  true,
     "productionChanged":  false,
-    "previousProcess":  10340
+    "previousProcess":  5220
 }

@@ -61,7 +61,7 @@
         const result=await readData(keys);if(revision!==loadRevision)return false;
         Object.assign(data,result);keys.forEach(key=>loaded.add(key));
       }
-      render();$('control-message').hidden=true;return true;
+      await render();if(revision!==loadRevision)return false;$('control-message').hidden=true;return true;
     }catch(error){if(revision===loadRevision){notify(error.message,true);ariaCopy.setProperty($('control-content'),"innerHTML",empty(ariaCopy.text("text.889849aa616470")));}return false;}
     finally{if(revision===loadRevision)$('control-content').setAttribute('aria-busy','false');}
   }
@@ -130,7 +130,8 @@
   function settings(){return ariaCopy.template("template.e4d4769425491b",[[
     [ariaCopy.text("text.147938b74f32b5"),ariaCopy.text("text.171c782dda04ed"),'#policies'],[ariaCopy.text("text.568a809cc5fdcc"),ariaCopy.text("text.ded72c0e22a1ea"),'#manager'],[ariaCopy.text("text.fe230e6f5b7db1"),ariaCopy.text("text.17dcb327904ee8"),'#integrations'],[ariaCopy.text("text.ac5dad760e33c2"),ariaCopy.text("text.e8f9b4f71d8ba7"),'#audit'],[ariaCopy.text("text.fdc998d4e0ef8d"),ariaCopy.text("text.710fba5b52cc1a"),'/profile.html'],[ariaCopy.text("text.3fcc6a7a1f1566"),ariaCopy.text("text.c80c9967dfc5ab"),'/admin.html'],[ariaCopy.text("text.f0012086d52ed6"),ariaCopy.text("text.e2d90a6e2a9bd8"),'#feedback'],[ariaCopy.text("text.3c106d1b9d90e6"),ariaCopy.text("text.4a87b5c172ecfe"),'#guide']
   ].map(([title,note,url])=>`<a href="${url}"><h3>${title} ↗</h3><p>${note}</p></a>`).join('')]);}
-  function render(){
+  async function render(){
+    const section=tab;
     ariaCopy.setProperty($('control-title'),"textContent",tabs[tab]);
     $('control-refresh').hidden=['smart','socialPlans','stores'].includes(tab);
     const group=groups.find(([,keys])=>keys.includes(tab));
@@ -138,10 +139,10 @@
     const subnav=group?.[1].length>1?ariaCopy.template("template.e153deafaa0535",[group[1].map(key=>`<button type="button" data-action="tab" data-id="${key}" ${key===tab?'aria-current="page"':''}>${subLabels[key]||tabs[key]}</button>`).join('')]):'';
     ariaCopy.setProperty($('control-content'),"innerHTML",subnav+({workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide,settings}[tab])()+(listTabs.has(tab)?pager():''));
     const ctx={request,notify,form,formField,show,markDirty:()=>dirty=true,clearDirty:()=>dirty=false};
-    if(tab==='workspace')ariaWorkspace.mount(ctx);
-    if(tab==='settings')ariaWorkspace.mountDemoCatalogue(ctx);
-    if(tab==='stores')ariaStores.mount(ctx);
-    if(tab==='pricing')loadPreview();if(tab==='movements')ariaOperations.ledger(ctx);if(tab==='integrations')ariaOperations.integrations(ctx);if(tab==='pos')ariaPos.mount(ctx);if(tab==='purchases')ariaPurchases.mount(ctx);if(tab==='manager')ariaManager.mount(ctx);if(tab==='smart')ariaSmartPricing.mount(ctx);if(tab==='competitors')ariaCompetitors.mount(ctx);if(tab==='socialPlans')ariaSocialProposals.mount(ctx);
+    if(section==='workspace')await ariaWorkspace.mount(ctx);
+    if(section==='settings')await ariaWorkspace.mountDemoCatalogue(ctx);
+    if(section==='stores')await ariaStores.mount(ctx);
+    if(section==='pricing')await loadPreview();if(section==='movements')await ariaOperations.ledger(ctx);if(section==='integrations')await ariaOperations.integrations(ctx);if(section==='pos')await ariaPos.mount(ctx);if(section==='purchases')await ariaPurchases.mount(ctx);if(section==='manager')await ariaManager.mount(ctx);if(section==='smart')await ariaSmartPricing.mount(ctx);if(section==='competitors')await ariaCompetitors.mount(ctx);if(section==='socialPlans')await ariaSocialProposals.mount(ctx);
   }
   function go(key,newFilter='',fromHistory=false){if(!Object.hasOwn(tabs,key)||!closeDialog())return;clearTimeout(searchTimer);++previewRevision;tab=key;search='';filter=newFilter||(key==='products'?'CURRENT':'');page=0;sort='newest';const target=new URL(location.href);if(key!=='smart')target.searchParams.delete('decision');target.hash=key;if(!fromHistory)history.pushState(null,'',target);else if(target.href!==location.href)history.replaceState(null,'',target);document.querySelector('.control-sidebar').classList.remove('saas-menu-open');$('workspace-menu').setAttribute('aria-expanded','false');load();}
   async function loadPreview(){const revision=++previewRevision;preview=null;$('pricing-result')?.querySelector('[data-action=discount-apply]')?.setAttribute('disabled','');const id=$('pricing-product')?.value,percent=Number($('pricing-percent')?.value);if(!id){if($('pricing-result'))ariaCopy.setProperty($('pricing-result'),"textContent",ariaCopy.text("text.68a7e4e60a985b"));return;}if(!Number.isInteger(percent)||percent<0||percent>90){if($('pricing-result'))ariaCopy.setProperty($('pricing-result'),"textContent",ariaCopy.text("text.fe25f5458b2bae"));return;}

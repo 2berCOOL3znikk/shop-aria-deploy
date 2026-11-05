@@ -282,5 +282,6 @@
   "untranslated": [],
   "writesPerformed": false,
   "aiRequested": false,
+  "waitsForAsyncSections": true,
   "passed": true
 }

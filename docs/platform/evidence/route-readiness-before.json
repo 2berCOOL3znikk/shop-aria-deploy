@@ -1,0 +1,12 @@
+{
+  "environment": "isolated woo-e2e",
+  "baseline": true,
+  "productionChanged": false,
+  "businessWrites": 0,
+  "aiRequested": false,
+  "checks": [],
+  "errors": [],
+  "prematurelyReportedReady": true,
+  "baselineReproduced": true,
+  "completedAt": "2026-11-05T14:01:23.364Z"
+}

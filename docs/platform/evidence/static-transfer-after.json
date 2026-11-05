@@ -1,0 +1,150 @@
+{
+  "environment": "two owned isolated previews, postgres + free profiles",
+  "productionChanged": false,
+  "businessWrites": 0,
+  "aiRequested": false,
+  "environments": [
+    {
+      "base": "http://127.0.0.1:8085",
+      "binding": "woo-e2e",
+      "assets": [
+        {
+          "resource": "/js/app-copy-data.js",
+          "uncompressedBytes": 349817,
+          "wireBytes": 105197,
+          "savedPercent": 69.9,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/js/i18n.js",
+          "uncompressedBytes": 92470,
+          "wireBytes": 24260,
+          "savedPercent": 73.8,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/js/control.js",
+          "uncompressedBytes": 52673,
+          "wireBytes": 16737,
+          "savedPercent": 68.2,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/css/experience.css",
+          "uncompressedBytes": 15984,
+          "wireBytes": 3591,
+          "savedPercent": 77.5,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/control.html",
+          "uncompressedBytes": 4300,
+          "wireBytes": 1588,
+          "savedPercent": 63.1,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        }
+      ],
+      "api": [
+        {
+          "resource": "/api/admin/control/products",
+          "wireBytes": 1460,
+          "encoding": "identity",
+          "parsed": true
+        },
+        {
+          "resource": "/api/admin/control/audit",
+          "wireBytes": 23777,
+          "encoding": "identity",
+          "parsed": true
+        }
+      ],
+      "unauthorizedStillDenied": true,
+      "binaryNotRecompressed": true,
+      "threeScriptTotals": {
+        "uncompressedBytes": 494960,
+        "wireBytes": 146194,
+        "savedPercent": 70.5
+      }
+    },
+    {
+      "base": "http://127.0.0.1:8087",
+      "binding": "demo",
+      "assets": [
+        {
+          "resource": "/js/app-copy-data.js",
+          "uncompressedBytes": 349817,
+          "wireBytes": 105197,
+          "savedPercent": 69.9,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/js/i18n.js",
+          "uncompressedBytes": 92470,
+          "wireBytes": 24260,
+          "savedPercent": 73.8,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/js/control.js",
+          "uncompressedBytes": 52673,
+          "wireBytes": 16737,
+          "savedPercent": 68.2,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/css/experience.css",
+          "uncompressedBytes": 15984,
+          "wireBytes": 3591,
+          "savedPercent": 77.5,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        },
+        {
+          "resource": "/control.html",
+          "uncompressedBytes": 4300,
+          "wireBytes": 1588,
+          "savedPercent": 63.1,
+          "decodedMatchesSource": true,
+          "varyAcceptEncoding": true
+        }
+      ],
+      "api": [
+        {
+          "resource": "/api/admin/control/products",
+          "wireBytes": 6054,
+          "encoding": "identity",
+          "parsed": true
+        },
+        {
+          "resource": "/api/admin/control/audit",
+          "wireBytes": 14847,
+          "encoding": "identity",
+          "parsed": true
+        },
+        {
+          "resource": "/api/products",
+          "wireBytes": 9867,
+          "encoding": "identity",
+          "parsed": true
+        }
+      ],
+      "unauthorizedStillDenied": true,
+      "binaryNotRecompressed": true,
+      "threeScriptTotals": {
+        "uncompressedBytes": 494960,
+        "wireBytes": 146194,
+        "savedPercent": 70.5
+      }
+    }
+  ],
+  "passed": true,
+  "completedAt": "2026-11-05T14:06:57.743Z"
+}

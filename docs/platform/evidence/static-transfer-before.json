@@ -1,0 +1,24 @@
+{
+  "environment": "local educational preview 8087",
+  "measurement": "single raw HTTP transfer, gzip requested",
+  "files": [
+    {
+      "resource": "/js/app-copy-data.js",
+      "status": 200,
+      "encoding": "identity",
+      "wireBytes": 347242
+    },
+    {
+      "resource": "/js/i18n.js",
+      "status": 200,
+      "encoding": "identity",
+      "wireBytes": 92470
+    },
+    {
+      "resource": "/js/control.js",
+      "status": 200,
+      "encoding": "identity",
+      "wireBytes": 52477
+    }
+  ]
+}
