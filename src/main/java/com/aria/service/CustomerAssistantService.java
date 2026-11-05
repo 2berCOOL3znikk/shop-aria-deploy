@@ -12,6 +12,8 @@ public class CustomerAssistantService {
     private final CustomerCatalogueService catalogue;private final IntelligenceService ai;private final SmartPricingSettingsRepository settings;private final TransactionTemplate transaction;
     public CustomerAssistantService(CustomerCatalogueService catalogue,IntelligenceService ai,SmartPricingSettingsRepository settings,PlatformTransactionManager manager){this.catalogue=catalogue;this.ai=ai;this.settings=settings;transaction=new TransactionTemplate(manager);}
     public Map<String,Object> status(){return Map.of("externalAiAvailable",settings.findById(1L).filter(s->s.publicAssistantAiEnabled).isPresent()&&Boolean.TRUE.equals(ai.pricingStatus().get("configured")),"note","Внешний AI получает только ваше сообщение и публичные карточки после вашего согласия. Поиск по каталогу работает и без внешнего AI.");}
+    public Map<String,Object> status(String language){return CustomerAssistantCopy.localize(status(),language);}
+    public Map<String,Object> answer(String query,List<Long> compared,boolean consent,String language){return CustomerAssistantCopy.localize(answer(query,compared,consent),language);}
     public Map<String,Object> answer(String query,List<Long> compared,boolean consent){
         String support=AssistantQuery.supportIntent(query);
         if(!"CATALOGUE".equals(support)){
@@ -42,7 +44,7 @@ public class CustomerAssistantService {
         String answer=fresh.isEmpty()?"Подходящих доступных товаров не найдено. Попробуйте изменить бюджет или запрос.":"COMPARE".equals(parsed.intent())?"Сравните актуальные цены, категории, единицы и характеристики выбранных товаров ниже. Упаковки могут отличаться.":"Подходящие доступные товары показаны ниже. Цена и наличие повторно проверяются при оформлении.";
         return Map.of("source",source,"intent",parsed.intent(),"text",answer,"note",note,"products",fresh);
     }
-    private int score(AssistantQuery q,Map<String,Object> p){String text=(p.get("name")+" "+p.get("category")+" "+p.getOrDefault("brand","")+" "+p.get("sku")).toLowerCase(Locale.ROOT).replace('ё','е');return (int)q.terms().stream().filter(term->text.contains(term)||term.startsWith("продукт")&&text.contains("продукт")).count();}
+    private int score(AssistantQuery q,Map<String,Object> p){String text=(p.get("name")+" "+p.get("category")+" "+p.getOrDefault("brand","")+" "+p.get("sku")).toLowerCase(Locale.ROOT).replace('ё','е');return (int)q.terms().stream().filter(term->text.contains(term)||term.startsWith("продукт")&&text.contains("продукт")||AssistantQuery.aliases(term).stream().anyMatch(text::contains)).count();}
     private boolean claimPublicBudget(){return Boolean.TRUE.equals(transaction.execute(tx->{var config=settings.lockSettings().orElse(null);if(config==null||!config.publicAssistantAiEnabled||!Boolean.TRUE.equals(ai.pricingStatus().get("configured")))return false;
         var now=LocalDateTime.now();if(config.publicAiLastRequestAt!=null&&config.publicAiLastRequestAt.isAfter(now.minusMinutes(1)))return false;
         if(!LocalDate.now().equals(config.publicAiBudgetDate)){config.publicAiBudgetDate=LocalDate.now();config.publicAiBudgetUsed=0;}

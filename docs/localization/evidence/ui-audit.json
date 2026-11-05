@@ -1,0 +1,838 @@
+{
+  "theme": "light",
+  "errors": [],
+  "routes": [
+    {
+      "language": "ru",
+      "route": "workspace",
+      "width": 1440,
+      "title": "Главная"
+    },
+    {
+      "language": "ru",
+      "route": "manager",
+      "width": 1440,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "ru",
+      "route": "stores",
+      "width": 1440,
+      "title": "Мои магазины"
+    },
+    {
+      "language": "ru",
+      "route": "products",
+      "width": 1440,
+      "title": "Товары"
+    },
+    {
+      "language": "ru",
+      "route": "orders",
+      "width": 1440,
+      "title": "Заказы"
+    },
+    {
+      "language": "ru",
+      "route": "lots",
+      "width": 1440,
+      "title": "Склад"
+    },
+    {
+      "language": "ru",
+      "route": "movements",
+      "width": 1440,
+      "title": "Движения и потери"
+    },
+    {
+      "language": "ru",
+      "route": "pos",
+      "width": 1440,
+      "title": "POS · продажи"
+    },
+    {
+      "language": "ru",
+      "route": "smart",
+      "width": 1440,
+      "title": "Цены"
+    },
+    {
+      "language": "ru",
+      "route": "competitors",
+      "width": 1440,
+      "title": "Цены и конкуренты"
+    },
+    {
+      "language": "ru",
+      "route": "pricing",
+      "width": 1440,
+      "title": "Цены и скидки"
+    },
+    {
+      "language": "ru",
+      "route": "purchases",
+      "width": 1440,
+      "title": "Закупки"
+    },
+    {
+      "language": "ru",
+      "route": "suppliers",
+      "width": 1440,
+      "title": "Поставщики"
+    },
+    {
+      "language": "ru",
+      "route": "overview",
+      "width": 1440,
+      "title": "Аналитика"
+    },
+    {
+      "language": "ru",
+      "route": "intelligence",
+      "width": 1440,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "ru",
+      "route": "socialPlans",
+      "width": 1440,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "ru",
+      "route": "social",
+      "width": 1440,
+      "title": "Социальная полка"
+    },
+    {
+      "language": "ru",
+      "route": "settings",
+      "width": 1440,
+      "title": "Настройки"
+    },
+    {
+      "language": "ru",
+      "route": "policies",
+      "width": 1440,
+      "title": "Настройки правил"
+    },
+    {
+      "language": "ru",
+      "route": "integrations",
+      "width": 1440,
+      "title": "Интеграции"
+    },
+    {
+      "language": "ru",
+      "route": "audit",
+      "width": 1440,
+      "title": "Журнал действий"
+    },
+    {
+      "language": "ru",
+      "route": "feedback",
+      "width": 1440,
+      "title": "Сообщения поддержки"
+    },
+    {
+      "language": "ru",
+      "route": "guide",
+      "width": 1440,
+      "title": "Как работать"
+    },
+    {
+      "language": "ru",
+      "route": "workspace",
+      "width": 768,
+      "title": "Главная"
+    },
+    {
+      "language": "ru",
+      "route": "manager",
+      "width": 768,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "ru",
+      "route": "stores",
+      "width": 768,
+      "title": "Мои магазины"
+    },
+    {
+      "language": "ru",
+      "route": "products",
+      "width": 768,
+      "title": "Товары"
+    },
+    {
+      "language": "ru",
+      "route": "orders",
+      "width": 768,
+      "title": "Заказы"
+    },
+    {
+      "language": "ru",
+      "route": "lots",
+      "width": 768,
+      "title": "Склад"
+    },
+    {
+      "language": "ru",
+      "route": "movements",
+      "width": 768,
+      "title": "Движения и потери"
+    },
+    {
+      "language": "ru",
+      "route": "pos",
+      "width": 768,
+      "title": "POS · продажи"
+    },
+    {
+      "language": "ru",
+      "route": "smart",
+      "width": 768,
+      "title": "Цены"
+    },
+    {
+      "language": "ru",
+      "route": "competitors",
+      "width": 768,
+      "title": "Цены и конкуренты"
+    },
+    {
+      "language": "ru",
+      "route": "pricing",
+      "width": 768,
+      "title": "Цены и скидки"
+    },
+    {
+      "language": "ru",
+      "route": "purchases",
+      "width": 768,
+      "title": "Закупки"
+    },
+    {
+      "language": "ru",
+      "route": "suppliers",
+      "width": 768,
+      "title": "Поставщики"
+    },
+    {
+      "language": "ru",
+      "route": "overview",
+      "width": 768,
+      "title": "Аналитика"
+    },
+    {
+      "language": "ru",
+      "route": "intelligence",
+      "width": 768,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "ru",
+      "route": "socialPlans",
+      "width": 768,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "ru",
+      "route": "social",
+      "width": 768,
+      "title": "Социальная полка"
+    },
+    {
+      "language": "ru",
+      "route": "settings",
+      "width": 768,
+      "title": "Настройки"
+    },
+    {
+      "language": "ru",
+      "route": "policies",
+      "width": 768,
+      "title": "Настройки правил"
+    },
+    {
+      "language": "ru",
+      "route": "integrations",
+      "width": 768,
+      "title": "Интеграции"
+    },
+    {
+      "language": "ru",
+      "route": "audit",
+      "width": 768,
+      "title": "Журнал действий"
+    },
+    {
+      "language": "ru",
+      "route": "feedback",
+      "width": 768,
+      "title": "Сообщения поддержки"
+    },
+    {
+      "language": "ru",
+      "route": "guide",
+      "width": 768,
+      "title": "Как работать"
+    },
+    {
+      "language": "ru",
+      "route": "workspace",
+      "width": 390,
+      "title": "Главная"
+    },
+    {
+      "language": "ru",
+      "route": "manager",
+      "width": 390,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "ru",
+      "route": "stores",
+      "width": 390,
+      "title": "Мои магазины"
+    },
+    {
+      "language": "ru",
+      "route": "products",
+      "width": 390,
+      "title": "Товары"
+    },
+    {
+      "language": "ru",
+      "route": "orders",
+      "width": 390,
+      "title": "Заказы"
+    },
+    {
+      "language": "ru",
+      "route": "lots",
+      "width": 390,
+      "title": "Склад"
+    },
+    {
+      "language": "ru",
+      "route": "movements",
+      "width": 390,
+      "title": "Движения и потери"
+    },
+    {
+      "language": "ru",
+      "route": "pos",
+      "width": 390,
+      "title": "POS · продажи"
+    },
+    {
+      "language": "ru",
+      "route": "smart",
+      "width": 390,
+      "title": "Цены"
+    },
+    {
+      "language": "ru",
+      "route": "competitors",
+      "width": 390,
+      "title": "Цены и конкуренты"
+    },
+    {
+      "language": "ru",
+      "route": "pricing",
+      "width": 390,
+      "title": "Цены и скидки"
+    },
+    {
+      "language": "ru",
+      "route": "purchases",
+      "width": 390,
+      "title": "Закупки"
+    },
+    {
+      "language": "ru",
+      "route": "suppliers",
+      "width": 390,
+      "title": "Поставщики"
+    },
+    {
+      "language": "ru",
+      "route": "overview",
+      "width": 390,
+      "title": "Аналитика"
+    },
+    {
+      "language": "ru",
+      "route": "intelligence",
+      "width": 390,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "ru",
+      "route": "socialPlans",
+      "width": 390,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "ru",
+      "route": "social",
+      "width": 390,
+      "title": "Социальная полка"
+    },
+    {
+      "language": "ru",
+      "route": "settings",
+      "width": 390,
+      "title": "Настройки"
+    },
+    {
+      "language": "ru",
+      "route": "policies",
+      "width": 390,
+      "title": "Настройки правил"
+    },
+    {
+      "language": "ru",
+      "route": "integrations",
+      "width": 390,
+      "title": "Интеграции"
+    },
+    {
+      "language": "ru",
+      "route": "audit",
+      "width": 390,
+      "title": "Журнал действий"
+    },
+    {
+      "language": "ru",
+      "route": "feedback",
+      "width": 390,
+      "title": "Сообщения поддержки"
+    },
+    {
+      "language": "ru",
+      "route": "guide",
+      "width": 390,
+      "title": "Как работать"
+    },
+    {
+      "language": "en",
+      "route": "workspace",
+      "width": 1440,
+      "title": "Overview"
+    },
+    {
+      "language": "en",
+      "route": "manager",
+      "width": 1440,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "en",
+      "route": "stores",
+      "width": 1440,
+      "title": "My stores"
+    },
+    {
+      "language": "en",
+      "route": "products",
+      "width": 1440,
+      "title": "Products"
+    },
+    {
+      "language": "en",
+      "route": "orders",
+      "width": 1440,
+      "title": "Orders"
+    },
+    {
+      "language": "en",
+      "route": "lots",
+      "width": 1440,
+      "title": "Inventory"
+    },
+    {
+      "language": "en",
+      "route": "movements",
+      "width": 1440,
+      "title": "Movements and losses"
+    },
+    {
+      "language": "en",
+      "route": "pos",
+      "width": 1440,
+      "title": "POS sales"
+    },
+    {
+      "language": "en",
+      "route": "smart",
+      "width": 1440,
+      "title": "Pricing"
+    },
+    {
+      "language": "en",
+      "route": "competitors",
+      "width": 1440,
+      "title": "Prices and competitors"
+    },
+    {
+      "language": "en",
+      "route": "pricing",
+      "width": 1440,
+      "title": "Prices and discounts"
+    },
+    {
+      "language": "en",
+      "route": "purchases",
+      "width": 1440,
+      "title": "Purchases"
+    },
+    {
+      "language": "en",
+      "route": "suppliers",
+      "width": 1440,
+      "title": "Suppliers"
+    },
+    {
+      "language": "en",
+      "route": "overview",
+      "width": 1440,
+      "title": "Analytics"
+    },
+    {
+      "language": "en",
+      "route": "intelligence",
+      "width": 1440,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "en",
+      "route": "socialPlans",
+      "width": 1440,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "en",
+      "route": "social",
+      "width": 1440,
+      "title": "Social shelf"
+    },
+    {
+      "language": "en",
+      "route": "settings",
+      "width": 1440,
+      "title": "Settings"
+    },
+    {
+      "language": "en",
+      "route": "policies",
+      "width": 1440,
+      "title": "Regulation settings"
+    },
+    {
+      "language": "en",
+      "route": "integrations",
+      "width": 1440,
+      "title": "Integration"
+    },
+    {
+      "language": "en",
+      "route": "audit",
+      "width": 1440,
+      "title": "Activity log"
+    },
+    {
+      "language": "en",
+      "route": "feedback",
+      "width": 1440,
+      "title": "Support messages"
+    },
+    {
+      "language": "en",
+      "route": "guide",
+      "width": 1440,
+      "title": "How to Work"
+    },
+    {
+      "language": "en",
+      "route": "workspace",
+      "width": 768,
+      "title": "Overview"
+    },
+    {
+      "language": "en",
+      "route": "manager",
+      "width": 768,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "en",
+      "route": "stores",
+      "width": 768,
+      "title": "My stores"
+    },
+    {
+      "language": "en",
+      "route": "products",
+      "width": 768,
+      "title": "Products"
+    },
+    {
+      "language": "en",
+      "route": "orders",
+      "width": 768,
+      "title": "Orders"
+    },
+    {
+      "language": "en",
+      "route": "lots",
+      "width": 768,
+      "title": "Inventory"
+    },
+    {
+      "language": "en",
+      "route": "movements",
+      "width": 768,
+      "title": "Movements and losses"
+    },
+    {
+      "language": "en",
+      "route": "pos",
+      "width": 768,
+      "title": "POS sales"
+    },
+    {
+      "language": "en",
+      "route": "smart",
+      "width": 768,
+      "title": "Pricing"
+    },
+    {
+      "language": "en",
+      "route": "competitors",
+      "width": 768,
+      "title": "Prices and competitors"
+    },
+    {
+      "language": "en",
+      "route": "pricing",
+      "width": 768,
+      "title": "Prices and discounts"
+    },
+    {
+      "language": "en",
+      "route": "purchases",
+      "width": 768,
+      "title": "Purchases"
+    },
+    {
+      "language": "en",
+      "route": "suppliers",
+      "width": 768,
+      "title": "Suppliers"
+    },
+    {
+      "language": "en",
+      "route": "overview",
+      "width": 768,
+      "title": "Analytics"
+    },
+    {
+      "language": "en",
+      "route": "intelligence",
+      "width": 768,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "en",
+      "route": "socialPlans",
+      "width": 768,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "en",
+      "route": "social",
+      "width": 768,
+      "title": "Social shelf"
+    },
+    {
+      "language": "en",
+      "route": "settings",
+      "width": 768,
+      "title": "Settings"
+    },
+    {
+      "language": "en",
+      "route": "policies",
+      "width": 768,
+      "title": "Regulation settings"
+    },
+    {
+      "language": "en",
+      "route": "integrations",
+      "width": 768,
+      "title": "Integration"
+    },
+    {
+      "language": "en",
+      "route": "audit",
+      "width": 768,
+      "title": "Activity log"
+    },
+    {
+      "language": "en",
+      "route": "feedback",
+      "width": 768,
+      "title": "Support messages"
+    },
+    {
+      "language": "en",
+      "route": "guide",
+      "width": 768,
+      "title": "How to Work"
+    },
+    {
+      "language": "en",
+      "route": "workspace",
+      "width": 390,
+      "title": "Overview"
+    },
+    {
+      "language": "en",
+      "route": "manager",
+      "width": 390,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "en",
+      "route": "stores",
+      "width": 390,
+      "title": "My stores"
+    },
+    {
+      "language": "en",
+      "route": "products",
+      "width": 390,
+      "title": "Products"
+    },
+    {
+      "language": "en",
+      "route": "orders",
+      "width": 390,
+      "title": "Orders"
+    },
+    {
+      "language": "en",
+      "route": "lots",
+      "width": 390,
+      "title": "Inventory"
+    },
+    {
+      "language": "en",
+      "route": "movements",
+      "width": 390,
+      "title": "Movements and losses"
+    },
+    {
+      "language": "en",
+      "route": "pos",
+      "width": 390,
+      "title": "POS sales"
+    },
+    {
+      "language": "en",
+      "route": "smart",
+      "width": 390,
+      "title": "Pricing"
+    },
+    {
+      "language": "en",
+      "route": "competitors",
+      "width": 390,
+      "title": "Prices and competitors"
+    },
+    {
+      "language": "en",
+      "route": "pricing",
+      "width": 390,
+      "title": "Prices and discounts"
+    },
+    {
+      "language": "en",
+      "route": "purchases",
+      "width": 390,
+      "title": "Purchases"
+    },
+    {
+      "language": "en",
+      "route": "suppliers",
+      "width": 390,
+      "title": "Suppliers"
+    },
+    {
+      "language": "en",
+      "route": "overview",
+      "width": 390,
+      "title": "Analytics"
+    },
+    {
+      "language": "en",
+      "route": "intelligence",
+      "width": 390,
+      "title": "ARIA Intelligence"
+    },
+    {
+      "language": "en",
+      "route": "socialPlans",
+      "width": 390,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "en",
+      "route": "social",
+      "width": 390,
+      "title": "Social shelf"
+    },
+    {
+      "language": "en",
+      "route": "settings",
+      "width": 390,
+      "title": "Settings"
+    },
+    {
+      "language": "en",
+      "route": "policies",
+      "width": 390,
+      "title": "Regulation settings"
+    },
+    {
+      "language": "en",
+      "route": "integrations",
+      "width": 390,
+      "title": "Integration"
+    },
+    {
+      "language": "en",
+      "route": "audit",
+      "width": 390,
+      "title": "Activity log"
+    },
+    {
+      "language": "en",
+      "route": "feedback",
+      "width": 390,
+      "title": "Support messages"
+    },
+    {
+      "language": "en",
+      "route": "guide",
+      "width": 390,
+      "title": "How to Work"
+    }
+  ],
+  "untranslated": [],
+  "writesPerformed": false,
+  "aiRequested": false,
+  "passed": true
+}

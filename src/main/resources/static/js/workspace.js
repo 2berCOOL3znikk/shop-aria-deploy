@@ -1,19 +1,19 @@
 (() => {
   'use strict';
   const esc = v => String(v ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-  const number = v => new Intl.NumberFormat('ru-KZ').format(Number(v || 0));
-  const money = v => new Intl.NumberFormat('ru-KZ', {style:'currency',currency:'KZT',maximumFractionDigits:2}).format(Number(v || 0));
-  const stamp = v => v ? new Date(v).toLocaleString('ru-KZ', {dateStyle:'short',timeStyle:'short'}) : 'Ещё не запускалась';
+  const number = v => new Intl.NumberFormat(ariaCopy.locale()).format(Number(v || 0));
+  const money = v => new Intl.NumberFormat(ariaCopy.locale(), {style:'currency',currency:'KZT',maximumFractionDigits:2}).format(Number(v || 0));
+  const stamp = v => v ? new Date(v).toLocaleString(ariaCopy.locale(), {dateStyle:'short',timeStyle:'short'}) : ariaCopy.text("text.8f602a91bd5ffc");
   const link = (text, section, cls='ws-link') => `<a class="${cls}" href="#${section}">${text}<span aria-hidden="true">↗</span></a>`;
   const empty = (text, action, section) => `<div class="ws-empty"><span aria-hidden="true">○</span><p>${text}</p>${action ? link(action,section) : ''}</div>`;
   const metric = (label, value, note, section) => `<a class="ws-metric" href="#${section}"><span>${label}<i aria-hidden="true">↗</i></span><strong>${value}</strong><small>${note}</small></a>`;
   function salesChart(daily) {
     const max = Math.max(0,...daily.map(d => Number(d.revenue)));
-    if (!max) return empty('Пока нет отгрузок за последние 14 дней. График появится после первой продажи.', 'Открыть заказы', 'orders');
-    return `<div class="ws-chart" role="group" aria-label="Выручка подтверждённых отгрузок за 14 дней">${daily.map(d => {
-      const label = new Date(d.date+'T12:00:00').toLocaleDateString('ru-KZ',{day:'numeric',month:'short'});
-      return `<div class="ws-chart-column"><button type="button" class="ws-chart-bar" style="--bar:${Number(d.revenue)/max*100}%" aria-label="${esc(label)}: ${esc(money(d.revenue))}, заказов: ${Number(d.orders)}"><span>${esc(money(d.revenue))}<small>${esc(label)} · заказов ${Number(d.orders)}</small></span></button><small>${new Date(d.date+'T12:00:00').getDate()}</small></div>`;
-    }).join('')}</div><p class="ws-chart-caption">Дата отгрузки · ${esc(daily[0]?.date)} — ${esc(daily.at(-1)?.date)}</p>`;
+    if (!max) return empty(ariaCopy.text("text.2c9c2399998a59"), ariaCopy.text("text.0a440a38189fe4"), 'orders');
+    return ariaCopy.template("template.54fbea819a66ac",[daily.map(d => {
+      const label = new Date(d.date+'T12:00:00').toLocaleDateString(ariaCopy.locale(),{day:'numeric',month:'short'});
+      return ariaCopy.template("template.398cfcb6b75d81",[Number(d.revenue)/max*100,esc(label),esc(money(d.revenue)),Number(d.orders),esc(money(d.revenue)),esc(label),Number(d.orders),new Date(d.date+'T12:00:00').getDate()]);
+    }).join(''),esc(daily[0]?.date),esc(daily.at(-1)?.date)]);
   }
   async function mount({request}) {
     const root = document.getElementById('workspace-root'); if (!root) return;
@@ -21,39 +21,25 @@
       const d = await request('/workspace/overview'); if (!root.isConnected) return;
       const o=d.overview,t=d.today,r=d.risks,m=d.manager;
       const enabled=m.enabled;
-      const status=!enabled?'Автоматизация выключена':m.lastError?'Нужна проверка':m.mode==='AUTOPILOT'?'Автопилот включён':'ARIA наблюдает за магазином';
+      const status=!enabled?ariaCopy.text("text.3f5ef6d306e615"):m.lastError?ariaCopy.text("text.f348d7ff4eb4fb"):m.mode==='AUTOPILOT'?ariaCopy.text("text.70842ff79d9967"):ariaCopy.text("text.50c69bb752c981");
       const provider=m.provider;
-      const aiNote=!provider.configured?'Подключите AI в настройках':!m.externalAiConsent?'Для AI нужно ваше согласие':provider.status==='UNAVAILABLE'?'ИИ временно недоступен':provider.lastSuccess?'Последний ответ AI: '+stamp(provider.lastSuccess):'Первый ответ AI ещё не получен';
+      const aiNote=!provider.configured?ariaCopy.text("text.42a17a486f1426"):!m.externalAiConsent?ariaCopy.text("text.faa4ab450dc239"):provider.status==='UNAVAILABLE'?ariaCopy.text("text.1f99710f2e23a3"):provider.lastSuccess?ariaCopy.text("text.7019d5b5afbd62")+stamp(provider.lastSuccess):m.lastDecisionAt?ariaCopy.text("text.4cdb7da0200c96")+stamp(m.lastDecisionAt):ariaCopy.text("text.09139585952b98");
       const tasks=[
-        [o.pendingOrders,'Новые заказы','Подтвердите обработку и отгрузку','orders'],
-        [r.pendingDecisions,'Рекомендации по ценам','Проверьте и подтвердите решение','smart'],
-        [o.lowStock,'Товары на минимуме','Проверьте потребность в закупке','products'],
-        [o.expiredLots,'Просроченные партии','Продажа запрещена. Проверьте списание','lots'],
-        [r.openSignals,'Исключения ARIA','Нужно внимание ответственного','manager'],
-        [r.failedTasks,'Задачи с ошибкой','Проверьте причину и повторите','manager']
+        [o.pendingOrders,ariaCopy.text("text.0938c426416553"),ariaCopy.text("text.f58dc46179add0"),'orders'],
+        [r.pendingDecisions,ariaCopy.text("text.3f79f51cc69944"),ariaCopy.text("text.403e8dead760e6"),'smart'],
+        [o.lowStock,ariaCopy.text("text.3e7d7e375fbf96"),ariaCopy.text("text.6b9fbc4b91b3a6"),'products'],
+        [o.expiredLots,ariaCopy.text("text.eec24834a083d7"),ariaCopy.text("text.1ff4e05dc429a4"),'lots'],
+        [r.openSignals,ariaCopy.text("text.073b0884cc24b6"),ariaCopy.text("text.8591d9115ef5d9"),'manager'],
+        [r.failedTasks,ariaCopy.text("text.b172bc7d108c49"),ariaCopy.text("text.15b16570e8e367"),'manager']
       ].filter(x=>x[0]>0);
-      document.getElementById('workspace-company').textContent=d.organization.name;
-      document.getElementById('workspace-kind').textContent=d.organization.demonstration?'Демонстрационная компания':'Кабинет компании';
-      root.innerHTML=`
-        <div class="ws-page-heading"><div><p class="ws-overline">Обзор компании</p><h2>${esc(d.organization.name)}</h2><p>Всё важное о магазине — в одном месте.</p></div><button type="button" class="ws-button ws-button-primary" data-action="product-new">＋ Добавить товар</button></div>
-        ${d.organization.demonstration?'<div class="ws-demo-note"><span class="ws-pill">Демо</span><p>Учебная компания. Показатели взяты из её базы и не являются результатами реального магазина.</p><a href="/index.html">Открыть витрину ↗</a></div>':''}
-        <section class="ws-metrics" aria-label="Показатели магазина">
-          ${metric('Продажи сегодня',money(d.sales.revenueToday),number(d.sales.ordersToday)+' отгруженных заказов','orders')}
-          ${metric('Товары',number(o.products),'Карточки собственного каталога','products')}
-          ${metric('Доступный остаток',number(o.availableUnits),'Пригодные единицы в партиях','lots')}
-          ${metric('Мои магазины',number(d.stores.connected),d.stores.attention?number(d.stores.attention)+' требуют настройки':'Подтверждённые подключения','stores')}
-        </section>
-        <section class="ws-ai-card" aria-labelledby="ws-ai-title"><div class="ws-ai-heading"><div class="ws-ai-mark" aria-hidden="true">✳</div><div><p class="ws-overline">ARIA AI</p><h3 id="ws-ai-title">Что ARIA сделала сегодня</h3></div>${link('Центр управления','manager')}</div><div class="ws-ai-stats">${[
-          ['Проверено товаров',t.productsAnalyzed],['Ценовых решений AI',t.aiDecisions],['Карточек подготовлено AI',t.productDrafts],['Автоматически изменено цен',t.priceApplied],['Черновиков закупок',t.purchaseDrafts],['Социальных предложений',t.socialDrafts]
-        ].map(([label,v])=>`<div><strong>${number(v)}</strong><span>${label}</span></div>`).join('')}</div><div class="ws-ai-footer"><span><i class="ws-status-dot ${enabled?'is-on':''}" aria-hidden="true"></i>${esc(status)}</span><span>${number(t.engineDecisions)} решений — автоматический расчёт</span><small>${esc(aiNote)}</small></div></section>
-        <div class="ws-grid"><section class="ws-panel ws-sales"><div class="ws-panel-head"><div><h3>Продажи</h3><p>Выручка отгрузок · последние 14 дней</p></div><span class="ws-pill">₸ KZT</span></div>${salesChart(d.sales.daily)}<p class="ws-footnote">Собственный магазин и внутренняя касса. Заказы подключений WooCommerce учитываются отдельно.</p></section>
-        <section class="ws-panel ws-attention"><div class="ws-panel-head"><div><h3>Требует внимания</h3><p>Следующие действия для команды</p></div><span class="ws-pill">${tasks.length}</span></div>${tasks.length?`<div class="ws-task-list">${tasks.map(([count,title,note,section])=>`<a href="#${section}"><span class="ws-task-count">${number(count)}</span><span><strong>${title}</strong><small>${note}</small></span><span aria-hidden="true">›</span></a>`).join('')}</div>`:empty('Сейчас нет открытых задач. ARIA покажет их здесь, когда появятся новые данные.','Проверить состояние AI','manager')}</section>
-        <section class="ws-panel ws-recent"><div class="ws-panel-head"><div><h3>Последние изменения</h3><p>Сохранённая история действий</p></div>${link('Весь журнал','audit')}</div>${d.recent.length?`<ol class="ws-timeline">${d.recent.slice(0,5).map(e=>`<li><span class="ws-timeline-dot" aria-hidden="true"></span><a href="#${esc(e.section)}">${esc(e.title)}</a><time>${esc(stamp(e.at))}</time></li>`).join('')}</ol>`:empty('История пока пуста. Начните с товара или подключения магазина.','Мои магазины','stores')}</section>
-        <section class="ws-panel ws-shortcuts"><div class="ws-panel-head"><div><h3>Рабочие инструменты</h3><p>Быстрый переход к делу</p></div></div><div class="ws-shortcut-list">${[['Принять поставку','Партии, закупка и сроки годности','lots'],['Провести продажу','Внутренняя касса и история операций','pos'],['Подключить магазин','WooCommerce и каталог ARIA','stores']].map(([title,note,section])=>`<a href="#${section}"><span><strong>${title}</strong><small>${note}</small></span><span aria-hidden="true">↗</span></a>`).join('')}</div></section></div>
-        <p class="ws-updated">Обновлено ${esc(stamp(d.asOf))} · ${esc(d.timeZone)} · ${esc(d.date)}</p>`;
+      ariaCopy.setProperty(document.getElementById('workspace-company'),"textContent",d.organization.name);
+      ariaCopy.setProperty(document.getElementById('workspace-kind'),"textContent",d.organization.demonstration?ariaCopy.text("text.6b5c6d2aef728b"):ariaCopy.text("text.c07628a643884d"));
+      ariaCopy.setProperty(root,"innerHTML",ariaCopy.template("template.cf8acd01cc735b",[ariaCopy.original(esc(d.organization.name),false),d.organization.demonstration?ariaCopy.text("text.6947bcb56aa843"):'',metric(ariaCopy.text("text.e16ee6c571c923"),money(d.sales.revenueToday),number(d.sales.ordersToday)+ariaCopy.text("text.009c5c462dcf93"),'orders'),metric(ariaCopy.text("text.d126705e2c12ad"),number(o.products),ariaCopy.text("text.8288674708ff67"),'products'),metric(ariaCopy.text("text.ccb65e80baeebd"),number(o.availableUnits),ariaCopy.text("text.4dc5450e97cbbf"),'lots'),metric(ariaCopy.text("text.c5dba2b0e4cce1"),number(d.stores.connected+Number(d.stores.testConnected||0)),d.stores.testConnected?number(d.stores.testConnected)+ariaCopy.text("text.fc80be8d0bfcdb")+number(d.stores.connected)+ariaCopy.text("text.618d18cca7de3a"):d.stores.attention?number(d.stores.attention)+ariaCopy.text("text.28722087b2c4a9"):ariaCopy.text("text.f6a7b3a843d85e"),'stores'),link(ariaCopy.text("text.8621d4f8a62632"),'manager'),[
+          [ariaCopy.text("text.dd8cda258d94bd"),t.productsAnalyzed],[ariaCopy.text("text.a02a86deaed014"),t.aiDecisions],[ariaCopy.text("text.16bfe9a5922676"),t.productDrafts],[ariaCopy.text("text.82c994de43e764"),t.priceApplied],[ariaCopy.text("text.73e5e584ac2c17"),t.purchaseDrafts],[ariaCopy.text("text.e648f522c127ca"),t.socialDrafts]
+        ].map(([label,v])=>`<div><strong>${number(v)}</strong><span>${label}</span></div>`).join(''),enabled?'is-on':'',esc(status),number(t.engineDecisions),esc(aiNote),salesChart(d.sales.daily),tasks.length,tasks.length?`<div class="ws-task-list">${tasks.map(([count,title,note,section])=>`<a href="#${section}"><span class="ws-task-count">${number(count)}</span><span><strong>${title}</strong><small>${note}</small></span><span aria-hidden="true">›</span></a>`).join('')}</div>`:empty(ariaCopy.text("text.f3828ecce0bebb"),ariaCopy.text("text.a4df7deea9ba15"),'manager'),link(ariaCopy.text("text.a26e110955a6a5"),'audit'),d.recent.length?`<ol class="ws-timeline">${d.recent.slice(0,5).map(e=>`<li><span class="ws-timeline-dot" aria-hidden="true"></span><a href="#${esc(e.section)}">${esc(ariaCopy.systemMessage(e.title))}</a><time>${esc(stamp(e.at))}</time></li>`).join('')}</ol>`:empty(ariaCopy.text("text.2305b6ae34e7cc"),ariaCopy.text("text.c5dba2b0e4cce1"),'stores'),[[ariaCopy.text("text.de6426b7e45e95"),ariaCopy.text("text.48a13f36431da3"),'lots'],[ariaCopy.text("text.caf07f33f43e0a"),ariaCopy.text("text.05d6641d39c6f7"),'pos'],[ariaCopy.text("text.8a2cef326c404d"),ariaCopy.text("text.59ff2e3d8cb581"),'stores']].map(([title,note,section])=>`<a href="#${section}"><span><strong>${title}</strong><small>${note}</small></span><span aria-hidden="true">↗</span></a>`).join(''),esc(stamp(d.asOf)),esc(d.timeZone),esc(d.date)]));
     } catch (error) {
       if (!root.isConnected) return;
-      root.innerHTML=`<div class="ws-panel ws-error" role="alert"><h3>Не удалось загрузить главную</h3><p>${esc(error.message)}</p><button type="button" class="ws-button">Повторить</button></div>`;
+      ariaCopy.setProperty(root,"innerHTML",ariaCopy.template("template.5cd5e31c715333",[esc(error.message)]));
       root.querySelector('button').onclick=()=>mount({request});
     }
   }
@@ -62,13 +48,13 @@
     try{
       const state=await ctx.request('/demo-catalogue');if(!root.isConnected||!state.available)return;
       root.hidden=false;
-      root.innerHTML=`<div class="ws-panel-head"><div><h3>Учебный каталог</h3><p>Для демонстрационной компании · ${number(state.references)} справочных карточек</p></div><span class="ws-pill">Демо</span></div><p class="control-help">Проверенные сведения о коммерческих товарах, источники и отдельно обозначенные учебные цены и партии. Уже добавлено: ${number(state.imported)}.</p><button type="button" class="ws-button">Добавить учебный каталог</button>`;
-      root.querySelector('button').onclick=()=>ctx.form('Добавить учебные товары',`<p class="control-help wide">${esc(state.note)}</p><p class="control-help wide">Существующие товары не перезаписываются. Продажи, цены конкурентов и подтверждённые сроки реальных поставок не создаются.</p><label class="control-field wide"><span><input type="checkbox" name="confirmed" required> Понимаю, что цены, закупка, остатки и даты создаются как учебные данные</span></label>`,async f=>{
-        if(!f.has('confirmed'))throw new Error('Подтвердите создание учебных данных');
+      ariaCopy.setProperty(root,"innerHTML",ariaCopy.template("template.50353b6e77f391",[number(state.references),number(state.imported)]));
+      root.querySelector('button').onclick=()=>ctx.form(ariaCopy.text("text.baff1a347a18d9"),ariaCopy.template("template.18e59be7530500",[ariaCopy.original(esc(state.note),true)]),async f=>{
+        if(!f.has('confirmed'))throw new Error(ariaCopy.errorText(ariaCopy.text("text.d1c81475f43ad7")));
         const result=await ctx.request('/demo-catalogue','POST',{confirmed:true});
-        return `Создано ${result.created.length} карточек. Существующих сохранено без изменения: ${result.preserved.length}. Откройте витрину.`;
+        return ariaCopy.template("template.aa3cb5d080fb6f",[result.created.length,result.preserved.length]);
       });
-    }catch(error){if(root.isConnected){root.hidden=false;root.innerHTML='<p class="control-help">Не удалось проверить доступность учебного каталога. Обновите страницу.</p>';}}
+    }catch(error){if(root.isConnected){root.hidden=false;ariaCopy.setProperty(root,"innerHTML",ariaCopy.text("text.971d1810cf387f"));}}
   }
   window.ariaWorkspace={mount,mountDemoCatalogue};
 })();

@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARIA Shop — Вход</title>
+    <title data-copy="text.c7dcda5c6124d5">ARIA Shop — Вход</title>
     <link rel="stylesheet" href="/styles.css">
     <style>
         .auth-container {
@@ -97,182 +97,52 @@
         <h1 style="text-align: center; margin-bottom: 30px;">◆ <span class="gradient-text">ARIA</span>Shop</h1>
 
         <div class="tab-buttons">
-            <button class="tab-btn active" onclick="switchTab('login')">Вход</button>
-            <button class="tab-btn" onclick="switchTab('register')">Регистрация</button>
+            <button class="tab-btn active" onclick="switchTab('login')" data-copy="text.63f5c2c2f95afc">Вход</button>
+            <button class="tab-btn" id="register-tab" hidden onclick="switchTab('register')" data-copy="text.9d91b7f27006ee">Регистрация</button>
         </div>
 
+        <p id="company-login-note" hidden data-copy="text.3c22c23d5bef27">Закрытый кабинет компании. Доступ предоставляет владелец; регистрация покупателей здесь недоступна.</p>
         <!-- Форма входа -->
         <form id="login-form" class="auth-form active" onsubmit="handleLogin(event)">
             <div id="login-error" class="error-message" role="alert"></div>
             <label class="auth-label" for="login-email">Email</label>
             <input type="email" id="login-email" placeholder="Email" required maxlength="255" autocomplete="username">
-            <label class="auth-label" for="login-password">Пароль</label>
-            <input type="password" id="login-password" placeholder="Пароль" required maxlength="72" autocomplete="current-password">
-            <button type="submit" class="btn-glow" style="width: 100%;">Войти</button>
+            <label class="auth-label" for="login-password" data-copy="text.cb1a2074b3a027">Пароль</label>
+            <input type="password" id="login-password" placeholder="Пароль" required maxlength="72" autocomplete="current-password" data-copy-placeholder="text.cb1a2074b3a027">
+            <button type="submit" class="btn-glow" style="width: 100%;" data-copy="text.8fc9ab2eeb38ad">Войти</button>
         </form>
 
         <!-- Форма регистрации -->
         <form id="register-form" class="auth-form" onsubmit="handleRegister(event)">
             <div id="register-error" class="error-message" role="alert"></div>
-            <label class="auth-label" for="register-fullName">ФИО</label>
-            <input type="text" id="register-fullName" placeholder="ФИО" required maxlength="255" autocomplete="name">
+            <label class="auth-label" for="register-fullName" data-copy="text.bd391c57b08d97">ФИО</label>
+            <input type="text" id="register-fullName" placeholder="ФИО" required maxlength="255" autocomplete="name" data-copy-placeholder="text.bd391c57b08d97">
             <label class="auth-label" for="register-email">Email</label>
             <input type="email" id="register-email" placeholder="Email" required maxlength="255" autocomplete="email">
-            <label class="auth-label" for="register-password">Пароль</label>
-            <input type="password" id="register-password" placeholder="Пароль — от 12 символов" required minlength="12" maxlength="72" autocomplete="new-password">
+            <label class="auth-label" for="register-password" data-copy="text.cb1a2074b3a027">Пароль</label>
+            <input type="password" id="register-password" placeholder="Пароль — от 12 символов" required minlength="12" maxlength="72" autocomplete="new-password" data-copy-placeholder="text.fa5754b25da596">
 
             <!-- Honeypot field (скрыт от людей, но боты его заполнят) -->
             <input type="text" name="website" style="display: none;" tabindex="-1" autocomplete="off">
 
             <!-- Капча -->
             <div id="captcha-container" style="margin-bottom: 16px;">
-                <input type="text" id="captcha-answer" inputmode="numeric" autocomplete="off" required placeholder="Ответ на вопрос" aria-label="Ответ на проверочный пример" style="width: 100%; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-size: 15px; box-sizing: border-box;">
-                <div class="captcha-question-row"><div id="captcha-question" aria-live="polite" style="font-size: 13px; color: var(--text-muted);">Загрузка капчи...</div><button id="captcha-refresh" class="captcha-refresh" type="button" onclick="window.loadRegisterCaptcha()" aria-label="Обновить пример">↻</button></div>
+                <input type="text" id="captcha-answer" inputmode="numeric" autocomplete="off" required placeholder="Ответ на вопрос" aria-label="Ответ на проверочный пример" style="width: 100%; padding: 14px 16px; background: var(--bg-surface); border: 1px solid var(--border-color); border-radius: 10px; color: var(--text-primary); font-size: 15px; box-sizing: border-box;" data-copy-placeholder="text.3813f004ebf692" data-copy-aria-label="text.9ae0b5ee1ce4e6">
+                <div class="captcha-question-row"><div id="captcha-question" aria-live="polite" style="font-size: 13px; color: var(--text-muted);" data-copy="text.40e9a4a31bf405">Загрузка капчи...</div><button id="captcha-refresh" class="captcha-refresh" type="button" onclick="window.loadRegisterCaptcha()" aria-label="Обновить пример" data-copy-aria-label="text.059fb8349835ae">↻</button></div>
             </div>
             <input type="hidden" id="captcha-id">
 
-            <button type="submit" class="btn-glow" style="width: 100%;">Зарегистрироваться</button>
+            <button type="submit" class="btn-glow" style="width: 100%;" data-copy="text.6629491d4d2233">Зарегистрироваться</button>
         </form>
 
-        <div class="guest-link">
-            <a href="/index.html">Продолжить без входа — витрина открыта</a>
+        <div class="guest-link" data-public-store-link>
+            <a href="/index.html" data-copy="text.ced92c68f31d22">Продолжить без входа — витрина открыта</a>
         </div>
     </div>
 </div>
 
 <div class="toast-container" id="toast-container"></div>
 
-<script>
-    function switchTab(tab) {
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-
-        if (tab === 'login') {
-            document.querySelector('.tab-btn:first-child').classList.add('active');
-            document.getElementById('login-form').classList.add('active');
-        } else {
-            document.querySelector('.tab-btn:last-child').classList.add('active');
-            document.getElementById('register-form').classList.add('active');
-            window.loadRegisterCaptcha();
-        }
-    }
-
-    window.loadRegisterCaptcha = async function () {
-        const question = document.getElementById('captcha-question');
-        const id = document.getElementById('captcha-id');
-        const answer = document.getElementById('captcha-answer');
-        question.textContent = 'Загружаем проверочный пример…';
-        id.value = '';
-        answer.value = '';
-        try {
-            const response = await fetch('/api/auth/captcha', { cache: 'no-store' });
-            if (!response.ok) throw new Error('Капча временно недоступна');
-            const challenge = await response.json();
-            id.value = challenge.id || '';
-            question.textContent = challenge.question || 'Нажмите ↻, чтобы получить новый пример';
-            if (!id.value) throw new Error('Сервер не выдал проверочный пример');
-        } catch (error) {
-            question.textContent = error.message || 'Не удалось загрузить капчу';
-        }
-    };
-
-    async function handleLogin(event) {
-        event.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const errorDiv = document.getElementById('login-error');
-
-        try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('aria_token', data.token);
-                localStorage.setItem('aria_role', data.role);
-                localStorage.setItem('aria_email', data.email);
-
-                const next = localStorage.getItem('aria_next');
-                localStorage.removeItem('aria_next');
-                location.href = safeNext(next, data.role);
-            } else if (res.status === 401) {
-                errorDiv.textContent = 'Неверный email или пароль';
-                errorDiv.classList.add('show');
-            } else {
-                const err = await res.json();
-                errorDiv.textContent = err.error || err.message || 'Ошибка входа';
-                errorDiv.classList.add('show');
-            }
-        } catch (e) {
-            errorDiv.textContent = 'Ошибка соединения с сервером';
-            errorDiv.classList.add('show');
-        }
-    }
-
-    async function handleRegister(event) {
-        event.preventDefault();
-        const fullName = document.getElementById('register-fullName').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const errorDiv = document.getElementById('register-error');
-        const captchaId = document.getElementById('captcha-id').value.trim();
-        const captchaAnswer = document.getElementById('captcha-answer').value.trim();
-        const website = document.querySelector('#register-form [name="website"]').value.trim();
-
-        if (!captchaId || !captchaAnswer) {
-            errorDiv.textContent = 'Загрузите пример и введите ответ на капчу';
-            errorDiv.classList.add('show');
-            if (!captchaId) window.loadRegisterCaptcha();
-            return;
-        }
-        errorDiv.classList.remove('show');
-
-        try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, fullName, website, captchaId, captchaAnswer })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('aria_token', data.token);
-                localStorage.setItem('aria_role', data.role);
-                localStorage.setItem('aria_email', data.email);
-
-                const next = localStorage.getItem('aria_next');
-                localStorage.removeItem('aria_next');
-                location.href = safeNext(next, data.role);
-            } else {
-                const err = await res.json().catch(() => ({}));
-                errorDiv.textContent = err.error || err.message || 'Ошибка регистрации';
-                errorDiv.classList.add('show');
-                window.loadRegisterCaptcha();
-            }
-        } catch (e) {
-            errorDiv.textContent = 'Ошибка соединения с сервером';
-            errorDiv.classList.add('show');
-            window.loadRegisterCaptcha();
-        }
-    }
-
-    function safeNext(next, role) {
-        if (role === 'ADMIN') return next && next.startsWith('/') && !next.startsWith('//') ? next : '/control.html';
-        if (role === 'ORG') return next === '/social.html' ? next : '/social.html';
-        return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/admin') ? next : '/index.html';
-    }
-
-    // Сохраняем next-параметр при загрузке
-    const params = new URLSearchParams(location.search);
-    if (params.get('next')) {
-        localStorage.setItem('aria_next', params.get('next'));
-    }
-    if (localStorage.getItem('aria_role') === 'ADMIN') location.replace('/control.html');
-    else if (localStorage.getItem('aria_role') === 'ORG') location.replace('/social.html');
-    window.loadRegisterCaptcha();
-</script>
+<script src="/js/login-page.js"></script>
 <script src="/js/pwa.js"></script></body>
 </html>

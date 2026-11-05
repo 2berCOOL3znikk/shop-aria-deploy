@@ -1,0 +1,214 @@
+{
+  "approach": "explicit static source keys, no runtime DOM text translation",
+  "files": [
+    {
+      "file": "js/about.js",
+      "keys": 0
+    },
+    {
+      "file": "js/admin-docs.js",
+      "keys": 5
+    },
+    {
+      "file": "js/admin-mvp.js",
+      "keys": 19
+    },
+    {
+      "file": "js/admin-operations.js",
+      "keys": 41
+    },
+    {
+      "file": "js/analysis-history.js",
+      "keys": 7
+    },
+    {
+      "file": "js/assistant.js",
+      "keys": 24
+    },
+    {
+      "file": "js/auth.js",
+      "keys": 2
+    },
+    {
+      "file": "js/catalog-images.js",
+      "keys": 7
+    },
+    {
+      "file": "js/competitors.js",
+      "keys": 44
+    },
+    {
+      "file": "js/control.js",
+      "keys": 443
+    },
+    {
+      "file": "js/favorites.js",
+      "keys": 8
+    },
+    {
+      "file": "js/feedback.js",
+      "keys": 3
+    },
+    {
+      "file": "js/index-mvp.js",
+      "keys": 15
+    },
+    {
+      "file": "js/login-page.js",
+      "keys": 11
+    },
+    {
+      "file": "js/manager.js",
+      "keys": 183
+    },
+    {
+      "file": "js/money.js",
+      "keys": 1
+    },
+    {
+      "file": "js/operations.js",
+      "keys": 20
+    },
+    {
+      "file": "js/page-admin-inline-1.js",
+      "keys": 81
+    },
+    {
+      "file": "js/page-cart-inline-1.js",
+      "keys": 16
+    },
+    {
+      "file": "js/page-index-inline-1.js",
+      "keys": 15
+    },
+    {
+      "file": "js/page-product-inline-1.js",
+      "keys": 40
+    },
+    {
+      "file": "js/page-profile-inline-1.js",
+      "keys": 20
+    },
+    {
+      "file": "js/pos.js",
+      "keys": 32
+    },
+    {
+      "file": "js/product-creation.js",
+      "keys": 45
+    },
+    {
+      "file": "js/product-mvp.js",
+      "keys": 14
+    },
+    {
+      "file": "js/product-redirect.js",
+      "keys": 0
+    },
+    {
+      "file": "js/purchases.js",
+      "keys": 57
+    },
+    {
+      "file": "js/pwa.js",
+      "keys": 11
+    },
+    {
+      "file": "js/shell.js",
+      "keys": 68
+    },
+    {
+      "file": "js/smart-pricing.js",
+      "keys": 168
+    },
+    {
+      "file": "js/social-proposals.js",
+      "keys": 88
+    },
+    {
+      "file": "js/store-connection-wizard.js",
+      "keys": 48
+    },
+    {
+      "file": "js/stores.js",
+      "keys": 163
+    },
+    {
+      "file": "js/theme.js",
+      "keys": 2
+    },
+    {
+      "file": "js/workspace.js",
+      "keys": 71
+    },
+    {
+      "file": "404.html",
+      "keys": 10
+    },
+    {
+      "file": "about.html",
+      "keys": 36
+    },
+    {
+      "file": "admin.html",
+      "keys": 134
+    },
+    {
+      "file": "analysis-history.html",
+      "keys": 15
+    },
+    {
+      "file": "cart.html",
+      "keys": 14
+    },
+    {
+      "file": "control.html",
+      "keys": 31
+    },
+    {
+      "file": "favorites.html",
+      "keys": 10
+    },
+    {
+      "file": "home.html",
+      "keys": 41
+    },
+    {
+      "file": "index.html",
+      "keys": 64
+    },
+    {
+      "file": "login.html",
+      "keys": 28
+    },
+    {
+      "file": "offline.html",
+      "keys": 10
+    },
+    {
+      "file": "privacy.html",
+      "keys": 28
+    },
+    {
+      "file": "product-detail.html",
+      "keys": 5
+    },
+    {
+      "file": "product.html",
+      "keys": 30
+    },
+    {
+      "file": "profile.html",
+      "keys": 41
+    },
+    {
+      "file": "social.html",
+      "keys": 35
+    },
+    {
+      "file": "support.html",
+      "keys": 57
+    }
+  ],
+  "keyCount": 1761
+}

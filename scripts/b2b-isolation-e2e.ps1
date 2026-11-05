@@ -60,7 +60,9 @@ try{
   $c.token=$login.token
   $current=Api $c '/api/admin/control/organization' 'GET' $null $c.token
   if($current.binding -ne $c.key){throw 'Incorrect organization metadata'}
-  foreach($privatePath in '/api/products/store','/api/products/store-info','/api/social/impact','/api/admin/control/organization','/api/admin/control/stores','/api/admin/control/demo-catalogue'){
+  $public=Api $c '/api/auth/capabilities'
+  if($public.publicStorefront -or $public.buyerRegistration -or @($public.PSObject.Properties).Count -ne 2){throw 'Incorrect public access capabilities'}
+  foreach($privatePath in '/api/auth/captcha','/api/auth/register','/api/products/store','/api/products/store-info','/api/social/impact','/api/admin/control/organization','/api/admin/control/stores','/api/admin/control/demo-catalogue'){
    $denied=$false
    try{$null=Api $c $privatePath}catch{if([int]$_.Exception.Response.StatusCode -eq 401){$denied=$true}else{throw}}
    if(!$denied){throw 'Anonymous request accessed company business data'}

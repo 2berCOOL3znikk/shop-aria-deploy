@@ -20,7 +20,7 @@ async function loadFavorites() {
     return;
   }
   const response = await ariaAuth.authFetch("/api/favorites/ids");
-  if (!response.ok) throw new Error("Не удалось загрузить избранное");
+  if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.1133eccf802e0a")));
   const data = await response.json();
   state.favoriteIds = new Set((data.ids || []).map(Number));
 }
@@ -29,31 +29,31 @@ window.toggleFavorite = async function (productId, button) {
   if (!ariaAuth.requireLogin()) return;
   try {
     const response = await ariaAuth.authFetch("/api/favorites/" + encodeURIComponent(productId), { method: "POST" });
-    if (!response.ok) throw new Error("Не удалось обновить избранное");
+    if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.5cb21968d2c5b7")));
     const data = await response.json();
     const isFavorite = !!data.isFavorite;
     if (isFavorite) state.favoriteIds.add(Number(productId));
     else state.favoriteIds.delete(Number(productId));
     if (button) {
-      button.textContent = isFavorite ? "♥" : "♡";
+      ariaCopy.setProperty(button,"textContent",isFavorite ? "♥" : "♡");
       button.classList.toggle("is-active", isFavorite);
       button.setAttribute("aria-pressed", String(isFavorite));
-      button.setAttribute("aria-label", isFavorite ? "Удалить из избранного" : "Добавить в избранное");
+      ariaCopy.setAttribute(button,"aria-label",isFavorite ? ariaCopy.text("text.7658dd5450ed58") : ariaCopy.text("text.2a6b5f7278c0d6"));
       button.classList.add("pop");
       setTimeout(() => button.classList.remove("pop"), 340);
     }
-    window.showToast(isFavorite ? "Добавлено в избранное" : "Удалено из избранного");
+    window.showToast(isFavorite ? ariaCopy.text("text.6527a13f1e2fec") : ariaCopy.text("text.b076284d2dfae1"));
   } catch (error) {
-    window.showToast(error.message || "Ошибка избранного", "error");
+    window.showToast(error.message || ariaCopy.text("text.5e6d97672cf9b9"), "error");
   }
 };
 
 window.addToCart = async function (productId) {
   if (!ariaAuth.requireLogin()) return;
   try {
-    if (await window.ariaCart.add(productId)) window.showToast("Товар в корзине");
+    if (await window.ariaCart.add(productId)) window.showToast(ariaCopy.text("text.ef754ea83995e0"));
   } catch (error) {
-    window.showToast(error.message || "Ошибка добавления", "error");
+    window.showToast(error.message || ariaCopy.text("text.75085e97cda03f"), "error");
   }
 };
 
@@ -63,10 +63,10 @@ function updateCategoryChips() {
   const categories = [""].concat(Array.from(state.allCategories).sort((a, b) => a.localeCompare(b, "ru")));
   const selected = new URLSearchParams(location.search).get("category") || "";
   const active = categories.includes(selected) ? selected : "";
-  container.innerHTML = categories.map(category =>
+  ariaCopy.setProperty(container,"innerHTML",categories.map(category =>
     '<button type="button" class="category-chip' + (category === active ? " active" : "") + '" aria-pressed="' + (category === active) + '" data-category="' + escapeHtml(category) + '">' +
-    (category ? escapeHtml(category) : "Все товары") + "</button>"
-  ).join("");
+    (category ? escapeHtml(category) : ariaCopy.text("text.98157c47a1bdb8")) + "</button>"
+  ).join(""));
   container.querySelectorAll(".category-chip").forEach(chip => {
     chip.addEventListener("click", () => {
       container.querySelectorAll(".category-chip").forEach(item => { item.classList.remove("active"); item.setAttribute("aria-pressed", "false"); });
@@ -84,9 +84,9 @@ async function initCatalogPage() {
   try {
     // An unavailable optional account feature must not hide the public catalogue.
     const accountLoads = await Promise.allSettled([loadFavorites(), loadCartCount()]);
-    if (accountLoads.some(result => result.status === "rejected")) window.showToast("Часть данных аккаунта пока недоступна. Каталог можно просматривать.", "error");
+    if (accountLoads.some(result => result.status === "rejected")) window.showToast(ariaCopy.text("text.0eecb5abc70336"), "error");
     const response = await fetch("/api/products/store");
-    if (!response.ok) throw new Error("Не удалось загрузить каталог");
+    if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.cac774f7b48a95")));
     state.products = await response.json();
     window.ariaCart.register(state.products, true);
     state.products.forEach(product => {
@@ -98,8 +98,8 @@ async function initCatalogPage() {
     if (sort) sort.addEventListener("change", () => window.filterAndSort && window.filterAndSort());
   } catch (error) {
     const grid = document.getElementById("products");
-    if (grid) grid.innerHTML = '<div class="catalog-empty" style="grid-column:1/-1"><h3>Каталог временно недоступен</h3><p>' + escapeHtml(error.message) + '</p><button class="btn-outline" type="button" onclick="location.reload()">Повторить</button></div>';
-    window.showToast(error.message || "Не удалось загрузить каталог", "error");
+    if (grid) ariaCopy.setProperty(grid,"innerHTML",ariaCopy.text("text.15973fdd73c335") + escapeHtml(error.message) + ariaCopy.text("text.19febf9e216781"));
+    window.showToast(error.message || ariaCopy.text("text.cac774f7b48a95"), "error");
   }
 }
 

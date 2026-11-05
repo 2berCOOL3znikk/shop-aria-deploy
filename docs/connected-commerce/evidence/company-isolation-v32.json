@@ -1,11 +1,12 @@
-﻿{
-    "checks":  [
-                   "Two real PostgreSQL databases, distinct restricted logins, V1-V32 and Hibernate validate",
-                   "Two real Spring Boot processes, same owner email and signing key",
-                   "Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs",
-                   "Database login cannot connect to the other company database; no external AI requests",
-                   "New workspace/AI settings reject foreign signed tokens; permissions remain disabled in both test companies",
-                   "Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled"
-               ],
-    "passed":  true
+{
+  "checks": [
+    "Two real PostgreSQL databases, distinct restricted logins, V1-V32 and Hibernate validate",
+    "Two real Spring Boot processes, same owner email and signing key",
+    "Same SKU stays independent; foreign tokens rejected by product/manager/organization APIs",
+    "Database login cannot connect to the other company database; no external AI requests",
+    "New workspace/AI settings reject foreign signed tokens; permissions remain disabled in both test companies",
+    "Store metadata remains private; educational import denied in company bindings even with its capability and demonstration flag enabled",
+    "Anonymous capabilities expose exactly two booleans; company captcha, registration route and all business APIs remain closed"
+  ],
+  "passed": true
 }

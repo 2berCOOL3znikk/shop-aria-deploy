@@ -4,12 +4,12 @@
     const id = document.getElementById("captcha-id");
     try {
       const response = await fetch("/api/auth/captcha");
-      if (!response.ok) throw new Error("Не удалось загрузить проверочный вопрос");
+      if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.7136662cecb671")));
       const challenge = await response.json();
-      question.textContent = challenge.question;
+      ariaCopy.setProperty(question,"textContent",challenge.question);
       id.value = challenge.id;
       document.getElementById("captcha-answer").value = "";
-    } catch (error) { question.textContent = error.message; }
+    } catch (error) { ariaCopy.setProperty(question,"textContent",error.message); }
   }
   document.addEventListener("DOMContentLoaded", () => {
     const form = document.getElementById("feedback-form");
@@ -29,8 +29,8 @@
         };
         const response = await fetch("/api/feedback", { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
         const result = await response.json().catch(() => ({}));
-        if (!response.ok) throw new Error(result.error || "Не удалось отправить сообщение");
-        showToast(result.message || "Спасибо за обратную связь!");
+        if (!response.ok) throw new Error(ariaCopy.errorText(result.error || ariaCopy.text("text.2dd8acb7a8793e")));
+        showToast(result.message || ariaCopy.text("text.37b71d39b04f50"));
         form.reset();
         await loadCaptcha();
       } catch (error) { showToast(error.message, "error"); await loadCaptcha(); }

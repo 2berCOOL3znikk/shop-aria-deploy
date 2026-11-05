@@ -5,8 +5,8 @@
     const node = document.createElement("nav");
     node.id = "product-breadcrumbs";
     node.className = "product-breadcrumbs";
-    node.setAttribute("aria-label", "Навигация");
-    node.innerHTML = '<a href="/index.html">Главная</a><span aria-hidden="true">/</span><a href="/index.html">Каталог</a><span aria-hidden="true">/</span><span aria-current="page">' + escape(name) + '</span>';
+    ariaCopy.setAttribute(node,"aria-label",ariaCopy.text("text.e638fc3afbee12"));
+    ariaCopy.setProperty(node,"innerHTML",ariaCopy.text("text.18a2950704f6ec") + escape(name) + '</span>');
     document.getElementById("product").before(node);
     document.querySelector('main.container > a[href="/index.html"]')?.remove();
   };
@@ -22,7 +22,7 @@
     if (!rows.length) return;
     const table = document.createElement("table");
     table.className = "product-spec-table";
-    table.innerHTML = rows.map(([label, value]) => "<tr><th>" + escape(label) + "</th><td>" + escape(value) + "</td></tr>").join("");
+    ariaCopy.setProperty(table,"innerHTML",rows.map(([label, value]) => "<tr><th>" + escape(label) + "</th><td>" + escape(value) + "</td></tr>").join(""));
     box.querySelectorAll(":scope > div").forEach(row => row.remove());
     box.appendChild(table);
   };
@@ -32,7 +32,7 @@
     const name = info.querySelector("h1")?.textContent || document.title;
     const link = document.createElement("a");
     link.className = "btn-outline telegram-share";
-    link.textContent = "Поделиться в Telegram";
+    ariaCopy.setProperty(link,"textContent",ariaCopy.text("text.9ed933587b8505"));
     link.href = "https://t.me/share/url?url=" + encodeURIComponent(location.href) + "&text=" + encodeURIComponent(name);
     link.target = "_blank";
     link.rel = "noopener noreferrer";
@@ -44,7 +44,7 @@
       section = document.createElement("section");
       section.id = "similar-products";
       section.className = "similar-section";
-      section.innerHTML = '<h2>Похожие товары</h2><div class="similar-row" id="similar-row"></div>';
+      ariaCopy.setProperty(section,"innerHTML",ariaCopy.text("text.045989eb7a84b2"));
       document.querySelector("main.container").appendChild(section);
     }
     try {
@@ -53,7 +53,7 @@
       const products = await response.json();
       const matches = products.filter(p => String(p.category || "") === String(current.category || "") && String(p.id) !== String(current.id)).slice(0, 8);
       const row = document.getElementById("similar-row");
-      row.innerHTML = matches.length ? matches.map(p => '<a class="similar-card glass-card" href="/product.html?id=' + encodeURIComponent(p.id) + '">' + CatalogImages.imageTag(p, { alt: p.name }) + '<span class="product-card-category">' + escape(p.category || "") + '</span><strong>' + escape(p.name) + '</strong><span>' + formatKZT(p.displayPrice ?? p.unitPrice) + '</span></a>').join("") : '<p class="admin-note">В этой категории пока нет других товаров.</p>';
+      ariaCopy.setProperty(row,"innerHTML",matches.length ? matches.map(p => '<a class="similar-card glass-card" href="/product.html?id=' + encodeURIComponent(p.id) + '">' + CatalogImages.imageTag(p, { alt: p.name }) + '<span class="product-card-category">' + escape(p.category || "") + '</span><strong>' + escape(p.name) + '</strong><span>' + formatKZT(p.displayPrice ?? p.unitPrice) + '</span></a>').join("") : ariaCopy.text("text.4a6d184350ddd9"));
     } catch (_) {}
   }
   function enhance() {
@@ -69,13 +69,13 @@
   function renderEvidence(product){
     const info=document.querySelector('#product > div:nth-child(2)');if(!info)return;
     const provenance=product.provenance||{};
-    if(provenance.demonstration){const note=document.createElement('aside');note.className='storefront-demo-label';note.textContent='Учебная карточка · цена, закупка, остаток и даты партии созданы для демонстрации';info.prepend(note);}
+    if(provenance.demonstration){const note=document.createElement('aside');note.className='storefront-demo-label';ariaCopy.setProperty(note,"textContent",ariaCopy.text("text.a7bafefc5aa744"));info.prepend(note);}
     const section=document.createElement('section');section.className='storefront-source';section.id='product-sources';
     const safeLink=(url,label)=>{try{const value=new URL(url);return value.protocol==='https:'?'<a href="'+escape(value.href)+'" target="_blank" rel="noopener noreferrer">'+escape(label)+'</a>':escape(label);}catch{return escape(label);}};
     const facts=Array.isArray(provenance.facts)?provenance.facts:[];
     if(facts.length){
-      section.innerHTML='<h2>'+ (provenance.verification==='PACKAGE_PHOTO'?'Что подтверждено по фотографии':'Сведения из источников')+'</h2><p class="storefront-fact-note">Проверены только перечисленные сведения. Это не проверка конкретной поставки.</p><dl class="storefront-facts">'+facts.map(f=>'<div><dt>'+escape(f.label)+'</dt><dd>'+escape(f.value)+'<small>'+safeLink(f.sourceUrl,'Источник ↗')+' · '+escape(f.checkedAt)+'</small></dd></div>').join('')+'</dl>'+(provenance.limitations?.length?'<details><summary>Что ещё требует проверки</summary><ul>'+provenance.limitations.map(value=>'<li>'+escape(value)+'</li>').join('')+'</ul></details>':'');
-    }else section.innerHTML='<h2>О сведениях товара</h2><p class="storefront-fact-note">'+(provenance.verification==='OWNER_EDITED'?'Название или характеристики изменены владельцем. Прежнее подтверждение источника к изменённой карточке не применяется.':'Сведения добавлены магазином. Проверенные внешние источники пока не указаны.')+'</p>';
+      ariaCopy.setProperty(section,"innerHTML",'<h2>'+ (provenance.verification==='PACKAGE_PHOTO'?ariaCopy.text("text.8927030ab92286"):ariaCopy.text("text.260bca7afc39c1"))+ariaCopy.text("text.addb27b104b888")+facts.map(f=>'<div><dt>'+escape(f.label)+'</dt><dd>'+escape(f.value)+'<small>'+safeLink(f.sourceUrl,ariaCopy.text("text.ef1f448895e3b8"))+' · '+escape(f.checkedAt)+'</small></dd></div>').join('')+'</dl>'+(provenance.limitations?.length?ariaCopy.text("text.0192fa10af8f56")+provenance.limitations.map(value=>'<li>'+escape(value)+'</li>').join('')+'</ul></details>':''));
+    }else ariaCopy.setProperty(section,"innerHTML",ariaCopy.text("text.45b275b61d2cbb")+(provenance.verification==='OWNER_EDITED'?ariaCopy.text("text.0a8b50f06b0576"):ariaCopy.text("text.9cb6ffd377abfc"))+'</p>');
     info.append(section);
   }
   window.addEventListener("aria:product-loaded", event => {renderEvidence(event.detail);loadSimilar(event.detail);});

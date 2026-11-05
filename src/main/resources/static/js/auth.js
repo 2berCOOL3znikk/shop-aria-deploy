@@ -75,9 +75,9 @@ window.ariaAuth = {
                 return false;
             }
             if (typeof showToast === 'function') {
-                showToast('Нужна роль администратора', 'error');
+                showToast(ariaCopy.text("text.c203d37ef6101f"), 'error');
             } else {
-                alert('Нужна роль администратора');
+                alert(ariaCopy.text("text.c203d37ef6101f"));
             }
             return false;
         }

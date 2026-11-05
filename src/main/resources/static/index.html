@@ -1,36 +1,36 @@
 <!doctype html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
   <meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
-  <title>ARIA Shop — товары на каждый день</title>
+  <title data-copy="text.9a4f487350dbae">ARIA Shop — товары на каждый день</title>
   <meta name="description" content="Каталог ARIA Shop: товары, актуальные цены и наличие. Помощник подберёт варианты по вашему запросу.">
   <script src="/js/theme.js"></script>
   <link rel="stylesheet" href="/styles.css"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css">
   <link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#171717">
 </head>
 <body class="storefront-page">
-  <nav class="nav-glass" aria-label="Магазин"><a class="logo-new" href="/index.html">ARIA Shop</a></nav>
+  <nav class="nav-glass" aria-label="Магазин" data-copy-aria-label="text.23e3c70647461a"><a class="logo-new" href="/index.html">ARIA Shop</a></nav>
   <main class="storefront-main">
     <section class="storefront-intro" aria-labelledby="catalog-title">
-      <div><p class="storefront-eyebrow">ARIA SHOP · КАТАЛОГ</p><h1 id="catalog-title">На каждый день.</h1><p class="storefront-lead">Нужные товары, понятные цены.<br>Выбирайте сами или вместе с ARIA.</p></div>
-      <div class="storefront-help"><span class="storefront-symbol" aria-hidden="true">✳</span><div><h2>Помочь с выбором?</h2><p>Найдём товары по бюджету<br>и сравним доступные варианты.</p><button type="button" class="storefront-text-button" data-open-assistant>Спросить ARIA <span aria-hidden="true">↗</span></button></div></div>
+      <div><p class="storefront-eyebrow" data-copy="text.112639a389e0bd">ARIA SHOP · КАТАЛОГ</p><h1 id="catalog-title" data-copy="text.d8d644ad167984">На каждый день.</h1><p class="storefront-lead"><span data-copy="text.a73fa492372ff2">Нужные товары, понятные цены.</span><br><span data-copy="text.a325f94e2ceeaa">Выбирайте сами или вместе с ARIA.</span></p></div>
+      <div class="storefront-help"><span class="storefront-symbol" aria-hidden="true">✳</span><div><h2 data-copy="text.a19498ddca6b96">Помочь с выбором?</h2><p><span data-copy="text.0559b0b946c664">Найдём товары по бюджету</span><br><span data-copy="text.2025790cf116a3">и сравним доступные варианты.</span></p><button type="button" class="storefront-text-button" data-open-assistant><span data-copy="text.3633b53a70ff32">Спросить ARIA </span><span aria-hidden="true">↗</span></button></div></div>
     </section>
-    <aside id="storefront-demonstration" class="storefront-demo" hidden><span>Демо-магазин</span><p>Источники характеристик приведены в справочных карточках. Цены, остатки и даты учебных партий созданы для демонстрации.</p><a href="/about.html">О платформе ↗</a></aside>
-    <section class="storefront-catalog" aria-label="Выбор товаров">
+    <aside id="storefront-demonstration" class="storefront-demo" hidden><span data-copy="text.cc40a60e5ced26">Демо-магазин</span><p data-copy="text.efa114854b3062">Источники характеристик приведены в справочных карточках. Цены, остатки и даты учебных партий созданы для демонстрации.</p><a href="/about.html" data-copy="text.ec5ff50a145a0f">О платформе ↗</a></aside>
+    <section class="storefront-catalog" aria-label="Выбор товаров" data-copy-aria-label="text.10a55d4870dab6">
       <div class="storefront-toolbar">
-        <label class="storefront-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only">Поиск товаров</span><input id="search" type="search" maxlength="200" autocomplete="off" placeholder="Название, бренд или категория"></label>
-        <label class="storefront-sort"><span class="sr-only">Сортировка</span><select id="sort"><option value="default">По умолчанию</option><option value="price-asc">Сначала дешевле</option><option value="price-desc">Сначала дороже</option><option value="popular">По популярности</option><option value="expiry-asc">По ближайшему сроку</option></select></label>
+        <label class="storefront-search"><svg viewBox="0 0 24 24" aria-hidden="true"><circle cx="10.5" cy="10.5" r="6.5"/><path d="m16 16 5 5"/></svg><span class="sr-only" data-copy="text.1f9b0a2a0dbaca">Поиск товаров</span><input id="search" type="search" maxlength="200" autocomplete="off" placeholder="Название, бренд или категория" data-copy-placeholder="text.b8e4ecfb21fd18"></label>
+        <label class="storefront-sort"><span class="sr-only" data-copy="text.66d6d374ce9278">Сортировка</span><select id="sort"><option value="default" data-copy="text.fd0560ebbf83d2">По умолчанию</option><option value="price-asc" data-copy="text.9c0282a4037539">Сначала дешевле</option><option value="price-desc" data-copy="text.be3c8e8187685f">Сначала дороже</option><option value="popular" data-copy="text.b9e0a3fdf32571">По популярности</option><option value="expiry-asc" data-copy="text.eba3a74e509558">По ближайшему сроку</option></select></label>
       </div>
-      <div class="category-chips" id="category-chips" role="group" aria-label="Категории"><button type="button" class="category-chip active" data-category="" aria-pressed="true">Все товары</button></div>
+      <div class="category-chips" id="category-chips" role="group" aria-label="Категории" data-copy-aria-label="text.05f6c615a3518d"><button type="button" class="category-chip active" data-category="" aria-pressed="true" data-copy="text.98157c47a1bdb8">Все товары</button></div>
       <div class="storefront-filters">
-        <div class="storefront-price-range"><span>Цена, ₸</span><label><span class="sr-only">Минимальная цена</span><input type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" id="price-min" placeholder="От"></label><span aria-hidden="true">—</span><label><span class="sr-only">Максимальная цена</span><input type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" id="price-max" placeholder="До"></label></div>
-        <label class="storefront-sale"><input type="checkbox" id="discount-only"> Со скидкой</label>
-        <button type="button" class="storefront-text-button" id="catalog-reset">Сбросить</button><span id="catalog-result-count" role="status" aria-live="polite">Загружаем товары…</span>
+        <div class="storefront-price-range"><span data-copy="text.791df6a56a11bb">Цена, ₸</span><label><span class="sr-only" data-copy="text.edfe775391f06b">Минимальная цена</span><input type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" id="price-min" placeholder="От" data-copy-placeholder="text.2c704c5ef488d5"></label><span aria-hidden="true">—</span><label><span class="sr-only" data-copy="text.145e735cfcfe3b">Максимальная цена</span><input type="number" min="0" max="9999999999.99" step="0.01" inputmode="decimal" id="price-max" placeholder="До" data-copy-placeholder="text.4a38273155aa88"></label></div>
+        <label class="storefront-sale"><input type="checkbox" id="discount-only"><span data-copy="text.b6b6d5d75edd01"> Со скидкой</span></label>
+        <button type="button" class="storefront-text-button" id="catalog-reset" data-copy="text.407f871778d310">Сбросить</button><span id="catalog-result-count" role="status" aria-live="polite" data-copy="text.a63118a695a335">Загружаем товары…</span>
       </div>
       <p id="catalog-filter-error" role="alert" hidden></p>
-      <div id="products" class="responsive-grid" aria-busy="true"><div class="catalog-loading" role="status">Загружается каталог…</div></div>
+      <div id="products" class="responsive-grid" aria-busy="true"><div class="catalog-loading" role="status" data-copy="text.96247c0598dd4c">Загружается каталог…</div></div>
     </section>
-    <section class="storefront-impact" aria-label="ARIA Impact"><div><span class="storefront-eyebrow">ARIA IMPACT</span><h2>Больше пользы.<br>Меньше потерь.</h2><a href="/social.html">Социальная полка ↗</a></div><div class="impact-hero"><div class="impact-stat"><strong class="impact-stat-value" id="impact-saved">—</strong><span class="impact-stat-label">спасено от списания</span></div><div class="impact-stat"><strong class="impact-stat-value" id="impact-social">—</strong><span class="impact-stat-label">на социальной полке</span></div><div class="impact-stat"><strong class="impact-stat-value" id="impact-active">—</strong><span class="impact-stat-label">в обработке ARIA</span></div></div></section>
+    <section class="storefront-impact" aria-label="ARIA Impact"><div><span class="storefront-eyebrow">ARIA IMPACT</span><h2><span data-copy="text.9b39f12763ab44">Больше пользы.</span><br><span data-copy="text.b2ac31485864ba">Меньше потерь.</span></h2><a href="/social.html" data-copy="text.0c3cae37d18c89">Социальная полка ↗</a></div><div class="impact-hero"><div class="impact-stat"><strong class="impact-stat-value" id="impact-saved">—</strong><span class="impact-stat-label" data-copy="text.b68e34084bb305">спасено от списания</span></div><div class="impact-stat"><strong class="impact-stat-value" id="impact-social">—</strong><span class="impact-stat-label" data-copy="text.e47b20f2d9e2ef">на социальной полке</span></div><div class="impact-stat"><strong class="impact-stat-value" id="impact-active">—</strong><span class="impact-stat-label" data-copy="text.90fb7852912385">в обработке ARIA</span></div></div></section>
   </main>
   <div class="toast-container" id="toast-container"></div>
   <script src="/js/i18n.js"></script><script src="/js/shell.js"></script><script src="/js/auth.js"></script><script src="/js/money.js"></script><script src="/js/catalog-images.js"></script><script src="/js/page-index-inline-1.js"></script><script src="/js/index-mvp.js"></script><script src="/js/assistant.js"></script><script src="/js/pwa.js"></script>

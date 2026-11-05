@@ -1,13 +1,14 @@
 {
   "totals": {
-    "tests": 234,
+    "tests": 240,
     "failures": 0,
     "errors": 0,
     "skipped": 0
   },
-  "environment": "fresh isolated PostgreSQL, V1-V32, Hibernate validate",
-  "verification": "full 233-test run, then affected suites and added global-stop test; latest results all green",
-  "suites": [
+  "scope": "All tests in one full fresh PostgreSQL V1-V32 run. No external AI calls in automated tests.",
+  "completedAt": "2026-11-05T09:37:55.0306752Z",
+  "exitCode": 0,
+  "classes": [
     {
       "name": "com.aria.config.DatabaseUrlConfigurationTest",
       "tests": "3",
@@ -136,7 +137,7 @@
     },
     {
       "name": "com.aria.service.AssistantQueryTest",
-      "tests": "5",
+      "tests": "7",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -164,7 +165,7 @@
     },
     {
       "name": "com.aria.service.CustomerAssistantScopeTest",
-      "tests": "2",
+      "tests": "4",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
@@ -248,10 +249,11 @@
     },
     {
       "name": "com.aria.WorkspaceOverviewIntegrationTest",
-      "tests": "2",
+      "tests": "4",
       "failures": "0",
       "errors": "0",
       "skipped": "0"
     }
-  ]
+  ],
+  "productionChanged": false
 }

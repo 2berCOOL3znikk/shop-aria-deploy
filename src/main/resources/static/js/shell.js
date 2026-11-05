@@ -2,23 +2,23 @@
   "use strict";
 
   const labels = {
-    ru: { write: "Написать нам", catalog: "Каталог", social: "Соц. полка", favorites: "♡ Избранное", cart: "Корзина", profile: "Профиль", admin: "Управление", org: "Кабинет организации", support: "Поддержка", login: "Войти", logout: "Выйти", project: "Проект", about: "О проекте", how: "Как это работает", privacy: "Конфиденциальность", contact: "Связаться", faq: "FAQ", telegram: "Telegram", mission: "Соц. миссия", funds: "Помощь фондам и приютам" },
+    ru: { write: ariaCopy.text("text.b0f097f65241d8"), catalog: ariaCopy.text("text.d0ef3540b088bb"), social: ariaCopy.text("text.fd3069dfffcedf"), favorites: ariaCopy.text("text.68bbb1fc7579d6"), cart: ariaCopy.text("text.ec1808413ddcb0"), profile: ariaCopy.text("text.359497aff53e7d"), admin: ariaCopy.text("text.a4bba03c40fd1c"), org: ariaCopy.text("text.ed3b79e5d8058d"), support: ariaCopy.text("text.f0012086d52ed6"), login: ariaCopy.text("text.8fc9ab2eeb38ad"), logout: ariaCopy.text("text.5690c2e63b9da5"), project: ariaCopy.text("text.f45edf00685108"), about: ariaCopy.text("text.d09828b0005f32"), how: ariaCopy.text("text.b9f1fffef424d9"), privacy: ariaCopy.text("text.6d5c24967752a4"), contact: ariaCopy.text("text.2d4a75604eb904"), faq: "FAQ", telegram: "Telegram", mission: ariaCopy.text("text.66dc94f279a9f5"), funds: ariaCopy.text("text.5b2f6be0aeb139") },
     en: { write: "Write to us", catalog: "Catalog", social: "Social shelf", favorites: "♡ Favorites", cart: "Cart", profile: "Profile", admin: "Management", org: "Organization cabinet", support: "Support", login: "Sign in", logout: "Sign out", project: "Project", about: "About", how: "How it works", privacy: "Privacy", contact: "Contact", faq: "FAQ", telegram: "Telegram", mission: "Social mission", funds: "Support charities and shelters" },
-    kk: { write: "Бізге жазыңыз", catalog: "Каталог", social: "Әлеуметтік сөре", favorites: "♡ Таңдаулылар", cart: "Себет", profile: "Профиль", admin: "Басқару", org: "Ұйым кабинеті", support: "Қолдау", login: "Кіру", logout: "Шығу", project: "Жоба", about: "Жоба туралы", how: "Қалай жұмыс істейді", privacy: "Құпиялылық", contact: "Байланыс", faq: "FAQ", telegram: "Telegram", mission: "Әлеуметтік миссия", funds: "Қорлар мен панажайларға көмек" }
+    kk: { write: ariaCopy.text("text.d032982716d295"), catalog: ariaCopy.text("text.d0ef3540b088bb"), social: ariaCopy.text("text.4ec16e28f8e933"), favorites: ariaCopy.text("text.fdded270c5cf21"), cart: ariaCopy.text("text.f83105734fa566"), profile: ariaCopy.text("text.359497aff53e7d"), admin: ariaCopy.text("text.2ac2567b71b108"), org: ariaCopy.text("text.95bc07194ecbf4"), support: ariaCopy.text("text.f1fbb7c7a7279b"), login: ariaCopy.text("text.80342ff67646f8"), logout: ariaCopy.text("text.ec602d5330c3bb"), project: ariaCopy.text("text.5ece2380f3f854"), about: ariaCopy.text("text.ffab419e7e53ff"), how: ariaCopy.text("text.aa13a67d7d4bf9"), privacy: ariaCopy.text("text.632d909c3b56b6"), contact: ariaCopy.text("text.2619e6c33c9ead"), faq: "FAQ", telegram: "Telegram", mission: ariaCopy.text("text.ab4c7796f23459"), funds: ariaCopy.text("text.d6484b5ed09773") }
   };
 
   const langCode = () => window.ariaI18n && window.ariaI18n.getLang ? window.ariaI18n.getLang() : "ru";
   const t = key => (labels[langCode()] || labels.ru)[key] || labels.ru[key] || key;
   const setNavLabel = link => {
     const badge = link.querySelector(".shell-cart-count");
-    link.textContent = t(link.dataset.shellLabel);
+    ariaCopy.setProperty(link,"textContent",t(link.dataset.shellLabel));
     if (badge) link.appendChild(badge);
   };
 
   function makeLink(href, text, key) {
     const a = document.createElement("a");
     a.href = href;
-    a.textContent = text;
+    ariaCopy.setProperty(a,"textContent",text);
     if (key) a.dataset.shellLabel = key;
     if (location.pathname.toLowerCase().endsWith(href.split("#")[0].toLowerCase())) a.classList.add("active");
     return a;
@@ -28,9 +28,9 @@
     const activeNav = document.getElementById("aria-shell-links");
     const footer = document.getElementById("aria-shell-footer");
     if (activeNav) activeNav.querySelectorAll("[data-shell-label]").forEach(setNavLabel);
-    if (footer) footer.querySelectorAll("[data-shell-footer]").forEach(el => el.textContent = t(el.dataset.shellFooter));
+    if (footer) footer.querySelectorAll("[data-shell-footer]").forEach(el => ariaCopy.setProperty(el,"textContent",t(el.dataset.shellFooter)));
     const languageButton = document.getElementById("lang-toggle-btn");
-    if (languageButton) languageButton.textContent = (langCode() || "ru").toUpperCase();
+    if (languageButton) ariaCopy.setProperty(languageButton,"textContent",(langCode() || "ru").toUpperCase());
   }
 
   function render() {
@@ -40,12 +40,12 @@
     const oldNav = document.querySelector("body > nav.nav-glass");
     const nav = document.createElement("nav");
     nav.className = "nav-glass aria-shell";
-    nav.setAttribute("aria-label", "ARIA");
+    ariaCopy.setAttribute(nav,"aria-label","ARIA");
 
     const brand = document.createElement("a");
     brand.href = "/index.html";
     brand.className = "logo-new";
-    brand.innerHTML = '<span class="aria-brand-mark">◆</span> <span class="gradient-text">ARIA</span> <span class="aria-brand-shop">Shop</span>';
+    ariaCopy.setProperty(brand,"innerHTML",'<span class="aria-brand-mark">◆</span> <span class="gradient-text">ARIA</span> <span class="aria-brand-shop">Shop</span>');
     nav.appendChild(brand);
 
     const links = document.createElement("div");
@@ -57,9 +57,9 @@
     const cartBadge = document.createElement("span");
     cartBadge.id = "cart-count";
     cartBadge.className = "shell-cart-count";
-    cartBadge.textContent = "0";
+    ariaCopy.setProperty(cartBadge,"textContent","0");
     cartBadge.hidden = true;
-    cartBadge.setAttribute("aria-label", "Товаров в корзине: 0");
+    ariaCopy.setAttribute(cartBadge,"aria-label",ariaCopy.text("text.c660f1dac8ad2f"));
     cartLink.appendChild(cartBadge);
 
     [makeLink("/index.html", t("catalog"), "catalog"),
@@ -81,7 +81,7 @@
     theme.type = "button";
     theme.id = "theme-toggle-btn";
     theme.className = "shell-icon-button";
-    theme.setAttribute("aria-label", "Сменить тему");
+    ariaCopy.setAttribute(theme,"aria-label",ariaCopy.text("text.207dc60b4b0633"));
     theme.addEventListener("click", () => window.ariaTheme && window.ariaTheme.toggleTheme());
     actions.appendChild(theme);
 
@@ -102,13 +102,13 @@
     if (window.ariaAuth && window.ariaAuth.isLoggedIn()) {
       const email = document.createElement("span");
       email.className = "shell-user-email";
-      email.textContent = window.ariaAuth.getUserEmail() || "";
+      ariaCopy.setProperty(email,"textContent",window.ariaAuth.getUserEmail() || "");
       user.appendChild(email);
 
       const logout = document.createElement("button");
       logout.type = "button";
       logout.className = "shell-user-button";
-      logout.textContent = t("logout");
+      ariaCopy.setProperty(logout,"textContent",t("logout"));
       logout.addEventListener("click", () => window.ariaAuth.logout());
       user.appendChild(logout);
     } else {
@@ -121,9 +121,9 @@
     const burger = document.createElement("button");
     burger.type = "button";
     burger.className = "aria-shell-burger";
-    burger.setAttribute("aria-label", "Открыть меню");
+    ariaCopy.setAttribute(burger,"aria-label",ariaCopy.text("text.b2bbe988578044"));
     burger.setAttribute("aria-expanded", "false");
-    burger.innerHTML = "<span></span><span></span><span></span>";
+    ariaCopy.setProperty(burger,"innerHTML","<span></span><span></span><span></span>");
     burger.addEventListener("click", () => {
       const open = nav.classList.toggle("menu-open");
       burger.setAttribute("aria-expanded", String(open));
@@ -147,16 +147,16 @@
       footer = document.createElement("footer");
       footer.id = "aria-shell-footer";
       footer.className = "aria-shell-footer";
-      footer.innerHTML = '<div class="shell-footer-columns"><section><h2 data-shell-footer="project"></h2><a href="/about.html" data-shell-footer="about"></a><a href="/about.html#flow" data-shell-footer="how"></a><a href="/privacy.html" data-shell-footer="privacy"></a></section><section><h2 data-shell-footer="support"></h2><a href="/support.html" data-shell-footer="contact"></a><a href="/support.html#faq" data-shell-footer="faq"></a><a href="/support.html#feedback-form" data-shell-footer="write"></a></section><section><h2 data-shell-footer="mission"></h2><a href="/social.html" data-shell-footer="funds"></a></section></div><p class="shell-copyright">© 2026 ARIA · Smart Retail & Social Impact · Казахстан</p>';
+      ariaCopy.setProperty(footer,"innerHTML",ariaCopy.text("text.641128e13e3f4d"));
       document.body.appendChild(footer);
     }
 
-    footer.querySelectorAll("[data-shell-footer]").forEach(el => el.textContent = t(el.dataset.shellFooter));
+    footer.querySelectorAll("[data-shell-footer]").forEach(el => ariaCopy.setProperty(el,"textContent",t(el.dataset.shellFooter)));
     links.querySelectorAll("[data-shell-label]").forEach(setNavLabel);
 
-    theme.textContent = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "☀" : "🌙";
-    theme.title = window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "Светлая тема" : "Тёмная тема";
-    lang.textContent = (langCode() || "ru").toUpperCase();
+    ariaCopy.setProperty(theme,"textContent",window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? "☀" : "🌙");
+    ariaCopy.setProperty(theme,"title",window.ariaTheme && window.ariaTheme.getTheme() === "dark" ? ariaCopy.text("text.46bf625a0f170f") : ariaCopy.text("text.46fd0410f99d68"));
+    ariaCopy.setProperty(lang,"textContent",(langCode() || "ru").toUpperCase());
     window.refreshCartBadge();
   }
 
@@ -168,18 +168,18 @@
     const badge = document.getElementById("cart-count");
     if (!badge) return 0;
     if (!window.ariaAuth || !window.ariaAuth.isLoggedIn()) {
-      badge.textContent = "0";
-      badge.setAttribute("aria-label", "Товаров в корзине: 0");
+      ariaCopy.setProperty(badge,"textContent","0");
+      ariaCopy.setAttribute(badge,"aria-label",ariaCopy.text("text.c660f1dac8ad2f"));
       badge.hidden = true;
       return 0;
     }
     try {
       const response = await window.ariaAuth.authFetch("/api/cart/total");
-      if (!response.ok) throw new Error("Не удалось обновить корзину");
+      if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.160d98c161571f")));
       const data = await response.json();
       const count = Math.max(0, Number(data.itemCount) || 0);
-      badge.textContent = count > 99 ? "99+" : String(count);
-      badge.setAttribute("aria-label", "Товаров в корзине: " + count);
+      ariaCopy.setProperty(badge,"textContent",count > 99 ? "99+" : String(count));
+      ariaCopy.setAttribute(badge,"aria-label",ariaCopy.text("text.12ffa5b136e2c6") + count);
       badge.hidden = count === 0;
       return count;
     } catch (_) {
@@ -206,8 +206,8 @@
 
     const el = document.createElement('div');
     el.className = 'toast ' + type;
-    el.innerHTML = '<span class="toast-icon">' + (ICONS[type] || '•') + '</span><span class="toast-message"></span>';
-    el.querySelector('.toast-message').textContent = message;
+    ariaCopy.setProperty(el,"innerHTML",'<span class="toast-icon">' + (ICONS[type] || '•') + '</span><span class="toast-message"></span>');
+    ariaCopy.setProperty(el.querySelector('.toast-message'),"textContent",message);
     container.appendChild(el);
 
     requestAnimationFrame(() => el.classList.add('show'));           // плавный вход
@@ -231,7 +231,7 @@
   // === ЕДИНАЯ ФУНКЦИЯ ДЛЯ ЛАЙКОВ (работает на всех страницах) ===
   window.bindFavoriteButton = function (btn, productId, isFav) {
     btn.classList.toggle('is-active', !!isFav);
-    btn.innerHTML = isFav ? '♥' : '♡';
+    ariaCopy.setProperty(btn,"innerHTML",isFav ? '♥' : '♡');
     btn.onclick = async function () {
       if (!window.ariaAuth || !window.ariaAuth.requireLogin()) return;
       try {
@@ -239,11 +239,11 @@
         const data = await res.json();
         const nowFav = !!data.isFavorite;
         btn.classList.toggle('is-active', nowFav);
-        btn.innerHTML = nowFav ? '♥' : '♡';
+        ariaCopy.setProperty(btn,"innerHTML",nowFav ? '♥' : '♡');
         btn.classList.add('pop');
         setTimeout(() => btn.classList.remove('pop'), 340);
-        window.showToast(nowFav ? 'Добавлено в избранное' : 'Удалено из избранного');
-      } catch(e) { window.showToast('Ошибка', 'error'); }
+        window.showToast(nowFav ? ariaCopy.text("text.6527a13f1e2fec") : ariaCopy.text("text.b076284d2dfae1"));
+      } catch(e) { window.showToast(ariaCopy.text("text.bf22dfeeba8b85"), 'error'); }
     };
   };
 
@@ -252,8 +252,8 @@
     return new Promise(resolve => {
       const overlay = document.createElement("div");
       overlay.className = "aria-confirm-backdrop";
-      overlay.innerHTML = '<section class="aria-confirm-dialog glass-card" role="dialog" aria-modal="true" aria-labelledby="aria-confirm-title"><h2 id="aria-confirm-title">Подтвердите действие</h2><p class="aria-confirm-message"></p><div class="aria-confirm-actions"><button type="button" class="btn-outline" data-choice="cancel">Отмена</button><button type="button" class="btn-glow" data-choice="confirm">Подтвердить</button></div></section>';
-      overlay.querySelector(".aria-confirm-message").textContent = String(message ?? "");
+      ariaCopy.setProperty(overlay,"innerHTML",ariaCopy.text("text.2271740a753084"));
+      ariaCopy.setProperty(overlay.querySelector(".aria-confirm-message"),"textContent",String(message ?? ""));
       const finish = choice => { overlay.remove(); document.removeEventListener("keydown", onKeydown); resolve(choice); };
       const onKeydown = event => { if (event.key === "Escape") finish(false); };
       overlay.addEventListener("click", event => { if (event.target === overlay) finish(false); });
@@ -281,16 +281,16 @@
   const stock=id=>stocks.has(Number(id))?stocks.get(Number(id)):null;
   function controlsInner(id) {
     const count=quantity(id),limit=stock(id),waiting=!!token()&&!loaded,disabled=busy||waiting;
-    if(readError&&!loaded)return `<button type="button" class="btn-add-cart" data-cart-op="retry" data-cart-product="${id}" ${busy?'disabled':''}>Обновить корзину</button>`;
-    if(!count)return `<button type="button" class="btn-add-cart" data-cart-op="add" data-cart-product="${id}" ${disabled||limit===0?'disabled':''}>${waiting?'Загрузка…':limit===0?'Нет в наличии':'В корзину'}</button>`;
-    return `<div class="cart-stepper" role="group" aria-label="Количество товара в корзине"><button type="button" class="btn-icon" data-cart-op="decrease" data-cart-product="${id}" aria-label="Уменьшить количество" ${disabled?'disabled':''}>−</button><output aria-label="Количество" aria-live="polite">${count}</output><button type="button" class="btn-icon" data-cart-op="increase" data-cart-product="${id}" aria-label="Увеличить количество" ${disabled||limit==null||count>=limit?'disabled':''}>+</button></div>${limit!=null&&count>limit?`<small class="cart-stock-note">Доступно ${limit}. Уменьшите количество.</small>`:'<small class="cart-control-note">В корзине</small>'}`;
+    if(readError&&!loaded)return ariaCopy.template("template.4864eae7e9606b",[id,busy?'disabled':'']);
+    if(!count)return `<button type="button" class="btn-add-cart" data-cart-op="add" data-cart-product="${id}" ${disabled||limit===0?'disabled':''}>${waiting?ariaCopy.text("text.db491ef5033fe0"):limit===0?ariaCopy.text("text.bd374f46503b94"):ariaCopy.text("text.4a252fb127a9de")}</button>`;
+    return ariaCopy.template("template.fbba7487dc2cac",[id,disabled?'disabled':'',count,id,disabled||limit==null||count>=limit?'disabled':'',limit!=null&&count>limit?ariaCopy.template("template.5379263dfe0a8f",[limit]):ariaCopy.text("text.dc59224d0c7273")]);
   }
   function paint() {
     document.querySelectorAll('[data-cart-control]').forEach(node=>{
-      const id=Number(node.dataset.cartControl);node.dataset.cartQuantity=String(quantity(id));node.setAttribute('aria-busy',String(busy));node.innerHTML=controlsInner(id);
+      const id=Number(node.dataset.cartControl);node.dataset.cartQuantity=String(quantity(id));node.setAttribute('aria-busy',String(busy));ariaCopy.setProperty(node,"innerHTML",controlsInner(id));
     });
     const badge=document.getElementById('cart-count');
-    if(badge){const count=rows.length;badge.textContent=count>99?'99+':String(count);badge.hidden=!count;badge.setAttribute('aria-label','Позиций в корзине: '+count);}
+    if(badge){const count=rows.length;ariaCopy.setProperty(badge,"textContent",count>99?'99+':String(count));badge.hidden=!count;ariaCopy.setAttribute(badge,'aria-label',ariaCopy.text("text.1ba9830420bb44")+count);}
   }
   function emit(){paint();window.dispatchEvent(new CustomEvent('aria:cart-changed',{detail:{items:snapshot(),busy,loaded}}));}
   function control(product) {
@@ -307,7 +307,7 @@
   async function response(request) {
     const reply=await request;
     const data=await reply.json().catch(()=>({}));
-    if(!reply.ok)throw new Error(data.message||data.error||'Не удалось обновить корзину. Проверьте соединение.');
+    if(!reply.ok)throw new Error(ariaCopy.errorText(data.message||data.error||ariaCopy.text("text.518e47d808c15a")));
     return data;
   }
   async function refresh(options={}) {
@@ -319,7 +319,7 @@
     reading=(async()=>{
       try {
         const data=await response(window.ariaAuth.authFetch('/api/cart'));
-        if(!Array.isArray(data))throw new Error('Не удалось загрузить корзину.');
+        if(!Array.isArray(data))throw new Error(ariaCopy.errorText(ariaCopy.text("text.29acb7589c028c")));
         // Ignore a response from a previous account if the session changed while reading.
         if(token()!==current)return snapshot();
         rows=data;if(catalogLoaded)rows.forEach(row=>{if(!stocks.has(Number(row.productId)))stocks.set(Number(row.productId),0);});loaded=true;readError='';emit();return snapshot();
@@ -332,36 +332,36 @@
     const reply=await fetch('/api/products/'+encodeURIComponent(id));
     if(reply.status===404){stocks.set(id,0);return;}
     const data=await response(Promise.resolve(reply));
-    if(!data.product)throw new Error('Не удалось проверить наличие товара.');
+    if(!data.product)throw new Error(ariaCopy.errorText(ariaCopy.text("text.16069caeb4cfb1")));
     stocks.set(id,Math.max(0,Number(data.product.quantityOnHand)||0));
   }
   async function loadStocks() {
     const products=await response(fetch('/api/products/store'));
-    if(!Array.isArray(products))throw new Error('Не удалось проверить остатки.');
+    if(!Array.isArray(products))throw new Error(ariaCopy.errorText(ariaCopy.text("text.8b528f40a705c3")));
     register(products,true);
   }
   async function mutate(productId,kind,value=0) {
     if(!window.ariaAuth?.requireLogin()||busy)return false;
     const actor=token();
-    const id=Number(productId);if(!Number.isSafeInteger(id)||id<1)throw new Error('Товар не найден.');
+    const id=Number(productId);if(!Number.isSafeInteger(id)||id<1)throw new Error(ariaCopy.errorText(ariaCopy.text("text.70f52edc0c60a0")));
     busy=true;emit();
     const operation=async()=>{
-      if(token()!==actor)throw new Error('Учётная запись изменилась. Откройте корзину заново.');
+      if(token()!==actor)throw new Error(ariaCopy.errorText(ariaCopy.text("text.42b84698224205")));
       await Promise.all([refresh({force:true}),kind==='remove'?Promise.resolve():refreshStock(id)]);
-      if(token()!==actor)throw new Error('Учётная запись изменилась. Откройте корзину заново.');
+      if(token()!==actor)throw new Error(ariaCopy.errorText(ariaCopy.text("text.42b84698224205")));
       const current=rows.find(row=>Number(row.productId)===id),count=quantity(id);
       if(kind==='add'&&count>0)return true; // The add button means "put in cart", never a blind second +1.
       let target=kind==='remove'?0:kind==='add'?1:count+value;
       const limit=stock(id);
       if(kind==='adjust'&&value<0&&limit!=null)target=Math.min(target,limit);
       target=Math.max(0,target);
-      if(limit!=null&&target>limit)throw new Error('Сейчас доступно '+limit+' шт.');
+      if(limit!=null&&target>limit)throw new Error(ariaCopy.errorText(ariaCopy.text("text.d18dbd27a02e84")+limit+ariaCopy.text("text.297cac49ffa570")));
       if(target===count)return true;
       if(!target){
         // Delete all observed duplicate rows too, should legacy data contain them.
         for(const item of rows.filter(row=>Number(row.productId)===id))await response(window.ariaAuth.authFetch('/api/cart/'+item.id,{method:'DELETE'}));
       }else if(current){
-        if(rows.filter(row=>Number(row.productId)===id).length>1)throw new Error('Обновите корзину или удалите эту позицию перед повтором.');
+        if(rows.filter(row=>Number(row.productId)===id).length>1)throw new Error(ariaCopy.errorText(ariaCopy.text("text.c05ef70e6d81e3")));
         await response(window.ariaAuth.authFetch('/api/cart/'+current.id+'?qty='+target,{method:'PUT'}));
       }else await response(window.ariaAuth.authFetch('/api/cart/add?productId='+id+'&qty='+target,{method:'POST'}));
       await refresh({force:true});channel?.postMessage('changed');return true;
@@ -371,7 +371,7 @@
     finally{busy=false;emit();if(remotePending){remotePending=false;refresh().catch(()=>{});}}
   }
   const add=id=>mutate(id,'add');
-  const adjust=(id,delta)=>{if(![-1,1].includes(delta))return Promise.reject(new Error('Выберите количество кнопками + и −.'));return mutate(id,'adjust',delta);};
+  const adjust=(id,delta)=>{if(![-1,1].includes(delta))return Promise.reject(new Error(ariaCopy.errorText(ariaCopy.text("text.2d63e8c6b0fd85"))));return mutate(id,'adjust',delta);};
   const remove=id=>mutate(id,'remove');
   function remoteRefresh(){if(busy){remotePending=true;return;}refresh().catch(()=>{});}
   if(channel)channel.onmessage=event=>{if(event.data==='changed')remoteRefresh();};

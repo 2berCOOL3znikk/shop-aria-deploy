@@ -47,6 +47,7 @@ public class WorkspaceOverviewService {
         result.put("stores", Map.of(
                 "total", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status<>'DISCONNECTED'"),
                 "connected", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status='CONNECTED'"),
+                "testConnected", count("ConnectedStore s", "s.archived=false and s.testConnection=true and s.status='CONNECTED'"),
                 "attention", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status not in ('CONNECTED','DISCONNECTED')"),
                 "catalogCards", count("StoreSnapshot s", "s.storeId in (select c.id from ConnectedStore c where c.archived=false and c.testConnection=false and c.status<>'DISCONNECTED')")
                         + (count("ConnectedStore s", "s.archived=false and s.platform='ARIA_DEMO' and s.status<>'DISCONNECTED'") > 0 ? ((Number) inventory.get("products")).longValue() : 0L)));
@@ -94,6 +95,10 @@ public class WorkspaceOverviewService {
         manager.put("scheduledAiConsent", pricing != null && pricing.scheduledAiEnabled);
         manager.put("lastFinished", state == null ? null : state.lastFinished);
         manager.put("lastError", state == null ? null : state.lastError);
+        // Provider health belongs to this process; verified decisions survive a restart.
+        var nativeAiAt = em.createQuery("select max(d.aiCompletedAt) from PricingDecision d where d.source='AI' and d.aiCompletedAt<=:now", LocalDateTime.class).setParameter("now", now).getSingleResult();
+        var connectedAiAt = em.createQuery("select max(d.aiCompletedAt) from StorePricingDecision d where d.source='AI' and d.aiCompletedAt<=:now", LocalDateTime.class).setParameter("now", now).getSingleResult();
+        manager.put("lastDecisionAt", nativeAiAt == null ? connectedAiAt : connectedAiAt == null || nativeAiAt.isAfter(connectedAiAt) ? nativeAiAt : connectedAiAt);
         var provider = new LinkedHashMap<String, Object>();
         var status = intelligence.pricingStatus();
         for (var key : List.of("configured", "status", "lastAttempt", "lastSuccess")) provider.put(key, status.get(key));

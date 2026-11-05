@@ -46,6 +46,7 @@ public class SecurityConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/api/webhooks/woocommerce/*/*").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/auth/capabilities").permitAll()
                         // Only the preserved demo exposes customer APIs/registration publicly.
                         // Silo companies must not expose their imported business catalogue anonymously.
                         .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
@@ -57,7 +58,7 @@ public class SecurityConfig {
                                 "/api/hello",
                                 "/actuator/health",
                                 "/", "/*.html", "/css/**", "/js/**", "/images/**", "/styles.css", "/control.css", "/favicon.ico",
-                                "/h2-console/**", "/sw.js", "/manifest.webmanifest"
+                                "/h2-console/**", "/sw.js", "/manifest.webmanifest", "/manifest-en.webmanifest"
                         ).permitAll()
                         .requestMatchers(HttpMethod.GET, "/api/products").hasRole("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/api/products/social").hasAnyRole("ADMIN", "ORG")

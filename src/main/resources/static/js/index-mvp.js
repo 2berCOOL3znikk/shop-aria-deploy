@@ -11,7 +11,7 @@
     if (!p.expiryDate) return '';
     const date = new Date(p.expiryDate + 'T12:00:00');
     if (!Number.isFinite(date.getTime())) return '';
-    return (p.provenance?.demonstration ? 'Учебный срок: ' : 'До ') + date.toLocaleDateString('ru-KZ', {day:'numeric',month:'short'});
+    return (p.provenance?.demonstration ? ariaCopy.text("text.44cab2c96f5fff") : ariaCopy.text("text.5a347316dd3625")) + date.toLocaleDateString(ariaCopy.locale(), {day:'numeric',month:'short'});
   }
   function loadRating(id) {
     if (!reviewCache.has(id)) reviewCache.set(id, fetch('/api/reviews/product/' + encodeURIComponent(id)).then(r => r.ok ? r.json() : []).catch(() => []));
@@ -20,8 +20,8 @@
       const node = document.querySelector('[data-rating-product="'+Number(id)+'"]');
       if (!node || !valid.length) return;
       const avg = valid.reduce((sum,r) => sum + Number(r.rating),0)/valid.length;
-      node.setAttribute('aria-label','Рейтинг '+avg.toFixed(1)+' из 5, отзывов: '+valid.length);
-      node.innerHTML = '<span aria-hidden="true">★</span> '+avg.toFixed(1).replace('.',',')+' <small>('+valid.length+')</small>';
+      ariaCopy.setAttribute(node,'aria-label',ariaCopy.text("text.07a3cb939d930d")+avg.toFixed(1)+ariaCopy.text("text.4ea929ff8e18ef")+valid.length);
+      ariaCopy.setProperty(node,"innerHTML",'<span aria-hidden="true">★</span> '+avg.toFixed(1).replace('.',',')+' <small>('+valid.length+')</small>');
       node.hidden=false;
     });
   }
@@ -29,17 +29,17 @@
     currentList=products.slice();
     const grid=document.getElementById('products'); if(!grid)return;
     grid.setAttribute('aria-busy','false');
-    const count=document.getElementById('catalog-result-count');if(count)count.textContent='Найдено: '+products.length;
+    const count=document.getElementById('catalog-result-count');if(count)ariaCopy.setProperty(count,"textContent",ariaCopy.text("text.1bee7400e81b03")+products.length);
     document.getElementById('catalog-more')?.remove();
-    if(!products.length){grid.innerHTML='<div class="catalog-empty"><span aria-hidden="true">⌕</span><h3>Ничего не найдено</h3><p>Измените запрос, категорию или диапазон цен.</p><button type="button" class="btn-outline" data-reset-catalog>Сбросить фильтры</button></div>';return;}
+    if(!products.length){ariaCopy.setProperty(grid,"innerHTML",ariaCopy.text("text.797df1f059efa1"));return;}
     const visible=products.slice(0,pageSize);
-    grid.innerHTML=visible.map(p=>{
+    ariaCopy.setProperty(grid,"innerHTML",visible.map(p=>{
       const price=p.displayPrice??p.unitPrice, reduced=Number(price)<Number(p.unitPrice), expiry=expiryInfo(p);
       const favorite=state.favoriteIds.has(Number(p.id));
-      return '<article class="product-card aria-product-card" data-product-card="'+Number(p.id)+'"><a class="aria-product-art" href="/product.html?id='+Number(p.id)+'">'+CatalogImages.imageTag(p,{className:'product-card-image',alt:p.name})+'</a><div class="product-card-content"><div class="product-card-category">'+esc(p.category||'Без категории')+'</div><div class="aria-rating" data-rating-product="'+Number(p.id)+'" hidden></div><a class="product-card-name" href="/product.html?id='+Number(p.id)+'">'+esc(p.name)+'</a><div class="product-card-stock">В наличии: '+Number(p.quantityOnHand||0)+' '+esc(p.unit||'шт')+'</div>'+(expiry?'<span class="expiry-pill">'+esc(expiry)+'</span>':'')+'<div class="product-card-price">'+money(price)+(reduced?'<del class="product-card-old-price">'+money(p.unitPrice)+'</del>':'')+'</div><div class="product-card-actions">'+window.ariaCart.control(p)+'<button type="button" class="aria-favorite-button'+(favorite?' is-active':'')+'" aria-label="'+(favorite?'Удалить из избранного':'Добавить в избранное')+'" aria-pressed="'+favorite+'" onclick="toggleFavorite('+Number(p.id)+',this)">'+(favorite?'♥':'♡')+'</button></div></div></article>';
-    }).join('');
+      return '<article class="product-card aria-product-card" data-product-card="'+Number(p.id)+'"><a class="aria-product-art" href="/product.html?id='+Number(p.id)+'">'+CatalogImages.imageTag(p,{className:'product-card-image',alt:p.name})+'</a><div class="product-card-content"><div class="product-card-category">'+esc(p.category||ariaCopy.text("text.c1952d18056a9d"))+'</div><div class="aria-rating" data-rating-product="'+Number(p.id)+'" hidden></div><a class="product-card-name" href="/product.html?id='+Number(p.id)+'">'+esc(p.name)+ariaCopy.text("text.188b8bca754dd5")+Number(p.quantityOnHand||0)+' '+esc(p.unit||ariaCopy.text("text.a2954e5e0db4a7"))+'</div>'+(expiry?'<span class="expiry-pill">'+esc(expiry)+'</span>':'')+'<div class="product-card-price">'+money(price)+(reduced?'<del class="product-card-old-price">'+money(p.unitPrice)+'</del>':'')+'</div><div class="product-card-actions">'+window.ariaCart.control(p)+'<button type="button" class="aria-favorite-button'+(favorite?' is-active':'')+'" aria-label="'+(favorite?ariaCopy.text("text.7658dd5450ed58"):ariaCopy.text("text.2a6b5f7278c0d6"))+'" aria-pressed="'+favorite+'" onclick="toggleFavorite('+Number(p.id)+',this)">'+(favorite?'♥':'♡')+'</button></div></div></article>';
+    }).join(''));
     visible.forEach(p=>loadRating(p.id));
-    if(products.length>pageSize){const more=document.createElement('button');more.id='catalog-more';more.className='btn-outline catalog-more';more.type='button';more.textContent='Показать ещё · '+Math.min(12,products.length-pageSize);more.onclick=()=>{pageSize+=12;window.renderProducts(currentList);};grid.after(more);}
+    if(products.length>pageSize){const more=document.createElement('button');more.id='catalog-more';more.className='btn-outline catalog-more';more.type='button';ariaCopy.setProperty(more,"textContent",ariaCopy.text("text.2b95a0709b6351")+Math.min(12,products.length-pageSize));more.onclick=()=>{pageSize+=12;window.renderProducts(currentList);};grid.after(more);}
   };
 
   function persistFilters(category) {
@@ -54,7 +54,7 @@
     const sort=document.getElementById('sort')?.value||'default', min=numberField('price-min'), max=numberField('price-max'), sale=document.getElementById('discount-only')?.checked;
     const error=document.getElementById('catalog-filter-error');
     const invalid=(min!==null&&(!Number.isFinite(min)||min<0))||(max!==null&&(!Number.isFinite(max)||max<0))||(min!==null&&max!==null&&min>max);
-    if(error){error.hidden=!invalid;error.textContent=invalid?'Проверьте диапазон: цена «От» не должна превышать «До», значения — не ниже нуля.':'';}
+    if(error){error.hidden=!invalid;ariaCopy.setProperty(error,"textContent",invalid?ariaCopy.text("text.44fc16d6d7816e"):'');}
     persistFilters(category);
     let filtered=invalid?[]:state.products.filter(p=>{
       const text=[p.name,p.sku,p.description,p.category,p.brand].join(' ').toLocaleLowerCase('ru').replaceAll('ё','е'), price=Number(p.displayPrice??p.unitPrice);
@@ -76,8 +76,8 @@
   }
   window.updateImpactStats=function(){
     fetch('/api/products/impact/positions').then(r=>r.ok?r.json():Promise.reject()).then(data=>{
-      [['impact-saved',data.savedCount],['impact-social',data.socialCount],['impact-active',data.processingCount]].forEach(([id,value])=>{const n=document.getElementById(id);if(n)n.textContent=Number.isFinite(Number(value))?String(Number(value)):'—';});
-    }).catch(()=>{for(const id of ['impact-saved','impact-social','impact-active']){const n=document.getElementById(id);if(n){n.textContent='—';n.title='Данные пока недоступны';}}});
+      [['impact-saved',data.savedCount],['impact-social',data.socialCount],['impact-active',data.processingCount]].forEach(([id,value])=>{const n=document.getElementById(id);if(n)ariaCopy.setProperty(n,"textContent",Number.isFinite(Number(value))?String(Number(value)):'—');});
+    }).catch(()=>{for(const id of ['impact-saved','impact-social','impact-active']){const n=document.getElementById(id);if(n){ariaCopy.setProperty(n,"textContent",'—');ariaCopy.setProperty(n,"title",ariaCopy.text("text.ed05d91511d964"));}}});
   };
   document.addEventListener('DOMContentLoaded',()=>{
     const params=queryParams();

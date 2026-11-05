@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARIA Shop — Корзина</title>
+    <title data-copy="text.be990ea12501b2">ARIA Shop — Корзина</title>
     <link rel="stylesheet" href="/styles.css">
 
 
@@ -15,11 +15,11 @@
 <nav class="nav-glass">
     <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
     <div class="nav-links">
-        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
-        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
-        <a href="/profile.html#favorites-list" aria-label="Избранное">♡ Избранное</a>
-        <a href="/cart.html" class="active" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
-        <a href="/profile.html" data-i18n="nav.profile">Профиль</a>
+        <a href="/index.html" data-i18n="nav.catalog" data-copy="text.d0ef3540b088bb">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social" data-copy="text.fd3069dfffcedf">Соц. полка</a>
+        <a href="/profile.html#favorites-list" aria-label="Избранное" data-copy-aria-label="text.e4c1d01c5c8f21" data-copy="text.68bbb1fc7579d6">♡ Избранное</a>
+        <a href="/cart.html" class="active" data-i18n="nav.cart"><span data-copy="text.ae09e966c8d48d">Корзина 🛒 </span><span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" data-i18n="nav.profile" data-copy="text.359497aff53e7d">Профиль</a>
         <span id="auth-nav"></span>
         <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
         <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
@@ -27,7 +27,7 @@
 </nav>
 
 <main class="container" style="max-width:900px;margin:40px auto;padding:0 20px;">
-    <h1 style="margin-bottom:30px;" data-i18n="cart.title">Ваша корзина</h1>
+    <h1 style="margin-bottom:30px;" data-i18n="cart.title" data-copy="text.21aa55fa312070">Ваша корзина</h1>
     <div id="cart-items"></div>
     <div id="cart-total" style="margin-top:30px;padding:20px;" class="glass-card"></div>
 </main>

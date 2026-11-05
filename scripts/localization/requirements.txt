@@ -1,0 +1,6 @@
+# Optional offline authoring tool only; never production dependencies.
+ctranslate2==4.6.0
+sentencepiece==0.2.0
+numpy==2.5.4
+PyYAML==6.0.3
+setuptools==80.9.0

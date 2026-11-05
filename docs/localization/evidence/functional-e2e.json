@@ -1,0 +1,30 @@
+{
+  "checks": [
+    "RU/EN switch preserves the route and session; dashboard separates test connections and reads persisted AI evidence after restart",
+    "Stored Russian description is preserved exactly in the English edit form, without injected markup",
+    "English manual product creation, unique Java SKU, explicit educational stock, unsaved-language-change cancellation; no product facts or AI result invented",
+    "English connected-store pricing opens the persisted real OpenRouter KEEP decision with provenance and original explanation",
+    "Actual English registration and server-issued arithmetic challenge create a dedicated QA buyer",
+    "Real buyer cart adds, increments across catalogue/detail tabs, keeps one row, shows totals, validates address and removes; checkout is not submitted",
+    "English floating assistant searches actual educational catalogue, honors budget and comparison IDs, rejects coding tasks, reveals no cost, and makes no external AI request",
+    "44 public RU/EN mobile/desktop routes, real PWA offline page, and cache restricted to fixed public shell assets"
+  ],
+  "errors": [],
+  "productionChanged": false,
+  "externalAiRequests": 0,
+  "checkoutRequests": 0,
+  "product": {
+    "id": 1,
+    "sku": "ARIA-AUTO-1",
+    "name": "Учебное полотенце",
+    "educational": true
+  },
+  "publicProduct": {
+    "id": 17,
+    "name": "Учебное полотенце",
+    "educational": true
+  },
+  "publicPreview": "http://127.0.0.1:8087",
+  "publicPages": 44,
+  "passed": true
+}

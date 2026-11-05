@@ -1,0 +1,18 @@
+'use strict';
+const fs=require('node:fs'),path=require('node:path'),assert=require('node:assert/strict');const {chromium}=require(process.env.ARIA_PLAYWRIGHT_MODULE||'playwright');
+const cfg=JSON.parse(fs.readFileSync('data/woocommerce/aria-config.json','utf8').replace(/^\uFEFF/,'')),base='http://127.0.0.1:8085',directory='docs/localization/evidence';fs.mkdirSync(directory,{recursive:true});
+const dark=process.argv.includes('--dark'),quick=process.argv.includes('--quick');
+const allRoutes=['workspace','manager','stores','products','orders','lots','movements','pos','smart','competitors','pricing','purchases','suppliers','overview','intelligence','socialPlans','social','settings','policies','integrations','audit','feedback','guide'];
+const routes=dark?['workspace','manager','stores','smart','socialPlans']:allRoutes;
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true}),report={theme:dark?'dark':'light',errors:[],routes:[],untranslated:[],writesPerformed:false,aiRequested:false};try{
+ for(const lang of (quick||dark?['en']:['ru','en'])){
+  const ctx=await browser.newContext({viewport:{width:1440,height:1000}});await ctx.addInitScript(({lang,dark})=>{localStorage.setItem('aria_lang',lang);localStorage.setItem('aria_theme',dark?'dark':'light');},{lang,dark});const p=await ctx.newPage();p.on('pageerror',e=>report.errors.push(lang+': '+e.message));p.on('dialog',d=>d.accept());
+  await p.goto(base+'/login.html');await p.locator('#login-email').fill(cfg.email);await p.locator('#login-password').fill(cfg.password);await p.locator('#login-form [type=submit]').click();await p.waitForURL('**/control.html');await p.waitForSelector('#control-nav>button');assert.equal(await p.locator('#control-nav>button').count(),11);
+  for(const width of (quick?[1440]:dark?[1440,390]:[1440,768,390])){await p.setViewportSize({width,height:1000});for(const route of routes){await p.goto(base+'/control.html#'+route);await p.waitForFunction(()=>document.querySelector('#control-content')?.getAttribute('aria-busy')==='false');await p.waitForTimeout(80);assert.ok(await p.evaluate(()=>document.documentElement.scrollWidth<=innerWidth+1),lang+' '+route+' '+width+' overflow');const title=await p.locator('#control-title').innerText();assert.ok(title.trim());report.routes.push({language:lang,route,width,title});
+   if(lang==='en'&&width===1440){const leftovers=await p.locator('#control-content').evaluate(root=>{const result=[],walk=document.createTreeWalker(root,NodeFilter.SHOW_TEXT);let n;while(n=walk.nextNode()){const el=n.parentElement;if(!el||el.closest('[data-merchant-content],[data-original-content],script,style,textarea,input'))continue;const s=n.nodeValue.trim();if(/[А-Яа-яЁё]/.test(s)&&el.getBoundingClientRect().height>0)result.push(s);}return [...new Set(result)];});if(leftovers.length)report.untranslated.push({route,text:lefoversFix(leftovers)});}
+   if(['workspace','stores','manager','smart','socialPlans'].includes(route)&&width!==768)await p.screenshot({path:path.join(directory,route+'-'+lang+'-'+width+(dark?'-dark':'')+'.png')});
+  }}await ctx.close();
+ }
+ assert.deepEqual(report.errors,[]);assert.deepEqual(report.untranslated,[],'Untranslated system interface copy');report.passed=true;
+}catch(error){report.failure=error.stack;throw error;}finally{fs.writeFileSync(path.join(directory,dark?'ui-audit-dark.json':quick?'ui-audit-quick.json':'ui-audit.json'),JSON.stringify(report,null,2));await browser.close();}})().catch(e=>{console.error(e.stack);process.exitCode=1;});
+function lefoversFix(items){return items.map(s=>s.length>350?s.slice(0,350)+'…':s);}

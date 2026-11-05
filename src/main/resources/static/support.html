@@ -1,35 +1,35 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
   <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>ARIA — Поддержка</title><link rel="stylesheet" href="/styles.css">
+  <title data-copy="text.f555003638d027">ARIA — Поддержка</title><link rel="stylesheet" href="/styles.css">
 
 <link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css"></head>
 <body>
   <div class="bg-mesh"></div>
   <main class="container docs-page support-page">
-    <header class="docs-hero"><span class="product-card-category">Обратная связь</span><h1>Поддержка ARIA</h1><p>Опишите вопрос или проблему. Сообщение сохранится для администратора магазина; автоматическая отправка ответа по email пока не подключена.</p></header>
+    <header class="docs-hero"><span class="product-card-category" data-copy="text.930f9a65fb9f22">Обратная связь</span><h1 data-copy="text.9a1509849874eb">Поддержка ARIA</h1><p data-copy="text.c87b8ffd7be7f8">Опишите вопрос или проблему. Сообщение сохранится для администратора магазина; автоматическая отправка ответа по email пока не подключена.</p></header>
     <div class="support-grid">
       <section class="glass-card feedback-card">
-        <h2>Обратная связь</h2>
+        <h2 data-copy="text.930f9a65fb9f22">Обратная связь</h2>
         <form id="feedback-form">
-          <label for="feedback-message">Сообщение</label><textarea id="feedback-message" name="message" required maxlength="2000" rows="5" placeholder="Чем можем помочь?"></textarea>
-          <label for="feedback-rating">Оценка</label><select id="feedback-rating" name="rating" required><option value="5">5 — отлично</option><option value="4">4 — хорошо</option><option value="3">3 — нормально</option><option value="2">2 — есть проблемы</option><option value="1">1 — плохо</option></select>
-          <label for="feedback-email">Email для ответа (необязательно)</label><input id="feedback-email" name="email" type="email" autocomplete="email" placeholder="name@example.kz">
+          <label for="feedback-message" data-copy="text.3e0ccd92fa1595">Сообщение</label><textarea id="feedback-message" name="message" required maxlength="2000" rows="5" placeholder="Чем можем помочь?" data-copy-placeholder="text.541061817cc8d7"></textarea>
+          <label for="feedback-rating" data-copy="text.fec2ceaccc073e">Оценка</label><select id="feedback-rating" name="rating" required><option value="5" data-copy="text.674be8e7635fb8">5 — отлично</option><option value="4" data-copy="text.ecdfe327439df7">4 — хорошо</option><option value="3" data-copy="text.912205974f506a">3 — нормально</option><option value="2" data-copy="text.8174b699b2806f">2 — есть проблемы</option><option value="1" data-copy="text.27a180aaaace61">1 — плохо</option></select>
+          <label for="feedback-email" data-copy="text.8bec4f33ebc27f">Email для ответа (необязательно)</label><input id="feedback-email" name="email" type="email" autocomplete="email" placeholder="name@example.kz">
           <div class="honeypot-field" aria-hidden="true"><label for="feedback-website">Website</label><input id="feedback-website" name="website" type="text" tabindex="-1" autocomplete="off"></div>
-          <div class="captcha-line"><label id="captcha-question" for="captcha-answer">Загрузка проверочного вопроса…</label><button type="button" class="btn-outline" id="captcha-refresh" aria-label="Обновить вопрос">↻</button></div>
-          <input id="captcha-answer" name="captchaAnswer" inputmode="numeric" pattern="[0-9]*" required placeholder="Ответ">
+          <div class="captcha-line"><label id="captcha-question" for="captcha-answer" data-copy="text.345cd722e0c540">Загрузка проверочного вопроса…</label><button type="button" class="btn-outline" id="captcha-refresh" aria-label="Обновить вопрос" data-copy-aria-label="text.cb9ca0c40f2d8e">↻</button></div>
+          <input id="captcha-answer" name="captchaAnswer" inputmode="numeric" pattern="[0-9]*" required placeholder="Ответ" data-copy-placeholder="text.5cfcac6ad022ec">
           <input id="captcha-id" name="captchaId" type="hidden">
-          <button class="btn-glow" type="submit">Отправить сообщение</button>
+          <button class="btn-glow" type="submit" data-copy="text.c7557b58f1aad3">Отправить сообщение</button>
         </form>
       </section>
       <aside class="support-aside">
-        <section class="glass-card contact-card"><h2>Как связаться</h2><p>Используйте форму на этой странице. Сообщения доступны администратору; время ответа зависит от работы магазина.</p><a class="btn-glow" href="#feedback-form">Написать сообщение</a></section>
-        <section class="glass-card faq-card" id="faq"><h2>Частые вопросы</h2>
-          <details><summary>Как оформить возврат?</summary><p>Укажите номер заказа в сообщении администратору. Возврат согласуется с продавцом; форма поддержки сама не отменяет заказ и не возвращает оплату.</p></details>
-          <details><summary>Что означает срок годности на карточке?</summary><p>Это дата из складских данных. ARIA показывает риск и предлагает действие; сотрудник проверяет товар перед решением.</p></details>
-          <details><summary>Кто может забрать товар с соц. полки?</summary><p>Просматривать предложения могут все. Бронировать их могут только организации после проверки администратором.</p></details>
-          <details><summary>Как работает доставка и оплата?</summary><p>Заказ сохраняет адрес и резервирует количество списанием со склада. Автоматическая оплата и подключение службы доставки пока отсутствуют; условия должен подтвердить сотрудник магазина.</p></details>
+        <section class="glass-card contact-card"><h2 data-copy="text.7ab750daa3d0b2">Как связаться</h2><p data-copy="text.0085e7eaaf357e">Используйте форму на этой странице. Сообщения доступны администратору; время ответа зависит от работы магазина.</p><a class="btn-glow" href="#feedback-form" data-copy="text.4e27cafc5069e7">Написать сообщение</a></section>
+        <section class="glass-card faq-card" id="faq"><h2 data-copy="text.4663fcb25b2da2">Частые вопросы</h2>
+          <details><summary data-copy="text.5353777d635fbc">Как оформить возврат?</summary><p data-copy="text.2020c133ce4ca7">Укажите номер заказа в сообщении администратору. Возврат согласуется с продавцом; форма поддержки сама не отменяет заказ и не возвращает оплату.</p></details>
+          <details><summary data-copy="text.bc193468f60da2">Что означает срок годности на карточке?</summary><p data-copy="text.9d47fc3b8df021">Это дата из складских данных. ARIA показывает риск и предлагает действие; сотрудник проверяет товар перед решением.</p></details>
+          <details><summary data-copy="text.4e5a15be8a09d6">Кто может забрать товар с соц. полки?</summary><p data-copy="text.0c3cbb42feb1d5">Просматривать предложения могут все. Бронировать их могут только организации после проверки администратором.</p></details>
+          <details><summary data-copy="text.d8ec79cff62120">Как работает доставка и оплата?</summary><p data-copy="text.5e95eff911bc68">Заказ сохраняет адрес и резервирует количество списанием со склада. Автоматическая оплата и подключение службы доставки пока отсутствуют; условия должен подтвердить сотрудник магазина.</p></details>
         </section>
       </aside>
     </div>

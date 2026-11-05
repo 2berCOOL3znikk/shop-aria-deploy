@@ -578,6 +578,12 @@ window.ariaI18n = {
     },
 
     setLang: function(code) {
+        if(document.documentElement.hasAttribute('data-copy-app')){
+            const chosen=code==='en'?'en':'ru';
+            if(window.ariaCopy&&chosen!==ariaCopy.language)ariaCopy.setLanguage(chosen);
+            else {window.ariaCopy?.applyStatic();this.updateLangButton();}
+            return;
+        }
         if (!this.dictionaries[code]) return;
         localStorage.setItem('aria_lang', code);
         document.documentElement.lang = code;
@@ -588,6 +594,7 @@ window.ariaI18n = {
     },
 
     cycleLang: function() {
+        if(document.documentElement.hasAttribute('data-copy-app')){window.ariaCopy?.setLanguage(ariaCopy.language==='en'?'ru':'en');return;}
         const langs = ['ru', 'en', 'kk'];
         const current = this.getLang();
         const idx = langs.indexOf(current);
@@ -604,6 +611,7 @@ window.ariaI18n = {
     },
 
     applyI18n: function() {
+        if(document.documentElement.hasAttribute('data-copy-app')){window.ariaCopy?.applyStatic();return;}
         // Apply to elements with data-i18n attribute
         document.querySelectorAll('[data-i18n]').forEach(el => {
             const key = el.getAttribute('data-i18n');
@@ -622,6 +630,7 @@ window.ariaI18n = {
     },
 
     translatePage: function(root) {
+        if(document.documentElement.hasAttribute('data-copy-app'))return;
         if (!root || !root.ownerDocument && root !== document.body) return;
         const lang = this.getLang();
         if (lang === 'ru') {
@@ -1044,7 +1053,7 @@ window.ariaI18nObserver = new MutationObserver(records => {
         roots.forEach(node => window.ariaI18n.translatePage(node));
     }, 50);
 });
-if (document.body) window.ariaI18nObserver.observe(document.body, { childList: true, subtree: true });
+if (document.body&&!document.documentElement.hasAttribute('data-copy-app')) window.ariaI18nObserver.observe(document.body, { childList: true, subtree: true });
 window.ariaI18n.initI18n();
 
 Object.assign(window.ariaI18n.uiPhrases, {

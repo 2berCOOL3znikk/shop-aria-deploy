@@ -45,6 +45,16 @@ class WorkspaceOverviewIntegrationTest {
         assertThat((List<?>) ((Map<?, ?>) body.get("sales")).get("daily")).hasSize(14);
     }
 
+    @Test void publicEntryCapabilitiesAndEnglishManifestNeedNoBusinessDataAccess() throws Exception {
+        var response=http.send(HttpRequest.newBuilder(uri("/api/auth/capabilities")).GET().build(),HttpResponse.BodyHandlers.ofString());
+        assertThat(response.statusCode()).isEqualTo(200);
+        assertThat(json.readValue(response.body(),Map.class)).isEqualTo(Map.of("buyerRegistration",true,"publicStorefront",true));
+        assertThat(response.headers().firstValue("cache-control")).hasValue("no-store");
+        var manifest=http.send(HttpRequest.newBuilder(uri("/manifest-en.webmanifest")).GET().build(),HttpResponse.BodyHandlers.ofString());
+        assertThat(manifest.statusCode()).isEqualTo(200);
+        assertThat(json.readValue(manifest.body(),Map.class)).containsEntry("lang","en");
+    }
+
     @Test void dashboardCountsCommittedShippingAndDistinctAiEvidenceWithoutExternalOrdersOrDoubleCounting() throws Exception {
         String admin = account(Role.ADMIN);
         var before = read(admin);
@@ -94,6 +104,20 @@ class WorkspaceOverviewIntegrationTest {
         var yesterday = now.toLocalDate().minusDays(1).toString();
         assertThat(dailyRevenue(sales, yesterday).subtract(dailyRevenue(previousSales, yesterday))).isEqualByComparingTo("321.25");
         assertThat(((List<Map<String, Object>>) after.get("recent")).stream().map(e -> e.get("title"))).contains("Сохранён автоматический расчёт");
+    }
+
+    @Test void persistedConnectedAiIsVisibleWithoutAProviderCallAndTestStoresStayDistinct() throws Exception {
+        var admin = account(Role.ADMIN); var before = read(admin);
+        var completed = LocalDateTime.now(ZoneId.of("Asia/Qyzylorda")).withNano(0);
+        new TransactionTemplate(transactions).executeWithoutResult(tx -> {
+            var store = new ConnectedStore(); store.organization = em.find(Organization.class, 1); store.name = "Isolated dashboard test"; store.platform = "WOOCOMMERCE"; store.baseUrl = "https://test.invalid"; store.status = "CONNECTED"; store.testConnection = true; em.persist(store);
+            var d = new StorePricingDecision(); d.storeId = store.id; d.externalId = "dashboard-persisted"; d.productName = "Test product"; d.fingerprint = UUID.randomUUID().toString(); d.reportJson = "{}"; d.reason = "Persisted test response"; d.source = "AI"; d.status = "KEEP"; d.aiCompletedAt = completed; d.reviewAt = completed.plusDays(1); em.persist(d);
+            var engine = new StorePricingDecision(); engine.storeId = store.id; engine.externalId = "dashboard-engine"; engine.productName = "Test calculation"; engine.fingerprint = UUID.randomUUID().toString(); engine.reportJson = "{}"; engine.reason = "Calculation is not AI"; engine.aiCompletedAt = completed.plusDays(1); engine.reviewAt = completed.plusDays(2); em.persist(engine);
+        });
+        var after = read(admin);
+        assertThat(LocalDateTime.parse(map(after, "manager").get("lastDecisionAt").toString())).isBetween(completed, LocalDateTime.now(ZoneId.of("Asia/Qyzylorda")));
+        assertThat(number(map(after, "stores"), "testConnected") - number(map(before, "stores"), "testConnected")).isEqualTo(1);
+        assertThat(number(map(after, "stores"), "connected") - number(map(before, "stores"), "connected")).isZero();
     }
 
     private void nativeOrder(LocalDateTime at, String status, String total) {

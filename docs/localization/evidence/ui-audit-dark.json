@@ -1,0 +1,70 @@
+{
+  "theme": "dark",
+  "errors": [],
+  "routes": [
+    {
+      "language": "en",
+      "route": "workspace",
+      "width": 1440,
+      "title": "Overview"
+    },
+    {
+      "language": "en",
+      "route": "manager",
+      "width": 1440,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "en",
+      "route": "stores",
+      "width": 1440,
+      "title": "My stores"
+    },
+    {
+      "language": "en",
+      "route": "smart",
+      "width": 1440,
+      "title": "Pricing"
+    },
+    {
+      "language": "en",
+      "route": "socialPlans",
+      "width": 1440,
+      "title": "ARIA Impact"
+    },
+    {
+      "language": "en",
+      "route": "workspace",
+      "width": 390,
+      "title": "Overview"
+    },
+    {
+      "language": "en",
+      "route": "manager",
+      "width": 390,
+      "title": "ARIA AI"
+    },
+    {
+      "language": "en",
+      "route": "stores",
+      "width": 390,
+      "title": "My stores"
+    },
+    {
+      "language": "en",
+      "route": "smart",
+      "width": 390,
+      "title": "Pricing"
+    },
+    {
+      "language": "en",
+      "route": "socialPlans",
+      "width": 390,
+      "title": "ARIA Impact"
+    }
+  ],
+  "untranslated": [],
+  "writesPerformed": false,
+  "aiRequested": false,
+  "passed": true
+}

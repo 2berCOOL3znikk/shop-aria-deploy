@@ -1,0 +1,36 @@
+{
+  "checks": [
+    {
+      "language": "ru",
+      "width": 1440,
+      "cards": 12,
+      "images": 12,
+      "loading": false
+    },
+    {
+      "language": "ru",
+      "width": 390,
+      "cards": 12,
+      "images": 8,
+      "loading": false
+    },
+    {
+      "language": "en",
+      "width": 1440,
+      "cards": 12,
+      "images": 12,
+      "loading": false
+    },
+    {
+      "language": "en",
+      "width": 390,
+      "cards": 12,
+      "images": 8,
+      "loading": false
+    }
+  ],
+  "errors": [],
+  "writesPerformed": false,
+  "aiRequested": false,
+  "passed": true
+}

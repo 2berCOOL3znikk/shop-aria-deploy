@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARIA Shop — Карточка товара</title>
+    <title data-copy="text.6657bcaca1eeba">ARIA Shop — Карточка товара</title>
     <link rel="stylesheet" href="/styles.css">
 
 
@@ -15,11 +15,11 @@
 <nav class="nav-glass">
     <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
     <div class="nav-links">
-        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
-        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
-        <a href="/profile.html#favorites-list" aria-label="Избранное">♡ Избранное</a>
-        <a href="/cart.html" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
-        <a href="/profile.html" data-i18n="nav.profile">Профиль</a>
+        <a href="/index.html" data-i18n="nav.catalog" data-copy="text.d0ef3540b088bb">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social" data-copy="text.fd3069dfffcedf">Соц. полка</a>
+        <a href="/profile.html#favorites-list" aria-label="Избранное" data-copy-aria-label="text.e4c1d01c5c8f21" data-copy="text.68bbb1fc7579d6">♡ Избранное</a>
+        <a href="/cart.html" data-i18n="nav.cart"><span data-copy="text.ae09e966c8d48d">Корзина 🛒 </span><span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" data-i18n="nav.profile" data-copy="text.359497aff53e7d">Профиль</a>
         <span id="auth-nav"></span>
         <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
         <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
@@ -27,27 +27,27 @@
 </nav>
 
 <main class="container" style="max-width:1100px;margin:40px auto;padding:0 20px;">
-    <a href="/index.html" style="color:var(--text-secondary);text-decoration:none;margin-bottom:20px;display:inline-block;">← Назад в каталог</a>
+    <a href="/index.html" style="color:var(--text-secondary);text-decoration:none;margin-bottom:20px;display:inline-block;" data-copy="text.0200a449aebdb2">← Назад в каталог</a>
 
     <div id="product" style="display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:20px;">
-        <p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px;">Загрузка товара...</p>
+        <p style="grid-column:1/-1;text-align:center;color:var(--text-muted);padding:60px;" data-copy="text.e7da1e71415d80">Загрузка товара...</p>
     </div>
 
     <div id="reviews" style="margin-top:60px;">
-        <h2 style="margin-bottom:20px;" data-i18n="product.reviews">Отзывы покупателей</h2>
+        <h2 style="margin-bottom:20px;" data-i18n="product.reviews" data-copy="text.135309261047ff">Отзывы покупателей</h2>
         <div id="reviews-list"></div>
         <div style="margin-top:20px;padding:20px;" class="glass-card">
-            <h3 style="margin-bottom:15px;" data-i18n="product.leaveReview">Оставить отзыв</h3>
-            <label for="review-author" class="storefront-review-label">Имя в отзыве</label><input type="text" id="review-author" maxlength="100" autocomplete="name" data-i18n-placeholder="product.reviewAuthor" placeholder="Ваше имя" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
-            <label for="review-comment" class="storefront-review-label">Ваш отзыв</label><textarea id="review-comment" maxlength="2000" required data-i18n-placeholder="product.reviewComment" placeholder="Комментарий" rows="3" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);resize:vertical;"></textarea>
-            <label for="review-rating" class="storefront-review-label">Оценка</label><select id="review-rating" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
+            <h3 style="margin-bottom:15px;" data-i18n="product.leaveReview" data-copy="text.34c1d9638efc41">Оставить отзыв</h3>
+            <label for="review-author" class="storefront-review-label" data-copy="text.68c07480966a17">Имя в отзыве</label><input type="text" id="review-author" maxlength="100" autocomplete="name" data-i18n-placeholder="product.reviewAuthor" placeholder="Ваше имя" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);" data-copy-placeholder="text.429db4c662c34c">
+            <label for="review-comment" class="storefront-review-label" data-copy="text.9f6d926d0ae833">Ваш отзыв</label><textarea id="review-comment" maxlength="2000" required data-i18n-placeholder="product.reviewComment" placeholder="Комментарий" rows="3" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);resize:vertical;" data-copy-placeholder="text.d89b31028652e5"></textarea>
+            <label for="review-rating" class="storefront-review-label" data-copy="text.fec2ceaccc073e">Оценка</label><select id="review-rating" style="width:100%;padding:10px;margin-bottom:10px;background:var(--bg-surface);border:1px solid var(--border-color);border-radius:8px;color:var(--text-primary);">
                 <option value="5">★★★★★ (5)</option>
                 <option value="4">★★★★ (4)</option>
                 <option value="3">★★★ (3)</option>
                 <option value="2">★★ (2)</option>
                 <option value="1">★ (1)</option>
             </select>
-            <button id="review-submit" type="button" class="btn-glow" onclick="submitReview()" data-i18n="product.reviewSubmit">Отправить отзыв</button>
+            <button id="review-submit" type="button" class="btn-glow" onclick="submitReview()" data-i18n="product.reviewSubmit" data-copy="text.7d221fc1cee933">Отправить отзыв</button>
         </div>
     </div>
 </main>

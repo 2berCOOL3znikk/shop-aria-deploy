@@ -12,7 +12,14 @@ import java.util.Map;
 public class AuthController {
     private final AuthService auth;
     private final CaptchaService captcha;
+    @org.springframework.beans.factory.annotation.Value("${aria.organization.key:demo}")
+    private String organizationKey;
     public AuthController(AuthService auth,CaptchaService captcha){this.auth=auth;this.captcha=captcha;}
+    @GetMapping("/capabilities")
+    public ResponseEntity<Map<String,Boolean>> capabilities(){
+        boolean publicStore="demo".equals(organizationKey);
+        return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(Map.of("publicStorefront",publicStore,"buyerRegistration",publicStore));
+    }
     @PostMapping("/register")
     public ResponseEntity<Map<String,Object>> register(@Valid @RequestBody Register input){
         return ResponseEntity.ok().cacheControl(CacheControl.noStore()).body(auth.register(input.email(),input.password(),input.fullName(),input.website(),input.captchaId(),input.captchaAnswer()));

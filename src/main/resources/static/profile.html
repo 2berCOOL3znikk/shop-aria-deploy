@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
+<html lang="ru" data-copy-app>
+<head><script src="/js/app-copy-data.js"></script><script src="/js/app-copy.js"></script>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>ARIA Shop — Личный кабинет</title>
+    <title data-copy="text.d83a2e7398f3e1">ARIA Shop — Личный кабинет</title>
     <link rel="stylesheet" href="/styles.css">
 
 
@@ -15,11 +15,11 @@
 <nav class="nav-glass">
     <a href="/home.html" class="logo-new">◆ <span class="gradient-text">ARIA</span>Shop</a>
     <div class="nav-links">
-        <a href="/index.html" data-i18n="nav.catalog">Каталог</a>
-        <a href="/social.html" data-i18n="nav.social">Соц. полка</a>
-        <a href="#favorites-list" aria-label="Избранное">♡ Избранное</a>
-        <a href="/cart.html" data-i18n="nav.cart">Корзина 🛒 <span id="cart-count" class="cart-badge">0</span></a>
-        <a href="/profile.html" class="active" data-i18n="nav.profile">Профиль</a>
+        <a href="/index.html" data-i18n="nav.catalog" data-copy="text.d0ef3540b088bb">Каталог</a>
+        <a href="/social.html" data-i18n="nav.social" data-copy="text.fd3069dfffcedf">Соц. полка</a>
+        <a href="#favorites-list" aria-label="Избранное" data-copy-aria-label="text.e4c1d01c5c8f21" data-copy="text.68bbb1fc7579d6">♡ Избранное</a>
+        <a href="/cart.html" data-i18n="nav.cart"><span data-copy="text.ae09e966c8d48d">Корзина 🛒 </span><span id="cart-count" class="cart-badge">0</span></a>
+        <a href="/profile.html" class="active" data-i18n="nav.profile" data-copy="text.359497aff53e7d">Профиль</a>
         <span id="auth-nav"></span>
         <button id="theme-toggle-btn" onclick="ariaTheme.toggleTheme()" style="background:transparent;border:none;color:var(--text-primary);cursor:pointer;font-size:18px;padding:0 8px;" title="Toggle theme">☀</button>
         <button id="lang-toggle-btn" onclick="ariaI18n.cycleLang()" style="background:transparent;border:1px solid var(--border-color);color:var(--text-primary);cursor:pointer;font-size:12px;padding:4px 8px;border-radius:6px;">RU</button>
@@ -27,35 +27,35 @@
 </nav>
 
 <main class="container profile-page">
-  <h1 data-i18n="profile.title">Мой кабинет</h1>
+  <h1 data-i18n="profile.title" data-copy="text.faf74e55541694">Мой кабинет</h1>
   <section class="glass-card profile-form">
-    <h2 data-i18n="profile.personal">Личная информация</h2>
+    <h2 data-i18n="profile.personal" data-copy="text.fa4a107a1f596c">Личная информация</h2>
     <label for="email" data-i18n="profile.email">Email</label>
     <input type="email" id="email" data-i18n-placeholder="profile.email" placeholder="Email" readonly>
-    <label for="fullName" data-i18n="profile.fullName">ФИО</label>
-    <input type="text" id="fullName" maxlength="100" autocomplete="name" data-i18n-placeholder="profile.fullName" placeholder="ФИО">
-    <label for="phone" data-i18n="profile.phone">Телефон</label>
-    <input type="tel" id="phone" maxlength="50" autocomplete="tel" data-i18n-placeholder="profile.phone" placeholder="Телефон">
-    <label for="address" data-i18n="profile.address">Адрес</label>
-    <input type="text" id="address" maxlength="500" autocomplete="street-address" data-i18n-placeholder="profile.address" placeholder="Адрес">
-    <button id="profile-save" class="btn-glow" onclick="saveProfile()" data-i18n="profile.save">Сохранить</button>
+    <label for="fullName" data-i18n="profile.fullName" data-copy="text.bd391c57b08d97">ФИО</label>
+    <input type="text" id="fullName" maxlength="100" autocomplete="name" data-i18n-placeholder="profile.fullName" placeholder="ФИО" data-copy-placeholder="text.bd391c57b08d97">
+    <label for="phone" data-i18n="profile.phone" data-copy="text.822f9fd9ba2d11">Телефон</label>
+    <input type="tel" id="phone" maxlength="50" autocomplete="tel" data-i18n-placeholder="profile.phone" placeholder="Телефон" data-copy-placeholder="text.822f9fd9ba2d11">
+    <label for="address" data-i18n="profile.address" data-copy="text.da82e80563d75a">Адрес</label>
+    <input type="text" id="address" maxlength="500" autocomplete="street-address" data-i18n-placeholder="profile.address" placeholder="Адрес" data-copy-placeholder="text.da82e80563d75a">
+    <button id="profile-save" class="btn-glow" onclick="saveProfile()" data-i18n="profile.save" data-copy="text.b4d30cae52894c">Сохранить</button>
   </section>
   <section class="glass-card profile-form">
-    <h2>Безопасность аккаунта</h2>
+    <h2 data-copy="text.bea62e63b0e54d">Безопасность аккаунта</h2>
     <form id="password-form">
-      <label for="current-password">Текущий пароль</label>
+      <label for="current-password" data-copy="text.d83e5a22c02554">Текущий пароль</label>
       <input id="current-password" type="password" autocomplete="current-password" required maxlength="72">
-      <label for="new-password">Новый пароль — от 12 символов</label>
+      <label for="new-password" data-copy="text.a1acaa3735509c">Новый пароль — от 12 символов</label>
       <input id="new-password" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
-      <label for="repeat-password">Повторите новый пароль</label>
+      <label for="repeat-password" data-copy="text.fb22627cf996c1">Повторите новый пароль</label>
       <input id="repeat-password" type="password" autocomplete="new-password" required minlength="12" maxlength="72">
-      <p>После смены пароля все ранее выданные сеансы завершатся.</p>
-      <button class="btn-glow" type="submit">Изменить пароль</button>
+      <p data-copy="text.3d9779b8c76243">После смены пароля все ранее выданные сеансы завершатся.</p>
+      <button class="btn-glow" type="submit" data-copy="text.ce565295610740">Изменить пароль</button>
       <p id="password-message" role="status" aria-live="polite"></p>
     </form>
   </section>
   <section class="glass-card profile-orders">
-    <h2 data-i18n="profile.orders">Мои заказы</h2>
+    <h2 data-i18n="profile.orders" data-copy="text.13fac71919ff3e">Мои заказы</h2>
     <div id="orders"></div>
   </section>
 </main>
