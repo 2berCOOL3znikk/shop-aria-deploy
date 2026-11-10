@@ -77,6 +77,15 @@ class ControlIntegrationTest {
     }
     private Map<String,Object> productBody(String sku){return Map.of("sku",sku,"name","Тестовый товар","category","Продукты","unitPrice",1000,"unit","шт","lowStockThreshold",2);}
     private long product()throws Exception {var result=call("POST",base+"/products",admin,productBody("TEST-"+UUID.randomUUID()));assertThat(result.status).as(result.raw).isEqualTo(200);return result.id();}
+    @Test void companyApplicationsAreDisabledInAnExistingMerchantWorkspace()throws Exception {
+        assertThat(call("GET","/api/company-signup/capabilities",null,null).body).containsEntry("enabled",false);
+        assertThat(call("GET","/api/company-signup/challenge",null,null).status).isEqualTo(404);
+        var body=new LinkedHashMap<String,Object>();body.put("id",UUID.randomUUID().toString());body.put("token","ab".repeat(32));body.put("companyName","Unprovisioned application");body.put("ownerName","Applicant");body.put("email","owner@example.test");body.put("processingConsent",true);body.put("contactConsent",true);body.put("captchaId","not-issued");body.put("captchaAnswer","0");
+        assertThat(call("POST","/api/company-signup/requests",null,body).status).isEqualTo(404);
+        assertThat(call("GET","/api/admin/company-signup/requests",null,null).status).isEqualTo(401);
+        assertThat(call("GET","/api/admin/company-signup/requests",user,null).status).isEqualTo(403);
+        assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
+    }
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
     private Reply lot(long p,String number,int qty,int days)throws Exception {var body=new HashMap<String,Object>(lotBody(p,number,qty,days));if(number.equals("DONATE")||number.equals("MANAGER"))body.put("receivedAt",LocalDate.now().minusDays(10).toString());var r=call("POST",base+"/lots",admin,body);assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}

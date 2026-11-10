@@ -1,0 +1,35 @@
+package com.aria;
+
+import com.aria.service.*;
+import com.aria.repository.*;
+import org.junit.jupiter.api.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.server.ResponseStatusException;
+import java.util.*;
+import static org.assertj.core.api.Assertions.*;
+
+// Real isolated database/transactions; actual registration-desk binding + HTTP are tested separately in browser E2E.
+@SpringBootTest(properties={"aria.smart-pricing.schedule-enabled=false","aria.intelligence.external-enabled=false","aria.seed-demo-catalog=false","aria.seed-demo-users=false","aria.manager.enabled=false","aria.manager.schedule-enabled=false","aria.store-sync.worker-enabled=false","spring.datasource.url=${ARIA_TEST_DATABASE_URL:jdbc:h2:mem:companySignup;DB_CLOSE_DELAY=-1}","spring.datasource.username=${ARIA_TEST_DATABASE_USER:sa}","spring.datasource.password=${ARIA_TEST_DATABASE_PASSWORD:}","spring.datasource.driver-class-name=${ARIA_TEST_DATABASE_DRIVER:org.h2.Driver}","spring.flyway.enabled=${ARIA_TEST_FLYWAY:false}","spring.flyway.locations=classpath:db/migration/postgresql","spring.flyway.baseline-on-migrate=true","spring.flyway.baseline-version=0","spring.jpa.hibernate.ddl-auto=${ARIA_TEST_SCHEMA_MODE:update}","logging.level.root=ERROR"})
+@Transactional
+class CompanySignupIntegrationTest {
+ @Autowired CompanyRegistrationRequestRepository rows;
+ @Autowired CaptchaService captcha;
+ @Autowired AuditService audit;
+ @Autowired AuditEventRepository events;
+ @Autowired AppUserRepository users;
+ private CompanySignupService service;
+ private final String token="1a".repeat(32);
+ @BeforeEach void setup(){service=new CompanySignupService(true,"aria-registration",rows,captcha,audit);}
+ private Map<String,Object> create(String id,String token){var challenge=service.challenge(UUID.randomUUID().toString());var digits=java.util.regex.Pattern.compile("\\d+").matcher(challenge.get("question"));int sum=0;while(digits.find())sum+=Integer.parseInt(digits.group());return service.submit(id,token,"Учебная компания","Учебный владелец","owner@example.test",true,true,"",challenge.get("id"),Integer.toString(sum),UUID.randomUUID().toString());}
+ @Test void keepsOnlyTokenHashAndNeverClaimsWorkspaceExists(){long accounts=users.count();String id=UUID.randomUUID().toString();var publicValue=create(id,token);assertThat(publicValue).containsEntry("status","SUBMITTED").containsEntry("workspaceReady",false).containsEntry("accountCreated",false).containsEntry("emailAutomaticallyVerified",false);assertThat(publicValue).doesNotContainKeys("accessHash","token","ownerEmail");assertThat(rows.findById(id).orElseThrow().accessHash).isEqualTo(CompanySignupService.hash(token)).doesNotContain(token);assertThat(users.count()).isEqualTo(accounts);assertThat(service.list().stream().filter(v->v.get("id").equals(id)).findFirst().orElseThrow()).doesNotContainKeys("accessHash","token");}
+ @Test void retryAfterLostResponseDoesNotNeedAnotherCaptchaOrDuplicateRequest(){String id=UUID.randomUUID().toString();create(id,token);long before=rows.count();var again=service.submit(id,token,"Учебная компания","Учебный владелец","OWNER@EXAMPLE.TEST",true,true,"", "expired", "wrong", "test");assertThat(again).containsEntry("id",id);assertThat(rows.count()).isEqualTo(before);assertThatThrownBy(()->service.submit(id,token,"Different company","Учебный владелец","owner@example.test",true,true,"","","","test")).isInstanceOf(ResponseStatusException.class);}
+ @Test void applicationCodeCannotReadAnotherApplication(){String first=UUID.randomUUID().toString(),second=UUID.randomUUID().toString();create(first,token);create(second,"2b".repeat(32));assertThatThrownBy(()->service.status(second,token,"test")).isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");assertThatThrownBy(()->service.status(first,null,"test")).isInstanceOf(ResponseStatusException.class);assertThat(service.status(first,token,"test")).containsEntry("id",first);}
+ @Test void requiresBothSeparateConsentsAndSingleUseCaptcha(){String id=UUID.randomUUID().toString();assertThatThrownBy(()->service.submit(id,token,"Company","Owner","o@example.test",true,false,"","bad","bad","test")).isInstanceOf(IllegalArgumentException.class);assertThatThrownBy(()->service.submit(id,token,"Company","Owner","o@example.test",true,true,"","bad","bad","test")).isInstanceOf(IllegalArgumentException.class);assertThat(rows.existsById(id)).isFalse();}
+ @Test void operatorMustReviewBeforeVerifyingAndCannotSkipIdentityCheck(){String id=UUID.randomUUID().toString();create(id,token);assertThatThrownBy(()->service.review(id,0,"VERIFIED","Independent educational check",true)).isInstanceOf(ResponseStatusException.class);var underReview=service.review(id,0,"IN_REVIEW","Operator started educational check",false);long version=((Number)underReview.get("version")).longValue();assertThatThrownBy(()->service.review(id,version,"VERIFIED","Independent educational check",false)).isInstanceOf(IllegalArgumentException.class);var verified=service.review(id,version,"VERIFIED","Independent educational check",true);assertThat(verified).containsEntry("status","VERIFIED").containsEntry("workspaceReady",false);assertThat(events.findTop100ByOrderByCreatedAtDescIdDesc().stream().filter(e->("company-request:"+id).equals(e.getResource()))).hasSize(3);}
+ @Test void staleOperatorDecisionCannotOverwriteNewerReview(){String id=UUID.randomUUID().toString();create(id,token);service.review(id,0,"IN_REVIEW","Operator started educational check",false);assertThatThrownBy(()->service.review(id,0,"REJECTED","Stale decision must be rejected",false)).isInstanceOf(ResponseStatusException.class);assertThat(rows.findById(id).orElseThrow().status).isEqualTo("IN_REVIEW");}
+ @Test void cannotMarkAnUnprovisionedApplicationReady(){String id=UUID.randomUUID().toString();create(id,token);assertThatThrownBy(()->service.review(id,0,"READY","No environment has been created",true)).isInstanceOf(ResponseStatusException.class);assertThat(rows.findById(id).orElseThrow().status).isEqualTo("SUBMITTED");}
+ @Test void disabledDeskAndWrongBindingFailClosed(){var disabled=new CompanySignupService(false,"demo",rows,captcha,audit);assertThatThrownBy(disabled::list).isInstanceOf(ResponseStatusException.class).hasMessageContaining("404");assertThatThrownBy(()->new CompanySignupService(true,"woo-e2e",rows,captcha,audit)).isInstanceOf(IllegalStateException.class);}
+ @Test void challengeLimitIsBoundedAndDoesNotCreateApplications(){long before=rows.count();for(int n=0;n<60;n++)service.challenge("same-client");assertThatThrownBy(()->service.challenge("same-client")).isInstanceOf(ResponseStatusException.class).hasMessageContaining("429");assertThat(rows.count()).isEqualTo(before);}
+}

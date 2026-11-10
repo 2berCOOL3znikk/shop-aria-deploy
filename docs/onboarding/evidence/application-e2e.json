@@ -1,0 +1,38 @@
+{
+  "environment": "separate aria_registration_local PostgreSQL / role / Java process on 8088",
+  "productionChanged": false,
+  "existingCompaniesChanged": false,
+  "externalAiRequests": 0,
+  "applications": [
+    {
+      "language": "ru",
+      "id": "b26cfcbc-8f20-4ac5-81d6-e41440a6e668",
+      "actualPostgresSaved": true,
+      "onlyHashStored": true,
+      "receiptRestoredOnAnotherBrowser": true,
+      "explicitConsents": true,
+      "lostResponseRetriedWithoutDuplicate": true,
+      "staleOperatorDecisionRejected": true,
+      "operatorReviewPersisted": true,
+      "foreignIssuerDenied": true,
+      "workspaceReady": false
+    },
+    {
+      "language": "en",
+      "id": "12feafe5-9247-4ce0-bb45-3ebc94db3393",
+      "actualPostgresSaved": true,
+      "onlyHashStored": true,
+      "receiptRestoredOnAnotherBrowser": true,
+      "explicitConsents": true,
+      "lostResponseRetriedWithoutDuplicate": false,
+      "staleOperatorDecisionRejected": true,
+      "operatorReviewPersisted": true,
+      "foreignIssuerDenied": true,
+      "workspaceReady": false
+    }
+  ],
+  "errors": [],
+  "operatorAccountsUnchanged": true,
+  "passed": true,
+  "completedAt": "2026-11-10T12:12:39.425Z"
+}

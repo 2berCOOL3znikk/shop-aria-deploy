@@ -1,0 +1,9 @@
+﻿{
+    "passed":  true,
+    "newProcess":  9000,
+    "applications":  3,
+    "previousProcess":  8064,
+    "productionChanged":  false,
+    "applicationsPersisted":  true,
+    "operatorAccountsUnchanged":  true
+}

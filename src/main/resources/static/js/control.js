@@ -140,7 +140,7 @@
     ariaCopy.setProperty($('control-content'),"innerHTML",subnav+({workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide,settings}[tab])()+(listTabs.has(tab)?pager():''));
     const ctx={request,notify,form,formField,show,markDirty:()=>dirty=true,clearDirty:()=>dirty=false};
     if(section==='workspace')await ariaWorkspace.mount(ctx);
-    if(section==='settings')await ariaWorkspace.mountDemoCatalogue(ctx);
+    if(section==='settings'){await ariaWorkspace.mountDemoCatalogue(ctx);await window.ariaCompanyEntry?.mount(document.getElementById('control-content'));}
     if(section==='stores')await ariaStores.mount(ctx);
     if(section==='pricing')await loadPreview();if(section==='movements')await ariaOperations.ledger(ctx);if(section==='integrations')await ariaOperations.integrations(ctx);if(section==='pos')await ariaPos.mount(ctx);if(section==='purchases')await ariaPurchases.mount(ctx);if(section==='manager')await ariaManager.mount(ctx);if(section==='smart')await ariaSmartPricing.mount(ctx);if(section==='competitors')await ariaCompetitors.mount(ctx);if(section==='socialPlans')await ariaSocialProposals.mount(ctx);
   }

@@ -1,0 +1,91 @@
+{
+  "productionChanged": false,
+  "writesPerformed": false,
+  "views": [
+    {
+      "page": "application",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "page": "application",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "page": "application",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "page": "application",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "page": "operator",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "page": "operator",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "page": "operator",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "page": "operator",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "page": "application",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "page": "application",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "page": "application",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "page": "application",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "page": "operator",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "page": "operator",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "page": "operator",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "page": "operator",
+      "language": "en",
+      "width": 360
+    }
+  ],
+  "errors": [],
+  "validlySignedForeignIssuerRejected": true,
+  "operatorSearchAndFilterVerified": true,
+  "passed": true,
+  "completedAt": "2026-11-10T12:34:38.662Z"
+}

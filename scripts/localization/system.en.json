@@ -62,5 +62,15 @@
   "Подключение или данные изменились во время чтения. Поздний ответ не применён.": "The connection or data changed during the read. The late response was discarded.",
   "Дождитесь завершения текущего чтения магазина": "Wait for the current store read to finish.",
   "Не удалось прочитать магазин. Предыдущие данные сохранены": "The store could not be read. Previous data was preserved.",
-  "Не удалось проверить версию каталога": "The catalogue revision could not be checked."
+  "Не удалось проверить версию каталога": "The catalogue revision could not be checked.",
+  "Регистрация компаний здесь не включена": "Company applications are not enabled here.",
+  "Слишком много запросов. Повторите позже": "Too many requests. Try again later.",
+  "Проверьте данные и отдельные согласия заявки": "Review the application details and both separate consents.",
+  "Номер заявки уже используется для других данных": "This application number is already associated with different details.",
+  "Приём заявок временно приостановлен": "Applications are temporarily paused.",
+  "Заявка изменилась. Обновите список": "The application changed. Refresh the list.",
+  "Укажите основание проверки от 10 до 700 символов": "Enter the reason for this review using 10 to 700 characters.",
+  "Этот переход статуса недоступен": "This status change is unavailable.",
+  "Подтвердите отдельную проверку контакта и полномочий владельца": "Confirm that you independently checked the owner’s contact and authority.",
+  "Заявка не найдена или код доступа неверен": "Application not found or the access code is incorrect."
 }

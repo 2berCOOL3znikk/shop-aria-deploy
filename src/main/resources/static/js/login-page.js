@@ -123,9 +123,13 @@ ariaCopy.capabilities.then(value => {
     }
 
     function safeNext(next, role) {
-        if (role === 'ADMIN') return next && next.startsWith('/') && !next.startsWith('//') ? next : '/control.html';
-        if (role === 'ORG') return next === '/social.html' ? next : '/social.html';
-        return next && next.startsWith('/') && !next.startsWith('//') && !next.startsWith('/admin') ? next : '/index.html';
+        const fallback=role==='ADMIN'?'/control.html':role==='ORG'?'/social.html':'/index.html';
+        if(typeof next!=='string'||!next.startsWith('/')||next.startsWith('//')||/[\\\u0000-\u001f\u007f]/.test(next))return fallback;
+        let target;try{target=new URL(next,location.origin);}catch{return fallback;}
+        if(target.origin!==location.origin)return fallback;
+        if(role==='ORG')return target.pathname==='/social.html'?'/social.html':fallback;
+        if(role!=='ADMIN'&&target.pathname.startsWith('/admin'))return fallback;
+        return target.pathname+target.search+target.hash;
     }
 
     // Сохраняем next-параметр при загрузке

@@ -22,6 +22,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - run: node scripts/localization/check-copy.cjs
+      - run: node scripts/localization/check-login-redirect.cjs
       - uses: actions/setup-java@v4
         with:
           distribution: temurin
