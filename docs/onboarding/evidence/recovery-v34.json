@@ -1,0 +1,43 @@
+{
+  "productionChanged": false,
+  "sourceDatabasesModified": false,
+  "restoredApplicationsStopped": true,
+  "externalAiRequests": 0,
+  "checks": [
+    "desk: checksum mismatch refused before restore",
+    "desk: actual full dump restored; repeated restore into populated target refused without changes",
+    "desk: restored application boots under restricted owner; actual login and business API verified",
+    "shop: checksum mismatch refused before restore",
+    "shop: actual full dump restored; repeated restore into populated target refused without changes",
+    "shop: restored application boots under restricted owner; actual login and business API verified",
+    "source record digests unchanged before and after drill"
+  ],
+  "copies": [
+    {
+      "kind": "desk",
+      "database": "aria_onboard_restore_desk_586cc65c3a63",
+      "migrationVersion": 34,
+      "recordDigestsMatch": true,
+      "roleRestricted": true,
+      "sourceConnectionDenied": true,
+      "backupSha256": "aaf9cbbd92f7c7c2289d101e830d6c494a29f9d4d8a01fc89f97a4a024cabf2c"
+    },
+    {
+      "kind": "shop",
+      "database": "aria_onboard_restore_shop_586cc65c3a63",
+      "migrationVersion": 34,
+      "recordDigestsMatch": true,
+      "roleRestricted": true,
+      "sourceConnectionDenied": true,
+      "backupSha256": "c91475cf156425c060cb2b487ec45a55082086634461d968b8cd6413a22c851d"
+    }
+  ],
+  "screenshots": [
+    "restored-desk-ru-1440.png",
+    "restored-desk-ru-390.png",
+    "restored-shop-ru-1440.png",
+    "restored-shop-ru-390.png"
+  ],
+  "passed": true,
+  "completedAt": "2026-11-10T14:20:47.341Z"
+}
