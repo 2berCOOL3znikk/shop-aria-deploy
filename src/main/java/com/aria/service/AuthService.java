@@ -22,6 +22,7 @@ public class AuthService {
     private final AuthenticationManager authenticationManager;
     private final CaptchaService captchaService;
     private final LoginAttemptService attempts;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<WorkspaceActivationService> activation;
 
     public AuthService(AppUserRepository appUserRepository, PasswordEncoder passwordEncoder,
                        JwtService jwtService, AuthenticationManager authenticationManager,
@@ -76,6 +77,7 @@ public class AuthService {
 
     public Map<String, Object> login(String email, String password) {
         email=normalizeEmail(email);
+        if(activation!=null&&activation.getObject().requiresActivation())throw new org.springframework.security.authentication.BadCredentialsException("Неверный email или пароль");
         attempts.check(email);
         try {
         authenticationManager.authenticate(

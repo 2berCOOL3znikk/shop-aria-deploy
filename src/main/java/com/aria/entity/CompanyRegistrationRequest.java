@@ -19,5 +19,11 @@ public class CompanyRegistrationRequest {
  public LocalDateTime reviewedAt;
  @Column(length=255) public String reviewedBy;
  @Column(length=700) public String reviewNote;
+ @Column(length=80,unique=true) public String workspaceBinding;
+ @Column(length=500) public String workspaceUrl;
+ @Column(columnDefinition="text") public String setupSecretCipher;
+ public java.time.Instant activationDeadline;
+ public java.time.Instant workspaceCheckedAt;
+ public java.time.Instant workspaceActivatedAt;
  @Version public long version;
 }

@@ -1,0 +1,249 @@
+{
+  "writesPerformed": false,
+  "productionChanged": false,
+  "views": [
+    {
+      "screen": "activation-active",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activation-active",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activation-active",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activation-active",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activation-operator",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activation-operator",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activation-operator",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activation-operator",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activation-code",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activation-code",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activation-code",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activation-code",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activation-error",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activation-error",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activation-error",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activation-error",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activated-stores",
+      "language": "ru",
+      "width": 1440
+    },
+    {
+      "screen": "activated-stores",
+      "language": "ru",
+      "width": 768
+    },
+    {
+      "screen": "activated-stores",
+      "language": "ru",
+      "width": 390
+    },
+    {
+      "screen": "activated-stores",
+      "language": "ru",
+      "width": 360
+    },
+    {
+      "screen": "activation-active",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activation-active",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activation-active",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activation-active",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "screen": "activation-operator",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activation-operator",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activation-operator",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activation-operator",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "screen": "activation-code",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activation-code",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activation-code",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activation-code",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "screen": "activation-error",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activation-error",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activation-error",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activation-error",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activation-claimed",
+      "language": "en",
+      "width": 360
+    },
+    {
+      "screen": "activated-stores",
+      "language": "en",
+      "width": 1440
+    },
+    {
+      "screen": "activated-stores",
+      "language": "en",
+      "width": 768
+    },
+    {
+      "screen": "activated-stores",
+      "language": "en",
+      "width": 390
+    },
+    {
+      "screen": "activated-stores",
+      "language": "en",
+      "width": 360
+    }
+  ],
+  "errors": [],
+  "passed": true,
+  "completedAt": "2026-11-10T14:01:42.288Z"
+}

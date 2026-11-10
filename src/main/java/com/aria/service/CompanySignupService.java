@@ -66,8 +66,14 @@ public class CompanySignupService {
   var actor=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();r.status=next;r.reviewedBy=actor==null?"operator":actor.getName();r.reviewNote=note.trim();r.reviewedAt=LocalDateTime.now();r.updatedAt=r.reviewedAt;
   requests.flush();audit.record("COMPANY_APPLICATION_REVIEWED","company-request:"+id,next+"; окружение не предоставлено");return operatorView(r);
  }
- private Map<String,Object> publicView(CompanyRegistrationRequest r){var v=new LinkedHashMap<String,Object>();v.put("id",r.id);v.put("companyName",r.companyName);v.put("email",mask(r.ownerEmail));v.put("status",r.status);v.put("createdAt",r.createdAt);v.put("updatedAt",r.updatedAt);v.put("workspaceReady",false);v.put("accountCreated",false);v.put("emailAutomaticallyVerified",false);return v;}
- private Map<String,Object> operatorView(CompanyRegistrationRequest r){var v=publicView(r);v.put("ownerName",r.ownerName);v.put("ownerEmail",r.ownerEmail);v.put("version",r.version);v.put("processingConsent",r.processingConsent);v.put("contactConsent",r.contactConsent);v.put("consentVersion",r.consentVersion);v.put("reviewedBy",r.reviewedBy);v.put("reviewedAt",r.reviewedAt);v.put("reviewNote",r.reviewNote);return v;}
+ Map<String,Object> publicView(CompanyRegistrationRequest r){
+  boolean checked=Set.of("READY","ACTIVE").contains(r.status)&&r.workspaceCheckedAt!=null&&r.workspaceUrl!=null;
+  boolean expired=checked&&r.workspaceActivatedAt==null&&r.activationDeadline!=null&&!r.activationDeadline.isAfter(Instant.now());
+  var v=new LinkedHashMap<String,Object>();v.put("id",r.id);v.put("companyName",r.companyName);v.put("email",mask(r.ownerEmail));v.put("status",expired?"ACTIVATION_EXPIRED":r.status);v.put("createdAt",r.createdAt);v.put("updatedAt",r.updatedAt);v.put("workspaceReady",checked&&!expired);v.put("accountCreated",checked);v.put("emailAutomaticallyVerified",false);
+  if(checked){v.put("workspaceUrl",r.workspaceUrl);v.put("workspaceCheckedAt",r.workspaceCheckedAt);v.put("activationDeadline",r.activationDeadline);v.put("workspaceActivatedAt",r.workspaceActivatedAt);}return v;
+ }
+ Map<String,Object> operatorView(CompanyRegistrationRequest r){var v=publicView(r);v.put("ownerName",r.ownerName);v.put("ownerEmail",r.ownerEmail);v.put("version",r.version);v.put("processingConsent",r.processingConsent);v.put("contactConsent",r.contactConsent);v.put("consentVersion",r.consentVersion);v.put("reviewedBy",r.reviewedBy);v.put("reviewedAt",r.reviewedAt);v.put("reviewNote",r.reviewNote);return v;}
+ void requireAccess(CompanyRegistrationRequest r,String token){validateToken(token);authorize(r,token);}
  private static String mask(String email){int at=email.indexOf('@');return at<1?"•••":email.substring(0,1)+"•••"+email.substring(at);}
  private static void validateId(String id){try{if(!UUID.fromString(id).toString().equals(id))throw new Exception();}catch(Exception e){throw notFound();}}
  private static void validateToken(String token){if(token==null||!token.matches("[a-f0-9]{64}"))throw notFound();}

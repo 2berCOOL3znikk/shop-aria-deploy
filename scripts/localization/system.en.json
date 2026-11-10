@@ -72,5 +72,20 @@
   "Укажите основание проверки от 10 до 700 символов": "Enter the reason for this review using 10 to 700 characters.",
   "Этот переход статуса недоступен": "This status change is unavailable.",
   "Подтвердите отдельную проверку контакта и полномочий владельца": "Confirm that you independently checked the owner’s contact and authority.",
-  "Заявка не найдена или код доступа неверен": "Application not found or the access code is incorrect."
+  "Заявка не найдена или код доступа неверен": "Application not found or the access code is incorrect.",
+  "Сначала завершите проверку заявки": "Complete the application review first.",
+  "Кабинет ещё не проверен оператором": "The operator has not verified this workspace yet.",
+  "Кабинет ещё не подготовлен": "The workspace has not been prepared yet.",
+  "Состояние активации изменилось. Обратитесь к оператору": "The activation state changed. Contact the operator.",
+  "Доступна только отдельная локальная проверка кабинета. Внешний адрес ещё не подключён": "Only the isolated local workspace can be checked. External addresses are not enabled yet.",
+  "Работающий кабинет и учётная запись владельца не подтверждены. Проверьте настройки и повторите проверку": "The running workspace and owner account could not be verified. Check the setup and try again.",
+  "Код активации не найден или неверен": "Activation code not found or incorrect.",
+  "Срок активации истёк. Обратитесь к оператору": "Activation expired. Contact the operator.",
+  "Активация кабинета здесь не включена": "Workspace activation is not enabled here.",
+  "Кабинет завершает подготовку. Повторите проверку позже": "Your workspace is finishing setup. Check again shortly.",
+  "Готовность кабинета не подтверждена": "Workspace readiness could not be verified.",
+  "Подтвердите создание доступа владельца": "Confirm that you are creating owner access.",
+  "Кабинет уже активирован. Войдите с выбранным паролем": "This workspace is already activated. Sign in with your chosen password.",
+  "Учётная запись владельца изменилась": "The owner account has changed.",
+  "Не удалось подтвердить готовность кабинета": "Could not verify workspace readiness."
 }

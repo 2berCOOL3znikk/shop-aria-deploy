@@ -18,6 +18,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
     private final JwtService jwtService;
     private final UserDetailsServiceImpl userDetailsService;
+    @org.springframework.beans.factory.annotation.Autowired private org.springframework.beans.factory.ObjectProvider<com.aria.service.WorkspaceActivationService> activation;
 
     public JwtAuthFilter(JwtService jwtService, UserDetailsServiceImpl userDetailsService) {
         this.jwtService = jwtService;
@@ -39,6 +40,7 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         }
 
         String token = header.substring(7);
+        if(activation!=null&&activation.getObject().requiresActivation()){chain.doFilter(request,response);return;}
         try {
             String email = jwtService.extractEmail(token);
             if (email != null && SecurityContextHolder.getContext().getAuthentication() == null) {

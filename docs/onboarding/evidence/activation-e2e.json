@@ -1,0 +1,39 @@
+{
+  "environment": "actual separate registration + owner Java processes and PostgreSQL roles/databases",
+  "productionChanged": false,
+  "existingCompaniesChanged": false,
+  "externalAiRequests": 0,
+  "checks": [
+    "operator preparation response contains metadata only",
+    "a stopped target is never marked ready",
+    "bootstrap password and correctly signed business token denied before claim",
+    "raw proof key is not accepted as a readiness credential",
+    "actual nonce-signed target response verified before workspace link",
+    "owner refresh requires the matching receipt",
+    "wrong application and owner code denied",
+    "activation receipt removed from browser URL",
+    "password mismatch stays in the form",
+    "one-time claim cannot be replayed",
+    "pre-activation token version revoked",
+    "owner signs in and sees their own genuinely empty My stores",
+    "cross-company tokens denied both directions including a correctly signed foreign issuer",
+    "registry reflects actual persisted owner activation",
+    "restricted roles cannot connect to one another or the earlier company database",
+    "real target restart preserves claim password and account count"
+  ],
+  "screenshots": [
+    "activation-operator-ru-1440.png",
+    "activation-operator-ru-390.png",
+    "activation-ready-ru-1440.png",
+    "activation-ready-ru-390.png",
+    "activation-password-ru-1440.png",
+    "activation-password-ru-390.png",
+    "activation-complete-ru-1440.png",
+    "activation-complete-ru-390.png",
+    "activated-stores-ru-1440.png",
+    "activated-stores-ru-390.png"
+  ],
+  "errors": [],
+  "passed": true,
+  "completedAt": "2026-11-10T13:52:38.977Z"
+}

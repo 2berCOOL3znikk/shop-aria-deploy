@@ -48,6 +48,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.POST,"/api/webhooks/woocommerce/*/*").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/auth/capabilities").permitAll()
                         .requestMatchers("/api/company-signup/**").permitAll()
+                        .requestMatchers("/api/company-activation/**").permitAll()
                         // Only the preserved demo exposes customer APIs/registration publicly.
                         // Silo companies must not expose their imported business catalogue anonymously.
                         .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
