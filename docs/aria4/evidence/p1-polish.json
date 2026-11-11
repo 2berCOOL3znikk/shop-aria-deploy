@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "checks": [
+    "actual packaged PWA settings expand without opening notification permission or install prompt",
+    "full-page dashboard and Product Flow screenshots on desktop and phone",
+    "real visible language button honours cancelled unsaved login form"
+  ],
+  "aiRequested": false,
+  "productionChanged": false,
+  "completedAt": "2026-11-11T10:32:21.151Z"
+}

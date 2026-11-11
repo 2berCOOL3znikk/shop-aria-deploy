@@ -120,6 +120,24 @@ class WorkspaceOverviewIntegrationTest {
         assertThat(number(map(after, "stores"), "connected") - number(map(before, "stores"), "connected")).isZero();
     }
 
+    @Test void productFlowSeparatesUsableLotsProposalsReservationsAndActualHandover() throws Exception {
+        var admin=account(Role.ADMIN);var before=read(admin);var now=LocalDateTime.now(ZoneId.of("Asia/Qyzylorda"));
+        new TransactionTemplate(transactions).executeWithoutResult(tx->{
+            var p=new Product("FLOW-"+UUID.randomUUID(),"Flow test","Test",0,now.toLocalDate(),0,BigDecimal.ONE,BigDecimal.TEN,null);em.persist(p);
+            for(int i=0;i<5;i++){var lot=new InventoryLot();lot.setProduct(p);lot.setLotNumber("FLOW-"+i);lot.setReceivedAt(now.toLocalDate());lot.setExpiryDate(now.toLocalDate().plusDays(i==2?-1:2));lot.setInitialQuantity(2);lot.setQuantity(i==3?0:2);lot.setUnitCost(BigDecimal.ONE);lot.setActive(i!=4);lot.handlingStatus=i==1?"REJECTED":"CONFIRMED";em.persist(lot);}
+            for(int i=0;i<4;i++){var decision=decision(p.getId(),now,"ENGINE");em.persist(decision);var proposal=new SocialProposal();proposal.decisionId=decision.id;proposal.productId=p.getId();proposal.quantity=1;proposal.reason="Teaching proposal";proposal.validUntil=now.toLocalDate().plusDays(i==1?-1:2);proposal.status=i==2?"CANCELLED":i==3?"APPROVED":"PROPOSED";em.persist(proposal);}
+            var reserved=new SocialOffer(p,BigDecimal.ZERO,5,now.toLocalDate().plusDays(2));reserved.setStatus("CLAIMED");reserved.setQuantityClaimed(2);em.persist(reserved);
+            var transferred=new SocialOffer(p,BigDecimal.ZERO,3,now.toLocalDate().plusDays(2));transferred.setStatus("TRANSFERRED");transferred.setQuantityClaimed(3);transferred.setTransferredAt(now);em.persist(transferred);
+        });
+        var after=read(admin);var a=map(after,"flow");var b=map(before,"flow");
+        assertThat(number(a,"usableLots")-number(b,"usableLots")).isEqualTo(1);
+        assertThat(number(a,"socialProposals")-number(b,"socialProposals")).isEqualTo(1);
+        assertThat(number(a,"reservedOffers")-number(b,"reservedOffers")).isEqualTo(1);
+        assertThat(number(a,"transfersToday")-number(b,"transfersToday")).isEqualTo(1);
+        assertThat(number(a,"unitsTransferredToday")-number(b,"unitsTransferredToday")).isEqualTo(3);
+        assertThat(number(map(after,"today"),"aiDecisions")-number(map(before,"today"),"aiDecisions")).isZero();
+    }
+
     private void nativeOrder(LocalDateTime at, String status, String total) {
         var order = new Order(); order.setTotalAmount(new BigDecimal(total)); order.setStatus(status); order.setShippedAt(at); em.persist(order);
     }

@@ -1,0 +1,39 @@
+{
+  "passed": true,
+  "scope": "three compositions using actual isolated company overview; local browser route only, no mocked business values",
+  "selected": "a",
+  "reason": "An obvious next step works for an empty company; populated workspaces keep exceptions, product flow and recent actions without a full board or a long task queue.",
+  "views": [
+    {
+      "concept": "a",
+      "width": 1440,
+      "realCompanyData": true
+    },
+    {
+      "concept": "a",
+      "width": 390,
+      "realCompanyData": true
+    },
+    {
+      "concept": "b",
+      "width": 1440,
+      "realCompanyData": true
+    },
+    {
+      "concept": "b",
+      "width": 390,
+      "realCompanyData": true
+    },
+    {
+      "concept": "c",
+      "width": 1440,
+      "realCompanyData": true
+    },
+    {
+      "concept": "c",
+      "width": 390,
+      "realCompanyData": true
+    }
+  ],
+  "completedAt": "2026-11-11T10:20:04.244Z"
+}

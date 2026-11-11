@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "scope": "WorkspaceOverviewIntegrationTest, isolated PostgreSQL V1-V34; no production data",
+  "tests": 5,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "startedAt": "2026-11-11T10:21:36.9057241Z",
+  "completedAt": "2026-11-11T10:22:16.4852296Z"
+}

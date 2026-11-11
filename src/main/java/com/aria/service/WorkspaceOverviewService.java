@@ -43,6 +43,14 @@ public class WorkspaceOverviewService {
         var compact = new LinkedHashMap<String, Object>();
         for (var key : List.of("products", "availableUnits", "lowStock", "pendingOrders", "expiredLots", "urgentLots")) compact.put(key, inventory.get(key));
         result.put("overview", compact);
+        // Different counting units, deliberately not presented as a conversion funnel.
+        var flow = new LinkedHashMap<String,Object>();
+        flow.put("usableLots",inventory.get("usableLots"));
+        flow.put("socialProposals",em.createQuery("select count(p) from SocialProposal p where p.status='PROPOSED' and p.validUntil>=:today",Long.class).setParameter("today",today).getSingleResult());
+        flow.put("reservedOffers",count("SocialOffer o","o.status='CLAIMED'"));
+        flow.put("transfersToday",during("select count(o) from SocialOffer o where o.status='TRANSFERRED' and o.transferredAt>=:from and o.transferredAt<:until",from,until));
+        flow.put("unitsTransferredToday",em.createQuery("select coalesce(sum(o.quantityClaimed),0) from SocialOffer o where o.status='TRANSFERRED' and o.transferredAt>=:from and o.transferredAt<:until",Long.class).setParameter("from",from).setParameter("until",until).getSingleResult());
+        result.put("flow",flow);
 
         result.put("stores", Map.of(
                 "total", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status<>'DISCONNECTED'"),
@@ -124,6 +132,7 @@ public class WorkspaceOverviewService {
         else if (action.startsWith("PURCHASE_")) { title = "Обновлена закупка"; section = "purchases"; }
         else if (action.startsWith("SOCIAL_")) { title = action.equals("SOCIAL_PROPOSED") ? "Подготовлено социальное предложение" : "Обновлена социальная передача"; section = "socialPlans"; }
         else if (action.startsWith("MANAGER_")) { title = switch (action) { case "MANAGER_CYCLE_STARTED" -> "ARIA начала проверку магазина"; case "MANAGER_CYCLE_FINISHED" -> "ARIA завершила цикл проверки"; default -> "Обновлены настройки ARIA"; }; section = "manager"; }
+        else if(action.equals("ACCOUNT_SESSIONS_REVOKED")){title="Завершены сеансы аккаунта";section="audit";}
         else { title = "В журнале появилось новое действие"; section = "audit"; }
         // No raw technical action names, JSON, customer contacts or audit details in the dashboard.
         return Map.of("at", event.getCreatedAt(), "title", title, "section", section);

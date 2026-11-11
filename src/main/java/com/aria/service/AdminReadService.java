@@ -49,6 +49,7 @@ public class AdminReadService {
         long urgent=stock.stream().filter(inventory::usable).filter(l->l.getExpiryDate()!=null&&!l.getExpiryDate().isAfter(today.plusDays(rules.getOrDefault(PolicyService.categoryKey(l.getProduct().getCategory()),common).getCriticalDays()))).count();
         long low=rows.stream().filter(p->p.quantityOnHand()<=(p.lowStockThreshold()==null?5:p.lowStockThreshold())).count();
         Map<String,Object> result=new LinkedHashMap<>();result.put("products",rows.size());result.put("expiredLots",expired.size());result.put("urgentLots",urgent);result.put("lowStock",low);
+        result.put("usableLots",stock.stream().filter(inventory::usable).filter(l->!l.getProduct().getArchived()).count());
         result.put("pendingOrders",orders.count((root,query,cb)->cb.equal(root.get("status"),"PENDING")));
         result.put("availableUnits",rows.stream().mapToLong(ProductRow::quantityOnHand).sum());result.put("expiredUnits",expired.stream().mapToLong(InventoryLot::getQuantity).sum());
         result.put("stockCost",stock.stream().filter(inventory::usable).map(l->l.getUnitCost().multiply(BigDecimal.valueOf(l.getQuantity()))).reduce(BigDecimal.ZERO,BigDecimal::add));
