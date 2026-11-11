@@ -28,6 +28,7 @@
 	</scm>
 	<properties>
 		<java.version>21</java.version>
+		<aria.build.revision>development</aria.build.revision>
 	</properties>
 	<dependencies>
 
@@ -122,6 +123,8 @@
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<configuration><mainClass>com.aria.AriaBackendApplication</mainClass></configuration>
+				<executions><execution><goals><goal>build-info</goal></goals><configuration><additionalProperties><revision>${aria.build.revision}</revision></additionalProperties></configuration></execution></executions>
 			</plugin>
 		</plugins>
 	</build>

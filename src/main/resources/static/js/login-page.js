@@ -1,142 +1,32 @@
-let buyerRegistrationEnabled = false;
-ariaCopy.capabilities.then(value => {
-    buyerRegistrationEnabled = value?.buyerRegistration === true;
-    document.getElementById('register-tab').hidden = !buyerRegistrationEnabled;
-    document.getElementById('company-login-note').hidden = value?.publicStorefront !== false;
-});
-
-    function switchTab(tab) {
-        if (tab === 'register' && !buyerRegistrationEnabled) return;
-        document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelectorAll('.auth-form').forEach(form => form.classList.remove('active'));
-
-        if (tab === 'login') {
-            document.querySelector('.tab-btn:first-child').classList.add('active');
-            document.getElementById('login-form').classList.add('active');
-        } else {
-            document.querySelector('.tab-btn:last-child').classList.add('active');
-            document.getElementById('register-form').classList.add('active');
-            window.loadRegisterCaptcha();
-        }
-    }
-
-    window.loadRegisterCaptcha = async function () {
-        const question = document.getElementById('captcha-question');
-        const id = document.getElementById('captcha-id');
-        const answer = document.getElementById('captcha-answer');
-        ariaCopy.setProperty(question,"textContent",ariaCopy.text("text.cb610780272683"));
-        id.value = '';
-        answer.value = '';
-        try {
-            const response = await fetch('/api/auth/captcha', { cache: 'no-store' });
-            if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.45b2a923235a4a")));
-            const challenge = await response.json();
-            id.value = challenge.id || '';
-            ariaCopy.setProperty(question,"textContent",ariaCopy.captcha(challenge.question) || ariaCopy.text("text.f94111050c2e5e"));
-            if (!id.value) throw new Error(ariaCopy.errorText(ariaCopy.text("text.07bf6dc9226e50")));
-        } catch (error) {
-            ariaCopy.setProperty(question,"textContent",error.message || ariaCopy.text("text.75625f592f58e0"));
-        }
-    };
-
-    async function handleLogin(event) {
-        event.preventDefault();
-        const email = document.getElementById('login-email').value;
-        const password = document.getElementById('login-password').value;
-        const errorDiv = document.getElementById('login-error');
-
-        try {
-            const res = await fetch('/api/auth/login', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('aria_token', data.token);
-                localStorage.setItem('aria_role', data.role);
-                localStorage.setItem('aria_email', data.email);
-
-                const next = localStorage.getItem('aria_next');
-                localStorage.removeItem('aria_next');
-                location.href = safeNext(next, data.role);
-            } else if (res.status === 401) {
-                ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.text("text.f0591450e0ab0b"));
-                errorDiv.classList.add('show');
-            } else {
-                const err = await res.json();
-                ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.errorText(err.error || err.message || ariaCopy.text("text.4ebf918cfa41d6")));
-                errorDiv.classList.add('show');
-            }
-        } catch (e) {
-            ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.text("text.bd5e65f23a7bdb"));
-            errorDiv.classList.add('show');
-        }
-    }
-
-    async function handleRegister(event) {
-        event.preventDefault();
-        const fullName = document.getElementById('register-fullName').value;
-        const email = document.getElementById('register-email').value;
-        const password = document.getElementById('register-password').value;
-        const errorDiv = document.getElementById('register-error');
-        const captchaId = document.getElementById('captcha-id').value.trim();
-        const captchaAnswer = document.getElementById('captcha-answer').value.trim();
-        const website = document.querySelector('#register-form [name="website"]').value.trim();
-
-        if (!captchaId || !captchaAnswer) {
-            ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.text("text.d886fdc7d86a45"));
-            errorDiv.classList.add('show');
-            if (!captchaId) window.loadRegisterCaptcha();
-            return;
-        }
-        errorDiv.classList.remove('show');
-
-        try {
-            const res = await fetch('/api/auth/register', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ email, password, fullName, website, captchaId, captchaAnswer })
-            });
-
-            if (res.ok) {
-                const data = await res.json();
-                localStorage.setItem('aria_token', data.token);
-                localStorage.setItem('aria_role', data.role);
-                localStorage.setItem('aria_email', data.email);
-
-                const next = localStorage.getItem('aria_next');
-                localStorage.removeItem('aria_next');
-                location.href = safeNext(next, data.role);
-            } else {
-                const err = await res.json().catch(() => ({}));
-                ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.errorText(err.error || err.message || ariaCopy.text("text.4ff5d76ef0914a")));
-                errorDiv.classList.add('show');
-                window.loadRegisterCaptcha();
-            }
-        } catch (e) {
-            ariaCopy.setProperty(errorDiv,"textContent",ariaCopy.text("text.bd5e65f23a7bdb"));
-            errorDiv.classList.add('show');
-            window.loadRegisterCaptcha();
-        }
-    }
-
+'use strict';
+const authCopy={title:['Рады вас видеть','Welcome back'],intro:['Войдите в свой кабинет ARIA.','Sign in to your ARIA workspace.'],signin:['Войти','Sign in'],password:['Пароль','Password'],show:['Показать','Show'],hide:['Скрыть','Hide'],name:['Ваше имя','Your name'],buyer:['Аккаунт покупателя','Shopper account'],register:['Создать аккаунт покупателя','Create shopper account'],external:['Доступы к магазину добавляются после входа.','Add your store credentials after signing in.'],company:['Создать компанию','Create a company'],storefront:['Открыть витрину без входа','Browse the storefront'],back:['На старт ARIA','ARIA start'],loading:['Входим…','Signing in…'],wrong:['Проверьте email и пароль.','Check your email and password.'],network:['Не удалось связаться с ARIA. Проверьте запуск и повторите вход.','Could not reach ARIA. Check that it is running, then try again.'],expired:['Ваш сеанс завершён. Войдите снова.','Your session has ended. Sign in again.']};
+const authText=k=>authCopy[k][ariaCopy.language==='en'?1:0];
+document.querySelectorAll('[data-auth-copy]').forEach(node=>node.textContent=authText(node.dataset.authCopy));document.title=authText('signin')+' · ARIA';
+let buyerRegistrationEnabled=false,loginBusy=false,authRevision=0;
+ariaCopy.capabilities.then(value=>{buyerRegistrationEnabled=value?.buyerRegistration===true;document.getElementById('register-tab').hidden=!buyerRegistrationEnabled;document.querySelector('.tab-buttons').hidden=!buyerRegistrationEnabled;document.getElementById('company-login-note').hidden=true;});
+function switchTab(tab){if(loginBusy||tab==='register'&&!buyerRegistrationEnabled)return;document.querySelectorAll('.tab-btn').forEach(button=>button.classList.remove('active'));document.querySelectorAll('.auth-form').forEach(form=>form.classList.remove('active'));document.getElementById(tab==='register'?'register-tab':'login-form').classList.add('active');if(tab==='login')document.querySelector('.tab-btn:first-child').classList.add('active');else{document.getElementById('register-form').classList.add('active');window.loadRegisterCaptcha();}}
+window.loadRegisterCaptcha=async function(){if(!buyerRegistrationEnabled)return;const question=document.getElementById('captcha-question'),id=document.getElementById('captcha-id');id.value='';document.getElementById('captcha-answer').value='';try{const {response,body}=await ariaUi.json('/api/auth/captcha');if(!response.ok||!body.id)throw new Error();id.value=body.id;question.textContent=ariaCopy.captcha(body.question);}catch{question.textContent=authText('network');}};
+document.getElementById('login-password-toggle').onclick=function(){const input=document.getElementById('login-password'),shown=input.type==='password';input.type=shown?'text':'password';this.textContent=authText(shown?'hide':'show');this.setAttribute('aria-pressed',String(shown));};
+function error(form,message){const node=form.querySelector('[role=alert]');node.textContent=message;node.classList.toggle('show',Boolean(message));}
+function busy(form,value){loginBusy=value;form.setAttribute('aria-busy',String(value));form.querySelectorAll('button').forEach(button=>button.disabled=value);const submit=form.querySelector('[type=submit]');submit.textContent=value?authText('loading'):authText(form.id==='login-form'?'signin':'register');}
+async function handleLogin(event){event.preventDefault();if(loginBusy)return;++authRevision;const form=event.currentTarget;error(form,'');busy(form,true);try{
+ const {response,body}=await ariaUi.json('/api/auth/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('login-email').value.trim(),password:document.getElementById('login-password').value})});
+ if(response.ok&&typeof body.token==='string'){ariaUi.persist(body);const next=localStorage.getItem('aria_next');localStorage.removeItem('aria_next');location.assign(safeNext(next,body.role));return;}
+ error(form,response.status===401?authText('wrong'):ariaCopy.errorText(body.error||body.message,response.status));
+}catch{error(form,authText('network'));}finally{busy(form,false);}}
+async function handleRegister(event){event.preventDefault();if(loginBusy||!buyerRegistrationEnabled)return;++authRevision;const form=event.currentTarget,captchaId=document.getElementById('captcha-id').value,captchaAnswer=document.getElementById('captcha-answer').value.trim();if(!captchaId||!captchaAnswer){await window.loadRegisterCaptcha();return;}busy(form,true);error(form,'');try{
+ const {response,body}=await ariaUi.json('/api/auth/register',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email:document.getElementById('register-email').value.trim(),password:document.getElementById('register-password').value,fullName:document.getElementById('register-fullName').value,website:form.querySelector('[name=website]').value,captchaId,captchaAnswer})});
+ if(response.ok&&typeof body.token==='string'){ariaUi.persist(body);const next=localStorage.getItem('aria_next');localStorage.removeItem('aria_next');location.assign(safeNext(next,body.role));return;}error(form,ariaCopy.errorText(body.error||body.message,response.status));await window.loadRegisterCaptcha();
+}catch{error(form,authText('network'));}finally{busy(form,false);}}
     function safeNext(next, role) {
         const fallback=role==='ADMIN'?'/control.html':role==='ORG'?'/social.html':'/index.html';
         if(typeof next!=='string'||!next.startsWith('/')||next.startsWith('//')||/[\\\u0000-\u001f\u007f]/.test(next))return fallback;
         let target;try{target=new URL(next,location.origin);}catch{return fallback;}
         if(target.origin!==location.origin)return fallback;
         if(role==='ORG')return target.pathname==='/social.html'?'/social.html':fallback;
-        if(role!=='ADMIN'&&target.pathname.startsWith('/admin'))return fallback;
+        if(role!=='ADMIN'&&(target.pathname.startsWith('/admin')||['/control.html','/company-requests.html'].includes(target.pathname)))return fallback;
         return target.pathname+target.search+target.hash;
     }
-
-    // Сохраняем next-параметр при загрузке
-    const params = new URLSearchParams(location.search);
-    if (params.get('next')) {
-        localStorage.setItem('aria_next', params.get('next'));
-    }
-    if (localStorage.getItem('aria_role') === 'ADMIN') location.replace('/control.html');
-    else if (localStorage.getItem('aria_role') === 'ORG') location.replace('/social.html');
-    window.loadRegisterCaptcha();
+    // Preserve only a same-origin return destination; verify cached credentials on the SERVER.
+const params=new URLSearchParams(location.search);if(params.get('next'))localStorage.setItem('aria_next',params.get('next'));
+(async()=>{const token=localStorage.getItem('aria_token'),revision=authRevision;if(!token){localStorage.removeItem('aria_role');return;}try{const session=await ariaUi.session();if(revision!==authRevision||loginBusy)return;if(session){const next=localStorage.getItem('aria_next');localStorage.removeItem('aria_next');location.replace(safeNext(next,session.role));}else if(!localStorage.getItem('aria_token'))error(document.getElementById('login-form'),authText('expired'));}catch{/* A disconnected server must leave the login form usable. */}})();

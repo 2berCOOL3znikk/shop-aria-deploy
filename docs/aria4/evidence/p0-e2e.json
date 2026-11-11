@@ -1,0 +1,390 @@
+{
+  "productionChanged": false,
+  "externalAiRequests": 0,
+  "checks": [
+    "actual build identified without public company contacts or database address",
+    "wrong password preserves the form and does not enter a demo",
+    "real login response may be delayed without duplicate submissions",
+    "ru/light: valid cached session keeps the intended return destination and company",
+    "language and actual theme switches survive reload",
+    "real account menu revokes the previous token and returns to sign-in",
+    "expired cached token is cleared without a redirect loop",
+    "the shared start does not weaken company issuer isolation",
+    "demo opens only by explicit click and receives no company token",
+    "real buyer registration with single-use CAPTCHA returns to storefront, never to admin",
+    "company registration is reachable without forwarding company credentials",
+    "ru/dark: valid cached session keeps the intended return destination and company",
+    "en/light: valid cached session keeps the intended return destination and company",
+    "en/dark: valid cached session keeps the intended return destination and company"
+  ],
+  "views": [
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "start",
+      "language": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "login",
+      "language": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "home",
+      "language": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "start",
+      "language": "en",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "login",
+      "language": "en",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "home",
+      "language": "en",
+      "theme": "dark",
+      "width": 360
+    }
+  ],
+  "errors": [],
+  "build": {
+    "version": "0.0.1-SNAPSHOT",
+    "revision": "966e3bf707d0aa3f84621023d3ef316149462c55-dirty",
+    "builtAt": "2026-11-11T09:11:04.675Z"
+  },
+  "passed": true,
+  "completedAt": "2026-11-11T09:21:13.585Z"
+}

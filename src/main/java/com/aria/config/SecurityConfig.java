@@ -47,6 +47,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers(HttpMethod.POST,"/api/webhooks/woocommerce/*/*").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/auth/capabilities").permitAll()
+                        .requestMatchers(HttpMethod.GET,"/api/application").permitAll()
+                        .requestMatchers("/api/auth/session","/api/auth/logout-all").authenticated()
                         .requestMatchers("/api/company-signup/**").permitAll()
                         .requestMatchers("/api/company-activation/**").permitAll()
                         // Only the preserved demo exposes customer APIs/registration publicly.

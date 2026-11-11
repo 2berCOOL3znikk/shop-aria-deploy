@@ -32,7 +32,10 @@ if($cluster -ne (Join-Path $root 'data\preview\postgres') -or !(Test-Path -Liter
 if($LASTEXITCODE -ne 0){
  if(Get-NetTCPConnection -LocalPort 55434 -State Listen -ErrorAction SilentlyContinue){throw 'Database port occupied; no process stopped'}
  $argsList=@('-D',('"'+$cluster+'"'),'-o','"-p 55434 -h 127.0.0.1"','-l',('"'+(Join-Path $area 'postgres-start.log')+'"'),'-w','start')
- $helper=Start-Process -FilePath "$pg/pg_ctl.exe" -ArgumentList $argsList -WindowStyle Hidden -RedirectStandardOutput (Join-Path $area 'pgctl.log') -RedirectStandardError (Join-Path $area 'pgctl.err.log') -PassThru
+ # ShellExecute detaches inherited command pipes. Redirecting pg_ctl here can keep a caller
+ # (Node, IntelliJ or ARIA.cmd) waiting after readiness because the server inherits its handles.
+ # PostgreSQL already writes its actual server output to the explicit -l file above.
+ $helper=Start-Process -FilePath "$pg/pg_ctl.exe" -ArgumentList $argsList -Verb Open -WindowStyle Hidden -PassThru
  if(!$helper.WaitForExit(30000)){throw 'PostgreSQL start timed out'}
  & "$pg/pg_ctl.exe" -D $cluster status *> $null;if($LASTEXITCODE -ne 0){throw 'Owned PostgreSQL could not start'}
 }

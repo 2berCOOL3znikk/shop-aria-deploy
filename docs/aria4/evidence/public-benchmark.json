@@ -1,0 +1,46 @@
+{
+  "checkedAt": "2026-11-11T08:51:47.646Z",
+  "scope": "public pages only; no account, claims about private screens, reused graphics or data sent",
+  "sources": [
+    {
+      "name": "too-good-to-go",
+      "url": "https://business.toogoodtogo.com/en-us/platform",
+      "status": 200,
+      "title": "Too Good To Go Platform | For Food Retailers to Unlock Value | Too Good To Go for Business",
+      "screenshotLocalOnly": true
+    },
+    {
+      "name": "wasteless",
+      "url": "https://www.wasteless.com/",
+      "unavailable": true
+    },
+    {
+      "name": "flashfood",
+      "url": "https://flashfood.com/en/for-grocers",
+      "status": 200,
+      "title": "Flashfood for Retailers | Reduce Shrink in Your Grocery Store",
+      "screenshotLocalOnly": true
+    },
+    {
+      "name": "sharing-excess",
+      "url": "https://www.sharingexcess.com/",
+      "status": 200,
+      "title": "Sharing Excess | National Food Rescue Nonprofit",
+      "screenshotLocalOnly": true
+    },
+    {
+      "name": "spoiler-alert",
+      "url": "https://www.spoileralert.com/",
+      "status": 200,
+      "title": "Excess CPG Inventory Discounting - Spoiler Alert",
+      "screenshotLocalOnly": true
+    },
+    {
+      "name": "foodcloud",
+      "url": "https://www.food.cloud/",
+      "status": 200,
+      "title": "FoodCloud",
+      "screenshotLocalOnly": true
+    }
+  ]
+}

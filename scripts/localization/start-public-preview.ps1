@@ -1,4 +1,4 @@
-param([switch]$SkipBuild)
+param([switch]$SkipBuild,[switch]$Restart)
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location -LiteralPath $root
@@ -12,7 +12,7 @@ if(!(Test-Path -LiteralPath $cfgPath)){
 }
 $cfg=Get-Content -LiteralPath $cfgPath -Raw | ConvertFrom-Json
 $jar=Join-Path $area 'app.jar';$pidFile=Join-Path $area 'app.pid'
-if(Test-Path -LiteralPath $pidFile){$p=Get-CimInstance Win32_Process -Filter "ProcessId=$([int](Get-Content -LiteralPath $pidFile))";if($p -and $p.CommandLine.Contains($jar) -and $p.CommandLine.Contains('--server.port=8087')){Write-Output 'Separate public test storefront already running on 8087';exit 0}}
+if(Test-Path -LiteralPath $pidFile){$p=Get-CimInstance Win32_Process -Filter "ProcessId=$([int](Get-Content -LiteralPath $pidFile))";if($p){if(!$p.CommandLine.Contains($jar) -or !$p.CommandLine.Contains('--server.port=8087') -or !$p.CommandLine.Contains('/aria_locale_demo')){throw 'PID belongs to another process; preserved it'};if(!$Restart){Write-Output 'Separate public test storefront already running on 8087';exit 0};Stop-Process -Id $p.ProcessId;Wait-Process -Id $p.ProcessId -ErrorAction SilentlyContinue}}
 if(Get-NetTCPConnection -LocalPort 8087 -State Listen -ErrorAction SilentlyContinue){throw 'Port 8087 occupied; preserved the existing process'}
 $env:JAVA_HOME=Join-Path $env:USERPROFILE '.jdks/ms-21.0.12.1'
 if(!$SkipBuild){& ./mvnw.cmd -q -DskipTests package;if($LASTEXITCODE -ne 0){throw 'Build failed'}}

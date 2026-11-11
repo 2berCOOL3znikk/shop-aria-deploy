@@ -52,6 +52,8 @@ public class JwtService {
         return Role.valueOf(roleStr);
     }
 
+    public java.time.Instant expiresAt(String token) { return extractAllClaims(token).getExpiration().toInstant(); }
+
     public boolean isTokenValid(String token, String email) {
         String extractedEmail = extractEmail(token);
         Number version=extractAllClaims(token).get("version",Number.class);

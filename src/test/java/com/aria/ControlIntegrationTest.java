@@ -87,6 +87,16 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
     }
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
+    @Test void applicationIdentityIsPublicButDoesNotExposeCompanyOrSecrets()throws Exception {
+        var info=call("GET","/api/application",null,null);assertThat(info.status).isEqualTo(200);assertThat(info.body).containsEntry("application","ARIA").containsEntry("workspaceType","DEMO");assertThat(info.body).doesNotContainKeys("company","email","binding","password","database","token");assertThat(info.raw).doesNotContain("jdbc:","jwt.secret");
+        assertThat(call("GET","/api/auth/capabilities",null,null).body).hasSize(2);
+    }
+    @Test void sessionReadsTheServerIdentityAndDoesNotTrustAClientRole()throws Exception {
+        assertThat(call("GET","/api/auth/session",null,null).status).isEqualTo(401);var owner=call("GET","/api/auth/session",admin,null);assertThat(owner.status).isEqualTo(200);assertThat(owner.body).containsEntry("role","ADMIN").containsKeys("company","expiresAt","email").doesNotContainKeys("token","password","tokenVersion");var customer=call("GET","/api/auth/session",user,null);assertThat(customer.status).isEqualTo(200);assertThat(customer.body).containsEntry("role","USER").doesNotContainKeys("company","password");assertThat(call("GET","/api/auth/session",admin+"invalid",null).status).isEqualTo(401);
+    }
+    @Test void endingSessionsRevokesOnlyTheAuthenticatedAccount()throws Exception {
+        assertThat(call("POST","/api/auth/logout-all",null,null).status).isEqualTo(401);assertThat(call("POST","/api/auth/logout-all",admin,Map.of("email","another-account@test.local")).status).isEqualTo(204);assertThat(call("GET","/api/auth/session",admin,null).status).isEqualTo(401);assertThat(call("GET",base+"/stores",admin,null).status).isEqualTo(401);assertThat(call("GET","/api/auth/session",user,null).status).isEqualTo(200);assertThat(auditEvents.findTop100ByOrderByCreatedAtDescIdDesc().stream().anyMatch(e->e.getAction().equals("ACCOUNT_SESSIONS_REVOKED"))).isTrue();
+    }
     private Reply lot(long p,String number,int qty,int days)throws Exception {var body=new HashMap<String,Object>(lotBody(p,number,qty,days));if(number.equals("DONATE")||number.equals("MANAGER"))body.put("receivedAt",LocalDate.now().minusDays(10).toString());var r=call("POST",base+"/lots",admin,body);assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}
     @Test void managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock()throws Exception {

@@ -1,0 +1,7 @@
+'use strict';
+const fs=require('node:fs'),assert=require('node:assert/strict');
+const meta=JSON.parse(fs.readFileSync('target/postgres-test-run.json','utf8').replace(/^\uFEFF/,''));assert.equal(meta.exitCode,0);assert.ok(meta.tests.includes('sessionReadsTheServerIdentity'));
+const suites=['ApplicationIdentityTest','CompanySignupIntegrationTest','ControlIntegrationTest','LocalWorkspaceProbeTest','WorkspaceActivationTest'].map(name=>{
+ const file='target/surefire-reports/TEST-com.aria.'+name+'.xml';assert.ok(fs.statSync(file).mtimeMs>=Date.parse(meta.startedAt));const header=fs.readFileSync(file,'utf8').match(/<testsuite\b[^>]*>/)[0],field=k=>Number(header.match(new RegExp('\\b'+k+'="([^"]+)"'))[1]);return {name,tests:field('tests'),failures:field('failures'),errors:field('errors'),skipped:field('skipped')};
+});
+const total=k=>suites.reduce((sum,s)=>sum+s[k],0),proof={scope:'targeted P0 auth/session/registration/activation + desktop identity; fresh PostgreSQL V1-V34',tests:total('tests'),failures:total('failures'),errors:total('errors'),skipped:total('skipped'),suites,startedAt:meta.startedAt,completedAt:meta.completedAt,passed:true};assert.equal(proof.tests,32);assert.equal(proof.failures+proof.errors+proof.skipped,0);fs.writeFileSync('docs/aria4/evidence/p0-targeted-tests.json',JSON.stringify(proof,null,2)+'\n');console.log(JSON.stringify({targetedTests:proof.tests,passed:true}));

@@ -1,0 +1,9 @@
+{
+  "passed": true,
+  "elapsedSeconds": 14.53,
+  "serializedByMutex": true,
+  "bothLaunchesCompleted": true,
+  "entry": "http://127.0.0.1:8089/start.html",
+  "productionChanged": false,
+  "completedAt": "2026-11-11T09:56:12.500Z"
+}

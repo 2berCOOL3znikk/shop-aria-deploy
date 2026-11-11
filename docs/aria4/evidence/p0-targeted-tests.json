@@ -1,0 +1,47 @@
+{
+  "scope": "targeted P0 auth/session/registration/activation + desktop identity; fresh PostgreSQL V1-V34",
+  "tests": 32,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "suites": [
+    {
+      "name": "ApplicationIdentityTest",
+      "tests": 2,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "CompanySignupIntegrationTest",
+      "tests": 13,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "ControlIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "LocalWorkspaceProbeTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "WorkspaceActivationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "startedAt": "2026-11-11T09:13:02.7988114Z",
+  "completedAt": "2026-11-11T09:13:42.2023816Z",
+  "passed": true
+}

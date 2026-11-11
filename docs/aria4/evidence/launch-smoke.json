@@ -1,0 +1,45 @@
+{
+  "productionChanged": false,
+  "sourceBusinessRecordsChanged": false,
+  "checks": [
+    "one ARIA.cmd starts the stopped owned PostgreSQL cluster and three applications; business records and all earlier audit rows retained",
+    "repeat launch reuses the same healthy process IDs and retained records",
+    "actual server build and business identity match the launcher"
+  ],
+  "databaseInitiallyStopped": true,
+  "coldStartSeconds": 61.49,
+  "auditRowsAppended": 2,
+  "repeatStartSeconds": 7.3,
+  "entry": "http://127.0.0.1:8089/start.html",
+  "revision": "966e3bf707d0aa3f84621023d3ef316149462c55-dirty",
+  "before": [
+    {
+      "port": 8088,
+      "pid": 17048
+    },
+    {
+      "port": 8089,
+      "pid": 21612
+    },
+    {
+      "port": 8087,
+      "pid": 21300
+    }
+  ],
+  "after": [
+    {
+      "port": 8088,
+      "pid": 24372
+    },
+    {
+      "port": 8089,
+      "pid": 13780
+    },
+    {
+      "port": 8087,
+      "pid": 12276
+    }
+  ],
+  "passed": true,
+  "completedAt": "2026-11-11T09:43:37.688Z"
+}
