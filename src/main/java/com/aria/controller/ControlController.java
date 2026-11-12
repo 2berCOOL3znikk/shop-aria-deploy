@@ -23,6 +23,7 @@ public class ControlController {
     private final PolicyService policies;
     private final AdminReadService adminRead;
     private final SmartPricingService smart;
+    @org.springframework.beans.factory.annotation.Autowired private CatalogueEvidenceService catalogueEvidence;
     public ControlController(ControlService control,InventoryService inventory,PricingService pricing,ProductRepository products,ProductDetailRepository details,SupplierRepository suppliers,AuditEventRepository events,OrderRepository orders,SocialService social,SocialOfferRepository offers,OrderService orderService,IntelligenceService intelligence,PolicyService policies,AdminReadService adminRead,SmartPricingService smart){
         this.control=control;this.inventory=inventory;this.pricing=pricing;this.products=products;this.details=details;this.suppliers=suppliers;this.events=events;this.orders=orders;
         this.social=social;
@@ -33,7 +34,7 @@ public class ControlController {
         this.smart=smart;
     }
     @GetMapping("/products") public List<com.aria.dto.AdminViews.ProductRow> products(){return adminRead.productRows();}
-    @GetMapping("/products/{id}") public Map<String,Object> product(@PathVariable Long id){var result=new HashMap<String,Object>();result.put("product",inventory.lock(id));result.put("details",details.findByProductId(id).orElse(null));return result;}
+    @GetMapping("/products/{id}") public Map<String,Object> product(@PathVariable Long id){var p=inventory.lock(id);var detail=details.findByProductId(id).orElse(null);var result=new HashMap<String,Object>();result.put("product",p);result.put("details",detail);result.put("availableQuantity",inventory.available(p));result.put("provenance",catalogueEvidence.view(p,detail));return result;}
     @PostMapping("/products") public Product create(@Valid @RequestBody ProductInput input){return control.saveProduct(null,input);}
     @PutMapping("/products/{id}") public Product update(@PathVariable Long id,@Valid @RequestBody ProductInput input){return control.saveProduct(id,input);}
     @GetMapping("/products/{id}/attributes") public Map<String,Object> attributes(@PathVariable Long id){return control.productAttributes(id);}

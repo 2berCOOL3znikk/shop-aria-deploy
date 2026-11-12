@@ -1,4 +1,4 @@
-﻿param([switch]$NoBrowser,[switch]$SkipBuild,[switch]$Preview)
+﻿param([switch]$NoBrowser,[switch]$SkipBuild,[switch]$Preview,[switch]$DemoPreview)
 $ErrorActionPreference='Stop'
 # Keep module configuration unchanged outside this process, including when launched by PS7 or IntelliJ.
 $builtins=Join-Path $env:SystemRoot 'System32/WindowsPowerShell/v1.0/Modules'
@@ -106,15 +106,17 @@ try{
   $shortcut=Join-Path $parent 'ARIA.cmd';if(!(Test-Path -LiteralPath $shortcut)){[IO.File]::WriteAllText($shortcut,"@echo off`r`ncall `"%~dp0backend\ARIA.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
   $previewShortcut=Join-Path $parent 'ARIA-preview.cmd';if(!(Test-Path -LiteralPath $previewShortcut)){[IO.File]::WriteAllText($previewShortcut,"@echo off`r`ncall `"%~dp0backend\ARIA-preview.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
   $aiShortcut=Join-Path $parent 'ARIA-AI-preview.cmd';if(!(Test-Path -LiteralPath $aiShortcut)){[IO.File]::WriteAllText($aiShortcut,"@echo off`r`ncall `"%~dp0backend\ARIA-AI-preview.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
+  $catalogShortcut=Join-Path $parent 'ARIA-Catalog-preview.cmd';if(!(Test-Path -LiteralPath $catalogShortcut)){[IO.File]::WriteAllText($catalogShortcut,"@echo off`r`ncall `"%~dp0backend\ARIA-Catalog-preview.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
   $runDirectory=Join-Path $parent '.run';New-Item -ItemType Directory -Path $runDirectory -Force | Out-Null
   $runFile=Join-Path $runDirectory 'ARIA.run.xml';$canInstall=!(Test-Path -LiteralPath $runFile)
   if(!$canInstall){$existingRun=Get-Content -LiteralPath $runFile -Raw -Encoding UTF8;$canInstall=$existingRun.Contains('name="ARIA — запуск"') -and $existingRun.Contains('value="com.aria.AriaDesktopLauncher"')}
   if($canInstall){$runTemplate=Get-Content -LiteralPath '.run/ARIA.run.xml' -Raw -Encoding UTF8;$runTemplate=$runTemplate.Replace('$PROJECT_DIR$/data/','$PROJECT_DIR$/backend/data/');[IO.File]::WriteAllText($runFile,$runTemplate,[Text.Encoding]::UTF8)}
  }
- if(!$NoBrowser -and $Preview){
+ if(!$NoBrowser -and ($Preview -or $DemoPreview)){
   $previewReceipt=Join-Path $area ('preview-'+[guid]::NewGuid().ToString('N')+'.json')
   $previewScript=Join-Path $root 'scripts/onboarding/open-owner-preview.cjs'
-  Start-Process -FilePath $node -ArgumentList @(('"'+$previewScript+'"'),'--home',('"--ready-file='+$previewReceipt+'"')) -WorkingDirectory $root -Verb Open -WindowStyle Hidden | Out-Null
+  $previewChoice=if($DemoPreview){'--demo'}else{'--home'}
+  Start-Process -FilePath $node -ArgumentList @(('"'+$previewScript+'"'),$previewChoice,('"--ready-file='+$previewReceipt+'"')) -WorkingDirectory $root -Verb Open -WindowStyle Hidden | Out-Null
   $deadline=[DateTime]::UtcNow.AddSeconds(30)
   while(!(Test-Path -LiteralPath $previewReceipt) -and [DateTime]::UtcNow -lt $deadline){Start-Sleep -Milliseconds 250}
   if(!(Test-Path -LiteralPath $previewReceipt) -or !(Get-Content -LiteralPath $previewReceipt -Raw -Encoding UTF8 | ConvertFrom-Json).opened){throw 'ARIA: Не удалось открыть учебный кабинет. Обычный вход доступен на стартовой странице.'}

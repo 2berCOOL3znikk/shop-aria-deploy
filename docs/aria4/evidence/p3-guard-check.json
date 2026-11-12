@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "lateResponseIgnoredAfterAccountChange": true,
+  "referenceLabelsEnglish": [
+    "Name on the label",
+    "Packaging type"
+  ],
+  "productionChanged": false,
+  "completedAt": "2026-11-12T09:40:13.024Z"
+}

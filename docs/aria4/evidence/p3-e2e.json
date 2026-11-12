@@ -1,0 +1,24 @@
+{
+  "checks": [
+    "Native search and paging retained",
+    "Stock blocks archiving without write-off; linked Product Flow carries the reference",
+    "40 native catalogue/card views: RU/EN, light/dark, 360/390/768/1024/1440; reference facts and photo attribution, no false colour for groceries",
+    "Private catalogue links actual connected-store products separately from native stock",
+    "Private PNG displays through authenticated blob; anonymous and other-company image access return 401",
+    "Name-first manual creation generates SKU; compact edit retains SKU/photo, category-safe facts; receipt preselects product; no unavailable public shop link",
+    "Zero-stock QA card archived with explicit confirmation, history retained",
+    "Original native products, lots, connected stores and AI permissions unchanged; no AI request or stock mutation"
+  ],
+  "views": 41,
+  "errors": [],
+  "externalAiRequests": 0,
+  "policyWrites": 0,
+  "productionChanged": false,
+  "fixture": {
+    "id": 5,
+    "sku": "ARIA-AUTO-5",
+    "stage": "archived"
+  },
+  "passed": true,
+  "completedAt": "2026-11-12T09:31:23.783Z"
+}

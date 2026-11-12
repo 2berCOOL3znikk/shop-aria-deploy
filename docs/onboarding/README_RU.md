@@ -4,6 +4,8 @@
 
 ## Открыть
 
+Обычный запуск — `ARIA.cmd`, подготовленная учебная компания — `ARIA-preview.cmd`, [новые товары ARIA 4.0](../aria4/PRODUCTS_RU.md) — `ARIA-Catalog-preview.cmd`. Файлы в папке проекта открывают отдельные локальные окружения, не обновляя production. Ручные команды ниже оставлены для диагностики.
+
 - [Заявка и статус](http://127.0.0.1:8088/company-start.html).
 - [Оператор](http://127.0.0.1:8088/company-requests.html); локальный вход в исключённом из Git `data/onboarding/registry-access.txt`.
 - [Новый учебный кабинет](http://127.0.0.1:8089/control.html#stores). Команда `node scripts/onboarding/open-owner-preview.cjs` открывает отдельное окно и входит через настоящий интерфейс без вывода пароля.

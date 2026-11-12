@@ -87,6 +87,12 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
     }
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
+    @Test void productCardUsesRecordedStockAndDoesNotTurnOwnerInputIntoVerifiedFacts()throws Exception {
+        long id=product();assertThat(call("POST",base+"/lots",admin,lotBody(id,"CARD-"+UUID.randomUUID(),5,30)).status).isEqualTo(200);
+        assertThat(call("GET",base+"/products/"+id,null,null).status).isEqualTo(401);assertThat(call("GET",base+"/products/"+id,user,null).status).isEqualTo(403);
+        var response=call("GET",base+"/products/"+id,admin,null);assertThat(response.status).isEqualTo(200);assertThat(((Number)response.body.get("availableQuantity")).intValue()).isEqualTo(5);
+        var evidence=(Map<String,Object>)response.body.get("provenance");assertThat(evidence).containsEntry("verification","UNVERIFIED").doesNotContainKeys("facts","photo");
+    }
     @Test void applicationIdentityIsPublicButDoesNotExposeCompanyOrSecrets()throws Exception {
         var info=call("GET","/api/application",null,null);assertThat(info.status).isEqualTo(200);assertThat(info.body).containsEntry("application","ARIA").containsEntry("workspaceType","DEMO");assertThat(info.body).doesNotContainKeys("company","email","binding","password","database","token");assertThat(info.raw).doesNotContain("jdbc:","jwt.secret");
         assertThat(call("GET","/api/auth/capabilities",null,null).body).hasSize(2);

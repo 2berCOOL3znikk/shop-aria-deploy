@@ -1,0 +1,14 @@
+{
+  "tests": "ControlIntegrationTest#productCardUsesRecordedStockAndDoesNotTurnOwnerInputIntoVerifiedFacts",
+  "productionChanged": false,
+  "completedAt": "2026-11-12T08:58:48.2359028Z",
+  "log": "target/experience-full-tests.log",
+  "exitCode": 0,
+  "database": "aria_checks_03a696fbcd6c",
+  "startedAt": "2026-11-12T08:57:57.0396499Z",
+  "testsRun": 1,
+  "failures": 0,
+  "errors": 0,
+  "skipped": 0,
+  "scope": "recorded lot stock, source integrity, admin-only card access on PostgreSQL V1-V34"
+}
