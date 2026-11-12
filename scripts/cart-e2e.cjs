@@ -66,7 +66,7 @@ const dir='target/e2e/aria3';
     assert.ok((await basket.locator('#cart-total').innerText()).replace(/\s/g,'').includes('2468'));
     // This intentionally simulated failure tests presentation only; successful cart mutations above are real.
     await basket.route('**/api/cart/*?qty=*',route=>route.fulfill({status:503,contentType:'application/json',body:JSON.stringify({message:'Проверка ошибки корзины: повторите позже'})}));
-    await click(basket,'increase');await basket.waitForFunction(()=>document.querySelector('.toast-message')?.parentElement?.parentElement?.textContent.includes('Проверка ошибки корзины'));
+    await click(basket,'increase');await basket.waitForFunction(()=>document.querySelector('#cart-alert:not([hidden])')?.textContent.includes('Проверка ошибки корзины'));
     await count(basket,2);assert.equal((await cart())[0].quantity,2);assert.equal(await basket.locator('#delivery-address').inputValue(),'QA адрес — заказ не отправляется');await basket.unroute('**/api/cart/*?qty=*');
     report.checks.push('Cart totals follow server state; editing quantity preserves the address; a separately simulated failed update never shows a false increment');
     await basket.reload();await ready(basket);await count(basket,2);assert.equal((await cart())[0].quantity,2);

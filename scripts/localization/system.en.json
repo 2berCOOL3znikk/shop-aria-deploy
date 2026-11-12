@@ -87,5 +87,11 @@
   "Подтвердите создание доступа владельца": "Confirm that you are creating owner access.",
   "Кабинет уже активирован. Войдите с выбранным паролем": "This workspace is already activated. Sign in with your chosen password.",
   "Учётная запись владельца изменилась": "The owner account has changed.",
-  "Не удалось подтвердить готовность кабинета": "Could not verify workspace readiness."
+  "Не удалось подтвердить готовность кабинета": "Could not verify workspace readiness.",
+  "Проверена только указанная информация. Изготовитель конкретной упаковки и GTIN не подтверждены.": "Only the listed information is verified. The manufacturer of this specific pack and its GTIN are unconfirmed.",
+  "Состав и предупреждения необходимо сверить с этикеткой перед покупкой. Сокращённые сведения не заменяют маркировку.": "Check ingredients and warnings against the label before buying. These summaries do not replace the packaging information.",
+  "Цена, закупочная стоимость, остаток и сроки демонстрационной партии — учебные значения, не данные реального магазина.": "The demo price, cost, stock and lot dates are teaching values, not actual shop data.",
+  "Масса, состав, GTIN и изготовитель конкретной упаковки не подтверждены. Не приравнивается к коробке 24 × 415 г.": "Weight, ingredients, GTIN and manufacturer of this specific pack are unconfirmed. This is not the 24 × 415 g case.",
+  "Цена, закупочная стоимость, остаток и даты учебной партии созданы только для демонстрации.": "The price, cost, stock and teaching-lot dates were created solely for demonstration.",
+  "Оригинал без изменений. Подтверждено изображение этой банки; масса, регион поставки и состав не предполагаются.": "Original image, unchanged. Only this pictured can is verified; weight, supply region and ingredients are not inferred."
 }

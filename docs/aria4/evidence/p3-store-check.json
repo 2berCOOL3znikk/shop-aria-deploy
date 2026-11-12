@@ -1,0 +1,16 @@
+{
+  "checks": [
+    "Actual catalog/detail/cart quantity and totals agree; one server row; address survives quantity changes",
+    "Blank delivery address blocked locally with no order request",
+    "Separately simulated failed quantity update leaves server quantity and address intact; inline error visible",
+    "Floating assistant returns actual catalogue products without external consent or AI request",
+    "Removal and reload persist empty server cart; no order, inventory or external-AI mutation"
+  ],
+  "views": 36,
+  "errors": [],
+  "checkoutRequests": 0,
+  "externalAiRequests": 0,
+  "productionChanged": false,
+  "passed": true,
+  "completedAt": "2026-11-12T09:59:31.626Z"
+}

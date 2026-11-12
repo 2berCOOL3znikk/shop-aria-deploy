@@ -8,8 +8,8 @@
 
 
 
-<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/assistant.css"></head>
-<body>
+<link rel="apple-touch-icon" href="/images/aria-app-192.png"><link rel="manifest" href="/manifest.webmanifest"><meta name="theme-color" content="#101418"><link rel="stylesheet" href="/css/platform.css"><link rel="stylesheet" href="/css/control-center.css"><link rel="stylesheet" href="/css/storefront.css"><link rel="stylesheet" href="/css/commerce-experience.css"><link rel="stylesheet" href="/css/assistant.css"></head>
+<body class="storefront-page cart-page">
 <div class="bg-mesh"></div>
 
 <nav class="nav-glass">
@@ -26,10 +26,13 @@
     </div>
 </nav>
 
-<main class="container" style="max-width:900px;margin:40px auto;padding:0 20px;">
-    <h1 style="margin-bottom:30px;" data-i18n="cart.title" data-copy="text.21aa55fa312070">Ваша корзина</h1>
-    <div id="cart-items"></div>
-    <div id="cart-total" style="margin-top:30px;padding:20px;" class="glass-card"></div>
+<main class="storefront-main cart-main">
+    <header class="cart-heading"><div><p class="storefront-eyebrow">ARIA SHOP</p><h1 data-copy="text.21aa55fa312070">Ваша корзина</h1><p id="cart-summary-count" role="status" aria-live="polite"></p></div><a href="/index.html" class="cart-back" data-copy="text.0200a449aebdb2">← Назад в каталог</a></header>
+    <p id="cart-alert" role="alert" hidden></p>
+    <div class="cart-layout">
+        <section id="cart-items" aria-busy="true"><p role="status" data-copy="text.a63118a695a335">Загружаем товары…</p></section>
+        <aside id="cart-total" hidden></aside>
+    </div>
 </main>
 
 <div class="toast-container" id="toast-container"></div>

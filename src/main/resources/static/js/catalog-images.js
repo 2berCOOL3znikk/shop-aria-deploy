@@ -57,7 +57,7 @@
     const photo=product?.provenance?.photo;
     if(photo&&explicit===photo.path){
       const link=(value,label)=>{try{const url=new URL(value);return url.protocol==='https:'?'<a href="'+escapeAttr(url.href)+'" target="_blank" rel="noopener noreferrer">'+escapeAttr(label)+'</a>':escapeAttr(label);}catch{return escapeAttr(label);}};
-      return ariaCopy.text("text.6ff0e370203e73")+escapeAttr(photo.author)+' · '+link(photo.sourceUrl,ariaCopy.text("text.29a33ded420dd0"))+' · '+link(photo.licenseUrl,photo.license)+'. '+escapeAttr(photo.note);
+      return ariaCopy.text("text.6ff0e370203e73")+escapeAttr(photo.author)+' · '+link(photo.sourceUrl,ariaCopy.text("text.29a33ded420dd0"))+' · '+link(photo.licenseUrl,photo.license)+'. '+escapeAttr(ariaCopy.systemMessage(photo.note));
     }
     return ariaCopy.text("text.fd558d9aefc37d");
   }

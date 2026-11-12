@@ -1,0 +1,19 @@
+{
+  "checks": [
+    "Actual checkout UI creates one PENDING order for two rapid clicks; confirmation and profile show the saved order; actual stock decreases by one",
+    "Owner cancels only this recorded educational order through the existing UI with a reason; original lot stock is restored and price unchanged; order history retained"
+  ],
+  "orderRequests": 1,
+  "errors": [],
+  "productionChanged": false,
+  "order": {
+    "id": 1,
+    "sku": "ARIA-DEMO-016",
+    "status": "CANCELLED",
+    "total": 1590,
+    "stockBefore": 12,
+    "stockAfter": 12
+  },
+  "passed": true,
+  "completedAt": "2026-11-12T10:00:36.104Z"
+}

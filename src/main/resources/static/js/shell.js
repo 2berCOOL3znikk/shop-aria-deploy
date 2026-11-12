@@ -378,7 +378,7 @@
   document.addEventListener('click',async event=>{
     const button=event.target.closest('[data-cart-op]');if(!button||button.disabled)return;
     try{if(button.dataset.cartOp==='retry')await refresh();else if(button.dataset.cartOp==='add')await add(button.dataset.cartProduct);else await adjust(button.dataset.cartProduct,button.dataset.cartOp==='increase'?1:-1);}
-    catch(error){window.showToast?.(error.message,'error');}
+    catch(error){const message=error instanceof TypeError?(ariaCopy.language==='en'?'Could not update your cart. Check your connection and try again.':'Не удалось обновить корзину. Проверьте соединение и повторите.'):error.message;const report=new CustomEvent('aria:cart-error',{detail:{message},cancelable:true});if(window.dispatchEvent(report))window.showToast?.(message,'error');}
   });
   window.addEventListener('focus',()=>{if(document.querySelector('[data-cart-control],#cart-items'))remoteRefresh();});
   window.addEventListener('aria:order-recorded',async()=>{await refresh().catch(()=>{});channel?.postMessage('changed');});

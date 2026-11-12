@@ -1,0 +1,8 @@
+{
+  "passed": true,
+  "checks": [
+    "ru: fractional tenge kept; zero is valid; missing/invalid amounts are not displayed as zero",
+    "en: fractional tenge kept; zero is valid; missing/invalid amounts are not displayed as zero"
+  ],
+  "completedAt": "2026-11-12T09:54:31.176Z"
+}

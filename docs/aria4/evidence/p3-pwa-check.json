@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "realServiceWorkerRegistered": true,
+  "cachedPaths": [
+    "/images/aria-app.svg",
+    "/js/app-copy-data.js",
+    "/js/app-copy.js",
+    "/offline.html"
+  ],
+  "privatePagesAndApiNotCached": true,
+  "offlineNavigationShowsOfflinePage": true,
+  "automaticToastCount": 0,
+  "productionChanged": false,
+  "completedAt": "2026-11-12T10:02:31.015Z"
+}

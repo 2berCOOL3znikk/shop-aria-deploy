@@ -86,7 +86,7 @@ let reviewBusy = false;
         const food = /молоч|шокол|макарон|круп|консерв|продукт|напит|хлеб|food|dairy|chocol|pasta|grocer|beverage|bakery/i.test(String(category || ''));
         const measuredPack = /\d\s*(?:кг|мг|мл|г|л|kg|mg|ml|g|l)(?:$|[\s.,/])/i.test(String(details.size || ''));
         const rows = [
-            [ariaCopy.text("text.8c3761153abda8"), details.brand], [ariaCopy.text("text.92ab62ad6f3c1e"), details.color],
+            [ariaCopy.text("text.8c3761153abda8"), details.brand], [ariaCopy.text("text.92ab62ad6f3c1e"), food || /бытов|cleaning|household/i.test(String(category||'')) ? null : details.color],
             [food || measuredPack ? ariaCopy.text("text.aed083277bdcc2") : ariaCopy.text("text.572095d4a78792"), details.size],
             [ariaCopy.text("text.e4b270e5a0a255"), Number(details.weightKg) > 0 && Number.isFinite(Number(details.weightKg)) ? new Intl.NumberFormat(ariaCopy.locale(), {maximumFractionDigits:2}).format(Number(details.weightKg)) : null]
         ].filter(([,value]) => value != null && String(value).trim() !== '');
@@ -123,7 +123,7 @@ let reviewBusy = false;
                 : '';
             // Статус на русском
             const statusLabels = { 'ACTIVE': ariaCopy.text("text.2ad1287736b3d1"), 'DISCOUNTED': ariaCopy.text("text.d20b78b59fb4a9") };
-            const statusText = statusLabels[p.status] || p.status;
+            const statusText = statusLabels[p.status] || (ariaCopy.language==='en'?'Unavailable':'Нет в наличии');
 
             ariaCopy.setProperty(document.getElementById('product'),"innerHTML",'<div class="glass-card" style="padding:0;overflow:hidden;">' +
                 CatalogImages.imageTag(displayProduct, { className: "product-main-image", alt: p.name, style: "width:100%;height:400px;object-fit:cover;", creditTarget: "product-image-credit" }) +
@@ -132,24 +132,19 @@ let reviewBusy = false;
                 '<div>' +
                 '<h1 style="margin-bottom:10px;">' + escapeHtml(p.name) + '</h1>' +
                 ariaCopy.text("text.696158010744ad") + escapeHtml(p.sku) + ' · ' + escapeHtml(p.category || '') + '</div>' +
-                ariaCopy.text("text.3b25cfb6a3146a") + escapeHtml(d && d.descriptionLong ? d.descriptionLong : ariaCopy.text("text.6cfd4fc43a52c3")) + '</p></section>' +
                 '<div class="product-detail-price">' + ariaMoney.format(displayPrice) + oldPrice + '</div>' +
 
-                renderProductAttributes(d, p.category) +
-
                 // Информация о товаре
-                '<div style="margin-bottom:20px;padding:15px;background:var(--bg-surface);border-radius:10px;">' +
-                ariaCopy.text("text.bf4654328c1093") +
-                '<div style="margin-bottom:8px;"><b>' + ariaCopy.text("text.97023b38ead4cb") + ':</b> ' + p.quantityOnHand + ' ' + escapeHtml(p.unit || '') + '</div>' +
-                (p.expiryDate ? '<div style="margin-bottom:8px;"><b>' + (p.provenance?.demonstration ? ariaCopy.text("text.d779ade0b65a43") : ariaCopy.text("text.1b706a30d3f8dd")) + '</b> ' + new Date(p.expiryDate + 'T12:00:00').toLocaleDateString(ariaCopy.locale(), {day:'numeric',month:'short',year:'numeric'}) + '</div>' : '') +
-                ariaCopy.text("text.10e12b90ee1701") + statusText + '</div>' +
-                '</div>' +
+                '<div class="product-availability"><p><span class="product-stock-dot" aria-hidden="true"></span>' + escapeHtml(statusText) + ' · ' + p.quantityOnHand + ' ' + escapeHtml(ariaCopy.systemMessage(p.unit || '')) + '</p>' +
+                (p.expiryDate ? '<p class="product-expiry-note">' + (p.provenance?.demonstration ? ariaCopy.text("text.d779ade0b65a43") : ariaCopy.text("text.1b706a30d3f8dd")) + ' ' + new Date(p.expiryDate + 'T12:00:00').toLocaleDateString(ariaCopy.locale(), {day:'numeric',month:'short',year:'numeric'}) + '</p>' : '') + '</div>' +
 
                 // Кнопки
-                '<div style="display:flex;gap:10px;">' +
+                '<div class="product-purchase-actions">' +
                 window.ariaCart.control(p) +
                 '<button type="button" class="btn-outline" aria-pressed="' + isFav + '" onclick="toggleFavorite(' + p.id + ',this)">' + (isFav ? ariaCopy.text("text.6a5df732885c30") : ariaCopy.text("text.d6e7b0dcd513ff")) + '</button>' +
                 '</div>' +
+                renderProductAttributes(d, p.category) +
+                ariaCopy.text("text.3b25cfb6a3146a") + escapeHtml(d && d.descriptionLong ? d.descriptionLong : ariaCopy.text("text.6cfd4fc43a52c3")) + '</p></section>' +
                 '</div>');
 
             ariaCopy.setProperty(document,"title",p.name + ' — ARIA Shop');
