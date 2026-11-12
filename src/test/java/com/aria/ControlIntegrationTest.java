@@ -649,6 +649,18 @@ class ControlIntegrationTest {
         assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Проверка отменена")).status).isEqualTo(409);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
         assertThat(call("POST",path+"/"+proposal+"/cancel",admin,Map.of("reason","Не подтверждена организация")).status).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.CANDIDATE);
     }
+    @Test void socialActHasSameSnapshotForOwnerAndRecipientAndRejectsUnauthorizedReaders()throws Exception {
+        long p=product();var product=products.findById(p).orElseThrow();product.setName("Учебный <script>alert(1)</script>");products.saveAndFlush(product);var lotInput=new HashMap<String,Object>(lotBody(p,"DOCUMENT",10,2));lotInput.put("receivedAt",LocalDate.now().minusDays(10).toString());assertThat(call("POST",base+"/lots",admin,lotInput).status).isEqualTo(200);
+        long organization=verifiedCharity();charityAcceptance(organization);var analyzed=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null);assertThat(analyzed.status).as(analyzed.raw).isEqualTo(200);long decision=analyzed.id();
+        var proposed=call("POST",base+"/social-proposals/decisions/"+decision,admin,null);assertThat(proposed.status).as(proposed.raw).isEqualTo(200);long proposal=proposed.id();var approved=call("POST",base+"/social-proposals/"+proposal+"/approve",admin,Map.of("organizationId",organization,"quantity",3,"validUntil",LocalDate.now().plusDays(1).toString(),"reason","Учебная сверка акта","suitabilityConfirmed",true,"transportConfirmed",true));assertThat(approved.status).as(approved.raw).isEqualTo(200);
+        long offer=((Number)approved.body.get("offerId")).longValue();String path=base+"/social/"+offer+"/act";
+        assertThat(call("GET",path,null,null).status).isEqualTo(401);assertThat(call("GET",path,user,null).status).isEqualTo(403);assertThat(call("GET",path,org,null).status).isEqualTo(403);
+        product=products.findById(p).orElseThrow();product.setName("Новое имя после резерва");products.saveAndFlush(product);
+        var ownerAct=call("GET",path,admin,null);var recipientAct=call("GET","/api/social/my-claims/"+offer+"/act",org,null);assertThat(ownerAct.status).as(ownerAct.raw).isEqualTo(200);assertThat(recipientAct.status).as(recipientAct.raw).isEqualTo(200);
+        assertThat(ownerAct.raw).isEqualTo(recipientAct.raw).contains("&lt;script&gt;alert(1)&lt;/script&gt;","800.00","Черновик").doesNotContain("<script>","Новое имя после резерва");
+        assertThat(call("GET","/api/social/my-claims/"+offer+"/act",admin,null).status).isEqualTo(403);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
+        assertThat(call("POST",base+"/social-proposals/"+proposal+"/cancel",admin,Map.of("reason","Завершение проверки документа")).status).isEqualTo(200);assertThat(call("GET",path,admin,null).status).isEqualTo(409);
+    }
     @Test void publicAssistantWorksWithoutLoginAndOnlyReturnsAvailablePublicCatalog()throws Exception {
         long p=product();lot(p,"ASSISTANT",5,20);var row=products.findById(p).orElseThrow();var input=new HashMap<>(productBody(row.getSku()));input.put("name","Уникальный шоколад помощника");call("PUT",base+"/products/"+p,admin,input);
         assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",10,"reason","Акция для проверки помощника")).status).isEqualTo(200);

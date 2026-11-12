@@ -28,7 +28,7 @@
   async function loadVerification(){
     if(ariaAuth.getRole()!=='ORG'){paintCopy();return;}
     ensureVerificationPanel();try{const result=await request('/api/organizations/verification');verificationStatus=['NOT_SUBMITTED','PENDING_VERIFICATION','VERIFIED','REJECTED'].includes(result.status)?result.status:'UNKNOWN';if(result.organizationName)document.getElementById('org-verification-name').value=result.organizationName;}catch(_){verificationStatus='UNKNOWN';}
-    document.getElementById('org-verification-form').hidden=['PENDING_VERIFICATION','VERIFIED','UNKNOWN'].includes(verificationStatus);paintCopy();
+    document.getElementById('org-verification-form').hidden=['PENDING_VERIFICATION','VERIFIED','UNKNOWN'].includes(verificationStatus);document.getElementById('org-verification-panel').hidden=verificationStatus==='VERIFIED';paintCopy();
   }
   function offerCard(offer){
     const urgent=offer.expiryDate&&Math.ceil((new Date(offer.expiryDate+'T23:59:59+05:00')-new Date())/86400000)<=3,org=ariaAuth.getRole()==='ORG';
@@ -44,6 +44,7 @@
   async function loadOffers(){if(loading)return;loading=true;offersError='';paintOffers();try{const response=await fetch('/api/social/offers');if(!response.ok)throw new Error();offers=await response.json();offers.sort((a,b)=>(a.expiryDate||'9999-12-31').localeCompare(b.expiryDate||'9999-12-31'));}catch(_){offersError='offersError';}finally{loading=false;paintOffers();}}
   function paintClaims(){
     const section=document.getElementById('claims-section');section.hidden=ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED';if(section.hidden)return;
+    const heading=document.getElementById('social-offers-heading');if(heading&&section.nextElementSibling!==heading)heading.before(section);
     document.getElementById('claims-list').innerHTML=claimsError?`<p role="alert">${t('claimsError')}</p>`:claims.length?claims.map(c=>`<article class="claim-row"><div><strong data-merchant-content>${esc(c.productName)}</strong><p>${t(c.status==='TRANSFERRED'?'transferred':'reserved')} · ${Number(c.claimedQuantity||0)} ${t('units')}</p></div><button class="btn-outline" type="button" data-act="${c.id}">${t('act')}</button></article>`).join(''):`<p>${t('claimsEmpty')}</p>`;
   }
   async function loadClaims(){if(ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED'){claims=[];paintClaims();return;}try{claims=await request('/api/social/my-claims');claimsError='';}catch(_){claimsError='claimsError';}paintClaims();}

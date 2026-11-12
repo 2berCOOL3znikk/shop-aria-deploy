@@ -1,0 +1,11 @@
+{
+  "checks": [
+    "Verified recipient sees own reservations before available offers; duplicate verification block hidden; RU/EN 390/1440 without overflow",
+    "A freshly signed-in, valid administrator from the other company cannot read the document (401)",
+    "After the real local restart: original 17 active products, Heinz stock 12, cancelled teaching order retained; QA product archived; no fabricated handover count"
+  ],
+  "views": 4,
+  "productionChanged": false,
+  "passed": true,
+  "completedAt": "2026-11-12T10:33:27.445Z"
+}

@@ -1,0 +1,26 @@
+{
+  "checks": [
+    "Actual educational ORG account, submitted verification, owner approval and explicit acceptance settings; not a real verified charity",
+    "Actual risk produces a draft without reservation; recipient needing 30 remaining days is excluded for a 2-day lot, with an actionable empty state",
+    "Unchecked suitability/transport confirmations block submission; explicit approval reserves 3 with no stock consumption",
+    "Owner downloads the exact reserved-offer document in UI; owning recipient gets identical snapshots; anonymous 401 and ordinary buyer 403",
+    "Scheduling does not mark stock ready; explicit readiness does; editing defaults to READY rather than advancing to IN_TRANSIT",
+    "All physical-handover confirmations start unchecked and block a premature request; no physical receipt is simulated or recorded",
+    "Cancellation releases the real reservation without stock consumption, donated-unit increase, AI request or consent change"
+  ],
+  "views": 24,
+  "errors": [],
+  "handoverRequests": 0,
+  "externalAiRequests": 0,
+  "productionChanged": false,
+  "physicalHandoverClaimed": false,
+  "fixture": {
+    "productId": 19,
+    "proposalId": 2,
+    "offerId": 1,
+    "organizationId": 7
+  },
+  "passed": true,
+  "fixtureClosed": true,
+  "completedAt": "2026-11-12T10:28:10.075Z"
+}

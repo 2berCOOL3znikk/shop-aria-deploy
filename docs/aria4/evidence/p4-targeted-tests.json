@@ -1,0 +1,25 @@
+{
+  "passed": true,
+  "productionChanged": false,
+  "uniqueTargetedTests": 3,
+  "newDocumentCheck": {
+    "tests": "ControlIntegrationTest#socialActHasSameSnapshotForOwnerAndRecipientAndRejectsUnauthorizedReaders",
+    "startedAt": "2026-11-12T10:19:32.4924718Z",
+    "completedAt": "2026-11-12T10:20:06.0291711Z",
+    "productionChanged": false,
+    "exitCode": 0,
+    "log": "target/experience-full-tests.log",
+    "database": "aria_checks_f486605d19f9"
+  },
+  "previousSuccessfulChecks": {
+    "tests": [
+      "socialProposalDoesNotReserveBeforeExplicitVerifiedApprovalAndUsesExistingHandover",
+      "socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover"
+    ],
+    "completedAt": "2026-11-12T10:14:14Z",
+    "result": "2 passed in the earlier 3-method run; the new document fixture was the only error in that run"
+  },
+  "fixtureCorrection": "A just-received product had no calculated unsold-stock risk. The new test uses ten recorded observation days; pricing and donation guards were not relaxed.",
+  "database": "isolated PostgreSQL, V1-V34",
+  "completedAt": "2026-11-12T10:21:47.287Z"
+}
