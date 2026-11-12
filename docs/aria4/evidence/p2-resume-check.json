@@ -1,0 +1,15 @@
+{
+  "checks": [
+    "north: sign-in, working AI tabs and wizard, saved permissions unchanged",
+    "north: actual lot counts, history and desktop/mobile layout",
+    "demo: sign-in, working AI tabs and wizard, saved permissions unchanged",
+    "demo: actual lot counts, history and desktop/mobile layout",
+    "anonymous and foreign-company tokens cannot read native lot lists or details"
+  ],
+  "errors": [],
+  "externalAiRequests": 0,
+  "policyWrites": 0,
+  "productionChanged": false,
+  "passed": true,
+  "completedAt": "2026-11-12T08:42:23.299Z"
+}

@@ -8,7 +8,7 @@
   const date = n => n ? new Date(n.length === 10 ? n + 'T12:00:00' : n).toLocaleString(ariaCopy.locale(), n.length === 10 ? {dateStyle:'medium'} : {dateStyle:'short',timeStyle:'short'}) : ariaCopy.text("text.28c54755b53e07");
   const today = () => {const parts=Object.fromEntries(new Intl.DateTimeFormat('en',{timeZone:'Asia/Qyzylorda',year:'numeric',month:'2-digit',day:'2-digit'}).formatToParts(new Date()).map(p=>[p.type,p.value]));return `${parts.year}-${parts.month}-${parts.day}`;};
   const names = {ACTIVE:ariaCopy.text("text.2ad1287736b3d1"),CANDIDATE:ariaCopy.text("text.c796f84c653f91"),DISCOUNTED:ariaCopy.text("text.002be70a2f1630"),SOCIAL:ariaCopy.text("text.f5c1b2a98487b3"),RESERVED:ariaCopy.text("text.50eaa1827e710a"),TRANSFERRED:ariaCopy.text("text.41b04cf04adccf"),WRITTEN_OFF:ariaCopy.text("text.e69636a6e234d7"),OPEN:ariaCopy.text("text.460806a5f3b0b8"),CLAIMED:ariaCopy.text("text.e492fac0db3371"),CANCELLED:ariaCopy.text("text.23a2a9bfcf74c4"),PENDING:ariaCopy.text("text.f9a506077fa0d9"),SHIPPED:ariaCopy.text("text.0729a720f892d3"),DELIVERED:ariaCopy.text("text.ffb780a5ced6e9"),RETURNED:ariaCopy.text("text.ce05bd1e0d1ee5")};
-  const tabs = {workspace:ariaCopy.text("text.d328e53dc4561e"),stores:ariaCopy.text("text.c5dba2b0e4cce1"),overview:ariaCopy.text("text.4602c9bfeac509"),manager:'ARIA AI',products:ariaCopy.text("text.d126705e2c12ad"),lots:ariaCopy.text("text.fd207fae5b492b"),movements:ariaCopy.text("text.cca068de7f5544"),smart:ariaCopy.text("text.342dcbd35b70c1"),competitors:ariaCopy.text("text.18c71601871943"),pricing:ariaCopy.text("text.ad11dc2f874415"),suppliers:ariaCopy.text("text.34ea02f793df9f"),purchases:ariaCopy.text("text.d7d3c870ec1f0d"),pos:ariaCopy.text("text.25a4a90e2f4032"),integrations:ariaCopy.text("text.74fc14c7669972"),orders:ariaCopy.text("text.5b1d42386b6d46"),social:ariaCopy.text("text.f0ea147d43be66"),socialPlans:'ARIA Impact',intelligence:'ARIA Intelligence',audit:ariaCopy.text("text.ac5dad760e33c2"),policies:ariaCopy.text("text.f83c9caf553bb7"),feedback:ariaCopy.text("text.7c46fb157ac7c3"),guide:ariaCopy.text("text.3c106d1b9d90e6"),settings:ariaCopy.text("text.985b5e0f2ccf1b")};
+  const tabs = {flow:ariaCopy.language==='en'?'Product Flow':'Путь товара',workspace:ariaCopy.text("text.d328e53dc4561e"),stores:ariaCopy.text("text.c5dba2b0e4cce1"),overview:ariaCopy.text("text.4602c9bfeac509"),manager:'ARIA AI',products:ariaCopy.text("text.d126705e2c12ad"),lots:ariaCopy.text("text.fd207fae5b492b"),movements:ariaCopy.text("text.cca068de7f5544"),smart:ariaCopy.text("text.342dcbd35b70c1"),competitors:ariaCopy.text("text.18c71601871943"),pricing:ariaCopy.text("text.ad11dc2f874415"),suppliers:ariaCopy.text("text.34ea02f793df9f"),purchases:ariaCopy.text("text.d7d3c870ec1f0d"),pos:ariaCopy.text("text.25a4a90e2f4032"),integrations:ariaCopy.text("text.74fc14c7669972"),orders:ariaCopy.text("text.5b1d42386b6d46"),social:ariaCopy.text("text.f0ea147d43be66"),socialPlans:'ARIA Impact',intelligence:'ARIA Intelligence',audit:ariaCopy.text("text.ac5dad760e33c2"),policies:ariaCopy.text("text.f83c9caf553bb7"),feedback:ariaCopy.text("text.7c46fb157ac7c3"),guide:ariaCopy.text("text.3c106d1b9d90e6"),settings:ariaCopy.text("text.985b5e0f2ccf1b")};
   let tab = Object.hasOwn(tabs,location.hash.slice(1)) ? location.hash.slice(1) : 'workspace';
   let data = {products:[],suppliers:[],lots:[],orders:[],social:[],audit:[],policies:[],overview:{}}, search = '', selectedProduct = '', preview = null, previewRevision=0;
   let filter=tab==='products'?'CURRENT':'', sort='newest', page=0, pageSize=25, totalItems=0, loadRevision=0, dirty=false, saving=false;
@@ -106,6 +106,7 @@
   function integrations(){return ariaCopy.text("text.61a0b839c9f216");}
   function pos(){return ariaCopy.text("text.9b07fb506a4229");}
   function purchases(){return ariaCopy.text("text.af7e4a0911ee8e");}
+  function flow(){return '<div id="product-flow-root" class="control-skeleton" aria-busy="true"></div>';}
   function workspace(){return ariaCopy.text("text.a2a460ebabb4a9");}
   function stores(){return ariaCopy.text("text.0858c4a08f9a77");}
   function manager(){return ariaCopy.text("text.b6afb36bf08556");}
@@ -119,7 +120,7 @@
     ['stores',['stores'],'M3 10h18l-2-6H5z M5 10v10h14V10 M9 20v-6h6v6'],
     ['products',['products'],'m3 7 9-4 9 4-9 4z M3 7v10l9 4 9-4V7 M12 11v10'],
     ['orders',['orders'],'M6 3h12v18l-3-2-3 2-3-2-3 2z M9 8h6 M9 12h6'],
-    ['lots',['lots','movements','pos'],'M3 9 12 3l9 6v12H3z M7 21v-9h10v9 M7 16h10'],
+    ['lots',['flow','lots','movements','pos'],'M3 9 12 3l9 6v12H3z M7 21v-9h10v9 M7 16h10'],
     ['smart',['smart','competitors','pricing'],'M20 13 13 20a2 2 0 0 1-3 0l-7-7V3h10l7 7a2 2 0 0 1 0 3Z M7 7h.01'],
     ['purchases',['purchases','suppliers'],'M3 3h2l3 12h11l2-8H6 M10 20h.01 M18 20h.01'],
     ['overview',['overview','intelligence'],'M4 20h16 M7 16v-5 M12 16V4 M17 16V8'],
@@ -137,9 +138,10 @@
     const group=groups.find(([,keys])=>keys.includes(tab));
     ariaCopy.setProperty($('control-nav'),"innerHTML",groups.map(([key,keys,path])=>`<button type="button" data-action="tab" data-id="${key}" ${keys.includes(tab)?'aria-current="page"':''}><svg viewBox="0 0 24 24" aria-hidden="true"><path d="${path}"/></svg><span>${tabs[key]}</span></button>`).join(''));
     const subnav=group?.[1].length>1?ariaCopy.template("template.e153deafaa0535",[group[1].map(key=>`<button type="button" data-action="tab" data-id="${key}" ${key===tab?'aria-current="page"':''}>${subLabels[key]||tabs[key]}</button>`).join('')]):'';
-    ariaCopy.setProperty($('control-content'),"innerHTML",subnav+({workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide,settings}[tab])()+(listTabs.has(tab)?pager():''));
+    ariaCopy.setProperty($('control-content'),"innerHTML",subnav+({flow,workspace,stores,overview,manager,products,lots,movements,smart,competitors,pricing,suppliers,purchases,pos,integrations,orders,social,socialPlans,intelligence,audit,policies,feedback,guide,settings}[tab])()+(listTabs.has(tab)?pager():''));
     const ctx={request,notify,form,formField,show,markDirty:()=>dirty=true,clearDirty:()=>dirty=false};
     if(section==='workspace')await ariaWorkspace.mount(ctx);
+    if(section==='flow'){await ariaProductFlow.mount(ctx);document.getElementById('product-flow-root')?.setAttribute('aria-busy','false');}
     if(section==='settings'){await ariaWorkspace.mountDemoCatalogue(ctx);await window.ariaCompanyEntry?.mount(document.getElementById('control-content'));}
     if(section==='stores')await ariaStores.mount(ctx);
     if(section==='pricing')await loadPreview();if(section==='movements')await ariaOperations.ledger(ctx);if(section==='integrations')await ariaOperations.integrations(ctx);if(section==='pos')await ariaPos.mount(ctx);if(section==='purchases')await ariaPurchases.mount(ctx);if(section==='manager')await ariaManager.mount(ctx);if(section==='smart')await ariaSmartPricing.mount(ctx);if(section==='competitors')await ariaCompetitors.mount(ctx);if(section==='socialPlans')await ariaSocialProposals.mount(ctx);

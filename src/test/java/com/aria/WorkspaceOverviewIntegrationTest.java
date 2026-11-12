@@ -111,6 +111,7 @@ class WorkspaceOverviewIntegrationTest {
         var completed = LocalDateTime.now(ZoneId.of("Asia/Qyzylorda")).withNano(0);
         new TransactionTemplate(transactions).executeWithoutResult(tx -> {
             var store = new ConnectedStore(); store.organization = em.find(Organization.class, 1); store.name = "Isolated dashboard test"; store.platform = "WOOCOMMERCE"; store.baseUrl = "https://test.invalid"; store.status = "CONNECTED"; store.testConnection = true; em.persist(store);
+            var imported=new StoreSnapshot();imported.storeId=store.id;imported.externalId="test-card";imported.name="Teaching imported card";imported.price=new BigDecimal("500");imported.availableQuantity=7;imported.currency="KZT";em.persist(imported);
             var d = new StorePricingDecision(); d.storeId = store.id; d.externalId = "dashboard-persisted"; d.productName = "Test product"; d.fingerprint = UUID.randomUUID().toString(); d.reportJson = "{}"; d.reason = "Persisted test response"; d.source = "AI"; d.status = "KEEP"; d.aiCompletedAt = completed; d.reviewAt = completed.plusDays(1); em.persist(d);
             var engine = new StorePricingDecision(); engine.storeId = store.id; engine.externalId = "dashboard-engine"; engine.productName = "Test calculation"; engine.fingerprint = UUID.randomUUID().toString(); engine.reportJson = "{}"; engine.reason = "Calculation is not AI"; engine.aiCompletedAt = completed.plusDays(1); engine.reviewAt = completed.plusDays(2); em.persist(engine);
         });
@@ -118,6 +119,8 @@ class WorkspaceOverviewIntegrationTest {
         assertThat(LocalDateTime.parse(map(after, "manager").get("lastDecisionAt").toString())).isBetween(completed, LocalDateTime.now(ZoneId.of("Asia/Qyzylorda")));
         assertThat(number(map(after, "stores"), "testConnected") - number(map(before, "stores"), "testConnected")).isEqualTo(1);
         assertThat(number(map(after, "stores"), "connected") - number(map(before, "stores"), "connected")).isZero();
+        assertThat(number(map(after,"stores"),"testCatalogCards")-number(map(before,"stores"),"testCatalogCards")).isEqualTo(1);
+        assertThat(number(map(after,"stores"),"catalogCards")-number(map(before,"stores"),"catalogCards")).isZero();
     }
 
     @Test void productFlowSeparatesUsableLotsProposalsReservationsAndActualHandover() throws Exception {
@@ -137,6 +140,31 @@ class WorkspaceOverviewIntegrationTest {
         assertThat(number(a,"unitsTransferredToday")-number(b,"unitsTransferredToday")).isEqualTo(3);
         assertThat(number(map(after,"today"),"aiDecisions")-number(map(before,"today"),"aiDecisions")).isZero();
     }
+
+    @Test void productFlowRequiresAdminValidatesQueriesAndDoesNotRevealMissingLotsToBuyers() throws Exception {
+        String path="/api/admin/control/workspace/flow";
+        assertThat(getPath(path,null).statusCode()).isEqualTo(401);
+        assertThat(getPath(path,account(Role.USER)).statusCode()).isEqualTo(403);
+        var admin=account(Role.ADMIN);assertThat(getPath(path+"?view=made-up",admin).statusCode()).isEqualTo(400);
+        assertThat(getPath(path+"?size=101",admin).statusCode()).isEqualTo(400);
+        assertThat(getPath(path+"?page=-1",admin).statusCode()).isEqualTo(400);
+        assertThat(getPath(path+"/9223372036854775807",admin).statusCode()).isEqualTo(404);
+    }
+
+    @Test void productFlowPartitionsActualLotsAndKeepsProductReservationsSeparateFromLotMovements() throws Exception {
+        var admin=account(Role.ADMIN);var marker="FLOWPATH-"+UUID.randomUUID();var today=LocalDate.now();var lotId=new long[1];
+        new TransactionTemplate(transactions).executeWithoutResult(tx->{
+            var regular=new Product(marker,marker,"FlowCategory",0,today,0,BigDecimal.ONE,new BigDecimal("100"),null);em.persist(regular);
+            for(int i=0;i<5;i++){var lot=new InventoryLot();lot.setProduct(regular);lot.setLotNumber(marker+"-"+i);lot.setReceivedAt(today);lot.setExpiryDate(today.plusDays(i==1?1:i==2?-1:80));lot.setInitialQuantity(5);lot.setQuantity(i==0?3:5);lot.setUnitCost(BigDecimal.ONE);lot.setActive(i!=4);lot.handlingStatus=i==3?"REJECTED":"CONFIRMED";em.persist(lot);if(i==0){lotId[0]=lot.getId();var order=new Order();order.setOwnerEmail("private-customer@example.test");order.setDeliveryAddress("Private customer address");order.setTotalAmount(new BigDecimal("200"));order.setStatus("SHIPPED");order.setShippedAt(LocalDateTime.now());em.persist(order);em.persist(new OrderAllocation(order,lot,2));for(var type:List.of("RECEIPT","ORDER_STOCK")){var m=new InventoryMovement();m.productId=regular.getId();m.lotId=lot.getId();m.quantityDelta=type.equals("RECEIPT")?5:-2;m.type=type;m.reason="Recorded teaching movement";m.actor="private-employee@example.test";em.persist(m);}}}
+            for(var status:List.of(com.aria.enums.ProductStatus.DISCOUNTED,com.aria.enums.ProductStatus.RESERVED)){var p=new Product(marker+status,marker,"FlowCategory",0,today,0,BigDecimal.ONE,new BigDecimal("100"),null);p.setStatus(status);if(status==com.aria.enums.ProductStatus.DISCOUNTED)p.setDiscountPercent(10);em.persist(p);var l=new InventoryLot();l.setProduct(p);l.setLotNumber(marker+status);l.setReceivedAt(today);l.setExpiryDate(today.plusDays(80));l.setInitialQuantity(5);l.setQuantity(5);l.setUnitCost(BigDecimal.ONE);em.persist(l);}
+            var reserve=new SocialOffer(regular,BigDecimal.ZERO,2,today.plusDays(2));reserve.setStatus("CLAIMED");reserve.setQuantityClaimed(2);em.persist(reserve);
+        });
+        String path="/api/admin/control/workspace/flow?q="+marker;var result=getPath(path+"&size=2",admin);assertThat(result.statusCode()).as(result.body()).isEqualTo(200);var page=json.readValue(result.body(),Map.class);assertThat(number(page,"totalElements")).isEqualTo(7);assertThat(number(page,"totalPages")).isEqualTo(4);assertThat((List<?>)page.get("content")).hasSize(2);var counts=map(page,"counts");assertThat(number(counts,"AVAILABLE")).isEqualTo(1);assertThat(number(counts,"REVIEW")).isEqualTo(1);assertThat(number(counts,"BLOCKED")).isEqualTo(2);assertThat(number(counts,"CLOSED")).isEqualTo(1);assertThat(number(counts,"DISCOUNTED")).isEqualTo(1);assertThat(number(counts,"SOCIAL")).isEqualTo(1);
+        var blocked=json.readValue(getPath(path+"&view=BLOCKED",admin).body(),Map.class);assertThat((List<Map<?,?>>)blocked.get("content")).allMatch(v->v.get("stage").equals("BLOCKED"));
+        var detail=getPath("/api/admin/control/workspace/flow/"+lotId[0],admin);assertThat(detail.statusCode()).isEqualTo(200);assertThat(detail.body()).doesNotContain("private-customer","private-employee","Private customer address");var body=json.readValue(detail.body(),Map.class);assertThat(number(body,"quantity")).isEqualTo(3);assertThat((List<?>)body.get("movements")).hasSize(2);assertThat((List<?>)body.get("orders")).hasSize(1);assertThat((List<?>)body.get("social")).hasSize(1);assertThat(body).doesNotContainKey("reservedFromThisLot");
+    }
+
+    private HttpResponse<String> getPath(String path,String token)throws Exception {var builder=HttpRequest.newBuilder(uri(path));if(token!=null)builder.header("Authorization","Bearer "+token);return http.send(builder.GET().build(),HttpResponse.BodyHandlers.ofString());}
 
     private void nativeOrder(LocalDateTime at, String status, String total) {
         var order = new Order(); order.setTotalAmount(new BigDecimal(total)); order.setStatus(status); order.setShippedAt(at); em.persist(order);

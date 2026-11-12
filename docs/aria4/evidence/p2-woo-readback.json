@@ -1,0 +1,29 @@
+{
+  "environment": "actual installed isolated WooCommerce",
+  "method": "GET",
+  "readOnlyConsumerUsed": true,
+  "priceWriteRequested": false,
+  "productionChanged": false,
+  "items": [
+    {
+      "externalId": "10",
+      "price": "1215.00",
+      "quantity": 18,
+      "matchedAiSnapshot": true
+    },
+    {
+      "externalId": "12",
+      "price": "2888.00",
+      "quantity": 8,
+      "matchedAiSnapshot": true
+    },
+    {
+      "externalId": "13",
+      "price": "3500",
+      "quantity": 4,
+      "matchedAiSnapshot": true
+    }
+  ],
+  "passed": true,
+  "completedAt": "2026-11-12T08:42:45.473Z"
+}

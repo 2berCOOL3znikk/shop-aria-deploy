@@ -1,0 +1,442 @@
+{
+  "productionChanged": false,
+  "externalAiRequests": 0,
+  "checks": [
+    "ru/light: real tabs, keyboard and saved AI view",
+    "ru/light: explicit separate consents; autopilot cannot advance without them; cancel leaves owner policy unchanged",
+    "ru/dark: real tabs, keyboard and saved AI view",
+    "ru/dark: explicit separate consents; autopilot cannot advance without them; cancel leaves owner policy unchanged",
+    "en/light: real tabs, keyboard and saved AI view",
+    "en/light: explicit separate consents; autopilot cannot advance without them; cancel leaves owner policy unchanged",
+    "en/dark: real tabs, keyboard and saved AI view",
+    "en/dark: explicit separate consents; autopilot cannot advance without them; cancel leaves owner policy unchanged",
+    "actual populated lot history, stock and product-level reservation distinction; filters and search",
+    "real wizard save in teaching demo: recommendation mode, no external consent or AI request, all products/lots/orders unchanged"
+  ],
+  "views": [
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "setup",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "ru",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "ai-overview",
+      "lang": "en",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "setup",
+      "lang": "en",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1440
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "dark",
+      "width": 1024
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "dark",
+      "width": 768
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "dark",
+      "width": 390
+    },
+    {
+      "screen": "flow-empty",
+      "lang": "en",
+      "theme": "dark",
+      "width": 360
+    },
+    {
+      "screen": "flow-populated",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "flow-populated",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "flow-populated",
+      "lang": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "flow-populated",
+      "lang": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "flow-populated",
+      "lang": "ru",
+      "theme": "light",
+      "width": 360
+    },
+    {
+      "screen": "lot-detail",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1440
+    },
+    {
+      "screen": "lot-detail",
+      "lang": "ru",
+      "theme": "light",
+      "width": 1024
+    },
+    {
+      "screen": "lot-detail",
+      "lang": "ru",
+      "theme": "light",
+      "width": 768
+    },
+    {
+      "screen": "lot-detail",
+      "lang": "ru",
+      "theme": "light",
+      "width": 390
+    },
+    {
+      "screen": "lot-detail",
+      "lang": "ru",
+      "theme": "light",
+      "width": 360
+    }
+  ],
+  "errors": [],
+  "untranslated": [],
+  "passed": true,
+  "completedAt": "2026-11-11T10:59:40.252Z"
+}

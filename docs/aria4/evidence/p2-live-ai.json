@@ -1,0 +1,56 @@
+{
+  "environment": "approved isolated woo-e2e teaching company",
+  "productionChanged": false,
+  "consentsChanged": false,
+  "automaticRequestsEnabled": false,
+  "priceWriteRequested": false,
+  "errors": [],
+  "before": [
+    {
+      "externalId": "10",
+      "price": "1215.00",
+      "quantity": 18
+    },
+    {
+      "externalId": "12",
+      "price": "2888.00",
+      "quantity": 8
+    },
+    {
+      "externalId": "13",
+      "price": "3500.00",
+      "quantity": 4
+    }
+  ],
+  "decisionId": 9,
+  "apiRequestMade": true,
+  "endpointStatus": 200,
+  "source": "AI",
+  "providerNote": "AI выбрал допустимый сценарий. Ограничения и применение проверяются Java.",
+  "strategy": "KEEP",
+  "currentPrice": 1215,
+  "suggestedPrice": 1215,
+  "aiCompletedAt": "2026-11-11T16:02:30.078825",
+  "model": "baidu/ernie-5.5-flash-preview:free",
+  "realModelResult": true,
+  "after": [
+    {
+      "externalId": "10",
+      "price": "1215.00",
+      "quantity": 18
+    },
+    {
+      "externalId": "12",
+      "price": "2888.00",
+      "quantity": 8
+    },
+    {
+      "externalId": "13",
+      "price": "3500.00",
+      "quantity": 4
+    }
+  ],
+  "uiVerified": true,
+  "passed": true,
+  "completedAt": "2026-11-11T11:02:30.896Z"
+}

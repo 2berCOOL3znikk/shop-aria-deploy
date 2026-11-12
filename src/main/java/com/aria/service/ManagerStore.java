@@ -46,6 +46,16 @@ public class ManagerStore {
   invalidateTasks(!"OFF".equals(mode));
   audit.record("MANAGER_CONFIGURED","manager",mode+" · автоматический AI "+s.automaticAiConsent+" · черновики закупок "+purchases+" · лимит "+budget+" ₸/день");
  }
+ /** One owner-reviewed setup, with the existing manager -> pricing lock order and atomic rollback. */
+ public void setup(SettingsInput pricing,com.aria.controller.AiManagerController.Settings manager,boolean dataConsentConfirmed,boolean automationConsentConfirmed){
+  var state=lock();if(state.configRevision!=manager.revision())throw new IllegalStateException("Настройки менеджера изменились; обновите страницу");
+  if("OFF".equals(manager.mode()))throw new IllegalArgumentException("Для остановки используйте отдельную экстренную остановку");
+  if(Boolean.TRUE.equals(pricing.externalAiEnabled())&&!dataConsentConfirmed)throw new IllegalArgumentException("Отдельно подтвердите состав данных для внешнего AI");
+  if((manager.automaticAiConsent()||Boolean.TRUE.equals(pricing.scheduledAiEnabled()))&&!automationConsentConfirmed)throw new IllegalArgumentException("Отдельно разрешите автоматические обращения к AI");
+  var saved=smart.configure(pricing);
+  configure(manager.revision(),manager.mode(),manager.automaticAiConsent(),manager.socialDrafts(),manager.purchaseDrafts(),manager.intervalMinutes(),manager.dailyDraftBudget(),((Number)saved.get("version")).longValue(),manager.policyConfirmed());
+  audit.record("MANAGER_SETUP_COMPLETED","manager","Сохранена проверенная владельцем настройка; согласия на данные и автоматические обращения проверены отдельно");
+ }
  private void disableExternalAi(){var p=pricingSettings.lockSettings().orElseThrow();p.externalAiEnabled=false;p.scheduledAiEnabled=false;p.publicAssistantAiEnabled=false;p.consentRevision++;p.updatedAt=LocalDateTime.now();pricingSettings.saveAndFlush(p);}
  public void stop(){var s=lock();s.mode="OFF";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();disableExternalAi();invalidateTasks(false);audit.record("MANAGER_STOPPED","manager","Будущие циклы, внешний AI и ценовой автопилот отключены. Уже изменённые цены сохранены.");}
  public void stopPricing(){var s=lock();if(!"OFF".equals(s.mode))s.mode="ADVISOR";s.automaticAiConsent=false;s.configRevision++;s.lease=null;s.leaseUntil=null;smart.stop();invalidateTasks(true);audit.record("MANAGER_PRICING_STOPPED","manager","Автономное изменение цен остановлено; ручные AI-запросы сохраняют прежние разрешения.");}

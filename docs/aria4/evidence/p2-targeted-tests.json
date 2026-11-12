@@ -1,0 +1,24 @@
+{
+  "scope": "native Product Flow, truthful overview and atomic AI setup; isolated PostgreSQL V1-V34",
+  "passed": true,
+  "tests": 11,
+  "suites": [
+    {
+      "name": "WorkspaceOverviewIntegrationTest",
+      "tests": 7,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    },
+    {
+      "name": "ManagerSetupIntegrationTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0
+    }
+  ],
+  "startedAt": "2026-11-11T11:04:21.9981249Z",
+  "completedAt": "2026-11-11T11:05:04.3410153Z",
+  "productionChanged": false
+}

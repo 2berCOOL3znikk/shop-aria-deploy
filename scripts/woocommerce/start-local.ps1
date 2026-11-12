@@ -27,7 +27,8 @@ function Start-Owned([string]$Name,[string]$Exe,[string[]]$ArgsList,[int]$Port){
 Start-Owned 'database' (Join-Path $mdb.FullName 'bin/mariadbd.exe') @('--no-defaults',('--datadir="'+$db+'"'),'--bind-address=127.0.0.1','--port=53389','--max-connections=20','--innodb-buffer-pool-size=64M','--skip-name-resolve','--console') 53389
 $env:MYSQL_PWD=$cfg.databasePassword
 $dbReady=$false
-for($i=0;$i -lt 20;$i++){& (Join-Path $mdb.FullName 'bin/mariadb-admin.exe') --skip-ssl --protocol=tcp --host=127.0.0.1 --port=53389 --user=root ping 2>$null | Out-Null;if($LASTEXITCODE -eq 0){$dbReady=$true;break};Start-Sleep -Milliseconds 500}
+$previousPreference=$ErrorActionPreference
+try{$ErrorActionPreference='Continue';for($i=0;$i -lt 20;$i++){& (Join-Path $mdb.FullName 'bin/mariadb-admin.exe') --skip-ssl --protocol=tcp --host=127.0.0.1 --port=53389 --user=root ping 2>$null | Out-Null;if($LASTEXITCODE -eq 0){$dbReady=$true;break};Start-Sleep -Milliseconds 500}}finally{$ErrorActionPreference=$previousPreference}
 if(!$dbReady){throw 'Isolated MariaDB not ready; check data/woocommerce logs'}
 & (Join-Path $mdb.FullName 'bin/mariadb.exe') --skip-ssl --protocol=tcp --host=127.0.0.1 --port=53389 --user=root --execute='CREATE DATABASE IF NOT EXISTS aria_woo_e2e CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci'
 Remove-Item Env:MYSQL_PWD

@@ -105,6 +105,7 @@ try{
  if((Test-Path -LiteralPath (Join-Path $parent '.idea')) -and (Split-Path $root -Leaf) -eq 'backend'){
   $shortcut=Join-Path $parent 'ARIA.cmd';if(!(Test-Path -LiteralPath $shortcut)){[IO.File]::WriteAllText($shortcut,"@echo off`r`ncall `"%~dp0backend\ARIA.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
   $previewShortcut=Join-Path $parent 'ARIA-preview.cmd';if(!(Test-Path -LiteralPath $previewShortcut)){[IO.File]::WriteAllText($previewShortcut,"@echo off`r`ncall `"%~dp0backend\ARIA-preview.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
+  $aiShortcut=Join-Path $parent 'ARIA-AI-preview.cmd';if(!(Test-Path -LiteralPath $aiShortcut)){[IO.File]::WriteAllText($aiShortcut,"@echo off`r`ncall `"%~dp0backend\ARIA-AI-preview.cmd`" %*`r`n",[Text.Encoding]::ASCII)}
   $runDirectory=Join-Path $parent '.run';New-Item -ItemType Directory -Path $runDirectory -Force | Out-Null
   $runFile=Join-Path $runDirectory 'ARIA.run.xml';$canInstall=!(Test-Path -LiteralPath $runFile)
   if(!$canInstall){$existingRun=Get-Content -LiteralPath $runFile -Raw -Encoding UTF8;$canInstall=$existingRun.Contains('name="ARIA — запуск"') -and $existingRun.Contains('value="com.aria.AriaDesktopLauncher"')}

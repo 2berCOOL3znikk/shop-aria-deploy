@@ -56,6 +56,7 @@ public class WorkspaceOverviewService {
                 "total", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status<>'DISCONNECTED'"),
                 "connected", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status='CONNECTED'"),
                 "testConnected", count("ConnectedStore s", "s.archived=false and s.testConnection=true and s.status='CONNECTED'"),
+                "testCatalogCards",count("StoreSnapshot s","s.storeId in (select c.id from ConnectedStore c where c.archived=false and c.testConnection=true and c.status<>'DISCONNECTED')"),
                 "attention", count("ConnectedStore s", "s.archived=false and s.testConnection=false and s.status not in ('CONNECTED','DISCONNECTED')"),
                 "catalogCards", count("StoreSnapshot s", "s.storeId in (select c.id from ConnectedStore c where c.archived=false and c.testConnection=false and c.status<>'DISCONNECTED')")
                         + (count("ConnectedStore s", "s.archived=false and s.platform='ARIA_DEMO' and s.status<>'DISCONNECTED'") > 0 ? ((Number) inventory.get("products")).longValue() : 0L)));
