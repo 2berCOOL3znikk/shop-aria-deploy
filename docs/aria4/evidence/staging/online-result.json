@@ -1,0 +1,18 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "productionChanged": false,
+  "checks": [
+    "Public identity labels staging and advertises no desktop company links",
+    "Real owner sign-in works; the new company has zero products, orders, price actions, connected stores and AI consents",
+    "Staging workspace 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging workspace 390px: real empty state, environment label and no horizontal overflow",
+    "Staging stores 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging stores 390px: real empty state, environment label and no horizontal overflow",
+    "Staging manager 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging manager 390px: real empty state, environment label and no horizontal overflow"
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "5190ce2de8c3e92f96e4c27111ca4abd3ae6d9af",
+  "checkedAt": "2026-11-13T05:15:32.206Z"
+}

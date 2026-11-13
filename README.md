@@ -1,6 +1,6 @@
 # ARIA Shop
 
-**Автономность ARIA 4.0:** [настоящий фоновый WooCommerce E2E, источник ENGINE, readback и проверенный откат](docs/aria4/AUTONOMY_RU.md). Коммит `d5d1143`, CI успешен. [Отдельный staging и его изоляция](docs/aria4/STAGING_RU.md); production/main не переключались.
+**Автономность ARIA 4.0:** [настоящий фоновый WooCommerce E2E, источник ENGINE, readback и проверенный откат](docs/aria4/AUTONOMY_RU.md). Коммит `d5d1143`, CI успешен. [Открыть проверенный онлайн-staging](https://aria-v4-staging-2ber.onrender.com/start.html), [вход и изоляция](docs/aria4/STAGING_RU.md); production/main не переключались. Сборка `5190ce2`, CI успешен.
 
 **ARIA Impact 4.0:** [следующий шаг, готовность, прямой акт и кабинет получателя](docs/aria4/IMPACT_RU.md). 3 целевых PostgreSQL-сценария, 24 вида процесса и 4 завершающих проверки успешны. Учебный резерв отменён; физическая выдача и благотворительная помощь не имитировались.
 
