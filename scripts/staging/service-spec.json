@@ -1,0 +1,21 @@
+{
+  "name": "aria-v4-staging-2ber",
+  "workspaceId": "tea-db9optm1egvs7382osug",
+  "repo": "https://github.com/2berCOOL3znikk/shop-aria-deploy",
+  "branch": "codex/production-foundation",
+  "runtime": "docker",
+  "plan": "free",
+  "region": "frankfurt",
+  "autoDeploy": "no",
+  "dockerfilePath": "./Dockerfile",
+  "dockerContext": ".",
+  "envVars": [
+    {"key": "SPRING_PROFILES_ACTIVE", "value": "postgres,production,free,staging"},
+    {"key": "ARIA_SEED_DEMO_USERS", "value": "false"},
+    {"key": "ARIA_SEED_DEMO_CATALOG", "value": "false"},
+    {"key": "ARIA_DEMO_MARKET_ENABLED", "value": "false"},
+    {"key": "ARIA_RESET_DATA_ON_START", "value": "false"},
+    {"key": "ARIA_COMPANY_SIGNUP_ENABLED", "value": "false"},
+    {"key": "ARIA_INTELLIGENCE_FREE_ONLY", "value": "true"}
+  ]
+}

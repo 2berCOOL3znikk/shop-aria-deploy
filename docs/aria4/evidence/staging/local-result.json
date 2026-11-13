@@ -1,0 +1,18 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "productionChanged": false,
+  "checks": [
+    "Public identity labels staging and advertises no desktop company links",
+    "Real owner sign-in works; the new company has zero products, orders, price actions, connected stores and AI consents",
+    "Staging workspace 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging workspace 390px: real empty state, environment label and no horizontal overflow",
+    "Staging stores 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging stores 390px: real empty state, environment label and no horizontal overflow",
+    "Staging manager 1440px: real empty state, environment label and no horizontal overflow",
+    "Staging manager 390px: real empty state, environment label and no horizontal overflow"
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "development",
+  "checkedAt": "2026-11-13T05:04:44.389Z"
+}

@@ -1,7 +1,7 @@
 (()=>{'use strict';const {pair:t,icon,information}=ariaUi,root=document.getElementById('aria-start');
  const copy={title:['Ваш магазин.\nВсё под контролем.','Your store.\nUnder control.'],intro:['Товары, магазины и решения ARIA — в одном кабинете.','Products, stores and ARIA decisions in one workspace.']};
  const text=k=>copy[k][ariaCopy.language==='en'?1:0];
- function status(info){return t(info.environment==='LOCAL'?'На этом компьютере':info.environment==='PRODUCTION'?'Рабочая среда':'Предпросмотр',info.environment==='LOCAL'?'On this computer':info.environment==='PRODUCTION'?'Live environment':'Preview');}
+ function status(info){return t(info.environment==='LOCAL'?'На этом компьютере':info.environment==='PRODUCTION'?'Рабочая среда':info.environment==='STAGING'?'Тестовая онлайн-версия':'Предпросмотр',info.environment==='LOCAL'?'On this computer':info.environment==='PRODUCTION'?'Live environment':info.environment==='STAGING'?'Online staging':'Preview');}
  (async()=>{const info=await information;if(!info){root.innerHTML=`<p class="ar-eyebrow">ARIA</p><h1>${t('Начнём с запуска','Start with ARIA')}</h1><p class="ar-intro">${t('Этот экземпляр ещё не обновлён. Откройте ARIA через общий ярлык запуска в папке проекта.','This instance has not been updated yet. Open ARIA using the project’s desktop launcher.')}</p><a class="ar-button" href="/login.html">${t('Войти в этот кабинет','Sign in to this workspace')}${icon('arrow')}</a>`;root.setAttribute('aria-busy','false');return;}
   const demo=info.workspaceType==='DEMO',operator=info.workspaceType==='REGISTRATION',links=info.links||{};
   const registration=operator?'/company-start.html':links.registration;
