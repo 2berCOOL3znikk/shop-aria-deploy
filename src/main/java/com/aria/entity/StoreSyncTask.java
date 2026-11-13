@@ -8,6 +8,7 @@ public class StoreSyncTask {
  @Column(nullable=false,length=20) public String state;
  @Column(nullable=false) public int attempts;
  @Column(nullable=false) public long generation;
+ @Column(nullable=false) public long cycleCursor;
  @com.fasterxml.jackson.annotation.JsonIgnore @Column(nullable=false) public long claimedGeneration;
  @Column(nullable=false) public java.time.LocalDateTime dueAt;
  @Column(nullable=false) public java.time.LocalDateTime updatedAt;

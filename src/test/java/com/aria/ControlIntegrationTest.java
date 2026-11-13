@@ -879,4 +879,10 @@ class ControlIntegrationTest {
         assertThat(call("PUT",base+"/pricing/"+p,admin,Map.of("percent",0,"reason","Скидка закончена")).status).isEqualTo(200);
         assertThat(call("GET","/api/products/"+p,null,null).status).isEqualTo(404);
     }
+    @Test void connectedAutonomyAndReversalRoutesRequireTheCompanyAdministrator()throws Exception {
+        var made=call("POST",base+"/stores",admin,Map.of("name","Autonomy access boundary","platform","WOOCOMMERCE","url","https://isolated.example.invalid","testConnection",true));assertThat(made.status).isEqualTo(200);String storePath=base+"/stores/"+made.id();
+        assertThat(call("GET",storePath+"/autonomy",admin,null).status).isEqualTo(200);
+        for(String token:java.util.Arrays.asList(null,user,org)){int denied=token==null?401:403;assertThat(call("GET",storePath+"/autonomy",token,null).status).isEqualTo(denied);assertThat(call("PUT",storePath+"/autonomy",token,Map.of("confirmed",true)).status).isEqualTo(denied);assertThat(call("POST",storePath+"/autonomy/pause",token,Map.of("version",0,"confirmed",true)).status).isEqualTo(denied);assertThat(call("POST",storePath+"/pricing/changes/1/rollback",token,Map.of("storeVersion",0,"confirmed",true)).status).isEqualTo(denied);}
+    }
+
 }

@@ -21,4 +21,6 @@ public class StorePricingDecision {
  public java.time.LocalDateTime aiRequestedAt,aiCompletedAt;
  @com.fasterxml.jackson.annotation.JsonIgnore @Column(length=80) public String aiClaim;
  public Long globalConsentRevision,storeConsentRevision,priceChangeId;
+ @com.fasterxml.jackson.annotation.JsonIgnore public Long autonomyTaskId,autonomyGeneration;
+ @com.fasterxml.jackson.annotation.JsonIgnore @Column(length=50) public String autonomyLease;
 }

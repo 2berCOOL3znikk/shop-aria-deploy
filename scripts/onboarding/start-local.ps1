@@ -1,4 +1,4 @@
-param([switch]$SkipBuild,[switch]$Restart)
+﻿param([switch]$SkipBuild,[switch]$Restart)
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location -LiteralPath $root
@@ -36,7 +36,14 @@ if($LASTEXITCODE -ne 0){
  # (Node, IntelliJ or ARIA.cmd) waiting after readiness because the server inherits its handles.
  # PostgreSQL already writes its actual server output to the explicit -l file above.
  $helper=Start-Process -FilePath "$pg/pg_ctl.exe" -ArgumentList $argsList -Verb Open -WindowStyle Hidden -PassThru
- if(!$helper.WaitForExit(30000)){throw 'PostgreSQL start timed out'}
+ $readyLimit=[DateTime]::UtcNow.AddSeconds(60);$databaseReady=$false
+ do{
+  & "$pg/pg_isready.exe" -h 127.0.0.1 -p 55434 -t 1 *> $null
+  if($LASTEXITCODE -eq 0){$databaseReady=$true;break}
+  if($helper.HasExited -and $helper.ExitCode -ne 0){break}
+  Start-Sleep -Milliseconds 500
+ }while([DateTime]::UtcNow -lt $readyLimit)
+ if(!$databaseReady){throw 'Owned PostgreSQL is not ready; preserved the database and startup log'}
  & "$pg/pg_ctl.exe" -D $cluster status *> $null;if($LASTEXITCODE -ne 0){throw 'Owned PostgreSQL could not start'}
 }
 $env:PGHOST='127.0.0.1';$env:PGPORT='55434';$env:PGUSER='aria_preview';$env:PGPASSWORD=$preview.databasePassword;$env:PGCONNECT_TIMEOUT='5'

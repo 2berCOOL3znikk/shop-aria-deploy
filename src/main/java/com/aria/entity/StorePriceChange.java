@@ -16,6 +16,8 @@ public class StorePriceChange {
  @Column(nullable=false,length=20) public String source="MANUAL";
  @Column(nullable=false) public boolean automatic;
  public Long decisionId;
+ @Transient public String decisionReason;
+ public Long revertsId;
  @Column(nullable=false,length=900) public String reason;
  @Column(length=900) public String outcomeNote;
  @Column(nullable=false,length=255) public String requestedBy;

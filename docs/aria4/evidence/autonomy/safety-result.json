@@ -1,0 +1,32 @@
+{
+  "productionChanged": false,
+  "checks": [
+    "Real emergency stop revoked writes, recurring work and experiments; Resume could only restart read-only analysis, with new price permissions still required",
+    "New explicit setup resumed the background cycle; the seven-day experiment guard prevented another discount",
+    "Invalid floor and too-frequent price changes were rejected before creating or sending a write",
+    "Replaying the same approved operation returned the existing change instead of creating a duplicate",
+    "Owner confirmed Undo through the actual UI; WooCommerce readback confirmed 1470 → 1500 KZT, linked history and duplicate protection",
+    "Resumed analysis preserved the restored price; no repeated automatic write",
+    "Real AI overview ru light 1440px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview ru light 390px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview ru dark 1440px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview ru dark 390px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview en light 1440px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview en light 390px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview en dark 1440px: source, reversal, next check and no horizontal overflow",
+    "Real AI overview en dark 390px: source, reversal, next check and no horizontal overflow",
+    "Previous three fixture prices/quantities and other store permissions remain unchanged; no browser runtime errors"
+  ],
+  "errors": [],
+  "completed": true,
+  "reversal": {
+    "id": 8,
+    "revertsId": 7,
+    "before": 1470,
+    "after": 1500,
+    "source": "MANUAL",
+    "status": "APPLIED",
+    "verifiedAt": "2026-11-13T09:33:21.458563"
+  },
+  "checkedAt": "2026-11-13T04:33:30.912Z"
+}

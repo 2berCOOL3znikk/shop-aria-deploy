@@ -8,6 +8,7 @@ public class StoreSyncRun {
  @Column(nullable=false,length=20) public String status;
  @Column(nullable=false) public int imported;
  @Column(nullable=false) public int skipped;
+ @Column(nullable=false) public int actionsApplied;
  @Column(length=500) public String note;
  @Column(nullable=false) public java.time.LocalDateTime completedAt;
 }

@@ -19,4 +19,6 @@ public class StorePriceController {
  @GetMapping("/changes") public Object history(@PathVariable Long storeId){return service.history(storeId);}
  @PostMapping("/changes") public Object change(@PathVariable Long storeId,@Valid @RequestBody Change c){return service.request(storeId,c.storeVersion(),c.externalId(),c.expectedPrice(),c.targetPrice(),c.requestKey(),c.reason());}
  @PostMapping("/changes/{id}/reconcile") public Object reconcile(@PathVariable Long storeId,@PathVariable Long id){return service.reconcile(storeId,id);}
+ public record Rollback(@Min(0) long storeVersion,@AssertTrue boolean confirmed){}
+ @PostMapping("/changes/{id}/rollback") public Object rollback(@PathVariable Long storeId,@PathVariable Long id,@Valid @RequestBody Rollback r){return service.rollback(storeId,id,r.storeVersion());}
 }

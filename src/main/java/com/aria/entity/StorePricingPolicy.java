@@ -8,6 +8,8 @@ public class StorePricingPolicy {
  @Column(nullable=false) public boolean externalAiConsent=false,scheduledAiConsent=false,priceWriteConsent=false;
  @Column(nullable=false) public int maximumDiscount=20,cooldownHours=24;
  @Column(nullable=false) public boolean allowLowConfidence=false;
+ @Column(nullable=false) public boolean autonomyEnabled=false,engineFallbackConsent=false;
+ @Column(nullable=false) public int cycleIntervalMinutes=60;
  @Column(nullable=false,columnDefinition="text") public String allowedCategoriesJson="[]";
  @Column(nullable=false) public long consentRevision=0;
  @Column(nullable=false) public java.time.LocalDateTime updatedAt=java.time.LocalDateTime.now();

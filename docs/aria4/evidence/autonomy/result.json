@@ -1,0 +1,52 @@
+{
+  "environment": "installed isolated local WordPress/WooCommerce + separate ARIA PostgreSQL",
+  "productionChanged": false,
+  "syntheticStockAndOrders": true,
+  "checks": [
+    "Actual WooCommerce contains a separate labelled teaching SKU and a synthetic completed order",
+    "Real catalogue and completed orders imported; cost and non-perishability explicitly confirmed only for the new teaching SKU",
+    "Owner enabled explicit engine-only permissions through the real three-step UI; background worker applied the bounded price experiment and reread WooCommerce",
+    "Pause cancelled the durable task; actual action, reason, time and verified source are visible in history",
+    "Visible ARIA working state, actual history and mobile 390px layout verified",
+    "All previous WooCommerce fixture prices, quantities and per-store permissions are unchanged",
+    "Saved teaching product, reversal and externally confirmed current price survived restart; no write was sent by verification"
+  ],
+  "errors": [],
+  "completed": true,
+  "originalPricesBefore": [
+    {
+      "id": 10,
+      "price": "1215.00",
+      "quantity": 18
+    },
+    {
+      "id": 12,
+      "price": "2888.00",
+      "quantity": 8
+    },
+    {
+      "id": 13,
+      "price": "3500",
+      "quantity": 4
+    }
+  ],
+  "previousStoreIds": [
+    3
+  ],
+  "priceChange": {
+    "storeId": 4,
+    "productId": 16,
+    "changeId": 7,
+    "source": "ENGINE",
+    "automatic": true,
+    "before": 1500,
+    "after": "1470.00",
+    "currency": "KZT",
+    "verifiedAt": "2026-11-13T09:22:37.291193",
+    "stock": 165,
+    "reason": "Рекомендация подключённого магазина № 47"
+  },
+  "checkedAt": "2026-11-13T04:36:35.974Z",
+  "currentPriceAfterRestart": "1500.00",
+  "restartVerifiedAt": "2026-11-13T04:36:35.974Z"
+}
