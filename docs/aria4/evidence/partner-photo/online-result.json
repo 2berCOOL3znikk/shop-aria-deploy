@@ -1,0 +1,16 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "readOnly": true,
+  "productionChanged": false,
+  "checks": [
+    "Exact deployed revision and staging identity confirmed; synthetic staff disabled, review product archived, original review stock remains 12, no connected credentials or external AI consent",
+    "Owner team screen checked at 390 and 1440px, RU/light and EN/dark, without any management or stock writes",
+    "Owner can inspect the retained control image; response is private and not cached; anonymous access is rejected",
+    "Unverified partner cannot view a cancelled offer image, private catalogue or staff; own history API remains available and contains no fabricated transfer"
+  ],
+  "views": 8,
+  "errors": [],
+  "completed": true,
+  "revision": "fdba9788688c1c6619cc3df3d1d11be923ed9180",
+  "checkedAt": "2026-11-14T13:41:49.262Z"
+}

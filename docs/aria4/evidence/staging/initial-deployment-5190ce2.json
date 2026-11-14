@@ -1,0 +1,46 @@
+{
+  "verifiedAt": "2026-11-13T05:18:41.794Z",
+  "service": {
+    "id": "srv-dbr9o4tbedkc73cvlj0g",
+    "url": "https://aria-v4-staging-2ber.onrender.com",
+    "branch": "codex/production-foundation",
+    "plan": "free",
+    "autoDeploy": "no"
+  },
+  "deploy": {
+    "id": "dep-dbr9o5dbedkc73cvlk10",
+    "status": "live",
+    "commit": "5190ce2de8c3e92f96e4c27111ca4abd3ae6d9af",
+    "finishedAt": "2026-11-13T05:14:47.016324Z"
+  },
+  "database": {
+    "projectId": "dawn-dew-85661116",
+    "name": "aria_staging",
+    "separateEmptyProject": true,
+    "organizationPlan": "free",
+    "productionRowsCopied": false
+  },
+  "production": {
+    "serviceId": "srv-db9p3enavr4c73etcl1g",
+    "branch": "main",
+    "updatedAt": "2026-10-28T09:57:17.800733Z",
+    "unchanged": true
+  },
+  "ci": [
+    {
+      "commit": "d5d1143",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43367191157"
+    },
+    {
+      "commit": "ee44819",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43369883615"
+    },
+    {
+      "commit": "5190ce2",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43370282683"
+    }
+  ]
+}

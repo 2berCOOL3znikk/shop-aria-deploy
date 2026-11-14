@@ -3,16 +3,16 @@
   "productionChanged": false,
   "checks": [
     "Public identity labels staging and advertises no desktop company links",
-    "Real owner sign-in works; the new company has zero products, orders, price actions, connected stores and AI consents",
-    "Staging workspace 1440px: real empty state, environment label and no horizontal overflow",
-    "Staging workspace 390px: real empty state, environment label and no horizontal overflow",
-    "Staging stores 1440px: real empty state, environment label and no horizontal overflow",
-    "Staging stores 390px: real empty state, environment label and no horizontal overflow",
-    "Staging manager 1440px: real empty state, environment label and no horizontal overflow",
-    "Staging manager 390px: real empty state, environment label and no horizontal overflow"
+    "Real owner sign-in works; recorded product and stock counts agree with the existing review records; no price actions, connected stores or AI consent added",
+    "Staging workspace 1440px: real recorded state, environment label and no horizontal overflow",
+    "Staging workspace 390px: real recorded state, environment label and no horizontal overflow",
+    "Staging stores 1440px: real recorded state, environment label and no horizontal overflow",
+    "Staging stores 390px: real recorded state, environment label and no horizontal overflow",
+    "Staging manager 1440px: real recorded state, environment label and no horizontal overflow",
+    "Staging manager 390px: real recorded state, environment label and no horizontal overflow"
   ],
   "errors": [],
   "completed": true,
-  "revision": "5190ce2de8c3e92f96e4c27111ca4abd3ae6d9af",
-  "checkedAt": "2026-11-13T05:15:32.206Z"
+  "revision": "fdba9788688c1c6619cc3df3d1d11be923ed9180",
+  "checkedAt": "2026-11-14T10:53:18.013Z"
 }
