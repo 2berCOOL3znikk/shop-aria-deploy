@@ -1,0 +1,28 @@
+{
+  "checkedAt": "2026-11-14T20:04:25.489Z",
+  "originalCi": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43634907930",
+  "cause": "CI default UTC differed from the existing deployed JVM timezone Asia/Qyzylorda after local midnight",
+  "change": "Surefire argLine matches existing Docker ENTRYPOINT; business code and test assertions unchanged",
+  "targetedOnly": true,
+  "suites": [
+    {
+      "name": "com.aria.ConnectedPricingIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "userTimezone": "Asia/Qyzylorda"
+    },
+    {
+      "name": "com.aria.WorkspaceOverviewIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "userTimezone": "Asia/Qyzylorda"
+    }
+  ],
+  "passed": true,
+  "realAiOrWooCommerceRequest": false,
+  "productionChanged": false
+}
