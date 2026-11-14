@@ -23,7 +23,7 @@ public class CompanySignupController {
  public record Prepare(@Min(0) long version){}
  public record Verify(@Min(0) long version,@NotBlank @Size(max=500) String address){}
  private <T> ResponseEntity<T> response(T value){return ResponseEntity.ok().cacheControl(CacheControl.noStore()).header("Pragma","no-cache").body(value);}
- @GetMapping("/api/company-signup/capabilities") public Object capabilities(){return response(Map.of("enabled",signup.available()));}
+ @GetMapping("/api/company-signup/capabilities") public Object capabilities(){return response(Map.of("enabled",signup.available(),"intakeOnly",signup.intakeOnly(),"canProvision",signup.available()&&!signup.intakeOnly()));}
  @GetMapping("/api/company-signup/challenge") public Object challenge(HttpServletRequest req){return response(signup.challenge(req.getRemoteAddr()));}
  @PostMapping("/api/company-signup/requests") public Object submit(@Valid @RequestBody Application a,HttpServletRequest req){signup.requireDesk();return response(signup.submit(a.id,a.token,a.companyName,a.ownerName,a.email,a.processingConsent,a.contactConsent,a.website,a.captchaId,a.captchaAnswer,req.getRemoteAddr()));}
  @GetMapping("/api/company-signup/requests/{id}") public Object status(@PathVariable String id,@RequestHeader(value="X-ARIA-Signup-Token",required=false) String token,HttpServletRequest req){signup.requireDesk();return response(signup.status(id,token,req.getRemoteAddr()));}

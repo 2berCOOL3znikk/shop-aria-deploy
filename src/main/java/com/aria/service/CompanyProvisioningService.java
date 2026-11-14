@@ -22,7 +22,7 @@ public class CompanyProvisioningService {
  private final TransactionTemplate transaction;
  public CompanyProvisioningService(CompanySignupService signup,CompanyRegistrationRequestRepository rows,IntegrationVault vault,LocalWorkspaceProbe probe,AuditService audit,PlatformTransactionManager manager){this.signup=signup;this.rows=rows;this.vault=vault;this.probe=probe;this.audit=audit;transaction=new TransactionTemplate(manager);}
  public Map<String,Object> prepare(String id,long version){
-  signup.requireDesk();probe.requireLocal();
+  signup.requireProvisioning();probe.requireLocal();
   return transaction.execute(tx->{var r=rows.lockById(id).orElseThrow(CompanyProvisioningService::missing);
    if(r.version!=version)throw changed();
    if(!Set.of("VERIFIED","PREPARING").contains(r.status))throw new ResponseStatusException(HttpStatus.CONFLICT,"Сначала завершите проверку заявки");
@@ -37,8 +37,8 @@ public class CompanyProvisioningService {
    return Map.of("id",r.id,"status",r.status,"version",r.version,"serverSetupPrepared",true);
   });
  }
- public Map<String,Object> verify(String id,long version,String address){signup.requireDesk();probe.validate(address);return verifySnapshot(snapshot(id,version,null),address,false);}
- public Map<String,Object> refresh(String id,String token,String address){signup.requireDesk();signup.rate(address,30,"workspace-refresh");var s=snapshot(id,null,token);if(s.url==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Кабинет ещё не проверен оператором");return verifySnapshot(s,s.url,true);}
+ public Map<String,Object> verify(String id,long version,String address){signup.requireProvisioning();probe.validate(address);return verifySnapshot(snapshot(id,version,null),address,false);}
+ public Map<String,Object> refresh(String id,String token,String address){signup.requireProvisioning();signup.rate(address,30,"workspace-refresh");var s=snapshot(id,null,token);if(s.url==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Кабинет ещё не проверен оператором");return verifySnapshot(s,s.url,true);}
  private record Snapshot(String id,long version,String cipher,String binding,String ownerHash,Instant deadline,String url){@Override public String toString(){return "WorkspaceSnapshot[redacted]";}}
  private Snapshot snapshot(String id,Long version,String token){return transaction.execute(tx->{var r=rows.findById(id).orElseThrow(CompanyProvisioningService::missing);if(version==null)signup.requireAccess(r,token);if(version!=null&&r.version!=version)throw changed();if(!Set.of("PREPARING","READY","ACTIVE").contains(r.status)||r.setupSecretCipher==null)throw new ResponseStatusException(HttpStatus.CONFLICT,"Кабинет ещё не подготовлен");return new Snapshot(r.id,r.version,r.setupSecretCipher,r.workspaceBinding,CompanySignupService.hash(r.ownerEmail),r.activationDeadline,r.workspaceUrl);});}
  private Map<String,Object> verifySnapshot(Snapshot s,String address,boolean owner){

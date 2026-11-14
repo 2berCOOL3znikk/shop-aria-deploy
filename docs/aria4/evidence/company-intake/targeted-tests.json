@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "database": "isolated temporary PostgreSQL, migrations V1-V36",
+  "newTests": 6,
+  "simultaneousSubmissionTestPassed": true,
+  "existingRegistrationTestsPassed": 13,
+  "disabledMerchantHttpGuardPassed": true,
+  "source": "target/p12-intake-tests.log; prior CompanySignupIntegrationTest and ControlIntegrationTest surefire reports",
+  "activationPerformed": false,
+  "productionChanged": false
+}

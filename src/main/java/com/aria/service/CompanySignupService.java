@@ -16,17 +16,25 @@ import java.util.*;
 @Service
 public class CompanySignupService {
  private final boolean enabled;
+ private final boolean intakeOnly;
+ @Value("${spring.datasource.driver-class-name:org.postgresql.Driver}") private String databaseDriver;
  private final CompanyRegistrationRequestRepository requests;
  private final CaptchaService captcha;
  private final AuditService audit;
  private final Map<String,Limit> limits=new HashMap<>();
  private record Limit(int used,Instant until){}
+ public CompanySignupService(boolean enabled,String binding,CompanyRegistrationRequestRepository requests,CaptchaService captcha,AuditService audit){this(enabled,false,binding,requests,captcha,audit);}
+ @org.springframework.beans.factory.annotation.Autowired
  public CompanySignupService(@Value("${aria.company-signup.enabled:false}") boolean enabled,
+       @Value("${aria.company-signup.intake-only:false}") boolean intakeOnly,
        @Value("${aria.organization.key:demo}") String binding,CompanyRegistrationRequestRepository requests,CaptchaService captcha,AuditService audit){
   if(enabled&&!"aria-registration".equals(binding))throw new IllegalStateException("Company applications require the separate aria-registration database binding");
-  this.enabled=enabled;this.requests=requests;this.captcha=captcha;this.audit=audit;
+  if(intakeOnly&&(enabled||!"aria-v4-staging".equals(binding)))throw new IllegalStateException("Online application intake is restricted to the isolated staging and cannot provision accounts");
+  this.enabled=enabled||intakeOnly;this.intakeOnly=intakeOnly;this.requests=requests;this.captcha=captcha;this.audit=audit;
  }
  public boolean available(){return enabled;}
+ public boolean intakeOnly(){return intakeOnly;}
+ public void requireProvisioning(){requireDesk();if(intakeOnly)throw new ResponseStatusException(HttpStatus.CONFLICT,"Заявка сохранена. Создание облачного кабинета ещё не подключено; активация пока недоступна");}
  public void requireDesk(){if(!enabled)throw new ResponseStatusException(HttpStatus.NOT_FOUND,"Регистрация компаний здесь не включена");}
  public synchronized void rate(String address,int maximum,String operation){
   requireDesk();Instant now=Instant.now();limits.entrySet().removeIf(e->!e.getValue().until.isAfter(now));String key=operation+":"+address;
@@ -39,6 +47,9 @@ public class CompanySignupService {
   requireDesk();validateId(id);validateToken(token);
   email=AuthService.normalizeEmail(email);company=company.trim();owner=owner.trim();
   if(!processing||!contact||company.isBlank()||company.length()>200||owner.isBlank()||owner.length()>120||website!=null&&!website.isBlank())throw new IllegalArgumentException("Проверьте данные и отдельные согласия заявки");
+  // The lock includes absent UUIDs, so simultaneous retries cannot both create a row.
+  // PostgreSQL releases it only at transaction commit, also across server instances.
+  if("org.postgresql.Driver".equals(databaseDriver)){requests.serializeCreation(id);requests.serializeCreation("token:"+hash(token));}
   var existing=requests.lockById(id);
   if(existing.isPresent()){
    var r=existing.get();authorize(r,token);
@@ -46,6 +57,7 @@ public class CompanySignupService {
    return publicView(r);
   }
   rate(address,10,"submit");
+  if(requests.existsByAccessHash(hash(token)))throw new ResponseStatusException(HttpStatus.CONFLICT,"Код уже привязан к заявке. Откройте её по сохранённому коду");
   if(!captcha.verifyAnswer(challengeId,answer))throw new IllegalArgumentException("Пройдите проверку регистрации заново");
   if(requests.count()>=10000)throw new ResponseStatusException(HttpStatus.SERVICE_UNAVAILABLE,"Приём заявок временно приостановлен");
   var r=new CompanyRegistrationRequest();r.id=id;r.accessHash=hash(token);r.companyName=company;r.ownerName=owner;r.ownerEmail=email;r.processingConsent=processing;r.contactConsent=contact;r.createdAt=LocalDateTime.now();r.updatedAt=r.createdAt;
@@ -67,7 +79,7 @@ public class CompanySignupService {
   requests.flush();audit.record("COMPANY_APPLICATION_REVIEWED","company-request:"+id,next+"; окружение не предоставлено");return operatorView(r);
  }
  Map<String,Object> publicView(CompanyRegistrationRequest r){
-  boolean checked=Set.of("READY","ACTIVE").contains(r.status)&&r.workspaceCheckedAt!=null&&r.workspaceUrl!=null;
+  boolean checked=!intakeOnly&&Set.of("READY","ACTIVE").contains(r.status)&&r.workspaceCheckedAt!=null&&r.workspaceUrl!=null;
   boolean expired=checked&&r.workspaceActivatedAt==null&&r.activationDeadline!=null&&!r.activationDeadline.isAfter(Instant.now());
   var v=new LinkedHashMap<String,Object>();v.put("id",r.id);v.put("companyName",r.companyName);v.put("email",mask(r.ownerEmail));v.put("status",expired?"ACTIVATION_EXPIRED":r.status);v.put("createdAt",r.createdAt);v.put("updatedAt",r.updatedAt);v.put("workspaceReady",checked&&!expired);v.put("accountCreated",checked);v.put("emailAutomaticallyVerified",false);
   if(checked){v.put("workspaceUrl",r.workspaceUrl);v.put("workspaceCheckedAt",r.workspaceCheckedAt);v.put("activationDeadline",r.activationDeadline);v.put("workspaceActivatedAt",r.workspaceActivatedAt);}return v;

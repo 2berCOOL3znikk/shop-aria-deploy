@@ -30,7 +30,7 @@ jobs:
           cache: maven
       - run: chmod +x mvnw
       - run: ./mvnw -B clean verify
-      - run: ./mvnw -B -Dtest=ControlIntegrationTest test
+      - run: ./mvnw -B -Dtest=ControlIntegrationTest,CompanyIntakeIntegrationTest test
         env:
           ARIA_TEST_DATABASE_URL: jdbc:postgresql://localhost:5432/aria_test
           ARIA_TEST_DATABASE_USER: aria_test

@@ -1,0 +1,16 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "applicationOnly": true,
+  "workspaceCreated": false,
+  "identityVerified": false,
+  "aiConsentChanged": false,
+  "checks": [
+    "Saved code restores the request in a fresh browser; missing/foreign code and business/operator access are denied",
+    "A simulated status network failure preserves the receipt and offers retry; after recovery the same recorded application opens without resubmission"
+  ],
+  "views": 8,
+  "errors": [],
+  "completed": true,
+  "revision": "development",
+  "checkedAt": "2026-11-14T14:02:55.247Z"
+}

@@ -1,0 +1,19 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "applicationOnly": true,
+  "workspaceCreated": false,
+  "identityVerified": false,
+  "aiConsentChanged": false,
+  "checks": [
+    "Actual application submitted from the start page on the same origin; no account, workspace or verified-email assertion",
+    "Saved code restores the request in a fresh browser; missing/foreign code and business/operator access are denied",
+    "Retry after a lost response uses the same receipt and succeeds without a second CAPTCHA",
+    "Owner opens applications through settings, starts review, and closes the synthetic request; no identity approval or provisioning is performed"
+  ],
+  "views": 6,
+  "errors": [],
+  "completed": true,
+  "revision": "development",
+  "checkedAt": "2026-11-14T13:57:47.253Z",
+  "source": "Preserved from the successful first browser execution output, before subsequent read-only reviews"
+}

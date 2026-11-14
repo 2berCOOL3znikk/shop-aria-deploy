@@ -2,3 +2,5 @@
 
 .signup-table th:last-child{width:132px}.signup-table td:last-child .signup-button{white-space:nowrap;overflow-wrap:normal;word-break:normal}
 .signup-command{white-space:pre-wrap;overflow-wrap:anywhere;padding:12px;border:1px solid var(--line);border-radius:7px;font:12px/1.6 ui-monospace,monospace;background:var(--canvas)}
+
+html[data-theme="dark"]{color-scheme:dark;--ink:#f4f4f5;--muted:#a1a1aa;--line:#35353c;--surface:#202024;--canvas:#161619}html[data-theme="dark"] .signup-form input,html[data-theme="dark"] .signup-form select,html[data-theme="dark"] .signup-form textarea,html[data-theme="dark"] .signup-filter input,html[data-theme="dark"] .signup-filter select,html[data-theme="dark"] .signup-table,html[data-theme="dark"] .signup-button.secondary{background:var(--surface)}html[data-theme="dark"] .signup-button,html[data-theme="dark"] .signup-brand span{color:#18181b}html[data-theme="dark"] .signup-button.secondary{color:var(--ink)}html[data-theme="dark"] .signup-error{color:#fca5a5}html[data-theme="dark"] .signup-button:hover{background:#d4d4d8}html[data-theme="dark"] .signup-button.secondary:hover{background:#303036}
