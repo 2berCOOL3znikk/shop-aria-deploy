@@ -1,0 +1,26 @@
+{
+  "database": "isolated temporary PostgreSQL",
+  "tests": [
+    {
+      "test": "purchasesRequireVerifiedQuoteAndPartialReceiptIsIdempotent",
+      "passed": true
+    },
+    {
+      "test": "managerPurchaseDraftUsesBudgetAndNeverPlacesExternalOrder",
+      "passed": true
+    },
+    {
+      "test": "adminStockReadExcludesExpiredLotsWithoutChangingStoredProduct",
+      "passed": true
+    },
+    {
+      "test": "orderPagesSearchSnapshotsAndKeepStableStatusFilteredPages",
+      "passed": true
+    },
+    {
+      "test": "supplierPriceChangeRequiresNewPurchaseApproval",
+      "passed": true
+    }
+  ],
+  "source": "last targeted surefire report; full suite is CI"
+}

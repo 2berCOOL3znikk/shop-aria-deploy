@@ -1,0 +1,20 @@
+{
+  "productionChanged": false,
+  "syntheticReviewData": true,
+  "checks": [
+    "New inventory card opens the existing real lot workflow and its recorded movements",
+    "Private B2B staging does not expose retail registration or fabricate checkout orders; Orders guides the owner to connect a store"
+  ],
+  "errors": [],
+  "views": 32,
+  "completed": true,
+  "review": {
+    "productId": 1,
+    "sku": "ARIA-REVIEW-P7-001",
+    "purchaseId": 1,
+    "received": 12,
+    "orderStatus": "NOT_CREATED_PRIVATE_B2B",
+    "externalAiEnabled": false
+  },
+  "checkedAt": "2026-11-14T08:41:04.877Z"
+}

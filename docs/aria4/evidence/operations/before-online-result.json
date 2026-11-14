@@ -1,0 +1,42 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "label": "before-online",
+  "readOnly": true,
+  "views": [
+    {
+      "route": "lots",
+      "width": 1440
+    },
+    {
+      "route": "lots",
+      "width": 390
+    },
+    {
+      "route": "purchases",
+      "width": 1440
+    },
+    {
+      "route": "purchases",
+      "width": 390
+    },
+    {
+      "route": "suppliers",
+      "width": 1440
+    },
+    {
+      "route": "suppliers",
+      "width": 390
+    },
+    {
+      "route": "orders",
+      "width": 1440
+    },
+    {
+      "route": "orders",
+      "width": 390
+    }
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "5190ce2de8c3e92f96e4c27111ca4abd3ae6d9af"
+}

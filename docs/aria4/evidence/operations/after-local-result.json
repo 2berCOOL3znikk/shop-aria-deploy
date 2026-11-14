@@ -1,0 +1,42 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "label": "after-local",
+  "readOnly": true,
+  "views": [
+    {
+      "route": "lots",
+      "width": 1440
+    },
+    {
+      "route": "lots",
+      "width": 390
+    },
+    {
+      "route": "purchases",
+      "width": 1440
+    },
+    {
+      "route": "purchases",
+      "width": 390
+    },
+    {
+      "route": "suppliers",
+      "width": 1440
+    },
+    {
+      "route": "suppliers",
+      "width": 390
+    },
+    {
+      "route": "orders",
+      "width": 1440
+    },
+    {
+      "route": "orders",
+      "width": 390
+    }
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "development"
+}

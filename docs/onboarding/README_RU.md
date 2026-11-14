@@ -1,5 +1,7 @@
 # Компания: заявка → отдельный кабинет → активация
 
+**14.11 — операции:** [закупки](https://aria-v4-staging-2ber.onrender.com/control.html#purchases), [склад](https://aria-v4-staging-2ber.onrender.com/control.html#lots), [заказы](https://aria-v4-staging-2ber.onrender.com/control.html#orders). Новые карточки, пошаговая приёмка и понятные следующие действия. В staging — только отмеченные искусственные данные проверки, без чужих компаний, ключей и фиктивных продаж. [Подробности](../aria4/OPERATIONS_RU.md).
+
 **Публичный staging 13.11:** [открыть](https://aria-v4-staging-2ber.onrender.com/start.html), `backend/ARIA-Staging-preview.cmd`. Отдельные Render Free, Neon и секреты; main/production не менялись. Сборка `5190ce2`, CI и 8 онлайн-проверок успешны. [Подробно](../aria4/STAGING_RU.md).
 
 **13.11, P5:** [проверенный автономный цикл WooCommerce](../aria4/AUTONOMY_RU.md), запуск `ARIA-AI-preview.cmd`. Реальная фоновая отправка 1500 → 1470 ₸ и readback; безопасный откат → 1500 ₸, история/пауза/экстренная остановка/восстановление расписания. 46 целевых сценариев; новый интерфейс проверен RU/EN, обе темы, 390/1440 px. Это локальный учебный E2E; отдельный публичный staging опубликован и проверен в P5.1.
