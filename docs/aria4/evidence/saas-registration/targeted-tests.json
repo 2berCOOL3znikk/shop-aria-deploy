@@ -1,0 +1,90 @@
+{
+  "checkedAt": "2026-11-14T19:55:25.156Z",
+  "level": "targeted tests, not cloud E2E",
+  "suites": [
+    {
+      "name": "com.aria.CloudRegistrationIntegrationTest",
+      "tests": 10,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "checkedAt": "2026-11-14T19:53:30.270Z",
+      "cases": [
+        "missingInvitationOrConsentCannotReserveCapacity",
+        "concurrentRequestsCannotSpendOneInvitationTwice",
+        "anInvitationCannotClaimAnExistingPlatformEmailWithoutThatUsersSession",
+        "lostConfirmationKeepsTheSameAllocationAndRetryDoesNotInstallTwice",
+        "pendingRecoveryRequiresPasswordAndCaptchaThenRotatesOnlyTheStatusCode",
+        "changedCompanyAndPasswordCannotCollideInAnIdempotencyFingerprint",
+        "wrongReadbackNeverMarksAWorkspaceActiveOrReleasesItToSomeoneElse",
+        "recoveryDuringFinalConfirmationDoesNotLoseVerifiedActivation",
+        "recoveryDuringFinalFailureStillAllowsPreparationToBeResumed",
+        "activeMeansIndependentReadbackAndNeverCreatesAnOwnerInTheCoordinator"
+      ]
+    },
+    {
+      "name": "com.aria.WorkspaceGatewaySecurityTest",
+      "tests": 5,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "checkedAt": "2026-11-14T19:46:39.832Z",
+      "cases": [
+        "malformedLoginDoesNotExposeAParserErrorOrReachAnotherService",
+        "ambiguousPathsAndInternalBootstrapAreRejectedBeforeRouting",
+        "platformAdministrationIsNeverForwardedUsingTenantClaims",
+        "unknownIssuerOrConflictingViewCannotReachAnyBackend",
+        "workspaceHintWithoutBearerCannotOpenBusinessApis"
+      ]
+    },
+    {
+      "name": "com.aria.WorkspaceSlotSecurityTest",
+      "tests": 4,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "checkedAt": "2026-11-14T19:25:23.967Z",
+      "cases": [
+        "bootstrapHasSeparateServerAuthorizationAndSignedBodies",
+        "installationIsOneTimeAndCannotResetAnExistingOwnerPassword",
+        "anotherRegistrationCannotTakeAnAssignedSlot",
+        "nonemptyOrPrivilegedDatabaseIsRejected"
+      ]
+    },
+    {
+      "name": "com.aria.config.WorkspaceSlotConfigurationTest",
+      "tests": 3,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "checkedAt": "2026-11-14T19:10:30.613Z",
+      "cases": [
+        "acceptsExactDedicatedBoundaryBeforeMigrations",
+        "rejectsMissingKeyOrDisabledMigration",
+        "rejectsOtherDatabaseOrRoleBeforeMigrations"
+      ]
+    },
+    {
+      "name": "com.aria.ControlIntegrationTest",
+      "tests": 1,
+      "failures": 0,
+      "errors": 0,
+      "skipped": 0,
+      "checkedAt": "2026-11-14T19:18:13.104Z",
+      "cases": [
+        "cloudAdmissionAndBootstrapRequireExplicitDeploymentConfiguration"
+      ]
+    }
+  ],
+  "total": 23,
+  "passed": true,
+  "temporaryPostgresql": [
+    "com.aria.CloudRegistrationIntegrationTest",
+    "com.aria.ControlIntegrationTest"
+  ],
+  "remoteTransportMocked": true,
+  "realCloudRegistrationExecuted": false,
+  "createdCompany": false,
+  "publishedVersionChanged": false,
+  "cloudPreparation": "Waiting for explicit permission required by automatic safety review for new database roles and saved access credentials"
+}

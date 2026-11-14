@@ -19,6 +19,10 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 public class SecurityConfig {
 
     private final JwtAuthFilter jwtAuthFilter;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.aria.service.WorkspaceSlotService> workspaceSlots;
+    @org.springframework.beans.factory.annotation.Autowired
+    private org.springframework.beans.factory.ObjectProvider<com.aria.service.CloudRegistrationService> cloudRegistrations;
 
     @org.springframework.beans.factory.annotation.Value("${aria.organization.key:demo}")
     private String organizationKey;
@@ -49,6 +53,9 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET,"/api/auth/capabilities").permitAll()
                         .requestMatchers(HttpMethod.GET,"/api/application").permitAll()
                         .requestMatchers("/api/auth/session","/api/auth/logout-all").authenticated()
+                        .requestMatchers(HttpMethod.POST,"/api/internal/workspace/bootstrap").access((authentication,context)->new org.springframework.security.authorization.AuthorizationDecision(workspaceSlots.getObject().authorizeGatewayHeader(context.getRequest().getHeader("X-ARIA-Workspace-Access"))))
+                        .requestMatchers(HttpMethod.GET,"/api/saas/capabilities","/api/saas/challenge","/api/saas/registrations/*").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/saas/register","/api/saas/recover","/api/saas/registrations/*/retry").access((authentication,context)->new org.springframework.security.authorization.AuthorizationDecision(cloudRegistrations.getObject().enabled()))
                         .requestMatchers("/api/company-signup/**").permitAll()
                         .requestMatchers("/api/company-activation/**").permitAll()
                         .requestMatchers(HttpMethod.POST,"/api/employee-invitations/inspect","/api/employee-invitations/accept").permitAll()

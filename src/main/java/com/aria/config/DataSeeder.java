@@ -32,6 +32,7 @@ public class DataSeeder implements CommandLineRunner {
 
     @Override
     public void run(String... args) {
+        if(environment.getProperty("aria.saas.slot-enabled",Boolean.class,false))return;
         adminEmail=com.aria.service.AuthService.normalizeEmail(adminEmail);
         if(environment.acceptsProfiles(org.springframework.core.env.Profiles.of("production"))) {
             for(var entry:java.util.Map.of("admin@aria.shop","admin123","user@aria.shop","user123","fund@aria.shop","fund123").entrySet()) {

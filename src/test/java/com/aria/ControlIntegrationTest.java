@@ -137,6 +137,13 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/company-signup/requests",user,null).status).isEqualTo(403);
         assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
     }
+    @Test void cloudAdmissionAndBootstrapRequireExplicitDeploymentConfiguration()throws Exception {
+        assertThat(call("GET","/api/saas/capabilities",null,null).body).containsEntry("enabled",false);
+        assertThat(call("POST","/api/saas/register",null,Map.of()).status).isEqualTo(401);
+        assertThat(call("POST","/api/internal/workspace/bootstrap",null,Map.of()).status).isEqualTo(401);
+        assertThat(call("POST","/api/internal/workspace/bootstrap",admin,Map.of()).status).isEqualTo(403);
+        assertThat(call("GET","/api/admin/workspace-pool",user,null).status).isEqualTo(403);
+    }
     @Test void privateCompanyPartnersSeeOnlyTheirSocialWorkflowAndCannotEnterBusinessApis()throws Exception {
         var previous=ReflectionTestUtils.getField(securityConfiguration,"organizationKey");
         try{

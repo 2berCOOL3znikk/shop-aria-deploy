@@ -13,6 +13,7 @@
  async function mount(){const info=await ariaUi.information;
   const loginNote=document.getElementById('auth-workspace-note');if(loginNote){loginNote.textContent=info?t(info.workspaceType==='DEMO'?'Демонстрационная среда':info.workspaceType==='REGISTRATION'?'Вход оператора платформы':'Кабинет компании',info.workspaceType==='DEMO'?'Demo environment':info.workspaceType==='REGISTRATION'?'Platform operator sign-in':'Company workspace'):t('Версия и соединение пока не подтверждены','Version and connection are not verified yet');loginNote.hidden=false;}
   const create=document.getElementById('auth-company-register'),destination=info?.workspaceType==='REGISTRATION'?'/company-start.html':info?.links?.registration;if(create&&destination){create.href=destination;create.hidden=false;if(info.registrationMode==='APPLICATION')create.textContent=t('Заявка на кабинет','Request a workspace');}
+  if(info?.registrationMode==='SELF_SERVICE'&&document.getElementById('login-form')&&!document.getElementById('platform-signin')){const link=document.createElement('a');link.id='platform-signin';link.className='auth-footer';link.href='/login.html?workspace=platform&fresh=1';link.textContent=t('Войти в предпросмотр платформы','Platform preview sign-in');document.querySelector('.ar-auth').append(link);}
   if(!document.body.classList.contains('control-body'))return;context(info);
   const host=document.querySelector('.ws-header-actions');if(!host||host.querySelector('.ar-shell-tools'))return;
   try{current=await ariaUi.session();}catch{}

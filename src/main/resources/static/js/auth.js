@@ -30,7 +30,7 @@ window.ariaAuth = {
         localStorage.removeItem('aria_token');
         localStorage.removeItem('aria_role');
         localStorage.removeItem('aria_email');
-        location.href = '/login.html';
+        location.href = '/login.html'+(window.ariaWorkspaceAffinity?.context()?'?workspace='+encodeURIComponent(ariaWorkspaceAffinity.context()):'');
     },
 
     isLoggedIn: function() {
@@ -53,7 +53,7 @@ window.ariaAuth = {
             localStorage.removeItem('aria_token');
             localStorage.removeItem('aria_role');
             localStorage.removeItem('aria_email');
-            location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
+            location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash)+(window.ariaWorkspaceAffinity?.context()?'&workspace='+encodeURIComponent(ariaWorkspaceAffinity.context()):'');
         }
         return response;
     },
@@ -61,7 +61,7 @@ window.ariaAuth = {
     requireLogin: function(redirect = true) {
         if (!this.isLoggedIn()) {
             if (redirect) {
-                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
+                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash)+(window.ariaWorkspaceAffinity?.context()?'&workspace='+encodeURIComponent(ariaWorkspaceAffinity.context()):'');
             }
             return false;
         }
@@ -71,7 +71,7 @@ window.ariaAuth = {
     requireAdmin: function(redirect = true) {
         if (this.getRole() !== 'ADMIN') {
             if (redirect && !this.isLoggedIn()) {
-                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash);
+                location.href = '/login.html?next=' + encodeURIComponent(location.pathname + location.search + location.hash)+(window.ariaWorkspaceAffinity?.context()?'&workspace='+encodeURIComponent(ariaWorkspaceAffinity.context()):'');
                 return false;
             }
             if (typeof showToast === 'function') {
