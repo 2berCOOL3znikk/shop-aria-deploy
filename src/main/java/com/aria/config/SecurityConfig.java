@@ -51,6 +51,11 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/session","/api/auth/logout-all").authenticated()
                         .requestMatchers("/api/company-signup/**").permitAll()
                         .requestMatchers("/api/company-activation/**").permitAll()
+                        // A partner explicitly created inside this company can use only its
+                        // social workflow. Keep all catalogue/admin/customer APIs closed.
+                        .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
+                                !"demo".equals(organizationKey) && partnerRoute(request))
+                        .hasAnyRole("ADMIN","ORG")
                         // Only the preserved demo exposes customer APIs/registration publicly.
                         // Silo companies must not expose their imported business catalogue anonymously.
                         .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
@@ -100,5 +105,16 @@ public class SecurityConfig {
                 .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
+    }
+
+    private boolean partnerRoute(jakarta.servlet.http.HttpServletRequest request) {
+        String path=request.getServletPath(),method=request.getMethod();
+        if("GET".equals(method))return java.util.Set.of("/api/organizations/verification","/api/social/offers",
+                "/api/social/impact","/api/social/my-claims","/api/products/store-info").contains(path)
+                ||path.matches("/api/social/my-claims/[1-9][0-9]*/act");
+        if("POST".equals(method))return path.equals("/api/organizations/verification")
+                ||path.matches("/api/social/offers/[1-9][0-9]*/claim")
+                ||path.matches("/api/organizations/offers/[1-9][0-9]*/claim");
+        return false;
     }
 }

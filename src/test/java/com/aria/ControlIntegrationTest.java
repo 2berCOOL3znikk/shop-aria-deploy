@@ -31,6 +31,8 @@ class ControlIntegrationTest {
     @Autowired InventoryService inventory;
     @Autowired ProductRepository products;
     @Autowired ProductDetailRepository productDetails;
+    @Autowired ProductPhotoRepository productPhotos;
+    @Autowired com.aria.config.SecurityConfig securityConfiguration;
     @Autowired com.aria.service.CatalogueEvidenceService catalogueEvidence;
     @Autowired OrderRepository orders;
     @Autowired com.aria.service.AriaService analysis;
@@ -85,6 +87,24 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/company-signup/requests",null,null).status).isEqualTo(401);
         assertThat(call("GET","/api/admin/company-signup/requests",user,null).status).isEqualTo(403);
         assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
+    }
+    @Test void privateCompanyPartnersSeeOnlyTheirSocialWorkflowAndCannotEnterBusinessApis()throws Exception {
+        var previous=ReflectionTestUtils.getField(securityConfiguration,"organizationKey");
+        try{
+            ReflectionTestUtils.setField(securityConfiguration,"organizationKey","isolated-partner-test");
+            for(String path:List.of("/api/social/offers","/api/social/impact","/api/social/my-claims","/api/organizations/verification","/api/products/store-info")){
+                assertThat(call("GET",path,null,null).status).as(path).isEqualTo(401);
+                assertThat(call("GET",path,user,null).status).as(path).isEqualTo(403);
+                assertThat(call("GET",path,org,null).status).as(path).isEqualTo(200);
+            }
+            for(String path:List.of(base+"/products",base+"/stores",base+"/manager",base+"/audit","/api/products","/api/aria/lots","/api/orders","/api/products/1/photo"))assertThat(call("GET",path,org,null).status).as(path).isEqualTo(403);
+            assertThat(call("POST","/api/social/offers",org,Map.of("productId",1,"quantity",1)).status).isEqualTo(403);
+            assertThat(call("POST",base+"/stores/preflight",org,Map.of("url","https://shop.invalid")).status).isEqualTo(403);
+            // Not verified: being able to open a workflow never grants permission to reserve stock.
+            assertThat(call("POST","/api/social/offers/999999999/claim",org,null).status).isEqualTo(400);
+            assertThat(call("POST","/api/organizations/offers/999999999/claim",org,null).status).isEqualTo(403);
+            assertThat(call("POST","/api/organizations/offers/999999999/claim",user,null).status).isEqualTo(403);
+        }finally{ReflectionTestUtils.setField(securityConfiguration,"organizationKey",previous);}
     }
     @Test void connectionReadinessRequiresAdministratorAndNeverCreatesStoreOrSendsKeys()throws Exception {
         var input=Map.of("url","https://127.0.0.1");
@@ -456,15 +476,26 @@ class ControlIntegrationTest {
         assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(3);
         assertThat(call("POST",base+"/social/"+offer.id()+"/confirm",admin,Map.of("reason","Повтор")).status).isEqualTo(409);
     }
+    private HttpResponse<String> uploadTestPhoto(long id,boolean confirmed,String token)throws Exception {
+        var image=new java.awt.image.BufferedImage(4,4,java.awt.image.BufferedImage.TYPE_INT_RGB);var bytes=new java.io.ByteArrayOutputStream();javax.imageio.ImageIO.write(image,"png",bytes);
+        String boundary="AriaTestBoundary";var body=new java.io.ByteArrayOutputStream();body.write(("--"+boundary+"\r\nContent-Disposition: form-data; name=\"rightsConfirmed\"\r\n\r\n"+confirmed+"\r\n--"+boundary+"\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"test.png\"\r\nContent-Type: image/png\r\n\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));body.write(bytes.toByteArray());body.write(("\r\n--"+boundary+"--\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
+        var request=HttpRequest.newBuilder(URI.create("http://localhost:"+env.getProperty("local.server.port")+"/api/admin/products/"+id+"/photo")).header("Authorization","Bearer "+token).header("Content-Type","multipart/form-data; boundary="+boundary).POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray())).build();return client.send(request,HttpResponse.BodyHandlers.ofString());
+    }
     @Test void imageUploadPersistsAndCardRemainsEditable()throws Exception {
-        long p=product();var image=new java.awt.image.BufferedImage(4,4,java.awt.image.BufferedImage.TYPE_INT_RGB);
-        var bytes=new java.io.ByteArrayOutputStream();javax.imageio.ImageIO.write(image,"png",bytes);
-        String boundary="AriaTestBoundary";var body=new java.io.ByteArrayOutputStream();
-        body.write(("--"+boundary+"\r\nContent-Disposition: form-data; name=\"photo\"; filename=\"test.png\"\r\nContent-Type: image/png\r\n\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));body.write(bytes.toByteArray());body.write(("\r\n--"+boundary+"--\r\n").getBytes(java.nio.charset.StandardCharsets.UTF_8));
-        var request=HttpRequest.newBuilder(URI.create("http://localhost:"+env.getProperty("local.server.port")+"/api/admin/products/"+p+"/photo")).header("Authorization","Bearer "+admin).header("Content-Type","multipart/form-data; boundary="+boundary).POST(HttpRequest.BodyPublishers.ofByteArray(body.toByteArray())).build();
-        var response=client.send(request,HttpResponse.BodyHandlers.ofString());assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
+        long p=product();assertThat(uploadTestPhoto(p,false,admin).statusCode()).isEqualTo(400);
+        assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null).body).containsEntry("ownerUploadedImage",false).containsEntry("ownerRightsConfirmed",false);
+        var response=uploadTestPhoto(p,true,admin);assertThat(response.statusCode()).as(response.body()).isEqualTo(200);
         assertThat(call("GET","/api/products/"+p+"/photo",null,null).status).isEqualTo(200);
+        var proof=call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null);assertThat(proof.body).containsEntry("ownerRightsConfirmed",true).containsEntry("ownerUploadedImage",true);assertThat(proof.body.get("confirmedAt")).isNotNull();assertThat(proof.raw).doesNotContain("sha256","actor","@test.local");
+        assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",null,null).status).isEqualTo(401);assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",user,null).status).isEqualTo(403);
         var update=new HashMap<>(productBody("PHOTO-"+p));update.put("imageUrl","/api/products/"+p+"/photo");assertThat(call("PUT",base+"/products/"+p,admin,update).status).isEqualTo(200);
+    }
+    @Test void photoRightsDoNotFollowAnotherProductOrChangedImageBytes()throws Exception {
+        long p=product(),other=product();assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
+        assertThat(call("GET","/api/admin/products/"+other+"/photo-evidence",admin,null).body).containsEntry("ownerRightsConfirmed",false);
+        new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{var photo=productPhotos.findByProductId(p).orElseThrow();photo.setData(new byte[]{1,2,3});productPhotos.saveAndFlush(photo);});
+        assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null).body).containsEntry("ownerRightsConfirmed",false);
+        assertThat(uploadTestPhoto(p,true,user).statusCode()).isEqualTo(403);
     }
     @Test void favoritesDoNotExposePurchaseCostsOrAuditData()throws Exception {
         long p=product();lot(p,"FAVORITE",2,10);

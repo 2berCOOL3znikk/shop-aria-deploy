@@ -1,6 +1,8 @@
 (() => {
   'use strict';
-  function init() {
+  async function init() {
+    // This is the retail assistant; private-company partners use their social workflow.
+    const capabilities=await ariaCopy.capabilities;if(capabilities&&!capabilities.publicStorefront)return;
     if(document.getElementById('aria-assistant'))return;
     const launcher=document.createElement('button');launcher.id='assistant-launcher';launcher.type='button';launcher.className='assistant-launcher';ariaCopy.setAttribute(launcher,'aria-label',ariaCopy.text("text.ccb90eec06df88"));launcher.setAttribute('aria-expanded','false');launcher.setAttribute('aria-controls','aria-assistant');ariaCopy.setProperty(launcher,"innerHTML",'<svg viewBox="0 0 24 24" aria-hidden="true"><path d="m12 2 2.7 7.3L22 12l-7.3 2.7L12 22l-2.7-7.3L2 12l7.3-2.7Z"/></svg>');
     const panel=document.createElement('section');panel.id='aria-assistant';panel.hidden=true;panel.setAttribute('role','dialog');panel.setAttribute('aria-modal','false');panel.setAttribute('aria-labelledby','assistant-title');

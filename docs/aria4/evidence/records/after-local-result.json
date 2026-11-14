@@ -1,0 +1,13 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "views": 0,
+  "checks": [
+    "Real receipt ledger opens the recorded lot; no fabricated loss metrics",
+    "New synthetic unverified partner signs in, sees its empty claims and verification step; admin data denied, no handover fabricated",
+    "Original review stock remains 12; no external AI, price action or transfer is invented"
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "development",
+  "checkedAt": "2026-11-14T09:33:37.123Z"
+}

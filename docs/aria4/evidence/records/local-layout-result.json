@@ -1,0 +1,8 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "views": 20,
+  "pageErrors": [],
+  "layoutComplete": true,
+  "checkedAt": "2026-11-14T09:27:49.621Z",
+  "scope": "Only the completed layout matrix; action checks continue in after-local-result.json"
+}

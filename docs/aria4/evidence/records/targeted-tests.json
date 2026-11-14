@@ -1,0 +1,13 @@
+{
+  "passed": true,
+  "database": "isolated temporary PostgreSQL",
+  "tests": [
+    "imageUploadPersistsAndCardRemainsEditable",
+    "photoRightsDoNotFollowAnotherProductOrChangedImageBytes",
+    "privateCompanyPartnersSeeOnlyTheirSocialWorkflowAndCannotEnterBusinessApis"
+  ],
+  "sources": [
+    "target/p9-photo-tests.log: 2 tests, BUILD SUCCESS",
+    "target/p9-partner-test.log: 1 test, BUILD SUCCESS"
+  ]
+}

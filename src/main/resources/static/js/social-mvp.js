@@ -41,7 +41,7 @@
     document.getElementById('social-offer-count').textContent=loading||offersError?'':String(offers.length);
     grid.querySelector('[data-social-retry]')?.addEventListener('click',loadOffers);
   }
-  async function loadOffers(){if(loading)return;loading=true;offersError='';paintOffers();try{const response=await fetch('/api/social/offers');if(!response.ok)throw new Error();offers=await response.json();offers.sort((a,b)=>(a.expiryDate||'9999-12-31').localeCompare(b.expiryDate||'9999-12-31'));}catch(_){offersError='offersError';}finally{loading=false;paintOffers();}}
+  async function loadOffers(){if(loading)return;loading=true;offersError='';paintOffers();try{const response=await (ariaAuth.getToken()?ariaAuth.authFetch('/api/social/offers'):fetch('/api/social/offers'));if(!response.ok)throw new Error();offers=await response.json();offers.sort((a,b)=>(a.expiryDate||'9999-12-31').localeCompare(b.expiryDate||'9999-12-31'));}catch(_){offersError='offersError';}finally{loading=false;paintOffers();}}
   function paintClaims(){
     const section=document.getElementById('claims-section');section.hidden=ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED';if(section.hidden)return;
     const heading=document.getElementById('social-offers-heading');if(heading&&section.nextElementSibling!==heading)heading.before(section);
@@ -56,6 +56,6 @@
     paintCopy();document.getElementById('social-refresh').onclick=async()=>{const b=document.getElementById('social-refresh');b.disabled=true;try{await loadVerification();await loadOffers();await loadClaims();}finally{b.disabled=false;}};
     document.getElementById('grid').onclick=e=>{const b=e.target.closest('[data-claim]');if(b&&!b.disabled)claimOffer(Number(b.dataset.claim));};document.getElementById('claims-list').onclick=e=>{const b=e.target.closest('[data-act]');if(b&&!b.disabled)downloadClaimAct(Number(b.dataset.act));};
     await loadVerification();await loadOffers();await loadClaims();
-    try{const info=await(await fetch('/api/products/store-info')).json();document.getElementById('social-demo-note').hidden=!info.demonstration;}catch(_){}
+    try{const response=await (ariaAuth.getToken()?ariaAuth.authFetch('/api/products/store-info'):fetch('/api/products/store-info'));if(!response.ok)throw Error();const info=await response.json();document.getElementById('social-demo-note').hidden=!info.demonstration;}catch(_){}
   });
 })();

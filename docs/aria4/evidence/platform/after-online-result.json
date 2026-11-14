@@ -1,0 +1,15 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "before": false,
+  "views": 32,
+  "checks": [
+    "Real 14-day internal shipment export, native/store scope switching; no personal data",
+    "Product demand modal uses the real server calculation and does not claim an AI forecast",
+    "Password form has working length validation; actual owner password is not changed",
+    "No AI key copied, no external AI consent enabled or price action created"
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "b8342b396d03f4a595efd40e03da92056b11e344",
+  "checkedAt": "2026-11-14T09:16:07.907Z"
+}
