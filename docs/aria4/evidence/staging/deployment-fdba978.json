@@ -1,0 +1,73 @@
+{
+  "verifiedAt": "2026-11-14T13:41:49.262Z",
+  "service": {
+    "id": "srv-dbr9o4tbedkc73cvlj0g",
+    "url": "https://aria-v4-staging-2ber.onrender.com",
+    "branch": "codex/production-foundation",
+    "plan": "free",
+    "autoDeploy": "no"
+  },
+  "deploy": {
+    "id": "dep-dbs3p261egvs73cofkkg",
+    "status": "live",
+    "commit": "fdba9788688c1c6619cc3df3d1d11be923ed9180",
+    "finishedAt": "2026-11-14T10:51:44.910475Z"
+  },
+  "database": {
+    "projectId": "dawn-dew-85661116",
+    "name": "aria_staging",
+    "organizationPlan": "free",
+    "productionRowsCopied": false,
+    "initiallyEmptyProject": true,
+    "containsOnlyMarkedReviewRecords": true
+  },
+  "production": {
+    "serviceId": "srv-db9p3enavr4c73etcl1g",
+    "branch": "main",
+    "updatedAt": "2026-10-28T09:57:17.800733Z",
+    "unchanged": true
+  },
+  "ci": [
+    {
+      "commit": "d5d1143",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43367191157"
+    },
+    {
+      "commit": "ee44819",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43369883615"
+    },
+    {
+      "commit": "5190ce2",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43370282683"
+    },
+    {
+      "commit": "737df3e",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43577250303"
+    },
+    {
+      "commit": "b8342b3",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43578993784"
+    },
+    {
+      "commit": "ac9e897",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43581388803"
+    },
+    {
+      "commit": "227dce6",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43584731070"
+    },
+    {
+      "commit": "fdba978",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43586725269"
+    }
+  ],
+  "browserProof": "../partner-photo/online-result.json"
+}

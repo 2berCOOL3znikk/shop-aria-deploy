@@ -1,5 +1,5 @@
 {
-  "verifiedAt": "2026-11-14T13:41:49.262Z",
+  "verifiedAt": "2026-11-14T14:12:40.160Z",
   "service": {
     "id": "srv-dbr9o4tbedkc73cvlj0g",
     "url": "https://aria-v4-staging-2ber.onrender.com",
@@ -8,10 +8,10 @@
     "autoDeploy": "no"
   },
   "deploy": {
-    "id": "dep-dbs3p261egvs73cofkkg",
+    "id": "dep-dbs6mjrbc2fs73anl2c0",
     "status": "live",
-    "commit": "fdba9788688c1c6619cc3df3d1d11be923ed9180",
-    "finishedAt": "2026-11-14T10:51:44.910475Z"
+    "commit": "168ae04acc771455c43d2b5fb89bd54f7f739c21",
+    "finishedAt": "2026-11-14T14:10:59.859660Z"
   },
   "database": {
     "projectId": "dawn-dew-85661116",
@@ -67,7 +67,22 @@
       "commit": "fdba978",
       "status": "success",
       "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43586725269"
+    },
+    {
+      "commit": "b5a526a",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43601304652"
+    },
+    {
+      "commit": "168ae04",
+      "status": "success",
+      "url": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43602920099"
     }
   ],
-  "browserProof": "../partner-photo/online-result.json"
+  "browserProof": "../company-intake/online-result.json",
+  "companyRegistration": {
+    "mode": "application-only",
+    "cloudActivationAvailable": false,
+    "existingWorkspacePreserved": true
+  }
 }

@@ -4,7 +4,7 @@ const fs=require('node:fs'),path=require('node:path'),assert=require('node:asser
 const {chromium}=require(process.env.ARIA_PLAYWRIGHT_MODULE||path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
 process.chdir(path.resolve(__dirname,'../..'));
 const read=p=>JSON.parse(fs.readFileSync(p,'utf8').replace(/^\uFEFF/,'')),cfg=read('data/staging/config.json'),recipient=read('data/staging/p9-review.json'),fixture=read('data/staging/p11-review.json');
-const base='https://aria-v4-staging-2ber.onrender.com',out='docs/aria4/evidence/partner-photo',expected=process.argv[2]||'fdba9788688c1c6619cc3df3d1d11be923ed9180';
+const base='https://aria-v4-staging-2ber.onrender.com',out='docs/aria4/evidence/partner-photo',expected=process.argv[2]||'168ae04acc771455c43d2b5fb89bd54f7f739c21';
 assert.equal(cfg.url,base);assert.equal(cfg.projectId,'dawn-dew-85661116');assert.equal(fixture.completed,true);
 const report={base,readOnly:true,productionChanged:false,checks:[],views:0,errors:[],completed:false};
 fs.mkdirSync(out,{recursive:true});

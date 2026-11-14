@@ -1,0 +1,20 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "applicationOnly": true,
+  "workspaceCreated": false,
+  "identityVerified": false,
+  "aiConsentChanged": false,
+  "checks": [
+    "The earlier synthetic application survives the server deployment and remains accessible only with its original code",
+    "Actual application submitted from the start page on the same origin; no account, workspace or verified-email assertion",
+    "Saved code restores the request in a fresh browser; missing/foreign code and business/operator access are denied",
+    "Retry after a lost response uses the same receipt and succeeds without a second CAPTCHA",
+    "Owner opens applications through settings, starts review, and closes the synthetic request; no identity approval or provisioning is performed",
+    "A simulated status network failure preserves the receipt and offers retry; after recovery the same recorded application opens without resubmission"
+  ],
+  "views": 10,
+  "errors": [],
+  "completed": true,
+  "revision": "168ae04acc771455c43d2b5fb89bd54f7f739c21",
+  "checkedAt": "2026-11-14T14:12:40.160Z"
+}
