@@ -15,9 +15,11 @@ import java.util.Collections;
 public class UserDetailsServiceImpl implements UserDetailsService {
 
     private final AppUserRepository appUserRepository;
+    private final com.aria.repository.StaffMemberRepository staff;
 
-    public UserDetailsServiceImpl(AppUserRepository appUserRepository) {
+    public UserDetailsServiceImpl(AppUserRepository appUserRepository,com.aria.repository.StaffMemberRepository staff) {
         this.appUserRepository = appUserRepository;
+        this.staff=staff;
     }
 
     @Override
@@ -28,6 +30,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
         return User.builder()
                 .username(appUser.getEmail())
                 .password(appUser.getPassword())
+                .disabled(appUser.getRole()==com.aria.enums.Role.WAREHOUSE&&!staff.findByUserId(appUser.getId()).map(m->m.active).orElse(false))
                 .authorities(Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + appUser.getRole().name())))
                 .build();
     }

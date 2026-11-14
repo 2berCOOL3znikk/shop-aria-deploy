@@ -33,6 +33,8 @@ class ControlIntegrationTest {
     @Autowired ProductDetailRepository productDetails;
     @Autowired ProductPhotoRepository productPhotos;
     @Autowired com.aria.config.SecurityConfig securityConfiguration;
+    @jakarta.persistence.PersistenceContext jakarta.persistence.EntityManager staffTestEm;
+    @Autowired com.aria.security.JwtService staffJwt;
     @Autowired com.aria.service.CatalogueEvidenceService catalogueEvidence;
     @Autowired OrderRepository orders;
     @Autowired com.aria.service.AriaService analysis;
@@ -79,6 +81,53 @@ class ControlIntegrationTest {
     }
     private Map<String,Object> productBody(String sku){return Map.of("sku",sku,"name","Тестовый товар","category","Продукты","unitPrice",1000,"unit","шт","lowStockThreshold",2);}
     private long product()throws Exception {var result=call("POST",base+"/products",admin,productBody("TEST-"+UUID.randomUUID()));assertThat(result.status).as(result.raw).isEqualTo(200);return result.id();}
+    private Map<String,Object> staffInvitation(String email)throws Exception {var made=call("POST",base+"/team/invitations",admin,Map.of("email",email,"permissionsConfirmed",true));assertThat(made.status).as(made.raw).isEqualTo(200);return made.body;}
+    private String joinStaff(String email)throws Exception {var made=staffInvitation(email);assertThat(call("POST","/api/employee-invitations/accept",null,Map.of("token",made.get("token"),"name","Warehouse test","password","Staff-password-12345","permissionsConfirmed",true)).status).isEqualTo(200);return (String)call("POST","/api/auth/login",null,Map.of("email",email,"password","Staff-password-12345")).body.get("token");}
+    @Test void staffInvitationCreatesOnlyWarehouseRoleAndNeverExposesSecretInLists()throws Exception {
+        String email="staff-"+UUID.randomUUID()+"@test.local";var made=staffInvitation(email);String token=(String)made.get("token");
+        assertThat(call("GET",base+"/team",admin,null).raw).doesNotContain(token,"tokenHash","token_hash");
+        assertThat(call("POST","/api/employee-invitations/inspect",null,Map.of("token",token)).body).containsEntry("email",email).containsEntry("role","WAREHOUSE");
+        var input=Map.of("token",token,"name","Warehouse test","password","Staff-password-12345","permissionsConfirmed",true,"role","ADMIN");
+        var accepted=call("POST","/api/employee-invitations/accept",null,input);assertThat(accepted.status).as(accepted.raw).isEqualTo(200);assertThat(accepted.body).containsEntry("role","WAREHOUSE");assertThat(users.findByEmail(email).orElseThrow().getRole()).isEqualTo(Role.WAREHOUSE);
+        assertThat(call("POST","/api/employee-invitations/accept",null,input).status).isEqualTo(400);
+    }
+    @Test void warehouseCanReceiveAndWriteOffButCannotChangePricesKeysAiOrPeople()throws Exception {
+        String email="stock-"+UUID.randomUUID()+"@test.local",employee=joinStaff(email);long p=product();
+        var foreign=new com.aria.security.JwtService(users);ReflectionTestUtils.setField(foreign,"secret",ReflectionTestUtils.getField(staffJwt,"secret"));ReflectionTestUtils.setField(foreign,"organizationKey","another-company");assertThat(call("GET",base+"/lots",foreign.generateToken(email,Role.WAREHOUSE),null).status).isEqualTo(401);
+        for(String path:List.of("/products","/lots","/policies","/suppliers","/movements","/workspace/flow"))assertThat(call("GET",base+path,employee,null).status).as(path).isEqualTo(200);
+        for(String path:List.of("/manager","/stores","/team","/orders/page","/audit/page","/smart-pricing/settings","/purchases"))assertThat(call("GET",base+path,employee,null).status).as(path).isEqualTo(403);
+        assertThat(call("POST",base+"/products",employee,productBody("NOT-ALLOWED")).status).isEqualTo(403);
+        assertThat(call("PUT",base+"/pricing/"+p,employee,Map.of("percent",50,"reason","Not allowed")).status).isEqualTo(403);
+        assertThat(call("POST",base+"/manager/run",employee,null).status).isEqualTo(403);
+        var receipt=call("POST",base+"/lots",employee,lotBody(p,"STAFF-RECEIPT",3,30));assertThat(receipt.status).as(receipt.raw).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(3);
+        assertThat(call("DELETE",base+"/lots/"+receipt.id(),employee,Map.of("reason","Controlled stock test")).status).isEqualTo(200);assertThat(inventory.available(products.findById(p).orElseThrow())).isZero();
+    }
+    @Test void staffDisableEndsExistingSessionsAndRestoreNeverRevivesOldTokens()throws Exception {
+        String email="disable-"+UUID.randomUUID()+"@test.local",token=joinStaff(email);var member=staffMember(email);
+        var disabled=call("POST",base+"/team/members/"+member.id+"/disable",admin,Map.of("version",member.version,"reason","Disable test account"));assertThat(disabled.status).isEqualTo(200);
+        assertThat(call("GET",base+"/lots",token,null).status).isEqualTo(401);assertThat(call("POST","/api/auth/login",null,Map.of("email",email,"password","Staff-password-12345")).status).isEqualTo(401);
+        var restored=call("POST",base+"/team/members/"+member.id+"/enable",admin,Map.of("version",disabled.body.get("version"),"reason","Restore test account"));assertThat(restored.status).isEqualTo(200);assertThat(call("GET",base+"/lots",token,null).status).isEqualTo(401);
+        var login=call("POST","/api/auth/login",null,Map.of("email",email,"password","Staff-password-12345"));assertThat(login.status).isEqualTo(200);assertThat(call("GET",base+"/lots",(String)login.body.get("token"),null).status).isEqualTo(200);
+        assertThat(call("POST",base+"/team/members/"+member.id+"/disable",admin,Map.of("version",member.version,"reason","Stale permission change")).status).isEqualTo(409);
+    }
+    private StaffMember staffMember(String email){return new org.springframework.transaction.support.TransactionTemplate(transactionManager).execute(tx->staffTestEm.createQuery("select m from StaffMember m where m.user.email=:email",StaffMember.class).setParameter("email",email).getSingleResult());}
+    @Test void existingAccountsCannotBePromotedOrAdministratorsDisabledThroughStaffApi()throws Exception {
+        for(String token:List.of(user,org))assertThat(call("GET",base+"/team",token,null).status).isEqualTo(403);
+        for(String token:List.of(admin,user,org)){String email=(String)call("GET","/api/auth/session",token,null).body.get("email");assertThat(call("POST",base+"/team/invitations",admin,Map.of("email",email.toUpperCase(Locale.ROOT),"permissionsConfirmed",true)).status).isEqualTo(409);}
+        assertThat(call("POST",base+"/team/members/999999999/disable",admin,Map.of("version",0,"reason","Cannot target administrators")).status).isEqualTo(404);
+        assertThat(call("GET",base+"/team",null,null).status).isEqualTo(401);
+    }
+    @Test void revokedAndExpiredStaffInvitationsCannotCreateAccounts()throws Exception {
+        String revokedEmail="revoked-"+UUID.randomUUID()+"@test.local";var made=staffInvitation(revokedEmail);var row=(Map<?,?>)made.get("invitation");assertThat(call("POST",base+"/team/invitations/"+row.get("id")+"/revoke",admin,Map.of("version",row.get("version"),"reason","Revoke unused invitation")).status).isEqualTo(200);
+        assertThat(call("POST","/api/employee-invitations/inspect",null,Map.of("token",made.get("token"))).status).isEqualTo(400);assertThat(users.existsByEmail(revokedEmail)).isFalse();
+        var expired=staffInvitation("expired-"+UUID.randomUUID()+"@test.local");long id=((Number)((Map<?,?>)expired.get("invitation")).get("id")).longValue();new org.springframework.transaction.support.TransactionTemplate(transactionManager).executeWithoutResult(tx->{staffTestEm.find(StaffInvitation.class,id).expiresAt=java.time.LocalDateTime.now().minusMinutes(1);});
+        assertThat(call("POST","/api/employee-invitations/accept",null,Map.of("token",expired.get("token"),"name","Expired","password","Staff-password-12345","permissionsConfirmed",true)).status).isEqualTo(400);
+    }
+    @Test void concurrentInvitationAcceptanceCreatesOnlyOneEmployee()throws Exception {
+        String email="once-"+UUID.randomUUID()+"@test.local";var invitation=staffInvitation(email);var body=Map.of("token",invitation.get("token"),"name","Concurrent test","password","Staff-password-12345","permissionsConfirmed",true);
+        var one=CompletableFuture.supplyAsync(()->{try{return call("POST","/api/employee-invitations/accept",null,body).status;}catch(Exception e){throw new RuntimeException(e);}});var two=CompletableFuture.supplyAsync(()->{try{return call("POST","/api/employee-invitations/accept",null,body).status;}catch(Exception e){throw new RuntimeException(e);}});
+        assertThat(List.of(one.get(10,TimeUnit.SECONDS),two.get(10,TimeUnit.SECONDS))).containsExactlyInAnyOrder(200,400);assertThat(staffMember(email)).isNotNull();
+    }
     @Test void companyApplicationsAreDisabledInAnExistingMerchantWorkspace()throws Exception {
         assertThat(call("GET","/api/company-signup/capabilities",null,null).body).containsEntry("enabled",false);
         assertThat(call("GET","/api/company-signup/challenge",null,null).status).isEqualTo(404);

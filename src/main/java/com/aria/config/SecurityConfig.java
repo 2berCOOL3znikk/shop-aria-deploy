@@ -51,6 +51,9 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/session","/api/auth/logout-all").authenticated()
                         .requestMatchers("/api/company-signup/**").permitAll()
                         .requestMatchers("/api/company-activation/**").permitAll()
+                        .requestMatchers(HttpMethod.POST,"/api/employee-invitations/inspect","/api/employee-invitations/accept").permitAll()
+                        .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) this::warehouseRoute).hasAnyRole("ADMIN","WAREHOUSE")
+                        .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) this::warehouseRemainder).denyAll()
                         // A partner explicitly created inside this company can use only its
                         // social workflow. Keep all catalogue/admin/customer APIs closed.
                         .requestMatchers((org.springframework.security.web.util.matcher.RequestMatcher) request ->
@@ -116,5 +119,22 @@ public class SecurityConfig {
                 ||path.matches("/api/social/offers/[1-9][0-9]*/claim")
                 ||path.matches("/api/organizations/offers/[1-9][0-9]*/claim");
         return false;
+    }
+
+    private boolean warehouseRoute(jakarta.servlet.http.HttpServletRequest request) {
+        if(!warehouseRemainder(request))return false;
+        String path=request.getServletPath(),method=request.getMethod();
+        if("GET".equals(method))return java.util.Set.of("/api/admin/control/products","/api/admin/control/lots","/api/admin/control/suppliers","/api/admin/control/policies","/api/admin/control/movements","/api/admin/control/workspace/flow","/api/profile/me").contains(path)
+                ||path.matches("/api/admin/control/(lots|products)/[1-9][0-9]*")
+                ||path.matches("/api/admin/control/workspace/flow/[1-9][0-9]*")
+                ||path.matches("/api/products/[1-9][0-9]*/photo")
+                ||path.matches("/api/profile/[^/]{1,255}");
+        if("POST".equals(method))return path.equals("/api/admin/control/lots")||path.equals("/api/profile")||path.equals("/api/profile/security/password");
+        if("PUT".equals(method))return path.matches("/api/admin/control/lots/[1-9][0-9]*(/handling)?");
+        return "DELETE".equals(method)&&path.matches("/api/admin/control/lots/[1-9][0-9]*");
+    }
+    private boolean warehouseRemainder(jakarta.servlet.http.HttpServletRequest request) {
+        var current=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();
+        return request.getServletPath().startsWith("/api/")&&current!=null&&current.getAuthorities().stream().anyMatch(a->a.getAuthority().equals("ROLE_WAREHOUSE"));
     }
 }

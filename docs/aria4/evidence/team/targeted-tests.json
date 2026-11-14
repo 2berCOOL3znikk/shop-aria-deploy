@@ -1,0 +1,15 @@
+{
+  "passed": true,
+  "database": "isolated temporary PostgreSQL with migrations V1-V36",
+  "tests": [
+    "staffInvitationCreatesOnlyWarehouseRoleAndNeverExposesSecretInLists",
+    "warehouseCanReceiveAndWriteOffButCannotChangePricesKeysAiOrPeople",
+    "staffDisableEndsExistingSessionsAndRestoreNeverRevivesOldTokens",
+    "existingAccountsCannotBePromotedOrAdministratorsDisabledThroughStaffApi",
+    "revokedAndExpiredStaffInvitationsCannotCreateAccounts",
+    "concurrentInvitationAcceptanceCreatesOnlyOneEmployee",
+    "privateCompanyPartnersSeeOnlyTheirSocialWorkflowAndCannotEnterBusinessApis",
+    "imageUploadPersistsAndCardRemainsEditable"
+  ],
+  "source": "target/p10-team-tests.log: 8 tests, zero failures/errors; target/p10-company-boundary.log: added foreign-company signed-token assertion passed"
+}

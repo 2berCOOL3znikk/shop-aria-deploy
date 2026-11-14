@@ -19,10 +19,11 @@ async function handleRegister(event){event.preventDefault();if(loginBusy||!buyer
  if(response.ok&&typeof body.token==='string'){ariaUi.persist(body);const next=localStorage.getItem('aria_next');localStorage.removeItem('aria_next');location.assign(safeNext(next,body.role));return;}error(form,ariaCopy.errorText(body.error||body.message,response.status));await window.loadRegisterCaptcha();
 }catch{error(form,authText('network'));}finally{busy(form,false);}}
     function safeNext(next, role) {
-        const fallback=role==='ADMIN'?'/control.html':role==='ORG'?'/social.html':'/index.html';
+        const fallback=role==='ADMIN'?'/control.html':role==='ORG'?'/social.html':role==='WAREHOUSE'?'/control.html#lots':'/index.html';
         if(typeof next!=='string'||!next.startsWith('/')||next.startsWith('//')||/[\\\u0000-\u001f\u007f]/.test(next))return fallback;
         let target;try{target=new URL(next,location.origin);}catch{return fallback;}
         if(target.origin!==location.origin)return fallback;
+        if(role==='WAREHOUSE')return target.pathname==='/control.html'&&['#lots','#movements','#flow'].includes(target.hash)?target.pathname+target.hash:fallback;
         if(role==='ORG')return target.pathname==='/social.html'?'/social.html':fallback;
         if(role!=='ADMIN'&&(target.pathname.startsWith('/admin')||['/control.html','/company-requests.html'].includes(target.pathname)))return fallback;
         return target.pathname+target.search+target.hash;

@@ -1,0 +1,13 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "completed": true,
+  "checkedAt": "2026-11-14T10:09:53.614Z",
+  "source": "Successful real browser run preserved before the read-only screenshot refresh",
+  "views": 8,
+  "checks": [
+    "Employee actually receives three explicitly synthetic units through the authorised inventory form",
+    "Employee records the authorised review write-off; stock returns to zero and other products are unchanged",
+    "Owner disables, restores and disables review employee in UI; old sessions stay invalid after restore, fresh login works; review account ends disabled"
+  ],
+  "errors": []
+}

@@ -1,5 +1,7 @@
 # Компания: заявка → отдельный кабинет → активация
 
+**Сотрудники:** [открыть команду](https://aria-v4-staging-2ber.onrender.com/control.html#team) → «Пригласить сотрудника» → подтвердить складские права → передать одноразовую ссылку. Сотрудник входит с собственным email/паролем. [Что разрешено, как отключить доступ](../aria4/TEAM_RU.md).
+
 **P8:** [аналитика](https://aria-v4-staging-2ber.onrender.com/control.html#overview), [настройки](https://aria-v4-staging-2ber.onrender.com/control.html#settings), [подключения](https://aria-v4-staging-2ber.onrender.com/control.html#integrations). Доступы магазина не запрашиваются до проверки готовности. [Что проверено и что осталось](../aria4/PLATFORM_RU.md).
 
 **14.11 — операции:** [закупки](https://aria-v4-staging-2ber.onrender.com/control.html#purchases), [склад](https://aria-v4-staging-2ber.onrender.com/control.html#lots), [заказы](https://aria-v4-staging-2ber.onrender.com/control.html#orders). Новые карточки, пошаговая приёмка и понятные следующие действия. В staging — только отмеченные искусственные данные проверки, без чужих компаний, ключей и фиктивных продаж. [Подробности](../aria4/OPERATIONS_RU.md).
