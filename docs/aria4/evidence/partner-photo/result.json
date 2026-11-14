@@ -1,0 +1,10 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "checks": [
+    "The unverified review partner sees the actual project-provided control graphic through an authenticated blob; cannot reserve, cannot read the private product image directly, anonymous offer-photo access is denied"
+  ],
+  "reserved": false,
+  "transferred": false,
+  "completed": true,
+  "checkedAt": "2026-11-14T10:32:34.050Z"
+}

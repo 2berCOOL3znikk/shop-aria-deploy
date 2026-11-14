@@ -546,6 +546,15 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null).body).containsEntry("ownerRightsConfirmed",false);
         assertThat(uploadTestPhoto(p,true,user).statusCode()).isEqualTo(403);
     }
+    @Test void partnerPhotoIsScopedToOpenOfferOrOwnClaimWithoutOpeningPrivateCatalogue()throws Exception {
+        long p=product();lot(p,"SOCIAL-IMAGE",2,30);assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
+        var offered=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",1,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offered.status).as(offered.raw).isEqualTo(200);String photoPath="/api/social/offers/"+offered.id()+"/photo";
+        assertThat(call("GET",photoPath,null,null).status).isEqualTo(401);assertThat(call("GET",photoPath,user,null).status).isEqualTo(403);assertThat(call("GET",photoPath,org,null).status).isEqualTo(200);
+        var verification=call("POST","/api/organizations/verification",org,Map.of("organizationName","Synthetic photo scope test","registrationNumber","TEST-PHOTO"));assertThat(call("POST","/api/admin/organizations/verification-requests/"+verification.id()+"/approve",admin,null).status).isEqualTo(200);
+        assertThat(call("POST","/api/organizations/offers/"+offered.id()+"/claim",org,null).status).isEqualTo(200);assertThat(call("GET",photoPath,org,null).status).isEqualTo(200);
+        String other=account("other-photo-"+UUID.randomUUID(),Role.ORG);assertThat(call("GET",photoPath,other,null).status).isEqualTo(404);
+        var previous=ReflectionTestUtils.getField(securityConfiguration,"organizationKey");try{ReflectionTestUtils.setField(securityConfiguration,"organizationKey","private-photo-test");assertThat(call("GET",photoPath,org,null).status).isEqualTo(200);assertThat(call("GET","/api/products/"+p+"/photo",org,null).status).isEqualTo(403);assertThat(call("GET",base+"/products",org,null).status).isEqualTo(403);}finally{ReflectionTestUtils.setField(securityConfiguration,"organizationKey",previous);}
+    }
     @Test void favoritesDoNotExposePurchaseCostsOrAuditData()throws Exception {
         long p=product();lot(p,"FAVORITE",2,10);
         assertThat(call("POST","/api/favorites/"+p,user,null).status).isEqualTo(200);

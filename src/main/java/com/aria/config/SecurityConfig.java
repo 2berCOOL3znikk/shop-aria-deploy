@@ -114,7 +114,7 @@ public class SecurityConfig {
         String path=request.getServletPath(),method=request.getMethod();
         if("GET".equals(method))return java.util.Set.of("/api/organizations/verification","/api/social/offers",
                 "/api/social/impact","/api/social/my-claims","/api/products/store-info").contains(path)
-                ||path.matches("/api/social/my-claims/[1-9][0-9]*/act");
+                ||path.matches("/api/social/my-claims/[1-9][0-9]*/act")||path.matches("/api/social/offers/[1-9][0-9]*/photo");
         if("POST".equals(method))return path.equals("/api/organizations/verification")
                 ||path.matches("/api/social/offers/[1-9][0-9]*/claim")
                 ||path.matches("/api/organizations/offers/[1-9][0-9]*/claim");

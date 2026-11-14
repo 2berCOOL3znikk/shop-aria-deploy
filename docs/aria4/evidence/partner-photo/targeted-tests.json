@@ -1,0 +1,10 @@
+{
+  "passed": true,
+  "tests": [
+    "partnerPhotoIsScopedToOpenOfferOrOwnClaimWithoutOpeningPrivateCatalogue"
+  ],
+  "source": "target/p11-photo-tests.log: 1 test, zero failures/errors",
+  "historyContractChecks": 12,
+  "historyContractOnly": true,
+  "realTransfer": false
+}

@@ -15,6 +15,7 @@ import java.time.LocalDate;
 @RestController
 @RequestMapping("/api/social")
 public class SocialController {
+    @org.springframework.beans.factory.annotation.Value("${aria.organization.key:demo}") private String organizationKey;
 
     private final SocialService socialService;
     private final AppUserRepository users;
@@ -44,7 +45,8 @@ public class SocialController {
             map.put("validUntil", offer.getValidUntil() == null ? null : offer.getValidUntil().toString());
             map.put("expiryDate", offer.getProduct().getExpiryDate());
             map.put("ariaReason", publicReason(offer.getProduct().getAriaReason()));
-            map.put("imageUrl", offer.getProduct().getImageUrl());
+            String image=offer.getProduct().getImageUrl();
+            map.put("imageUrl",!"demo".equals(organizationKey)&&("/api/products/"+offer.getProduct().getId()+"/photo").equals(image)?"/api/social/offers/"+offer.getId()+"/photo":image);
             map.put("status", offer.getStatus());
             map.put("createdAt", offer.getCreatedAt().toString());
             // orgId НЕ включается для приватности

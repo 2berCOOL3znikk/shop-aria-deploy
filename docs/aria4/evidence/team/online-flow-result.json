@@ -1,0 +1,11 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "checks": [
+    "Invitation issued and accepted through real UI entirely on the public staging origin",
+    "Online employee opens inventory, store credentials are denied, owner disables the account and the existing session returns 401"
+  ],
+  "completed": true,
+  "stockChanged": false,
+  "revision": "227dce69bfc003cacfbfe81f312dfff76909d414",
+  "checkedAt": "2026-11-14T10:28:39.461Z"
+}

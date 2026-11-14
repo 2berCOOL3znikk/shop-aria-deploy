@@ -3,6 +3,14 @@
   const {t,lang}=ariaSocialCopy,esc=v=>String(v??'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
   let verificationStatus='NOT_SUBMITTED',offers=[],claims=[],offersError='',claimsError='',loading=false;
   const pending=new Set();
+  const photoUrls=new Set();let photoObserver=null,photoRevision=0;
+  function hydratePhotos(){
+    photoObserver?.disconnect();for(const url of photoUrls)URL.revokeObjectURL(url);photoUrls.clear();const revision=++photoRevision,token=ariaAuth.getToken();
+    async function load(img){if(img.dataset.loading)return;img.dataset.loading='true';try{const response=await ariaAuth.authFetch(img.dataset.socialPhoto);if(!response.ok)return;const blob=await response.blob();if(!['image/jpeg','image/png'].includes(blob.type)||blob.size>5*1024*1024||!img.isConnected||revision!==photoRevision||token!==ariaAuth.getToken())return;const url=URL.createObjectURL(blob);photoUrls.add(url);img.src=url;}catch{/* Keep the real missing-image state; no substitute product photo. */}}
+    const images=document.querySelectorAll('[data-social-photo]');if('IntersectionObserver'in window){photoObserver=new IntersectionObserver(entries=>{for(const item of entries)if(item.isIntersecting){photoObserver.unobserve(item.target);load(item.target);}},{rootMargin:'100px'});images.forEach(img=>photoObserver.observe(img));}else images.forEach(load);
+  }
+  window.addEventListener('storage',e=>{if(e.key==='aria_token'){photoObserver?.disconnect();photoRevision++;for(const url of photoUrls)URL.revokeObjectURL(url);photoUrls.clear();document.querySelectorAll('[data-social-photo]').forEach(img=>img.src='/images/product-placeholder.svg');}});
+  window.addEventListener('pagehide',()=>{photoObserver?.disconnect();for(const url of photoUrls)URL.revokeObjectURL(url);photoUrls.clear();});
   const date=v=>v?new Date(v+'T12:00:00').toLocaleDateString(lang()==='en'?'en-GB':'ru-KZ'):t('notSpecified');
   const errorText=(status,fallback)=>t(({401:'unauthorized',403:'forbidden',409:'conflict',429:'unavailable',503:'unavailable'})[status]||fallback);
   async function request(url,options={}){let r;try{r=await ariaAuth.authFetch(url,options);}catch(_){throw new Error(t('unavailable'));}const body=await r.json().catch(()=>({}));if(!r.ok)throw new Error(errorText(r.status,'requestError'));return body;}
@@ -11,7 +19,7 @@
     document.title=t('pageTitle');
     const admin=ariaAuth.getRole()==='ADMIN',org=ariaAuth.getRole()==='ORG',cta=document.getElementById('social-access-link');
     cta.hidden=org;cta.href=admin?'/control.html#socialPlans':'/login.html';cta.textContent=t(admin?'manage':'signIn');
-    document.getElementById('partner-message').textContent=t(org?verificationStatus:'access');
+    document.getElementById('partner-message').textContent=t(org?verificationStatus:'access');document.getElementById('partner-message').hidden=org;document.querySelector('.social-proof').hidden=org&&verificationStatus!=='VERIFIED';
     document.getElementById('social-help').textContent=t(admin?'adminHelp':org&&verificationStatus==='VERIFIED'?'verifiedHelp':'unverifiedHelp');
     const status=document.getElementById('org-verification-status');if(status)status.textContent=t(verificationStatus);
   }
@@ -31,23 +39,24 @@
     document.getElementById('org-verification-form').hidden=['PENDING_VERIFICATION','VERIFIED','UNKNOWN'].includes(verificationStatus);document.getElementById('org-verification-panel').hidden=verificationStatus==='VERIFIED';paintCopy();
   }
   function offerCard(offer){
+    const photo=/^\/api\/social\/offers\/[1-9][0-9]*\/photo$/.test(offer.imageUrl||'')?`<img src="/images/product-placeholder.svg" data-social-photo="${esc(offer.imageUrl)}" alt="${esc(offer.productName)}" loading="lazy">`:CatalogImages.imageTag({productName:offer.productName,productSku:offer.productSku,imageUrl:offer.imageUrl},{alt:offer.productName});
     const urgent=offer.expiryDate&&Math.ceil((new Date(offer.expiryDate+'T23:59:59+05:00')-new Date())/86400000)<=3,org=ariaAuth.getRole()==='ORG';
     const action=org&&verificationStatus==='VERIFIED'?`<button class="btn-glow" type="button" data-claim="${offer.id}" ${pending.has(offer.id)?'disabled':''}>${t(pending.has(offer.id)?'claiming':'claim')} · ${Number(offer.quantityAvailable)} ${t('units')}</button>`:`<p class="partner-access-note">${t(org?'onlyVerified':'access')}</p>`;
-    return `<article class="offer-card">${CatalogImages.imageTag({productName:offer.productName,productSku:offer.productSku,imageUrl:offer.imageUrl},{alt:offer.productName})}<div class="offer-body"><div class="product-card-category">${t(urgent?'urgent':'offer')}</div><h3 class="offer-title" data-merchant-content>${esc(offer.productName)}</h3>${lang()==='en'&&/[А-Яа-яЁё]/.test(offer.productName)?`<small class="social-original">${t('original')}</small>`:''}<dl class="offer-meta"><div><dt>${t('quantity')}</dt><dd>${Number(offer.quantityAvailable)} ${t('units')}</dd></div><div><dt>${t('offerUntil')}</dt><dd>${date(offer.validUntil)}</dd></div><div><dt>${t('expiry')}</dt><dd>${date(offer.expiryDate)}</dd></div></dl>${offer.ariaReason?`<details class="offer-reason"><summary>${t('reason')}${lang()==='en'&&/[А-Яа-яЁё]/.test(offer.ariaReason)?' · '+t('original'):''}</summary><p data-merchant-content>${esc(offer.ariaReason)}</p></details>`:''}<div class="offer-price">${t('free')}</div>${action}</div></article>`;
+    return `<article class="offer-card">${photo}<div class="offer-body"><div class="product-card-category">${t(urgent?'urgent':'offer')}</div><h3 class="offer-title" data-merchant-content>${esc(offer.productName)}</h3>${lang()==='en'&&/[А-Яа-яЁё]/.test(offer.productName)?`<small class="social-original">${t('original')}</small>`:''}<dl class="offer-meta"><div><dt>${t('quantity')}</dt><dd>${Number(offer.quantityAvailable)} ${t('units')}</dd></div><div><dt>${t('offerUntil')}</dt><dd>${date(offer.validUntil)}</dd></div><div><dt>${t('expiry')}</dt><dd>${date(offer.expiryDate)}</dd></div></dl>${offer.ariaReason?`<details class="offer-reason"><summary>${t('reason')}${lang()==='en'&&/[А-Яа-яЁё]/.test(offer.ariaReason)?' · '+t('original'):''}</summary><p data-merchant-content>${esc(offer.ariaReason)}</p></details>`:''}<div class="offer-price">${t('free')}</div>${action}</div></article>`;
   }
   function paintOffers(){
     const grid=document.getElementById('grid');grid.setAttribute('aria-busy',String(loading));
     grid.innerHTML=loading?`<p role="status">${t('loading')}</p>`:offersError?`<div class="empty-state glass-card" role="alert"><h3>${t(offersError)}</h3><button type="button" class="btn-outline" data-social-retry>${t('refresh')}</button></div>`:offers.length?offers.map(offerCard).join(''):`<div class="empty-state glass-card"><span class="social-empty-mark" aria-hidden="true">↗</span><h3>${t('empty')}</h3><p>${t('emptyNote')}</p></div>`;
-    document.getElementById('social-offer-count').textContent=loading||offersError?'':String(offers.length);
+    hydratePhotos();document.getElementById('social-offer-count').textContent=loading||offersError?'':String(offers.length);
     grid.querySelector('[data-social-retry]')?.addEventListener('click',loadOffers);
   }
   async function loadOffers(){if(loading)return;loading=true;offersError='';paintOffers();try{const response=await (ariaAuth.getToken()?ariaAuth.authFetch('/api/social/offers'):fetch('/api/social/offers'));if(!response.ok)throw new Error();offers=await response.json();offers.sort((a,b)=>(a.expiryDate||'9999-12-31').localeCompare(b.expiryDate||'9999-12-31'));}catch(_){offersError='offersError';}finally{loading=false;paintOffers();}}
   function paintClaims(){
-    const section=document.getElementById('claims-section');section.hidden=ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED';if(section.hidden)return;
+    const section=document.getElementById('claims-section');section.hidden=ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED'&&!claims.length&&!claimsError;if(section.hidden)return;
     const heading=document.getElementById('social-offers-heading');if(heading&&section.nextElementSibling!==heading)heading.before(section);
     document.getElementById('claims-list').innerHTML=claimsError?`<p role="alert">${t('claimsError')}</p>`:claims.length?claims.map(c=>`<article class="claim-row"><div><strong data-merchant-content>${esc(c.productName)}</strong><p>${t(c.status==='TRANSFERRED'?'transferred':'reserved')} · ${Number(c.claimedQuantity||0)} ${t('units')}</p></div><button class="btn-outline" type="button" data-act="${c.id}">${t('act')}</button></article>`).join(''):`<p>${t('claimsEmpty')}</p>`;
   }
-  async function loadClaims(){if(ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED'){claims=[];paintClaims();return;}try{claims=await request('/api/social/my-claims');claimsError='';}catch(_){claimsError='claimsError';}paintClaims();}
+  async function loadClaims(){if(ariaAuth.getRole()!=='ORG'){claims=[];paintClaims();return;}try{claims=await request('/api/social/my-claims');claimsError='';}catch(_){claimsError='claimsError';}paintClaims();}
   async function claimOffer(id){if(ariaAuth.getRole()!=='ORG'||verificationStatus!=='VERIFIED'||pending.has(id))return;pending.add(id);paintOffers();try{await request('/api/organizations/offers/'+id+'/claim',{method:'POST'});showToast(t('claimed'));await loadOffers();await loadClaims();}catch(error){showToast(error.message,'error');}finally{pending.delete(id);paintOffers();}}
   async function downloadClaimAct(id){const b=document.querySelector(`[data-act="${id}"]`);if(b?.disabled)return;if(b)b.disabled=true;try{const r=await ariaAuth.authFetch('/api/social/my-claims/'+id+'/act');if(!r.ok)throw new Error(t('actError'));const url=URL.createObjectURL(await r.blob()),a=document.createElement('a');a.href=url;a.download='aria-social-act-'+id+'.html';a.click();setTimeout(()=>URL.revokeObjectURL(url),30000);}catch(_){showToast(t('actError'),'error');}finally{if(b)b.disabled=false;}}
   window.claimOffer=claimOffer;window.downloadClaimAct=downloadClaimAct;window.loadSocial=loadOffers;window.loadClaims=loadClaims;window.renderOffer=offerCard;
