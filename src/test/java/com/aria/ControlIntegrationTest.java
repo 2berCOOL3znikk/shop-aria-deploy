@@ -86,6 +86,14 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/company-signup/requests",user,null).status).isEqualTo(403);
         assertThat(call("GET","/api/admin/company-signup/requests",admin,null).status).isEqualTo(404);
     }
+    @Test void connectionReadinessRequiresAdministratorAndNeverCreatesStoreOrSendsKeys()throws Exception {
+        var input=Map.of("url","https://127.0.0.1");
+        for(String token:Arrays.asList(null,user,org))assertThat(call("POST",base+"/stores/preflight",token,input).status).isEqualTo(token==null?401:403);
+        long before=connectedStores.count();var result=call("POST",base+"/stores/preflight",admin,input);
+        assertThat(result.status).isEqualTo(200);assertThat(result.body).containsEntry("addressAllowed",false).containsEntry("readyForCredentials",false).containsEntry("externalConnectionVerified",false);
+        assertThat(result.raw).doesNotContain("allowed-hosts","encryption-key","ck_","cs_");assertThat(connectedStores.count()).isEqualTo(before);
+        assertThat(call("POST",base+"/stores/preflight",admin,Map.of("url","")).status).isEqualTo(400);
+    }
     private Map<String,Object> lotBody(long p,String number,int quantity,int days){return Map.of("productId",p,"lotNumber",number,"quantity",quantity,"unitCost",800,"receivedAt",LocalDate.now().toString(),"expiryDate",LocalDate.now().plusDays(days).toString());}
     @Test void productCardUsesRecordedStockAndDoesNotTurnOwnerInputIntoVerifiedFacts()throws Exception {
         long id=product();assertThat(call("POST",base+"/lots",admin,lotBody(id,"CARD-"+UUID.randomUUID(),5,30)).status).isEqualTo(200);

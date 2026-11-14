@@ -5,6 +5,7 @@ import jakarta.validation.constraints.*;
 import org.springframework.web.bind.annotation.*;
 @RestController @RequestMapping("/api/admin/control/stores")
 public class ConnectedStoresController {
+ @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreConnectionReadiness readiness;
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncQueue queue;
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreSyncWorker worker;
  @org.springframework.beans.factory.annotation.Autowired private com.aria.service.StoreWebhookService webhooks;
@@ -19,6 +20,8 @@ public class ConnectedStoresController {
  public record Version(@Min(0) long version){}
  public record Credentials(@Min(0) long version,@Pattern(regexp="ck_[a-zA-Z0-9]{20,100}") @NotNull String key,@Pattern(regexp="cs_[a-zA-Z0-9]{20,100}") @NotNull String secret){}
  public record Business(@NotBlank @Size(max=200) String name){}
+ public record Address(@NotBlank @Size(max=500) String url){}
+ @PostMapping("/preflight") public Object preflight(@Valid @RequestBody Address input){return readiness.inspect(input.url());}
  @GetMapping public Object list(){return service.list();}
  @PostMapping public Object create(@Valid @RequestBody Create c){return service.create(c.name(),c.platform(),c.url(),Boolean.TRUE.equals(c.testConnection()));}
  @PutMapping("/{id}/presentation") public Object presentation(@PathVariable Long id,@Valid @RequestBody Presentation p){return service.presentation(id,p.version(),p.name(),p.testConnection(),p.reason());}

@@ -61,7 +61,7 @@
   }catch(error){if(root.isConnected){root.classList.remove('control-skeleton');ariaCopy.setProperty(root,"innerHTML",`<div class="cc-empty" role="alert">${esc(plain(error.message))} ${btn(ariaCopy.text("text.5189135a6110bd"),'retry')}</div>`);root.querySelector('button')?.addEventListener('click',()=>mount(ctx));}}
  }
  window.addEventListener('focus',()=>{if(lastContext&&document.getElementById('manager-root')&&!document.getElementById('control-dialog')?.open)mount(lastContext);});
- async function analytics(ctx,id){const d=await ctx.request('/manager/analytics/'+id),f=d.forecast,history=d.history,values=history.map(x=>x.units),max=Math.max(1,...values),points=values.map((v,i)=>`${20+i/Math.max(1,values.length-1)*640},${180-v/max*140}`).join(' ');
+ async function analytics(ctx,id){if(window.ariaPlatformExperience)return ariaPlatformExperience.productAnalytics(ctx,id);const d=await ctx.request('/manager/analytics/'+id),f=d.forecast,history=d.history,values=history.map(x=>x.units),max=Math.max(1,...values),points=values.map((v,i)=>`${20+i/Math.max(1,values.length-1)*640},${180-v/max*140}`).join(' ');
   ctx.show(ariaCopy.text("text.e7d4407862bef7")+d.name,ariaCopy.template("template.140dc3ca438e37",[ariaCopy.original(esc(d.note),true),esc(f.method),f.historyDays,f.recordedUnits,f.horizonDays,f.daily.length?f.expectedUnits:ariaCopy.text("text.a7a2993f4cf1e7"),f.validationMae??'—',f.baselineMae??'—',esc(f.limitation),esc(d.horizonLimitation),esc(history[0]?.date||''),esc(history.at(-1)?.date||''),points,history.map((r,i)=>ariaCopy.template("template.48700c6961428e",[20+i/Math.max(1,values.length-1)*640,180-r.units/max*140,esc(r.date),r.units])).join(''),max,d.stock,d.reorderUnits,esc(d.reorderBasis),d.expiredUnits,money(d.expiredCost)]));
  }
 

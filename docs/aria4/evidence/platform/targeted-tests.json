@@ -1,0 +1,36 @@
+{
+  "database": "isolated temporary PostgreSQL for integration tests",
+  "tests": [
+    {
+      "test": "connectionReadinessRequiresAdministratorAndNeverCreatesStoreOrSendsKeys",
+      "passed": true
+    },
+    {
+      "test": "missingEncryptionBlocksKeysEvenForAnAllowedAddress",
+      "passed": true
+    },
+    {
+      "test": "blockedAddressNeverRequestsCredentialsOrMakesAnExternalCall",
+      "passed": true
+    },
+    {
+      "test": "readinessNeverClaimsThatWooCommerceOrItsCredentialsWereVerified",
+      "passed": true
+    },
+    {
+      "test": "passwordChangeRevokesAllEarlierTokensAndKeepsNewLoginUsable",
+      "passed": true,
+      "source": "target/p8-targeted.log, 3 tests BUILD SUCCESS"
+    },
+    {
+      "test": "applicationIdentityIsPublicButDoesNotExposeCompanyOrSecrets",
+      "passed": true,
+      "source": "target/p8-targeted.log, 3 tests BUILD SUCCESS"
+    },
+    {
+      "test": "companyApplicationsAreDisabledInAnExistingMerchantWorkspace",
+      "passed": true,
+      "source": "target/p8-targeted.log, 3 tests BUILD SUCCESS"
+    }
+  ]
+}

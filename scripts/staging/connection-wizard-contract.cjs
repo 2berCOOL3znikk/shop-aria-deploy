@@ -1,0 +1,15 @@
+'use strict';
+// Browser contract only: synthetic policy replies, no keys, imports or external shop calls.
+const path=require('node:path'),assert=require('node:assert/strict');
+const {chromium}=require(process.env.ARIA_PLAYWRIGHT_MODULE||path.join(process.env.USERPROFILE,'.cache/codex-runtimes/codex-primary-runtime/dependencies/node/node_modules/playwright'));
+process.chdir(path.resolve(__dirname,'../..'));
+(async()=>{const browser=await chromium.launch({channel:'msedge',headless:true});try{let checks=0;
+ for(const lang of ['ru','en'])for(const status of ['ADDRESS_REVIEW_REQUIRED','STORAGE_UNAVAILABLE','READY_FOR_CREDENTIALS','UNAVAILABLE']){
+  const ctx=await browser.newContext({serviceWorkers:'block'});await ctx.addInitScript(lang=>localStorage.setItem('aria_lang',lang),lang);const p=await ctx.newPage();await p.goto('http://127.0.0.1:8091/login.html');await p.evaluate(()=>{document.body.innerHTML='<section id="stores-root"></section><dialog id="control-dialog"><h2 id="control-dialog-title"></h2><div id="control-dialog-body"></div></dialog>';window.ariaStores={mount:async()=>{}};});await p.addScriptTag({path:'src/main/resources/static/js/store-connection-wizard.js'});
+  await p.evaluate(status=>{window.contractCalls=[];ariaStoreConnectionWizard.open({request:async(route,method,body)=>{contractCalls.push({route,method,body});if(route!=='/stores/preflight')throw Error('Unexpected operation');if(status==='UNAVAILABLE')throw Error('Contract unavailable');return {readyForCredentials:status==='READY_FOR_CREDENTIALS',status,externalConnectionVerified:false};},show:(title,html)=>{document.querySelector('#control-dialog-title').textContent=title;document.querySelector('#control-dialog-body').innerHTML=html;document.querySelector('#control-dialog').showModal();},formField:(label,name,type,value)=>`<label>${label}<input name="${name}" type="${type}" value="${value}"></label>`,notify:()=>{},markDirty:()=>{},clearDirty:()=>{}},{secureCredentials:true,organization:{demonstration:false},stores:[]},{id:20,platform:'WOOCOMMERCE',url:'https://contract.example',name:'Contract-only shop',hasCredentials:false,status:'ACTION_REQUIRED'});},status);
+  if(status==='READY_FOR_CREDENTIALS'){await p.locator('input[name=key]').waitFor();assert.equal(await p.locator('input[type=password]').count(),2);assert.equal(await p.locator('[type=submit]').isEnabled(),true);await p.locator('input[name=key]').fill('contract-placeholder');p.once('dialog',d=>d.accept());await p.locator('#connect-later').click();await p.waitForFunction(()=>!document.querySelector('#control-dialog').open);assert.equal(await p.locator('input[name=key]').inputValue(),'');}
+  else{await p.locator('#connect-recheck').waitFor();assert.equal(await p.locator('input[type=password]').count(),0);assert.equal(await p.locator('[type=submit]').isDisabled(),true);}
+  assert.deepEqual((await p.evaluate(()=>contractCalls)).map(c=>c.route),['/stores/preflight']);checks+=3;await ctx.close();
+ }
+ console.log(JSON.stringify({passed:true,checks,contractOnly:true,remoteWooCommerce:false}));
+ }finally{await browser.close();}})().catch(e=>{console.error(e);process.exitCode=1;});

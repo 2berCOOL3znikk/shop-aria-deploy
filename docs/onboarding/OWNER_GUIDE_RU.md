@@ -1,5 +1,7 @@
 # Как открыть новый кабинет ARIA
 
+**P8:** [аналитика](https://aria-v4-staging-2ber.onrender.com/control.html#overview), [настройки](https://aria-v4-staging-2ber.onrender.com/control.html#settings), [подключения](https://aria-v4-staging-2ber.onrender.com/control.html#integrations). Доступы магазина не запрашиваются до проверки готовности. [Что проверено и что осталось](../aria4/PLATFORM_RU.md).
+
 **14.11 — операции:** [закупки](https://aria-v4-staging-2ber.onrender.com/control.html#purchases), [склад](https://aria-v4-staging-2ber.onrender.com/control.html#lots), [заказы](https://aria-v4-staging-2ber.onrender.com/control.html#orders). Новые карточки, пошаговая приёмка и понятные следующие действия. В staging — только отмеченные искусственные данные проверки, без чужих компаний, ключей и фиктивных продаж. [Подробности](../aria4/OPERATIONS_RU.md).
 
 **Онлайн-версия готова:** [staging](https://aria-v4-staging-2ber.onrender.com/start.html). На этом ПК `backend/ARIA-Staging-preview.cmd` открывает отдельное окно с настоящим входом. Данные входа — `backend/data/staging/access.txt`. Это отдельная компания с явно отмеченными проверочными записями; история автоматически проверенной цены доступна через `ARIA-AI-preview.cmd` в учебном WooCommerce. [Инструкция и ограничения](../aria4/STAGING_RU.md).

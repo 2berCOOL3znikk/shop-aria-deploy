@@ -1,0 +1,17 @@
+{
+  "base": "http://127.0.0.1:8091",
+  "before": false,
+  "views": 32,
+  "checks": [
+    "Real 14-day internal shipment export, native/store scope switching; no personal data",
+    "Product demand modal uses the real server calculation and does not claim an AI forecast",
+    "Password form has working length validation; actual owner password is not changed",
+    "Company name changed and restored through real UI in the separate review company",
+    "Real connection wizard retains a test draft but blocks credential fields for an unapproved address; no keys or import; review draft archived",
+    "No AI key copied, no external AI consent enabled or price action created"
+  ],
+  "errors": [],
+  "completed": true,
+  "revision": "development",
+  "checkedAt": "2026-11-14T09:04:14.059Z"
+}
