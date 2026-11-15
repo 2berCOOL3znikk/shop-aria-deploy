@@ -1,0 +1,20 @@
+{
+  "approvedByOwner": true,
+  "scope": "two new isolated staging workspaces, Neon Free and Render Free only",
+  "databasePreparationCompleted": true,
+  "slots": [
+    {"slot": "A", "projectId": "royal-darkness-00535090", "unprivilegedRole": true, "noRoleMembership": true, "ownsDedicatedDatabase": true, "empty": true, "ownerAccountCreated": false},
+    {"slot": "B", "projectId": "late-flower-36533773", "unprivilegedRole": true, "noRoleMembership": true, "ownsDedicatedDatabase": true, "empty": true, "ownerAccountCreated": false}
+  ],
+  "providerSetRoleOptionTemporarilyUsedAndRestored": true,
+  "privateSettingsGitIgnoredAndOwnerOnly": true,
+  "renderServicesCreated": false,
+  "newCompanyBrowserE2eExecuted": false,
+  "restartPersistenceVerified": false,
+  "gatewayEnabled": false,
+  "productionOrExistingCompaniesChanged": false,
+  "blockedAction": "Preparing Render environment variables through process stdout",
+  "reviewReason": "The command could output the complete A/B secrets into stdout, contrary to the owner's no-logging requirement",
+  "blockedCommandExecuted": false,
+  "stoppedWithoutRetryOrAlternativeExecution": true
+}
