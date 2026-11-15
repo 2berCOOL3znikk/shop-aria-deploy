@@ -39,10 +39,16 @@ public class CompetitorPriceService {
                 if(!validGtin(barcode)||!barcode.equals(p.getBarcode())||!unit.equalsIgnoreCase(p.getUnit()))throw new IllegalArgumentException("Должны совпадать корректный GTIN/EAN и единица упаковки в карточке товара");
                 BigDecimal price=new BigDecimal(row.get(3));if(price.scale()>2||price.signum()<=0||price.compareTo(new BigDecimal("9999999999.99"))>0)throw new IllegalArgumentException("Недопустимая цена");
                 if(!"KZT".equals(row.get(4)))throw new IllegalArgumentException("Поддерживается только KZT без выдуманного курса");
-                Instant observed=OffsetDateTime.parse(row.get(5)).toInstant();if(observed.isAfter(Instant.now())||observed.isBefore(Instant.now().minus(Duration.ofDays(30))))throw new IllegalArgumentException("Дата с часовым поясом: не в будущем и не старше 30 дней");
+                Instant rawObserved=OffsetDateTime.parse(row.get(5)).toInstant();if(rawObserved.isAfter(Instant.now())||rawObserved.isBefore(Instant.now().minus(Duration.ofDays(30))))throw new IllegalArgumentException("Дата с часовым поясом: не в будущем и не старше 30 дней");
                 publicUrl(row.get(6));
                 if(!sameOrigin(row.get(6),source.baseUrl))throw new IllegalArgumentException("URL должен принадлежать разрешённому источнику");
+                // Both supported databases persist timestamps at microsecond precision.
+                // Canonicalize before lookup and insert, including nanosecond input from Linux clients.
+                Instant observed=rawObserved.truncatedTo(java.time.temporal.ChronoUnit.MICROS);
                 var old=quotes.findBySourceIdAndProductIdAndObservedAt(sourceId,p.getId(),observed);
+                // Earlier versions let the database round upward. Preserve those rows on retries.
+                var legacyRounded=rawObserved.plusNanos(500).truncatedTo(java.time.temporal.ChronoUnit.MICROS);
+                if(old.isEmpty()&&!legacyRounded.equals(observed))old=quotes.findBySourceIdAndProductIdAndObservedAt(sourceId,p.getId(),legacyRounded);
                 if(old.isPresent()){var q=old.get();if(q.price.compareTo(price)!=0||!q.barcode.equals(barcode)||!q.unit.equalsIgnoreCase(unit)||!q.url.equals(row.get(6)))throw new IllegalArgumentException("Запись с этой датой уже есть с другими данными");duplicates++;continue;}
                 var q=new CompetitorQuote();q.sourceId=sourceId;q.productId=p.getId();q.barcode=barcode;q.unit=unit;q.price=price;q.observedAt=observed;q.url=row.get(6);quotes.saveAndFlush(q);events.publishEvent(new StoreChanged(p.getId(),"COMPETITOR_QUOTE"));imported++;
             }catch(IllegalArgumentException|java.time.DateTimeException e){throw new IllegalArgumentException("Строка "+line+": "+(e instanceof NumberFormatException?"Неверный формат цены":e instanceof java.time.DateTimeException?"Неверная дата с часовым поясом":e.getMessage()));}

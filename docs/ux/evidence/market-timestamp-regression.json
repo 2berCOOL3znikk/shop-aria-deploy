@@ -1,0 +1,12 @@
+{
+  "problem": "Nanosecond timestamps can round differently at microsecond database precision and break repeated imports",
+  "fix": "Normalize incoming identity before lookup/insert and recognize earlier rounded observations without rewriting them",
+  "checks": [
+    "H2: exact barcode import/retry with 9 fractional digits; legacy rounded observation is preserved",
+    "PostgreSQL: same two targeted scenarios"
+  ],
+  "passed": true,
+  "testsPerDatabase": 2,
+  "checkedAt": "2026-11-15T17:14:17.103Z",
+  "externalMarketE2E": false
+}

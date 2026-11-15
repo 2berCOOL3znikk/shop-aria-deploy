@@ -50,6 +50,7 @@ class ControlIntegrationTest {
     @Autowired ManagerActionRepository managerActions;
     @Autowired ManagerRunRepository managerRuns;
     @Autowired SocialProposalRepository socialProposals;
+    @Autowired CompetitorQuoteRepository competitorQuotes;
     @Autowired PurchaseRequestRepository purchaseRequests;
     @Autowired com.aria.service.PurchaseService purchaseService;
     @Autowired InventoryMovementRepository stockMovements;
@@ -546,10 +547,15 @@ class ControlIntegrationTest {
     @Test void competitorTableCanMatchUniqueBarcodeWithoutRequiringInternalSkuAndRejectsAmbiguity()throws Exception {
         String stem="299"+String.format("%09d",java.util.concurrent.ThreadLocalRandom.current().nextInt(1000000000));int sum=0,weight=3;for(int i=stem.length()-1;i>=0;i--){sum+=(stem.charAt(i)-'0')*weight;weight=weight==3?1:3;}String ean=stem+(10-sum%10)%10;
         long p=product();var body=new HashMap<String,Object>(productBody(products.findById(p).orElseThrow().getSku()));body.put("barcode",ean);assertThat(call("PUT",base+"/products/"+p,admin,body).status).isEqualTo(200);
-        long source=call("POST",base+"/competitors",admin,Map.of("name","Synthetic contract source","baseUrl","https://example.com","active",true,"permissionConfirmed",true)).id();String csv="sku,barcode,unit,price,currency,observedAt,url\n,"+ean+",шт,900.00,KZT,"+java.time.OffsetDateTime.now().minusSeconds(5)+",https://example.com/contract\n";var input=Map.of("sourceId",source,"csv",csv,"identityConfirmed",true);
+        long source=call("POST",base+"/competitors",admin,Map.of("name","Synthetic contract source","baseUrl","https://example.com","active",true,"permissionConfirmed",true)).id();String csv="sku,barcode,unit,price,currency,observedAt,url\n,"+ean+",шт,900.00,KZT,"+java.time.OffsetDateTime.now().minusSeconds(5).withNano(123456789)+",https://example.com/contract\n";var input=Map.of("sourceId",source,"csv",csv,"identityConfirmed",true);
         assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("imported",1);assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("duplicates",1);
         long duplicate=product();var other=new HashMap<String,Object>(productBody(products.findById(duplicate).orElseThrow().getSku()));other.put("barcode",ean);assertThat(call("PUT",base+"/products/"+duplicate,admin,other).status).isEqualTo(200);assertThat(call("POST",base+"/competitors/import",admin,input).status).isEqualTo(400);
         assertThat(call("DELETE",base+"/products/"+duplicate,admin,null).status).isEqualTo(200);assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("duplicates",1);assertThat(call("GET",base+"/competitors/products/"+p,admin,null).raw).contains("AVAILABLE");
+    }
+    @Test void competitorRetryPreservesPreviouslyRoundedObservationWithoutDuplicate()throws Exception {
+        long p=product();var body=new HashMap<String,Object>(productBody(products.findById(p).orElseThrow().getSku()));body.put("barcode","4006381333931");assertThat(call("PUT",base+"/products/"+p,admin,body).status).isEqualTo(200);
+        long source=call("POST",base+"/competitors",admin,Map.of("name","Synthetic legacy precision source","baseUrl","https://example.com","active",true,"permissionConfirmed",true)).id();var timestamp=java.time.OffsetDateTime.now().minusSeconds(20).withNano(123456789);var legacy=new CompetitorQuote();legacy.sourceId=source;legacy.productId=p;legacy.barcode="4006381333931";legacy.unit="шт";legacy.price=new java.math.BigDecimal("900.00");legacy.url="https://example.com/legacy-nanos";legacy.observedAt=timestamp.toInstant().plusNanos(500).truncatedTo(java.time.temporal.ChronoUnit.MICROS);competitorQuotes.saveAndFlush(legacy);
+        String csv="sku,barcode,unit,price,currency,observedAt,url\n"+products.findById(p).orElseThrow().getSku()+",4006381333931,шт,900.00,KZT,"+timestamp+",https://example.com/legacy-nanos\n";var result=call("POST",base+"/competitors/import",admin,Map.of("sourceId",source,"csv",csv,"identityConfirmed",true));assertThat(result.status).as(result.raw).isEqualTo(200);assertThat(result.body).containsEntry("duplicates",1).containsEntry("imported",0);assertThat(competitorQuotes.findByProductIdOrderByObservedAtDescIdDesc(p)).hasSize(1);
     }
     @Test void legacyDemoFlagCannotPromoteUnsourcedMarketAverageIntoAdvice()throws Exception {
         long p=product();lot(p,"MARKET-EVIDENCE",12,90);var product=products.findById(p).orElseThrow();product.setMarketAvgPrice(new java.math.BigDecimal("100"));products.saveAndFlush(product);
