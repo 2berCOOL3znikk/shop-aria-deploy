@@ -1,0 +1,15 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "The real UI prepares an 80-product teaching set without WooCommerce",
+    "Product illustration, card and the two distinct expiry lots open through the interface",
+    "Card and table views preserve the catalogue and its actions",
+    "The product gallery fits 390 px"
+  ],
+  "errors": [],
+  "apiErrors": [],
+  "productionChanged": false,
+  "products": 83,
+  "passed": true,
+  "checkedAt": "2026-11-15T15:37:57.040Z"
+}

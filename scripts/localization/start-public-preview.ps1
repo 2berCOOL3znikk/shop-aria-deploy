@@ -1,4 +1,4 @@
-param([switch]$SkipBuild,[switch]$Restart)
+param([switch]$SkipBuild,[switch]$Restart,[switch]$Supermarket)
 $ErrorActionPreference='Stop'
 $root=Split-Path (Split-Path $PSScriptRoot -Parent) -Parent
 Set-Location -LiteralPath $root
@@ -34,6 +34,7 @@ $env:ARIA_ADMIN_EMAIL=$cfg.email;$env:ARIA_ADMIN_PASSWORD=$cfg.password;$env:ARI
 $env:ARIA_SEED_DEMO_USERS='false';$env:ARIA_SEED_DEMO_CATALOG='false';$env:ARIA_RESET_DATA_ON_START='false';$env:ARIA_DEMO_MARKET_ENABLED='false'
 $source=(Resolve-Path -LiteralPath src/main/resources/static).Path+[IO.Path]::DirectorySeparatorChar
 $arguments=@('-Duser.timezone=Asia/Qyzylorda','-Xms32m','-Xmx192m','-XX:+UseSerialGC','-XX:ActiveProcessorCount=2','-jar',('"'+$jar+'"'),'--server.address=127.0.0.1','--server.port=8087','--spring.profiles.active=postgres,free','--spring.datasource.url=jdbc:postgresql://127.0.0.1:55434/aria_locale_demo','--spring.datasource.username=aria_locale_demo','--spring.jpa.hibernate.ddl-auto=validate','--spring.flyway.enabled=true','--aria.organization.key=demo','--aria.demo-catalog-import-enabled=true','--aria.intelligence.external-enabled=false','--aria.smart-pricing.schedule-enabled=false','--aria.manager.schedule-enabled=false','--aria.manager.activity-enabled=false','--aria.store-sync.worker-enabled=false',('--spring.web.resources.static-locations='+([Uri]$source).AbsoluteUri+',classpath:/static/'))
+if($Supermarket){$arguments+='--aria.demo-supermarket.enabled=true'}
 $p=Start-Process -FilePath (Join-Path $env:JAVA_HOME 'bin/java.exe') -ArgumentList $arguments -WorkingDirectory $root -WindowStyle Hidden -RedirectStandardOutput (Join-Path $area 'app.out.log') -RedirectStandardError (Join-Path $area 'app.err.log') -PassThru
 $p.Id | Set-Content -LiteralPath $pidFile
 $ready=$false

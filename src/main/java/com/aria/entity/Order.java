@@ -43,6 +43,7 @@ public class Order {
 
     public Long getId() { return id; }
     public LocalDateTime getCreatedAt() { return createdAt; }
+    public void setCreatedAt(LocalDateTime value) { createdAt=value; }
     public BigDecimal getTotalAmount() { return totalAmount; }
     public void setTotalAmount(BigDecimal t) { this.totalAmount = t; }
     public String getStatus() { return status; }

@@ -148,7 +148,7 @@
     if(['audit','social','feedback'].includes(section))ariaRecordsExperience.cards(section);
     if(section==='orders')await ariaConnectedOrders.mount(ctx);
     if(section==='workspace')await ariaWorkspace.mount(ctx);
-    if(section==='products')await ariaProductWorkspace.mount(ctx);if(section==='lots')ariaProductWorkspace.hydrate($('control-content'));const searchInput=$('control-search');if(searchInput)searchInput.setAttribute('aria-label',searchInput.placeholder);
+    if(section==='products')await ariaProductWorkspace.mount(ctx);if(section==='lots')ariaProductWorkspace.hydrate($('control-content').querySelector('[data-operations=warehouse]'));const searchInput=$('control-search');if(searchInput)searchInput.setAttribute('aria-label',searchInput.placeholder);
     if(section==='flow'){await ariaProductFlow.mount(ctx);document.getElementById('product-flow-root')?.setAttribute('aria-busy','false');}
     if(section==='settings'){await ariaPlatformExperience.settings(ctx);await ariaWorkspace.mountDemoCatalogue(ctx);await window.ariaCompanyEntry?.mount(document.getElementById('control-content'));}
     if(section==='overview'||section==='intelligence')await ariaPlatformExperience.analytics(ctx,section==='intelligence');

@@ -59,6 +59,8 @@
 
   function creditFor(product) {
     const explicit=getLocalProductImage(product);
+    const illustration=product?.provenance?.illustration;
+    if(illustration&&explicit===illustration.path){const note=ariaCopy.language==='en'?'Original ARIA teaching illustration, not a photograph of a commercial product.':'Оригинальная учебная иллюстрация ARIA, не фотография коммерческого товара.';return escapeAttr(note);}
     if (!explicit || explicit.endsWith('.svg')) return ariaCopy.text("text.998f7708d2b867");
     const photo=product?.provenance?.photo;
     if(photo&&explicit===photo.path){

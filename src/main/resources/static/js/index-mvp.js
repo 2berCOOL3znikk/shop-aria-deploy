@@ -64,7 +64,7 @@
     else if(sort==='price-desc')filtered.sort((a,b)=>Number(b.displayPrice??b.unitPrice)-Number(a.displayPrice??a.unitPrice));
     else if(sort==='expiry-asc')filtered.sort((a,b)=>(a.expiryDate||'9999-12-31').localeCompare(b.expiryDate||'9999-12-31'));
     else if(sort==='popular')filtered.sort((a,b)=>Number(b.popularityRank||0)-Number(a.popularityRank||0));
-    else filtered.sort((a,b)=>(a.provenance?.photo?-1:a.provenance?.catalogueOrder??999999)-(b.provenance?.photo?-1:b.provenance?.catalogueOrder??999999)||a.name.localeCompare(b.name,'ru'));
+    else {const rank=p=>p.provenance?.photo?-2:p.provenance?.illustration?-1:p.provenance?.catalogueOrder??999999;filtered.sort((a,b)=>rank(a)-rank(b)||a.name.localeCompare(b.name,ariaCopy.locale()));}
     pageSize=12;window.renderProducts(filtered);
   };
   function resetFilters(){

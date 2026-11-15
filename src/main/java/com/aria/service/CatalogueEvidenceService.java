@@ -15,8 +15,12 @@ public class CatalogueEvidenceService {
     private record Catalogue(int schemaVersion,List<Entry> entries) {}
     private final List<Entry> entries;
     private final Map<String,Entry> references;
+    private final SupermarketDemoCatalogue supermarket;
 
-    public CatalogueEvidenceService(){
+    public CatalogueEvidenceService(){this(new SupermarketDemoCatalogue());}
+    @org.springframework.beans.factory.annotation.Autowired
+    public CatalogueEvidenceService(SupermarketDemoCatalogue supermarket){
+        this.supermarket=supermarket;
         try(var input=getClass().getResourceAsStream("/catalogue/demo-products.json")){
             if(input==null)throw new IllegalStateException("Catalogue reference not found");
             var source=tools.jackson.databind.json.JsonMapper.builder().build().readValue(input,Catalogue.class);
@@ -36,6 +40,12 @@ public class CatalogueEvidenceService {
         var result=new LinkedHashMap<String,Object>();
         boolean demo=detail!=null&&detail.getDemonstration();result.put("demonstration",demo);result.put("verification","UNVERIFIED");
         if(detail==null||detail.getCatalogueReference()==null)return result;
+        var teaching=supermarket.reference(detail.getCatalogueReference());
+        if(demo&&teaching!=null&&Objects.equals(teaching.name(),product.getName())&&Objects.equals(teaching.category(),product.getCategory())){
+            result.put("verification","DEMONSTRATION");result.put("facts",List.of());
+            result.put("limitations",List.of("Учебная карточка без конкретного бренда. Название, цена, состав образца, остатки и история не являются сведениями о реальном магазине или подтверждёнными характеристиками производителя."));
+            if(Objects.equals(teaching.image(),product.getImageUrl()))result.put("illustration",supermarket.illustration(teaching));return result;
+        }
         var entry=references.get(detail.getCatalogueReference());
         if(entry==null||!Objects.equals(entry.name(),product.getName())||!Objects.equals(entry.brand(),detail.getBrand())||!Objects.equals(entry.category(),product.getCategory())||!Objects.equals(entry.size(),detail.getSize())){
             result.put("verification","OWNER_EDITED");return result;

@@ -1,0 +1,1 @@
+Original vector illustrations created for ARIA, 2026. No third-party product photos, trademarks or external licence claims. Educational category representations, not photographs of commercial SKUs. Generated from scripts/build-supermarket-demo.cjs.
