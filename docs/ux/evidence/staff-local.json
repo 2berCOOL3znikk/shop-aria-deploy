@@ -1,0 +1,12 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "New warehouse invitation is accepted on the same host; the role sees inventory only and server denies AI, stores, staff and social decisions",
+    "The previously verified teaching receipt/write-off remains closed with zero stock; it was not repeated",
+    "Owner revokes this teaching employee in the UI; the existing warehouse session immediately loses access"
+  ],
+  "errors": [],
+  "productionChanged": false,
+  "passed": true,
+  "checkedAt": "2026-11-15T16:08:44.757Z"
+}

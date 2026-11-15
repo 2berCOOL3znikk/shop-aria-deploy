@@ -1,0 +1,14 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "A native product is created from name, category and price; Java generates its reference without a SKU field or external AI",
+    "Project control graphic uploads with explicit rights, renders through the owner session, and is removed through an EN/dark/390 px confirmation without changing stock",
+    "The empty teaching card is archived through the UI; its history remains and it leaves the active catalogue"
+  ],
+  "errors": [],
+  "productionChanged": false,
+  "externalAiCalled": false,
+  "passed": true,
+  "resumedFromCheckpoint": true,
+  "checkedAt": "2026-11-15T16:12:55.339Z"
+}

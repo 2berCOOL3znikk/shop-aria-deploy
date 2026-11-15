@@ -1,0 +1,18 @@
+{
+  "environment": "isolated local demo",
+  "productionChanged": false,
+  "reset": false,
+  "passed": true,
+  "processReplaced": true,
+  "previousOwnerSessionStillValid": true,
+  "teachingProducts": 64,
+  "productRecords": 84,
+  "lotRecords": 153,
+  "orderRecords": 31,
+  "productsUnchanged": true,
+  "lotsAndChecksUnchanged": true,
+  "ordersAndCancellationsUnchanged": true,
+  "socialHistoryUnchanged": true,
+  "revokedStaffStillDisabled": true,
+  "checkedAt": "2026-11-15T16:16:26.114Z"
+}

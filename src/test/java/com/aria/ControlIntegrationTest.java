@@ -568,6 +568,15 @@ class ControlIntegrationTest {
         assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",null,null).status).isEqualTo(401);assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",user,null).status).isEqualTo(403);
         var update=new HashMap<>(productBody("PHOTO-"+p));update.put("imageUrl","/api/products/"+p+"/photo");assertThat(call("PUT",base+"/products/"+p,admin,update).status).isEqualTo(200);
     }
+    @Test void removingPhotoRequiresOwnerAndCurrentVersionAndNeverChangesStock()throws Exception {
+        long p=product();lot(p,"PHOTO-REMOVAL",5,7);assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
+        var proof=call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null);var input=Map.of("expectedRevision",proof.body.get("imageRevision"),"expectedImageUrl","/api/products/"+p+"/photo");
+        assertThat(call("DELETE","/api/admin/products/"+p+"/photo",user,input).status).isEqualTo(403);
+        assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);assertThat(call("DELETE","/api/admin/products/"+p+"/photo",admin,input).status).isEqualTo(409);
+        var fresh=call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null);var removal=Map.of("expectedRevision",fresh.body.get("imageRevision"),"expectedImageUrl","/api/products/"+p+"/photo");assertThat(call("DELETE","/api/admin/products/"+p+"/photo",admin,removal).status).isEqualTo(200);
+        assertThat(call("GET","/api/products/"+p+"/photo",null,null).status).isEqualTo(404);assertThat(call("GET","/api/admin/products/"+p+"/photo-evidence",admin,null).body).containsEntry("ownerUploadedImage",false).containsEntry("ownerRightsConfirmed",false);
+        assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(5);assertThat(products.findById(p).orElseThrow().getImageUrl()).isEqualTo("/images/product-placeholder.svg");assertThat(call("DELETE","/api/admin/products/"+p+"/photo",admin,removal).status).isEqualTo(409);
+    }
     @Test void photoRightsDoNotFollowAnotherProductOrChangedImageBytes()throws Exception {
         long p=product(),other=product();assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
         assertThat(call("GET","/api/admin/products/"+other+"/photo-evidence",admin,null).body).containsEntry("ownerRightsConfirmed",false);

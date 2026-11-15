@@ -78,6 +78,18 @@ public class ProductPhotoController {
         return ResponseEntity.ok(Map.of("message", "Фото товара обновлено", "imageUrl", product.getImageUrl()));
     }
 
+    public record Removal(@jakarta.validation.constraints.Min(0) long expectedRevision,@jakarta.validation.constraints.NotNull @jakarta.validation.constraints.Size(max=2000) String expectedImageUrl){}
+    @DeleteMapping("/api/admin/products/{id}/photo")
+    @Transactional
+    public Map<String,Object> remove(@PathVariable Long id,@jakarta.validation.Valid @RequestBody Removal input){
+        var product=inventory.lock(id);if(product.getArchived())throw new IllegalStateException("Товар архивирован");
+        long revision=events.findFirstByActionAndResourceOrderByIdDesc("PRODUCT_PHOTO_UPDATED","product:"+id).map(e->e.getId()).orElse(0L);
+        if(input.expectedRevision()!=revision||!java.util.Objects.equals(input.expectedImageUrl(),product.getImageUrl()))throw new IllegalStateException("Изображение изменилось. Откройте его заново перед удалением");
+        photos.findByProductId(id).ifPresent(photos::delete);photos.flush();product.setImageUrl("/images/product-placeholder.svg");products.save(product);
+        audit.record("PRODUCT_IMAGE_REMOVED","product:"+id,"Изображение убрано владельцем; товар, партии и история сохранены");
+        return Map.of("message","Изображение убрано. Товар и остатки сохранены","imageUrl",product.getImageUrl());
+    }
+
     @GetMapping("/api/admin/products/{id}/photo-evidence")
     @Transactional(readOnly=true)
     public Map<String,Object> evidence(@PathVariable Long id) {
@@ -86,7 +98,7 @@ public class ProductPhotoController {
         var event=events.findFirstByActionAndResourceOrderByIdDesc("PRODUCT_PHOTO_UPDATED","product:"+id).orElse(null);
         boolean assigned=photo!=null&&("/api/products/"+id+"/photo").equals(product.getImageUrl());
         boolean confirmed=assigned&&event!=null&&("Право использования изображения подтверждено загрузившим владельцем; sha256="+digest(photo.getData())).equals(event.getDetails());
-        var result=new java.util.LinkedHashMap<String,Object>();result.put("ownerUploadedImage",assigned);result.put("ownerRightsConfirmed",confirmed);result.put("confirmedAt",confirmed?event.getCreatedAt():null);return result;
+        var result=new java.util.LinkedHashMap<String,Object>();result.put("imageRevision",event==null?0L:event.getId());result.put("ownerUploadedImage",assigned);result.put("ownerRightsConfirmed",confirmed);result.put("confirmedAt",confirmed?event.getCreatedAt():null);return result;
     }
 
     private String digest(byte[] data) {

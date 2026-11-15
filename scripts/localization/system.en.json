@@ -125,5 +125,7 @@
   "Приглашение изменилось. Обновите список": "The invitation changed. Refresh the list.",
   "Приглашение уже закрыто": "The invitation has already been closed.",
   "Сотрудник не найден": "Employee not found.",
-  "Доступ изменился. Обновите список": "Access changed. Refresh the list."
+  "Доступ изменился. Обновите список": "Access changed. Refresh the list.",
+  "Изображение изменилось. Откройте его заново перед удалением": "The image changed. Open it again before removing it.",
+  "Изображение убрано. Товар и остатки сохранены": "Image removed. The product and stock are unchanged."
 }
