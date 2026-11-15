@@ -1,0 +1,19 @@
+{
+  "contractOnly": true,
+  "workspaceCreated": false,
+  "registrationPosts": 0,
+  "recoveryPosts": 1,
+  "views": 0,
+  "errorChecks": [
+    "Network failure retains and allows saving the existing status code without starting another registration",
+    "An HTML cold-start response gives a readable error and never discards the receipt",
+    "An incomplete status response cannot claim preparation or readiness",
+    "A genuine not-found response offers recovery and an explicit return while retaining the receipt",
+    "Only the explicit back action removes the local code and reopens registration; no registration POST is sent",
+    "Recovery followed by a lost challenge has no unhandled error and cannot reuse an invalid challenge",
+    "The challenge can be explicitly refreshed without re-sending recovery"
+  ],
+  "errors": [],
+  "passed": true,
+  "checkedAt": "2026-11-15T09:32:49.114Z"
+}
