@@ -36,7 +36,7 @@ let reviewBusy = false;
 
     async function loadReviews() {
         try {
-            const res = await fetch('/api/reviews/product/' + encodeURIComponent(productId));
+            const res = await ariaAuth.catalogFetch('/api/reviews/product/' + encodeURIComponent(productId));
             if (!res.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.c43d620ffc2337")));
             const reviews = await res.json();
             const list = document.getElementById('reviews-list');
@@ -95,6 +95,7 @@ let reviewBusy = false;
     }
 
     async function loadProduct() {
+        if (!(await window.ariaStorefront.ready).allowed) return;
         const params = new URLSearchParams(location.search);
         productId = params.get('id');
         if (!productId) { location.href = '/index.html'; return; }
@@ -102,7 +103,7 @@ let reviewBusy = false;
         if (reviews) reviews.hidden = true;
 
         try {
-            const res = await fetch('/api/products/' + encodeURIComponent(productId));
+            const res = await ariaAuth.catalogFetch('/api/products/' + encodeURIComponent(productId));
             if (!res.ok) throw Object.assign(new Error(ariaCopy.errorText(ariaCopy.text("text.25db4330ae7389"))), { status: res.status });
             const data = await res.json();
             const p = data.product;

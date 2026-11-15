@@ -329,14 +329,14 @@
     return reading;
   }
   async function refreshStock(id) {
-    const reply=await fetch('/api/products/'+encodeURIComponent(id));
+    const reply=await ariaAuth.catalogFetch('/api/products/'+encodeURIComponent(id));
     if(reply.status===404){stocks.set(id,0);return;}
     const data=await response(Promise.resolve(reply));
     if(!data.product)throw new Error(ariaCopy.errorText(ariaCopy.text("text.16069caeb4cfb1")));
     stocks.set(id,Math.max(0,Number(data.product.quantityOnHand)||0));
   }
   async function loadStocks() {
-    const products=await response(fetch('/api/products/store'));
+    const products=await response(ariaAuth.catalogFetch('/api/products/store'));
     if(!Array.isArray(products))throw new Error(ariaCopy.errorText(ariaCopy.text("text.8b528f40a705c3")));
     register(products,true);
   }

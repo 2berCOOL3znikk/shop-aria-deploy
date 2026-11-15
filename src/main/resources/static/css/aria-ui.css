@@ -4,3 +4,6 @@
 .aria-shell-ready .ws-header-actions{display:flex;align-items:center;justify-content:flex-end;flex-wrap:wrap;gap:10px}.aria-shell-ready .control-header{gap:16px;flex-wrap:wrap}.aria-shell-ready .control-header>div:first-child{min-width:0}
 @media(max-width:760px){.ar-topbar{padding:20px}.ar-entry{padding:0 20px;margin-top:32px}.ar-entry-grid{grid-template-columns:1fr}.ar-entry h1{letter-spacing:-1.7px}.ar-entry .ar-panel{padding:23px}.ar-entry-footer{flex-wrap:wrap}.ar-auth{margin-top:25px}.ar-context{align-items:flex-start;flex-wrap:wrap}.ar-shell-tools{gap:7px}.ar-account-name{display:none}.ar-account summary{padding-right:6px}.ar-controls{gap:6px}.ar-language button{padding:5px 6px}.ar-shell-tools .ar-icon-button{width:34px;height:34px}.ar-shell-tools .ar-controls{gap:6px}.ar-account-menu{width:240px}.ar-auth .ar-panel{padding:23px}.ar-page .ar-button{width:100%}.aria-shell-ready .ws-header-actions{gap:7px}.aria-shell-ready .control-header .control-caption{max-width:180px}}
 @media(prefers-reduced-motion:no-preference){.ar-button,.ar-icon-button,.ar-language button{transition:background .18s,border-color .18s,opacity .18s}.ar-button:hover{opacity:.86}}
+
+/* Action popovers must not leak hidden controls into layout or the tab order. */
+details[data-popup-menu-bound]>[hidden]{display:none!important}

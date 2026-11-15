@@ -81,11 +81,13 @@ async function initCatalogPage() {
   if (window.ariaTheme) ariaTheme.initTheme();
   if (window.ariaI18n) ariaI18n.initI18n();
 
+  if (!(await window.ariaStorefront.ready).allowed) return;
+
   try {
     // An unavailable optional account feature must not hide the public catalogue.
     const accountLoads = await Promise.allSettled([loadFavorites(), loadCartCount()]);
     if (accountLoads.some(result => result.status === "rejected")) window.showToast(ariaCopy.text("text.0eecb5abc70336"), "error");
-    const response = await fetch("/api/products/store");
+    const response = await ariaAuth.catalogFetch("/api/products/store");
     if (!response.ok) throw new Error(ariaCopy.errorText(ariaCopy.text("text.cac774f7b48a95")));
     state.products = await response.json();
     window.ariaCart.register(state.products, true);
@@ -98,7 +100,9 @@ async function initCatalogPage() {
     if (sort) sort.addEventListener("change", () => window.filterAndSort && window.filterAndSort());
   } catch (error) {
     const grid = document.getElementById("products");
-    if (grid) ariaCopy.setProperty(grid,"innerHTML",ariaCopy.text("text.15973fdd73c335") + escapeHtml(error.message) + ariaCopy.text("text.19febf9e216781"));
+    if (grid) { grid.setAttribute('aria-busy','false'); ariaCopy.setProperty(grid,"innerHTML",ariaCopy.text("text.15973fdd73c335") + escapeHtml(error.message) + ariaCopy.text("text.19febf9e216781")); }
+    const count = document.getElementById('catalog-result-count');
+    if (count) ariaCopy.setProperty(count,'textContent','');
     window.showToast(error.message || ariaCopy.text("text.cac774f7b48a95"), "error");
   }
 }

@@ -32,7 +32,7 @@
       document.querySelector("main.container").appendChild(section);
     }
     try {
-      const response = await fetch("/api/products/store");
+      const response = await ariaAuth.catalogFetch("/api/products/store");
       if (!response.ok) return;
       const products = await response.json();
       const matches = products.filter(p => String(p.category || "") === String(current.category || "") && String(p.id) !== String(current.id)).slice(0, 8);

@@ -1,0 +1,13 @@
+{
+  "contractOnly": true,
+  "checks": [
+    "Anonymous visitors get a private-store explanation without requesting the company catalogue",
+    "A partner role cannot enter the owner catalogue preview",
+    "Verified owner preview authenticates all catalogue reads, offers a return route and hides unavailable AI",
+    "A failed catalogue read leaves neither a spinner nor a stale loading count",
+    "The public demo still loads anonymously in English"
+  ],
+  "errors": [],
+  "passed": true,
+  "checkedAt": "2026-11-15T12:27:32.947Z"
+}

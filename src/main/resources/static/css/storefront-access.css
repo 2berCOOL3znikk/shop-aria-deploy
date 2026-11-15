@@ -1,0 +1,5 @@
+.storefront-access-state{max-width:600px;margin:72px auto;padding:28px;border:1px solid var(--border-color,#d9d9d9);border-radius:16px;background:var(--card-bg,var(--bg-secondary,#fff));color:var(--text-primary,#181818)}
+.storefront-access-state h1{font-size:26px;letter-spacing:-.6px;line-height:1.2;margin:0 0 14px}.storefront-access-state p{color:var(--text-secondary,#686868);font-size:15px;line-height:1.6;margin:0 0 24px}.storefront-access-state a{display:inline-flex}
+.storefront-preview-note{display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap;padding:14px 18px;margin:8px 0 28px;border:1px solid var(--border-color,#d9d9d9);border-radius:10px;color:var(--text-secondary,#686868);font-size:13px}.storefront-preview-note a{font-weight:600;color:var(--text-primary,#181818)}
+@media(max-width:600px){.storefront-access-state{margin:28px 0;padding:22px}.storefront-preview-note{font-size:12px;gap:9px}}
+[data-storefront-preview] .storefront-help[hidden],[data-storefront-preview] .telegram-share{display:none!important}

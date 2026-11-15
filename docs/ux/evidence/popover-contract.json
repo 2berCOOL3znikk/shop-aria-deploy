@@ -1,0 +1,16 @@
+{
+  "scope": "browser component contract, no backend requests or business changes",
+  "checks": [
+    "All four real popover families close outside; explanatory disclosures stay open",
+    "Selecting the current section closes the popup even without a hash change",
+    "Keyboard arrows and Home/End navigate actions; Escape restores focus to the trigger",
+    "An action button dismisses its popup",
+    "Route changes close popovers without collapsing content",
+    "Browser Back closes the popup",
+    "Tab leaves a menu normally and closes it; closed actions are excluded from focus",
+    "Newly rendered menus are wired automatically; only one popup stays open"
+  ],
+  "errors": [],
+  "passed": true,
+  "checkedAt": "2026-11-15T12:06:20.419Z"
+}

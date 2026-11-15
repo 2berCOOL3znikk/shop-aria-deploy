@@ -37,6 +37,15 @@ window.ariaAuth = {
         return !!this.getToken();
     },
 
+    // The demo is public; a company catalogue remains protected by the Java service.
+    catalogFetch: function(url, options = {}) {
+        const target = new URL(url, location.href);
+        if (target.origin !== location.origin || !['GET','HEAD'].includes(options.method || 'GET')) {
+            throw new Error('Invalid catalogue request');
+        }
+        return this.getToken() ? this.authFetch(target.pathname + target.search, options) : fetch(url, options);
+    },
+
     authFetch: async function(url, options = {}) {
         const token = this.getToken();
         const mergedOptions = {
