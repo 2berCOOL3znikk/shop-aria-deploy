@@ -11,6 +11,8 @@ public class SocialProposalController {
     public SocialProposalController(SocialProposalService proposals,CharityEligibilityService charities){this.proposals=proposals;this.charities=charities;}
     public record Acceptance(@NotBlank @Size(max=120) String region,@NotEmpty @Size(max=30) List<@NotBlank @Size(max=120) String> categories,@NotBlank @Size(max=1000) String storageConditions,@Min(0) @Max(365) int minimumRemainingDays,boolean active,@AssertTrue boolean informationConfirmed){}
     public record Approval(@NotNull Long organizationId,@Min(1) @Max(1000000) int quantity,@NotNull LocalDate validUntil,@NotBlank @Size(max=900) String reason,@AssertTrue boolean suitabilityConfirmed,@AssertTrue boolean transportConfirmed){}
+    @GetMapping("/products/{id}/readiness") public Map<String,Object> readiness(@PathVariable Long id){return proposals.readiness(id);}
+    @PostMapping("/products/{id}/prepare") public Map<String,Object> prepare(@PathVariable Long id){return proposals.prepareForProduct(id);}
     @GetMapping public List<Map<String,Object>> list(){return proposals.list();}
     @GetMapping("/organizations") public List<Map<String,Object>> organizations(){return charities.organizations();}
     @PutMapping("/organizations/{id}") public Map<String,String> acceptance(@PathVariable Long id,@Valid @RequestBody Acceptance in){charities.save(id,in.region(),in.categories(),in.storageConditions(),in.minimumRemainingDays(),in.active());return Map.of("message","Условия сохранены");}

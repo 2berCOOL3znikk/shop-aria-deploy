@@ -56,6 +56,18 @@ public class InventoryService {
         if (rows.isEmpty()) return p.getExpiryDate()!=null && p.getExpiryDate().isBefore(LocalDate.now()) ? 0 : Math.max(0,p.getQuantityOnHand()==null?0:p.getQuantityOnHand());
         return Math.toIntExact(rows.stream().filter(this::usable).mapToLong(InventoryLot::getQuantity).sum());
     }
+    /** Social handover needs an actual storage/suitability check, separately from retail stock. */
+    public boolean socialUsable(InventoryLot lot) {
+        var category=String.valueOf(lot.getProduct().getCategory()).toLowerCase(Locale.ROOT);
+        boolean food=category.matches(".*(продукт|молоч|мяс|птиц|рыб|хлеб|выпеч|овощ|фрукт|напит|сладост|бакале|food|dairy|bakery|meat|poultry|produce|beverage|grocery|sweets|fish).*" );
+        return usable(lot)&&"CONFIRMED".equals(lot.handlingStatus)&&lot.handlingCheckedAt!=null
+            &&lot.storageRequirements!=null&&!lot.storageRequirements.isBlank()&&(!food||lot.getExpiryDate()!=null);
+    }
+    public List<InventoryLot> productLots(Long productId) {return lots.findByProductId(productId);}
+    public List<InventoryLot> socialLots(Product p) {return lots.findByProductId(p.getId()).stream().filter(this::socialUsable).toList();}
+    public int socialAvailable(Product p) {return Math.toIntExact(socialLots(p).stream().mapToLong(InventoryLot::getQuantity).sum());}
+    public LocalDate socialExpiry(Product p) {return socialLots(p).stream().map(InventoryLot::getExpiryDate).filter(Objects::nonNull).min(LocalDate::compareTo).orElse(null);}
+    public List<Consumption> consumeSocial(Product p,int quantity) {return consumeRows(p,quantity,"SOCIAL_TRANSFER_STOCK",new ArrayList<>(socialLots(p)));}
     public void synchronize(Product p) {
         List<InventoryLot> rows=lots.findByProductId(p.getId());
         if (rows.isEmpty()) return;
@@ -98,8 +110,11 @@ public class InventoryService {
     public record Consumption(InventoryLot lot,int quantity) {}
     public List<Consumption> consume(Product p,int quantity,String operation) {
         ensureLegacyLot(p);
-        if (quantity<1 || quantity>available(p)) throw new IllegalStateException("Недостаточно пригодного товара «"+p.getName()+"». Обновите корзину");
-        List<InventoryLot> rows=new ArrayList<>(lots.findByProductId(p.getId()).stream().filter(this::usable).toList());
+        return consumeRows(p,quantity,operation,new ArrayList<>(lots.findByProductId(p.getId()).stream().filter(this::usable).toList()));
+    }
+    private List<Consumption> consumeRows(Product p,int quantity,String operation,List<InventoryLot> rows) {
+        long available=rows.stream().mapToLong(InventoryLot::getQuantity).sum();
+        if(quantity<1||quantity>available)throw new IllegalStateException(operation.equals("SOCIAL_TRANSFER_STOCK")?"Недостаточно проверенных партий. Проверьте пригодность, условия хранения и срок перед выдачей":"Недостаточно пригодного товара «"+p.getName()+"». Обновите корзину");
         rows.sort(Comparator.comparing(InventoryLot::getExpiryDate,Comparator.nullsLast(Comparator.naturalOrder())).thenComparing(InventoryLot::getReceivedAt).thenComparing(InventoryLot::getId));
         int remaining=quantity;
         List<Consumption> consumed=new ArrayList<>();

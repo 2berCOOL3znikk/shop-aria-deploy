@@ -18,16 +18,23 @@ public class SocialProposalService {
         var report=smart.currentForProposal(decisionId);var decision=decisions.findById(decisionId).orElseThrow();var p=inventory.lock(decision.productId);
         var old=proposals.findByDecisionId(decisionId);if(old.isPresent())return view(old.get());
         var scenarios=(List<?>)report.get("scenarios");double risk=scenarios.stream().mapToDouble(s->((Number)((Map<?,?>)s).get("estimatedExpiredUnits")).doubleValue()).min().orElse(0);
-        if(risk<=0||inventory.available(p)==0)throw new IllegalStateException("Нет рассчитанного риска списания пригодного остатка");
-        var item=new SocialProposal();item.decisionId=decisionId;item.productId=p.getId();item.quantity=Math.min(inventory.available(p),(int)Math.ceil(risk));item.validUntil=p.getExpiryDate()==null?LocalDate.now().plusDays(1):p.getExpiryDate();
+        if(risk<=0||inventory.socialAvailable(p)==0)throw new IllegalStateException("Нет рассчитанного риска списания пригодного остатка");
+        var item=new SocialProposal();item.decisionId=decisionId;item.productId=p.getId();item.quantity=Math.min(inventory.socialAvailable(p),(int)Math.ceil(risk));item.validUntil=inventory.socialExpiry(p)==null?LocalDate.now().plusDays(1):inventory.socialExpiry(p);
         item.reason="Оценочный риск непроданного остатка. Требуются проверенная организация и подтверждение пригодности/хранения. Товар пока не зарезервирован.";proposals.saveAndFlush(item);audit.record("SOCIAL_PROPOSED","proposal:"+item.id,item.quantity+" ед. · без резерва");return view(item);
     }
     @Transactional(readOnly=true) public List<Map<String,Object>> list(){return proposals.findTop100ByOrderByCreatedAtDescIdDesc().stream().map(this::view).toList();}
+    @Transactional(readOnly=true) public Map<String,Object> readiness(Long productId){
+        var p=em.find(com.aria.entity.Product.class,productId);if(p==null)throw new org.springframework.web.server.ResponseStatusException(org.springframework.http.HttpStatus.NOT_FOUND,"Товар не найден");var rows=inventory.productLots(productId).stream().filter(l->l.getActive()&&l.getQuantity()>0).toList();
+        var result=new LinkedHashMap<String,Object>();result.put("productId",productId);result.put("confirmedQuantity",inventory.socialAvailable(p));
+        result.put("canPrepare",!p.getArchived()&&Set.of(com.aria.enums.ProductStatus.ACTIVE,com.aria.enums.ProductStatus.CANDIDATE,com.aria.enums.ProductStatus.DISCOUNTED).contains(p.getStatus())&&inventory.socialAvailable(p)>0);
+        result.put("organizations",charities.matching(p));result.put("lots",rows.stream().map(l->{var row=new LinkedHashMap<String,Object>();row.put("id",l.getId());row.put("number",l.getLotNumber());row.put("quantity",l.getQuantity());row.put("expiryDate",l.getExpiryDate());row.put("storageRequirements",l.storageRequirements);row.put("eligible",inventory.socialUsable(l));row.put("handlingStatus",l.handlingStatus);return row;}).toList());return result;
+    }
+    public Map<String,Object> prepareForProduct(Long productId){var decision=smart.analyzeForManager(productId);return propose(((Number)decision.get("id")).longValue());}
     public Map<String,Object> approve(Long id,Long organizationId,int quantity,LocalDate until,String reason){
         var item=proposals.lockById(id).orElseThrow(()->new IllegalArgumentException("Предложение не найдено"));var p=inventory.lock(item.productId);em.refresh(item);inventory.synchronize(p);
         if(!"PROPOSED".equals(item.status))throw new IllegalStateException("Предложение уже обработано");
         if(charities.matching(p).stream().noneMatch(o->organizationId.equals(o.get("id"))))throw new IllegalStateException("Нет подходящей подтверждённой организации с указанными условиями приёма");
-        if(quantity<1||quantity>item.quantity||quantity>inventory.available(p)||until.isBefore(LocalDate.now())||until.isAfter(item.validUntil)||p.getExpiryDate()!=null&&until.isAfter(p.getExpiryDate()))throw new IllegalStateException("Проверьте количество, пригодность и срок выдачи");
+        if(quantity<1||quantity>item.quantity||quantity>inventory.socialAvailable(p)||until.isBefore(LocalDate.now())||until.isAfter(item.validUntil)||p.getExpiryDate()!=null&&until.isAfter(p.getExpiryDate()))throw new IllegalStateException("Проверьте количество, пригодность и срок выдачи");
         var offer=social.publishOffer(p.getId(),quantity,until);social.claimOffer(offer.getId(),organizationId);
         item.offerId=offer.getId();item.organizationId=organizationId;item.quantity=quantity;item.validUntil=until;item.status="RESERVED";item.approvedAt=LocalDateTime.now();var auth=org.springframework.security.core.context.SecurityContextHolder.getContext().getAuthentication();item.approvedBy=auth==null?"system":auth.getName();
         audit.record("SOCIAL_PROPOSAL_APPROVED","proposal:"+id,"Пригодность, хранение и транспорт подтверждены · "+reason);return view(item);

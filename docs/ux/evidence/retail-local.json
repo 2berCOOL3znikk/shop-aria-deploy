@@ -1,0 +1,17 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "Real catalogue image and quantity 0→1→2→1 stay consistent between catalogue, product card and cart without duplicate lines",
+    "Real educational checkout creates an order, consumes one actual lot unit and appears in the buyer profile",
+    "Owner cancels this test order through the UI; allocated stock returns exactly once",
+    "Floating assistant reads actual catalogue without external consent and exposes no purchase costs; its automatic source is labelled honestly"
+  ],
+  "errors": [],
+  "externalAiRequests": 0,
+  "productionChanged": false,
+  "productId": 20,
+  "stockBefore": 24,
+  "orderId": 31,
+  "passed": true,
+  "checkedAt": "2026-11-15T15:53:07.814Z"
+}

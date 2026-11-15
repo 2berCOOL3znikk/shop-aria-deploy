@@ -188,10 +188,11 @@ class ControlIntegrationTest {
         assertThat(call("POST","/api/auth/logout-all",null,null).status).isEqualTo(401);assertThat(call("POST","/api/auth/logout-all",admin,Map.of("email","another-account@test.local")).status).isEqualTo(204);assertThat(call("GET","/api/auth/session",admin,null).status).isEqualTo(401);assertThat(call("GET",base+"/stores",admin,null).status).isEqualTo(401);assertThat(call("GET","/api/auth/session",user,null).status).isEqualTo(200);assertThat(auditEvents.findTop100ByOrderByCreatedAtDescIdDesc().stream().anyMatch(e->e.getAction().equals("ACCOUNT_SESSIONS_REVOKED"))).isTrue();
     }
     private Reply lot(long p,String number,int qty,int days)throws Exception {var body=new HashMap<String,Object>(lotBody(p,number,qty,days));if(number.equals("DONATE")||number.equals("MANAGER"))body.put("receivedAt",LocalDate.now().minusDays(10).toString());var r=call("POST",base+"/lots",admin,body);assertThat(r.status).as(r.raw).isEqualTo(200);return r;}
+    private void confirmSocialLot(Reply lot)throws Exception {var checked=call("PUT",base+"/lots/"+lot.id()+"/handling",admin,Map.of("revision",0,"requirements","Учебная проверка пригодности и хранения","status","CONFIRMED","informationConfirmed",true,"reason","Проверено только в тестовом сценарии"));assertThat(checked.status).as(checked.raw).isEqualTo(200);}
     private long order(long p,int qty)throws Exception {assertThat(call("POST","/api/cart/add?productId="+p+"&qty="+qty,user,null).status).isEqualTo(200);var r=call("POST","/api/orders/checkout",user,Map.of("address","Тестовый адрес"));assertThat(r.status).as(r.raw).isEqualTo(200);return r.id();}
     @Test void managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock()throws Exception {
         managerStates.deleteAll();managerStates.saveAndFlush(new AiManagerState());
-        long p=product();lot(p,"MANAGER",4,2);
+        long p=product();confirmSocialLot(lot(p,"MANAGER",4,2));
         queue.enqueue(p,"TEST_STOCK_EVENT");
         ReflectionTestUtils.setField(aiManager,"enabled",true);
         try{
@@ -521,8 +522,29 @@ class ControlIntegrationTest {
         cartService.checkout();var rows=(List<Map<String,Object>>)json.readValue(call("GET","/api/cart",user,null).raw,List.class);assertThat(rows).hasSize(1);assertThat(rows.getFirst()).containsEntry("quantity",1);assertThat(carts.findById(unknown.getId())).isPresent();assertThat(carts.countByOwnerEmail("demo@aria.shop")).isZero();
         assertThat(call("POST","/api/cart/checkout",user,null).status).isEqualTo(200);assertThat(carts.findById(unknown.getId())).isPresent();
     }
+    @Test void socialRejectsUncheckedLotsAndRechecksSuitabilityAtReservationAndHandover()throws Exception {
+        long p=product();var lot=lot(p,"SOCIAL-SAFETY",5,7);var offerBody=Map.of("productId",p,"quantity",2,"validUntil",LocalDate.now().plusDays(3).toString());
+        assertThat(call("POST","/api/social/offers",admin,offerBody).status).isEqualTo(400);
+        assertThat(call("GET",base+"/social-proposals/products/"+p+"/readiness",user,null).status).isEqualTo(403);
+        assertThat(call("GET",base+"/social-proposals/products/"+p+"/readiness",admin,null).body).containsEntry("confirmedQuantity",0).containsEntry("canPrepare",false);
+        confirmSocialLot(lot);long offer=call("POST","/api/social/offers",admin,offerBody).id();verifiedCharity();
+        assertThat(call("PUT",base+"/lots/"+lot.id()+"/handling",admin,Map.of("revision",1,"requirements","Перепроверка учебного хранения","status","UNKNOWN","informationConfirmed",true,"reason","Проверка отозвана")).status).isEqualTo(200);
+        assertThat(call("POST","/api/social/offers/"+offer+"/claim",org,null).status).isEqualTo(400);
+        assertThat(call("PUT",base+"/lots/"+lot.id()+"/handling",admin,Map.of("revision",2,"requirements","Учебное хранение проверено повторно","status","CONFIRMED","informationConfirmed",true,"reason","Повторная тестовая проверка")).status).isEqualTo(200);
+        assertThat(call("POST","/api/social/offers/"+offer+"/claim",org,null).status).isEqualTo(200);
+        assertThat(call("PUT",base+"/lots/"+lot.id()+"/handling",admin,Map.of("revision",3,"requirements","Учебная партия повреждена","status","REJECTED","informationConfirmed",true,"reason","Повреждение перед выдачей")).status).isEqualTo(200);
+        assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Не должно быть выдано")).status).isEqualTo(409);assertThat(lots.findById(lot.id()).orElseThrow().getQuantity()).isEqualTo(5);
+    }
+    @Test void socialConsumesOnlyCheckedLotsLeavingEarlierUncheckedBatchUntouched()throws Exception {
+        long p=product();var unknown=lot(p,"SOCIAL-UNCHECKED",3,2);var safe=lot(p,"SOCIAL-CHECKED",5,7);confirmSocialLot(safe);verifiedCharity();
+        assertThat(call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",6,"validUntil",LocalDate.now().plusDays(1).toString())).status).isEqualTo(400);
+        long offer=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",4,"validUntil",LocalDate.now().plusDays(1).toString())).id();assertThat(call("POST","/api/social/offers/"+offer+"/claim",org,null).status).isEqualTo(200);
+        assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Учебная передача проверенной партии")).status).isEqualTo(200);
+        assertThat(lots.findById(unknown.id()).orElseThrow().getQuantity()).isEqualTo(3);assertThat(lots.findById(safe.id()).orElseThrow().getQuantity()).isEqualTo(1);
+        assertThat(stockMovements.findFirstByLotIdAndTypeOrderByIdAsc(safe.id(),"SOCIAL_TRANSFER_STOCK")).get().satisfies(m->assertThat(m.quantityDelta).isEqualTo(-4));
+    }
     @Test void socialReservationRequiresVerificationAndTransferNeedsSeparateConfirmation()throws Exception {
-        long p=product();lot(p,"SOCIAL",5,7);var offer=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",2,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offer.status).as(offer.raw).isEqualTo(200);
+        long p=product();confirmSocialLot(lot(p,"SOCIAL",5,7));var offer=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",2,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offer.status).as(offer.raw).isEqualTo(200);
         assertThat(call("POST","/api/social/offers/"+offer.id()+"/claim",org,null).status).isEqualTo(400);
         var application=call("POST","/api/organizations/verification",org,Map.of("organizationName","Тестовый фонд","registrationNumber","000000000001"));assertThat(application.status).isEqualTo(200);
         assertThat(call("POST","/api/admin/organizations/verification-requests/"+application.id()+"/approve",admin,null).status).isEqualTo(200);
@@ -554,7 +576,7 @@ class ControlIntegrationTest {
         assertThat(uploadTestPhoto(p,true,user).statusCode()).isEqualTo(403);
     }
     @Test void partnerPhotoIsScopedToOpenOfferOrOwnClaimWithoutOpeningPrivateCatalogue()throws Exception {
-        long p=product();lot(p,"SOCIAL-IMAGE",2,30);assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
+        long p=product();confirmSocialLot(lot(p,"SOCIAL-IMAGE",2,30));assertThat(uploadTestPhoto(p,true,admin).statusCode()).isEqualTo(200);
         var offered=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",1,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offered.status).as(offered.raw).isEqualTo(200);String photoPath="/api/social/offers/"+offered.id()+"/photo";
         assertThat(call("GET",photoPath,null,null).status).isEqualTo(401);assertThat(call("GET",photoPath,user,null).status).isEqualTo(403);assertThat(call("GET",photoPath,org,null).status).isEqualTo(200);
         var verification=call("POST","/api/organizations/verification",org,Map.of("organizationName","Synthetic photo scope test","registrationNumber","TEST-PHOTO"));assertThat(call("POST","/api/admin/organizations/verification-requests/"+verification.id()+"/approve",admin,null).status).isEqualTo(200);
@@ -727,7 +749,7 @@ class ControlIntegrationTest {
         var result=call("PUT",base+"/social-proposals/organizations/"+organizationId,admin,Map.of("region","Тестовый регион","categories",List.of("Продукты"),"storageConditions","Условия подтверждены только в тестовом сценарии","minimumRemainingDays",1,"active",true,"informationConfirmed",true));assertThat(result.status).as(result.raw).isEqualTo(200);
     }
     @Test void socialProposalDoesNotReserveBeforeExplicitVerifiedApprovalAndUsesExistingHandover()throws Exception {
-        long p=product();lot(p,"DONATE",10,2);long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";
+        long p=product();confirmSocialLot(lot(p,"DONATE",10,2));long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";
         assertThat(call("POST",path+"/decisions/"+decision,user,null).status).isEqualTo(403);
         var proposal=call("POST",path+"/decisions/"+decision,admin,null);assertThat(proposal.status).as(proposal.raw).isEqualTo(200);assertThat(proposal.body.get("status")).isEqualTo("PROPOSED");assertThat(call("POST",path+"/decisions/"+decision,admin,null).id()).isEqualTo(proposal.id());
         assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.ACTIVE);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
@@ -747,14 +769,14 @@ class ControlIntegrationTest {
           assertThat(call("GET","/api/aria/reports/social.csv",user,null).status).isEqualTo(403);
     }
     @Test void socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover()throws Exception {
-        long p=product();lot(p,"DONATE",10,2);long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";long proposal=call("POST",path+"/decisions/"+decision,admin,null).id();long organization=verifiedCharity();charityAcceptance(organization);
+        long p=product();confirmSocialLot(lot(p,"DONATE",10,2));long decision=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null).id();String path=base+"/social-proposals";long proposal=call("POST",path+"/decisions/"+decision,admin,null).id();long organization=verifiedCharity();charityAcceptance(organization);
         var approved=call("POST",path+"/"+proposal+"/approve",admin,Map.of("organizationId",organization,"quantity",10,"validUntil",LocalDate.now().plusDays(2).toString(),"reason","Согласовано","suitabilityConfirmed",true,"transportConfirmed",true));assertThat(approved.status).as(approved.raw).isEqualTo(200);
         var v=organizationVerifications.findByUserId(organization).orElseThrow();v.setStatus("PENDING_VERIFICATION");organizationVerifications.save(v);long offer=((Number)approved.body.get("offerId")).longValue();
         assertThat(call("POST",base+"/social/"+offer+"/confirm",admin,Map.of("reason","Проверка отменена")).status).isEqualTo(409);assertThat(inventory.available(products.findById(p).orElseThrow())).isEqualTo(10);
         assertThat(call("POST",path+"/"+proposal+"/cancel",admin,Map.of("reason","Не подтверждена организация")).status).isEqualTo(200);assertThat(products.findById(p).orElseThrow().getStatus()).isEqualTo(com.aria.enums.ProductStatus.CANDIDATE);
     }
     @Test void socialActHasSameSnapshotForOwnerAndRecipientAndRejectsUnauthorizedReaders()throws Exception {
-        long p=product();var product=products.findById(p).orElseThrow();product.setName("Учебный <script>alert(1)</script>");products.saveAndFlush(product);var lotInput=new HashMap<String,Object>(lotBody(p,"DOCUMENT",10,2));lotInput.put("receivedAt",LocalDate.now().minusDays(10).toString());assertThat(call("POST",base+"/lots",admin,lotInput).status).isEqualTo(200);
+        long p=product();var product=products.findById(p).orElseThrow();product.setName("Учебный <script>alert(1)</script>");products.saveAndFlush(product);var lotInput=new HashMap<String,Object>(lotBody(p,"DOCUMENT",10,2));lotInput.put("receivedAt",LocalDate.now().minusDays(10).toString());confirmSocialLot(call("POST",base+"/lots",admin,lotInput));
         long organization=verifiedCharity();charityAcceptance(organization);var analyzed=call("POST",base+"/smart-pricing/products/"+p+"/analyze",admin,null);assertThat(analyzed.status).as(analyzed.raw).isEqualTo(200);long decision=analyzed.id();
         var proposed=call("POST",base+"/social-proposals/decisions/"+decision,admin,null);assertThat(proposed.status).as(proposed.raw).isEqualTo(200);long proposal=proposed.id();var approved=call("POST",base+"/social-proposals/"+proposal+"/approve",admin,Map.of("organizationId",organization,"quantity",3,"validUntil",LocalDate.now().plusDays(1).toString(),"reason","Учебная сверка акта","suitabilityConfirmed",true,"transportConfirmed",true));assertThat(approved.status).as(approved.raw).isEqualTo(200);
         long offer=((Number)approved.body.get("offerId")).longValue();String path=base+"/social/"+offer+"/act";

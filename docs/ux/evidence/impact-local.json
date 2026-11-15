@@ -1,0 +1,16 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "Owner creates separate teaching partner access in Impact; partner signs in, submits verification; owner explicitly verifies and selects accepted catalogue categories",
+    "From the yoghurt card, two checked lots and an actual verified matching recipient lead to a proposal without reserving or consuming stock",
+    "Explicit owner-approved reserve leaves stock unchanged; assigned time/READY and partner document precede a simulated handover that changes the checked stock 40→37"
+  ],
+  "errors": [],
+  "productionChanged": false,
+  "realDonation": false,
+  "externalAiCalled": false,
+  "proposalId": 3,
+  "stockAfter": 37,
+  "passed": true,
+  "checkedAt": "2026-11-15T15:58:14.483Z"
+}

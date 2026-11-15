@@ -1,0 +1,18 @@
+{
+  "environment": "fresh isolated local PostgreSQL",
+  "tests": 8,
+  "failures": 0,
+  "errors": 0,
+  "cases": [
+    "socialActHasSameSnapshotForOwnerAndRecipientAndRejectsUnauthorizedReaders",
+    "socialProposalDoesNotReserveBeforeExplicitVerifiedApprovalAndUsesExistingHandover",
+    "socialConsumesOnlyCheckedLotsLeavingEarlierUncheckedBatchUntouched",
+    "managerAdvisorPreparesRealRisksAndSocialDraftWithoutChangingPriceOrStock",
+    "socialProposalRejectsStaleStockAndRevokedVerificationBeforeHandover",
+    "partnerPhotoIsScopedToOpenOfferOrOwnClaimWithoutOpeningPrivateCatalogue",
+    "socialReservationRequiresVerificationAndTransferNeedsSeparateConfirmation",
+    "socialRejectsUncheckedLotsAndRechecksSuitabilityAtReservationAndHandover"
+  ],
+  "checkedAt": "2026-11-15T16:00:30.377Z",
+  "productionChanged": false
+}

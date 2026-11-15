@@ -56,6 +56,8 @@ public class SocialService {
         if (product.getExpiryDate() != null && validUntil.isAfter(product.getExpiryDate())) {
             validUntil = product.getExpiryDate();
         }
+        if(quantity>inventory.socialAvailable(product))throw new IllegalStateException("Сначала проверьте пригодность и условия хранения партий. Неподтверждённые, просроченные и отклонённые партии передавать нельзя");
+        var safeExpiry=inventory.socialExpiry(product);if(safeExpiry!=null&&validUntil.isAfter(safeExpiry))validUntil=safeExpiry;
         int alreadyOffered = socialOfferRepo.findByProductId(productId).stream()
                 .filter(offer -> "OPEN".equals(offer.getStatus()))
                 .mapToInt(SocialOffer::getQuantityAvailable).sum();
@@ -100,7 +102,7 @@ public class SocialService {
             throw new IllegalStateException("Срок годности товара истёк");
         }
         int claimedQuantity = offer.getQuantityAvailable();
-        if(inventory.available(locked)<claimedQuantity) throw new IllegalStateException("Недостаточно пригодного остатка");
+        if(inventory.socialAvailable(locked)<claimedQuantity) throw new IllegalStateException("Недостаточно пригодного остатка");
         offer.setQuantityAvailable(0);
         offer.setQuantityClaimed(claimedQuantity);
         offer.setOrgId(orgId);
@@ -160,7 +162,7 @@ public class SocialService {
         else {
             if(offer.getValidUntil()!=null && offer.getValidUntil().isBefore(LocalDate.now())) throw new IllegalStateException("Срок выдачи истёк. Отмените резерв и проверьте партии");
             if(offer.getOrgId()==null||verifications.findByUserId(offer.getOrgId()).filter(v->"VERIFIED".equals(v.getStatus())).isEmpty())throw new IllegalStateException("Проверка организации больше не действительна. Выдача запрещена");
-            inventory.consume(p,offer.getQuantityClaimed(),"SOCIAL_TRANSFER_STOCK");
+            inventory.consumeSocial(p,offer.getQuantityClaimed());
             offer.setStatus("TRANSFERRED"); p.setStatus(p.getQuantityOnHand()==0?ProductStatus.TRANSFERRED:ProductStatus.CANDIDATE);
             offer.setTransferredAt(java.time.LocalDateTime.now());
         }
