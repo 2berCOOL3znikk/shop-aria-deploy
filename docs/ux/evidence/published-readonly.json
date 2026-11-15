@@ -1,0 +1,20 @@
+{
+  "checkedAt": "2026-11-15T13:02:02.708Z",
+  "origin": "https://aria-v4-staging-2ber.onrender.com",
+  "commits": [
+    "abdc05c",
+    "c03ee00"
+  ],
+  "backend": "actual staging API",
+  "businessWrites": "blocked during audit",
+  "checks": [
+    "Account menu: route, outside click, Escape and focus, selecting a destination",
+    "Owner storefront catalogue, product and return route",
+    "Lots and expiry: product picker, two recorded active lots, same-route return",
+    "AI source status, Model card destination and category selection in all setup steps"
+  ],
+  "passed": true,
+  "apiErrors": [],
+  "scriptErrors": [],
+  "evidenceScope": "Published read-only browser paths; no company permission changes or simulated AI responses"
+}

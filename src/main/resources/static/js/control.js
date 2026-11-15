@@ -1,7 +1,7 @@
 (() => {
   'use strict';
   if (!ariaAuth.requireLogin()) return;
-  const warehouse=ariaAuth.getRole()==='WAREHOUSE',warehouseTabs=new Set(['lots','movements','flow']);
+  const warehouse=ariaAuth.getRole()==='WAREHOUSE',warehouseTabs=new Set(['lots','movements','flow','guide']);
   if (!['ADMIN','WAREHOUSE'].includes(ariaAuth.getRole())) { location.replace('/index.html'); return; }
   const $ = id => document.getElementById(id);
   const esc = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
@@ -105,7 +105,7 @@
     const fields=[[ariaCopy.text("text.74bfa6c93b5ee7"),'warningDays',1,3650],[ariaCopy.text("text.60972e5db85a4d"),'warningPercent',0,90],[ariaCopy.text("text.8f762fa45e6973"),'criticalDays',0,3650],[ariaCopy.text("text.2b59f7d99afb18"),'criticalPercent',0,90],[ariaCopy.text("text.6c62874db30509"),'clearanceDays',0,3650],[ariaCopy.text("text.63945034ff1af5"),'clearancePercent',0,90],[ariaCopy.text("text.ad4089930071e3"),'slowStockDays',1,3650],[ariaCopy.text("text.e4bc850a7b0be7"),'slowStockPercent',0,90],[ariaCopy.text("text.5f7428e792410b"),'minimumMarginPercent',0,90]];
     form(ariaCopy.text("text.1d6546416c3525"),formField(ariaCopy.text("text.aa2653fec92f60"),'category','text',p.category,{required:true,wide:true,attrs:'maxlength="120"'+(category?' readonly':''),help:ariaCopy.text("text.626efb1819386d")})+fields.map(([label,key,min,max])=>formField(label,key,'number',p[key],{required:true,attrs:`min="${min}" max="${max}" step="1"`})).join('')+ariaCopy.text("text.b98862f485003e"),f=>{const body={category:f.get('category')};fields.forEach(([,key])=>body[key]=Number(f.get(key)));return request('/policies','PUT',body);});}
   function feedback(){return ariaCopy.template("template.adfdce3c5c9977",[table([ariaCopy.text("text.232a0ead182bb3"),ariaCopy.text("text.b965bf3d5b591c"),ariaCopy.text("text.3e0ccd92fa1595"),ariaCopy.text("text.225077c6d4791e")],(data.feedback||[]).map(f=>ariaCopy.template("template.8c4b0a8ebebeb2",[date(f.createdAt),esc(f.email||ariaCopy.text("text.943562cf477dd7")),esc(f.rating),esc(f.message),f.resolved?ariaCopy.text("text.e8aff9df9a4f82"):button(ariaCopy.text("text.53d7f460238b2a"),'feedback-resolve',f.id)])))]);}
-  function guide(){return ariaCopy.template("template.20eeb489122d15",[]);}
+  function guide(){return ariaUsageGuide.render({warehouse});}
   function pricing(){const candidates=data.products.filter(canPrice);if(!candidates.length)return empty(ariaCopy.text("text.2f4eb5c387a13a"));if(!candidates.some(p=>String(p.id)===String(selectedProduct)))selectedProduct='';return ariaCopy.template("template.4d8e434157b531",[candidates.map(p=>ariaCopy.template("template.1bcaba9940d13b",[p.id,String(p.id)===String(selectedProduct)?'selected':'',esc(p.name),esc(p.sku)])).join(''),candidates.find(p=>String(p.id)===String(selectedProduct))?.discountPercent||0]);}
   function movements(){return ariaCopy.text("text.2e176b702c5e8e");}
   function integrations(){return ariaCopy.text("text.61a0b839c9f216");}

@@ -1,0 +1,11 @@
+{
+  "contractOnly": true,
+  "checks": [
+    "Private photos use authenticated same-origin reads; no token appears in an image URL",
+    "A photo response from the previous account cannot appear after the session changes",
+    "Public licensed images keep their ordinary lazy-loading path"
+  ],
+  "errors": [],
+  "passed": true,
+  "checkedAt": "2026-11-15T14:45:48.362Z"
+}

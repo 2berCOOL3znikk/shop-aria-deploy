@@ -1,0 +1,19 @@
+{
+  "published": false,
+  "origin": "https://aria-v4-staging-2ber.onrender.com",
+  "checks": [
+    "Six non-blocking introduction steps open real routes and highlight visible controls; Finish keeps the last route",
+    "Help works in RU/EN, light/dark and at 390 px without horizontal overflow",
+    "The help route opens the real product picker in mobile inventory"
+  ],
+  "errors": [],
+  "apiErrors": [],
+  "businessWrites": [],
+  "screenshots": [
+    "screens/tour-lots-desktop.png",
+    "screens/help-mobile-en-dark.png"
+  ],
+  "revision": "c03ee009dabaefa58a297d27c788529d85a1cf51",
+  "passed": true,
+  "checkedAt": "2026-11-15T14:44:48.739Z"
+}

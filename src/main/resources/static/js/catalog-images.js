@@ -2,6 +2,11 @@
   "use strict";
 
   const GENERIC_IMAGE = "/images/product-placeholder.svg";
+  const privateImages=new Set();let photoAbort=new AbortController();
+  const releaseMissing=()=>{for(const record of privateImages)if(!record.image.isConnected){URL.revokeObjectURL(record.url);privateImages.delete(record);}};
+  new MutationObserver(releaseMissing).observe(document.documentElement,{childList:true,subtree:true});
+  addEventListener('pagehide',()=>{photoAbort.abort();for(const record of privateImages)URL.revokeObjectURL(record.url);privateImages.clear();});
+  addEventListener('pageshow',event=>{if(event.persisted){photoAbort=new AbortController();document.querySelectorAll('[data-catalog-private-photo]').forEach(image=>{delete image.dataset.privatePhotoAttempted;image.dataset.imageIndex='0';image.src=GENERIC_IMAGE;});}});
   const escapeAttr = value => String(value ?? "").replace(/[&<>"']/g, char => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[char]);
 
   function getSkuImage(product) {
@@ -43,12 +48,13 @@
     const name = product && (product.name || product.productName) || ariaCopy.text("text.4fb40f52fb5a8d");
     const category = product && product.category || "";
     const candidates = imageCandidates(product);
+    const privatePath=window.ariaAuth?.getToken()&&/^\/api\/products\/\d+\/photo$/.test(candidates[0])?candidates[0]:null;
     const css = options.className ? ' class="' + escapeAttr(options.className) + '"' : "";
     const style = options.style ? ' style="' + escapeAttr(options.style) + '"' : "";
     const creditTarget = options.creditTarget ? ' data-credit-target="' + escapeAttr(options.creditTarget) + '"' : "";
     const alt = options.alt === undefined ? name : options.alt;
     const creditHtml=options.creditTarget?' data-credit-html="'+escapeAttr(creditFor(product))+'"':'';
-    return '<img data-image-candidates="' + escapeAttr(JSON.stringify(candidates)) + '" data-image-index="0" data-cat="' + escapeAttr(category) + '" data-name="' + escapeAttr(name) + '"' + creditTarget + creditHtml + ' alt="' + escapeAttr(alt) + '" loading="lazy" decoding="async" onload="CatalogImages.attach(this)" onerror="CatalogImages.onError(this)"' + css + style + ' src="' + escapeAttr(candidates[0]) + '">';
+    return '<img data-image-candidates="' + escapeAttr(JSON.stringify(candidates)) + '" data-image-index="0" data-cat="' + escapeAttr(category) + '" data-name="' + escapeAttr(name) + '"' + (privatePath?' data-catalog-private-photo="'+escapeAttr(privatePath)+'"':'') + creditTarget + creditHtml + ' alt="' + escapeAttr(alt) + '" loading="lazy" decoding="async" onload="CatalogImages.attach(this)" onerror="CatalogImages.onError(this)"' + css + style + ' src="' + escapeAttr(privatePath?GENERIC_IMAGE:candidates[0]) + '">';
   }
 
   function creditFor(product) {
@@ -90,6 +96,10 @@
 
   function attach(image) {
     if (!image) return;
+    if(image.dataset.catalogPrivatePhoto&&!image.dataset.privatePhotoAttempted){
+      image.dataset.privatePhotoAttempted='true';const actor=window.ariaAuth.getToken(),url=image.dataset.catalogPrivatePhoto;
+      (async()=>{try{const response=await ariaAuth.catalogFetch(url,{cache:'no-store',signal:photoAbort.signal});if(!response.ok||!/^image\/(jpeg|png)/i.test(response.headers.get('content-type')||''))throw Error('Photo unavailable');const blob=await response.blob();if(blob.size>5*1024*1024)throw Error('Photo too large');if(!image.isConnected||ariaAuth.getToken()!==actor||photoAbort.signal.aborted)return;const object=URL.createObjectURL(blob);privateImages.add({image,url:object});image.src=object;}catch{if(image.isConnected&&ariaAuth.getToken()===actor&&!photoAbort.signal.aborted)onError(image);}})();return;
+    }
     if(image.naturalWidth<2||image.naturalHeight<2){onError(image);return;}
     image.onerror = () => onError(image);
     toggleCredit(image, image.naturalWidth > 0);
