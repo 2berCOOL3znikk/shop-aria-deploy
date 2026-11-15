@@ -1,0 +1,12 @@
+{
+  "contractOnly": true,
+  "checks": [
+    "Real category labels, commas and HTML characters remain intact; native keys are normalised once",
+    "Previously saved categories remain explicitly selected even after leaving the catalogue",
+    "Empty selection stays empty and never grants permission to all categories",
+    "External catalogue categories and confirmed owner categories are supported without inventing missing fields"
+  ],
+  "errors": [],
+  "passed": true,
+  "checkedAt": "2026-11-15T12:46:41.563Z"
+}
