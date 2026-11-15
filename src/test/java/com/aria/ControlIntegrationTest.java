@@ -543,6 +543,20 @@ class ControlIntegrationTest {
         assertThat(lots.findById(unknown.id()).orElseThrow().getQuantity()).isEqualTo(3);assertThat(lots.findById(safe.id()).orElseThrow().getQuantity()).isEqualTo(1);
         assertThat(stockMovements.findFirstByLotIdAndTypeOrderByIdAsc(safe.id(),"SOCIAL_TRANSFER_STOCK")).get().satisfies(m->assertThat(m.quantityDelta).isEqualTo(-4));
     }
+    @Test void competitorTableCanMatchUniqueBarcodeWithoutRequiringInternalSkuAndRejectsAmbiguity()throws Exception {
+        String stem="299"+String.format("%09d",java.util.concurrent.ThreadLocalRandom.current().nextInt(1000000000));int sum=0,weight=3;for(int i=stem.length()-1;i>=0;i--){sum+=(stem.charAt(i)-'0')*weight;weight=weight==3?1:3;}String ean=stem+(10-sum%10)%10;
+        long p=product();var body=new HashMap<String,Object>(productBody(products.findById(p).orElseThrow().getSku()));body.put("barcode",ean);assertThat(call("PUT",base+"/products/"+p,admin,body).status).isEqualTo(200);
+        long source=call("POST",base+"/competitors",admin,Map.of("name","Synthetic contract source","baseUrl","https://example.com","active",true,"permissionConfirmed",true)).id();String csv="sku,barcode,unit,price,currency,observedAt,url\n,"+ean+",шт,900.00,KZT,"+java.time.OffsetDateTime.now().minusSeconds(5)+",https://example.com/contract\n";var input=Map.of("sourceId",source,"csv",csv,"identityConfirmed",true);
+        assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("imported",1);assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("duplicates",1);
+        long duplicate=product();var other=new HashMap<String,Object>(productBody(products.findById(duplicate).orElseThrow().getSku()));other.put("barcode",ean);assertThat(call("PUT",base+"/products/"+duplicate,admin,other).status).isEqualTo(200);assertThat(call("POST",base+"/competitors/import",admin,input).status).isEqualTo(400);
+        assertThat(call("DELETE",base+"/products/"+duplicate,admin,null).status).isEqualTo(200);assertThat(call("POST",base+"/competitors/import",admin,input).body).containsEntry("duplicates",1);assertThat(call("GET",base+"/competitors/products/"+p,admin,null).raw).contains("AVAILABLE");
+    }
+    @Test void legacyDemoFlagCannotPromoteUnsourcedMarketAverageIntoAdvice()throws Exception {
+        long p=product();lot(p,"MARKET-EVIDENCE",12,90);var product=products.findById(p).orElseThrow();product.setMarketAvgPrice(new java.math.BigDecimal("100"));products.saveAndFlush(product);
+        ReflectionTestUtils.setField(analysis,"demoMarketEnabled",true);
+        try{analysis.analyze();var after=products.findById(p).orElseThrow();assertThat(after.getStatus()).isEqualTo(com.aria.enums.ProductStatus.ACTIVE);assertThat(after.getMarketAvgPrice()).isEqualByComparingTo("100");assertThat(java.util.Optional.ofNullable(after.getAriaReason()).orElse("")).doesNotContain("рынк");assertThat(call("GET",base+"/competitors/products/"+p,admin,null).raw).contains("NO_VERIFIED_PRICES");}
+        finally{ReflectionTestUtils.setField(analysis,"demoMarketEnabled",false);}
+    }
     @Test void socialReservationRequiresVerificationAndTransferNeedsSeparateConfirmation()throws Exception {
         long p=product();confirmSocialLot(lot(p,"SOCIAL",5,7));var offer=call("POST","/api/social/offers",admin,Map.of("productId",p,"quantity",2,"validUntil",LocalDate.now().plusDays(3).toString()));assertThat(offer.status).as(offer.raw).isEqualTo(200);
         assertThat(call("POST","/api/social/offers/"+offer.id()+"/claim",org,null).status).isEqualTo(400);

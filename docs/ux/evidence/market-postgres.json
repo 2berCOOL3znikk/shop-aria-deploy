@@ -1,0 +1,14 @@
+{
+  "environment": "fresh isolated local PostgreSQL",
+  "contractDataOnly": true,
+  "scenarios": 4,
+  "passed": true,
+  "note": "Three scenarios passed in the targeted group; the CSV fixture header was corrected and only its previously failing scenario was rerun successfully. This is not an external market E2E.",
+  "checks": [
+    "Legacy demo flag cannot use an unsourced stored market average as advice",
+    "Existing strict CSV identity, atomicity and duplicate checks remain passing",
+    "Optional internal SKU resolves only a unique exact barcode/package",
+    "Ambiguous barcode matches fail; archived duplicate does not make a new observation"
+  ],
+  "checkedAt": "2026-11-15T16:59:46.302Z"
+}

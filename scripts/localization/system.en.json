@@ -127,5 +127,21 @@
   "Сотрудник не найден": "Employee not found.",
   "Доступ изменился. Обновите список": "Access changed. Refresh the list.",
   "Изображение изменилось. Откройте его заново перед удалением": "The image changed. Open it again before removing it.",
-  "Изображение убрано. Товар и остатки сохранены": "Image removed. The product and stock are unchanged."
+  "Изображение убрано. Товар и остатки сохранены": "Image removed. The product and stock are unchanged.",
+  "Укажите настоящий штрихкод с упаковки": "Enter the real package barcode.",
+  "Товар с таким штрихкодом и упаковкой не найден": "No product matches this barcode and package.",
+  "У нескольких карточек одинаковый штрихкод. Укажите артикул нужного товара": "Several cards share this barcode. Specify the reference of the intended product.",
+  "Товар не найден по артикулу": "No product matches this reference.",
+  "Требуется 7 столбцов": "Seven columns are required.",
+  "Должны совпадать корректный GTIN/EAN и единица упаковки в карточке товара": "The valid package barcode and unit must match the product card.",
+  "Недопустимая цена": "Invalid price.",
+  "Поддерживается только KZT без выдуманного курса": "Only KZT is supported; exchange rates are not invented.",
+  "Дата с часовым поясом: не в будущем и не старше 30 дней": "Use a timestamp with time zone, no more than 30 days old and not in the future.",
+  "URL должен принадлежать разрешённому источнику": "The link must belong to the permitted source.",
+  "Запись с этой датой уже есть с другими данными": "An observation for this timestamp already exists with different data.",
+  "Неверный формат цены": "Invalid price format.",
+  "Неверная дата с часовым поясом": "Invalid timestamp with time zone.",
+  "Нужна публичная HTTPS-ссылка без пароля и фрагмента": "Enter a public HTTPS link without a password or fragment.",
+  "Выберите активный разрешённый источник": "Choose an enabled permitted source.",
+  "Подтвердите совпадение упаковки и характеристик товара": "Confirm that the package and product attributes match."
 }

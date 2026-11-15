@@ -28,7 +28,12 @@ public class CompetitorPriceService {
         for(var row:CompetitorCsv.read(csv)){
             line++;try{
                 if(row.size()!=7)throw new IllegalArgumentException("Требуется 7 столбцов");
-                var p=products.findBySkuIgnoreCase(row.get(0)).orElseThrow(()->new IllegalArgumentException("SKU не найден"));
+                Product p;
+                if(row.get(0).isBlank()){
+                    if(!validGtin(row.get(1)))throw new IllegalArgumentException("Укажите настоящий штрихкод с упаковки");
+                    var matches=products.findByBarcodeAndArchivedFalse(row.get(1)).stream().filter(item->row.get(2).equalsIgnoreCase(item.getUnit())).toList();
+                    if(matches.size()!=1)throw new IllegalArgumentException(matches.isEmpty()?"Товар с таким штрихкодом и упаковкой не найден":"У нескольких карточек одинаковый штрихкод. Укажите артикул нужного товара");p=matches.getFirst();
+                }else p=products.findBySkuIgnoreCase(row.get(0)).orElseThrow(()->new IllegalArgumentException("Товар не найден по артикулу"));
                 p=inventory.lock(p.getId());if(p.getArchived())throw new IllegalArgumentException("Товар архивирован");
                 String barcode=row.get(1),unit=row.get(2);
                 if(!validGtin(barcode)||!barcode.equals(p.getBarcode())||!unit.equalsIgnoreCase(p.getUnit()))throw new IllegalArgumentException("Должны совпадать корректный GTIN/EAN и единица упаковки в карточке товара");
@@ -62,6 +67,6 @@ public class CompetitorPriceService {
         var rows=latest.values().stream().map(q->Map.of("source",approved.get(q.sourceId).name,"price",q.price,"currency",q.currency,"observedAt",q.observedAt,"url",q.url,"match","EAN_EXACT_OPERATOR_CONFIRMED")).toList();
         return Map.of("status","AVAILABLE","medianPrice",median,"differencePercent",delta,"position",delta.compareTo(new BigDecimal("2"))>0?"HIGHER":delta.compareTo(new BigDecimal("-2"))<0?"LOWER":"SIMILAR","offers",rows,"note","Ручной импорт, GTIN и упаковку подтвердил сотрудник. Свежесть до 7 дней. Медиана не доказывает спрос или выгодность изменения цены.");
     }
-    @Transactional(readOnly=true) public Map<String,Object> product(Long id){var p=products.findById(id).orElseThrow(()->new IllegalArgumentException("Товар не найден"));return Map.of("productId",id,"sku",p.getSku(),"comparison",context(p),"history",quotes.findByProductIdOrderByObservedAtDescIdDesc(id));}
+    @Transactional(readOnly=true) public Map<String,Object> product(Long id){var p=products.findById(id).orElseThrow(()->new IllegalArgumentException("Товар не найден"));return Map.of("productId",id,"sku",p.getSku(),"identityReady",validGtin(p.getBarcode()),"comparison",context(p),"history",quotes.findByProductIdOrderByObservedAtDescIdDesc(id));}
     private boolean sameOrigin(String a,String b){try{var first=URI.create(a);var second=URI.create(b);return "https".equalsIgnoreCase(first.getScheme())&&first.getHost()!=null&&first.getHost().equalsIgnoreCase(second.getHost())&&(first.getPort()==-1?443:first.getPort())==(second.getPort()==-1?443:second.getPort());}catch(RuntimeException e){return false;}}
 }

@@ -13,6 +13,7 @@ import java.util.List;
 public interface ProductRepository extends JpaRepository<Product, Long> {
     long countByArchivedFalse();
     @Query("select p.id,p.name from Product p where p.id in :ids") List<Object[]> namesForIds(@Param("ids") java.util.Collection<Long> ids);
+    java.util.List<Product> findByBarcodeAndArchivedFalse(String barcode);
     java.util.Optional<Product> findBySkuIgnoreCase(String sku);
     boolean existsBySkuIgnoreCase(String sku);
 

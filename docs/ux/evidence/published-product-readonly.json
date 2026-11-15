@@ -1,0 +1,15 @@
+{
+  "published": true,
+  "checks": [
+    "Published real catalogue opens as cards; the single image-management form loads and requires file rights without changing data",
+    "Help people in need opens actual lot suitability; no proposal, reservation or handover is submitted",
+    "Partner access is discoverable inside Impact; the creation form opens without creating an account or changing verification",
+    "Published catalogue keeps actions and fits 390 px in English and dark theme"
+  ],
+  "errors": [],
+  "apiErrors": [],
+  "businessWrites": [],
+  "revision": "d2fda78d2b446085cf6d4f591ae19e8fc0c400ed",
+  "passed": true,
+  "checkedAt": "2026-11-15T16:43:54.560Z"
+}

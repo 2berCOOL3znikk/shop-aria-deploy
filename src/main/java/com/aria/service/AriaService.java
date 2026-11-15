@@ -76,14 +76,7 @@ public class AriaService {
                     || p.getStatus() == ProductStatus.RESERVED || p.getStatus() == ProductStatus.SOCIAL
                     || p.getStatus() == ProductStatus.DISCOUNTED) continue;
 
-            // Заполняем рыночную цену, если её ещё нет
-            if (demoMarketEnabled && p.getMarketAvgPrice() == null) {
-                BigDecimal marketPrice = competitorService.findMarketAveragePrice(
-                        p.getName(), p.getCategory() != null ? p.getCategory() : ""
-                );
-                p.setMarketAvgPrice(marketPrice);
-                    System.out.println("[ARIA] " + p.getName() + " -> ориентир рыночной цены: " + marketPrice + " ₸");
-            }
+            // Legacy marketAvgPrice has no source, identity or date; it is never market evidence.
 
             List<String> reasons = new ArrayList<>();
             boolean isUrgent = false;
@@ -116,22 +109,7 @@ public class AriaService {
                 }
             }
 
-            // Правило 4: Цена выше рынка на 20%
-            if (demoMarketEnabled && p.getMarketAvgPrice() != null && p.getUnitPrice() != null) {
-                BigDecimal marketPrice = p.getMarketAvgPrice();
-                if (marketPrice.compareTo(BigDecimal.ZERO) > 0) {
-                    BigDecimal diffPercent = p.getUnitPrice()
-                            .subtract(marketPrice)
-                            .divide(marketPrice, 2, RoundingMode.HALF_UP)
-                            .multiply(BigDecimal.valueOf(100));
-
-                    if (diffPercent.compareTo(new BigDecimal("20")) > 0) {
-                        reasons.add("цена выше рынка на " + diffPercent.toPlainString() + "%");
-                        priceOutliers++;
-                        System.out.println("[ARIA] " + p.getName() + " - выше рынка на " + diffPercent + "%");
-                    }
-                }
-            }
+            // Verified comparison and strategies belong to Smart Pricing / CompetitorPriceService.
 
             p.setLastAnalyzedAt(LocalDateTime.now());
 

@@ -1,0 +1,15 @@
+{
+  "environment": "isolated local demo",
+  "checks": [
+    "Real product price and image are visible; absent exact market observations and the teaching barcode are explained without invented offers",
+    "Example data are labelled as an example; source permissions stay unchecked and no source/import is saved",
+    "An explicitly injected 503 removes stale results and the real retry restores the saved comparison",
+    "Calculate recommendation opens the actual Java decision for this product; its minimum-price lock leaves the price unchanged and no model KEEP is replaced"
+  ],
+  "errors": [],
+  "productionChanged": false,
+  "externalAiCalled": false,
+  "fabricatedQuotes": 0,
+  "passed": true,
+  "checkedAt": "2026-11-15T16:48:28.234Z"
+}

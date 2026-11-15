@@ -3,7 +3,7 @@
 const fs=require('node:fs'),path=require('node:path');
 const groups=[
  ['Молочные продукты','milk','#e5eef0',[
-  ['Молоко 2,5%, 1 л',790,'STEADY','carton'],['Кефир 2,5%, 900 мл',850,'LOW_STOCK','bottle'],['Йогурт натуральный, 150 г',420,'EXPIRING','cup'],['Творог 5%, 200 г',680,'SOCIAL','cup'],['Сметана 15%, 300 г',750,'SLOW','cup'],['Масло сливочное, 180 г',1290,'PRICE_LOCK','cheese'],['Сыр полутвёрдый, 250 г',1890,'SAFETY_REVIEW','cheese'],['Йогурт клубничный, 250 г',590,'DAMAGED','cup']]],
+  ['Молоко 2,5%, 1 л',790,'STEADY','carton'],['Кефир 2,5%, 900 мл',850,'LOW_STOCK','bottle'],['Йогурт натуральный, 150 г',420,'EXPIRING','cup'],['Творог 5%, 200 г',680,'SOCIAL','cup'],['Сметана 15%, 300 г',750,'SLOW','cup'],['Масло сливочное, 180 г',1290,'PRICE_LOCK','butter'],['Сыр полутвёрдый, 250 г',1890,'SAFETY_REVIEW','cheese'],['Йогурт клубничный, 250 г',590,'DAMAGED','cup']]],
  ['Хлеб и выпечка','bakery','#eee9df',[
   ['Хлеб пшеничный, 500 г',390,'STEADY','bread'],['Хлеб ржаной, 400 г',450,'SOCIAL','bread'],['Багет, 250 г',350,'EXPIRING','bread'],['Круассан без начинки, 70 г',420,'LOW_STOCK','croissant'],['Булочка с изюмом, 100 г',310,'SLOW','croissant'],['Лаваш тонкий, 200 г',360,'PRICE_LOCK','bread'],['Хлеб цельнозерновой, 400 г',610,'SAFETY_REVIEW','bread'],['Печенье овсяное, 300 г',790,'STEADY','cookie']]],
  ['Мясо и птица','meat','#f0e4e1',[
@@ -21,6 +21,7 @@ const groups=[
 ];
 const esc=s=>String(s).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&apos;'}[c]));
 const shape={
+ butter:'<path d="m219 284 53-51h143l44 51v139H219z" fill="#e9d69d" stroke="#baab82" stroke-width="4"/><path d="m219 284 53-51h143l44 51z" fill="#f6e6b8"/><path d="m219 284 30 27-30 112m240-139-30 27 30 112" fill="#d6d8cf" stroke="#adb6aa" stroke-width="3"/><path d="M273 333h131v53H273z" fill="#faf7e9"/><path d="M292 351h91m-91 18h64" stroke="#b8a778" stroke-width="6" stroke-linecap="round"/>',
  carton:'<path d="M255 176h126l38 62v222H238V238z" fill="#fbfaf7" stroke="#334842" stroke-width="4"/><path d="M255 176v62h164l-38-62z" fill="#9dbbb5"/><path d="M238 302h181v92H238z" fill="#a9c5bd"/><path d="M267 333h122M267 353h90" stroke="#4e6c63" stroke-width="8" stroke-linecap="round"/>',
  bottle:'<path d="M293 160h68v78c0 32 43 52 43 99v116H250V337c0-47 43-67 43-99z" fill="#faf8ef" stroke="#4d675c" stroke-width="4"/><rect x="289" y="145" width="76" height="33" rx="7" fill="#5f8272"/><path d="M251 322h152v87H251z" fill="#b5cbbd"/><path d="M281 354h94M281 374h65" stroke="#5f8272" stroke-width="7" stroke-linecap="round"/>',
  cup:'<path d="M235 272h190l-25 176H260z" fill="#fbfaf6" stroke="#8c9d93" stroke-width="4"/><ellipse cx="330" cy="271" rx="102" ry="20" fill="#bfd0be"/><path d="M250 319h160l-12 85H262z" fill="#d4a09b"/><circle cx="330" cy="360" r="28" fill="#f9e4d2"/>',
