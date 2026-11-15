@@ -1,0 +1,18 @@
+{
+  "base": "https://aria-v4-staging-2ber.onrender.com",
+  "revision": "2b231a02761fcaecdcd0f54a7a4857ce193306dc",
+  "newCompanyCreated": false,
+  "newCompanyE2e": false,
+  "registrationEnabled": false,
+  "registrationPosts": 0,
+  "blockedWrites": [],
+  "errors": [],
+  "checks": [
+    "Published source and staging identity match; workspace admission remains disabled with no available environment",
+    "The actual public page offers an application and does not display a functioning signup or claim a ready company",
+    "The existing owner signs in through the ordinary same-origin form and reads the existing company dashboard after V37"
+  ],
+  "passed": true,
+  "availableUnits": 12,
+  "checkedAt": "2026-11-15T09:43:07.708Z"
+}

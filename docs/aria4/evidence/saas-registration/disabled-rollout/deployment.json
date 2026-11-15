@@ -1,0 +1,16 @@
+{
+  "serviceId": "srv-dbr9o4tbedkc73cvlj0g",
+  "publicUrl": "https://aria-v4-staging-2ber.onrender.com",
+  "plan": "free",
+  "sourceBranch": "codex/production-foundation",
+  "revision": "2b231a02761fcaecdcd0f54a7a4857ce193306dc",
+  "deployId": "dep-dbsnrb8n74is73adma8g",
+  "status": "live",
+  "finishedAt": "2026-11-15T09:42:04.387346Z",
+  "ci": "https://github.com/2berCOOL3znikk/shop-aria-deploy/actions/runs/43699893368",
+  "gatewayEnabled": false,
+  "companyCreated": false,
+  "newCompanyE2e": false,
+  "productionChanged": false,
+  "newDatabaseRolesOrCredentialsPrepared": false
+}
